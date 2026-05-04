@@ -226,15 +226,21 @@ const splitIntentText = (fullIntent) => {
 		    // Add Linked Criteria if available
 		    if (links && Array.isArray(links)) {
 		        const linkInfo = links.find(l => normalizeCriterionCode(l.criteria) === normalized);
-		        if (linkInfo) {
-		            if (linkInfo.linked_criteria && linkInfo.linked_criteria.length > 0) {
-			                // Sort linked criteria codes in natural numeric order and
-			                // render them as an enumerated list for easier reading.
-			                const sortedLinked = [...linkInfo.linked_criteria].sort(compareCodes);
-			                const enumerated = sortedLinked.map((linkedCode, idx) => `${idx + 1}. ${linkedCode}`).join('\n');
-			                parts.push(`Linked Criteria:\n${enumerated}`);
-		            }
-		        }
+                if (linkInfo) {
+                    if (linkInfo.linked_criteria && linkInfo.linked_criteria.length > 0) {
+                            // Sort linked criteria codes in natural numeric order and
+                            // render them as an enumerated list for easier reading.
+                            const sortedLinked = [...linkInfo.linked_criteria].sort(compareCodes);
+                            const colored = sortedLinked.map((linkedCode, idx) => {
+                                const m = String(linkedCode).match(/^(.*?)-(G|B)$/i);
+                                const tag = m ? m[2].toUpperCase() : null;
+                                const icon = tag === 'G' ? '🟩' : tag === 'B' ? '🟦' : '•';
+                                // Keep the visible -G/-B suffix for clarity, prepend a colored icon
+                                return `${idx + 1}. ${icon} ${linkedCode}`;
+                            }).join('\n');
+                            parts.push(`Linked Criteria:\n${colored}`);
+                    }
+                }
 		    }
 		
 		    // Add Score Traceability (sorted by criterion code for consistency)
@@ -474,6 +480,8 @@ const FormArea = ({
     const [isSeSummaryOpen, setIsSeSummaryOpen] = useState(false); // collapsible SE summary textarea
     const [openStandardSummaries, setOpenStandardSummaries] = useState({}); // keyed by x.x.x field id
     const [openPiGroups, setOpenPiGroups] = useState({}); // keyed by PI code (e.g. 7.1)
+    // Persistent tooltip panel for criterion info (click-to-open)
+    const [openCriterionTooltip, setOpenCriterionTooltip] = useState(null);
 
     // Reset pagination when activeSection changes
     React.useEffect(() => {
@@ -643,6 +651,20 @@ const FormArea = ({
     // Submit state
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitResult, setSubmitResult] = useState(null); // { success, message }
+
+  // Resolve the DataElement ID for "Type of Assessment" from loaded metadata so
+  // we can enforce it as mandatory on submit.
+  const typeOfAssessmentDeId = React.useMemo(() => {
+    const ps = configuration?.programStage;
+    if (!ps) return null;
+    const list = (ps.programStageDataElements || []).map(psde => psde.dataElement || psde);
+    const match = list.find(de => {
+      const n = (de?.displayName || de?.formName || de?.name || '').toLowerCase();
+      return n.includes('type of assessment');
+    });
+    // Known fallback if present in your environment
+    return match?.id || 'LNszX9xHx8s';
+  }, [configuration]);
 
     // Reset submit status if data changes after successful submission
     // This allows the user to "Update" DHIS2
@@ -1107,8 +1129,13 @@ const FormArea = ({
                     }
                 }
             }
-
-		            const isRoot = calculatedFieldScore?.isRoot || false;
+	            
+	            const isRoot = calculatedFieldScore?.isRoot || false;
+	            const rootDraftPoints = isRoot && calculatedFieldScore
+	                ? (typeof calculatedFieldScore.rootDraftPoints === 'number'
+	                    ? calculatedFieldScore.rootDraftPoints
+	                    : null)
+	                : null;
 		
 		            // Precompute the raw label once so we can reuse it for
 		            // multiple checks (severity, display label, code fallback).
@@ -1212,18 +1239,17 @@ const FormArea = ({
 		            ) {
 		                const subCodes = HOSPITAL_SUBCRITERIA_MAP[normalizedCode];
 		                subCriteriaExpectedCount = Array.isArray(subCodes) ? subCodes.length : 0;
-		                let sum = 0;
-		                subCodes.forEach(subCode => {
-		                    const normSub = normalizeCriterionCode(subCode) || subCode;
-		                    const subScore = scoringResults.globalScores[normSub];
-		                    if (subScore && subScore.isScored && subScore.points !== null) {
-		                        sum += subScore.points;
-		                        subCriteriaAvgCount += 1;
-		                    }
-		                });
-		                if (subCriteriaAvgCount > 0) {
-		                    subCriteriaAvgPoints = sum / subCriteriaAvgCount;
-		                }
+                let sum = 0;
+                subCodes.forEach(subCode => {
+                    const normSub = normalizeCriterionCode(subCode) || subCode;
+                    const subScore = scoringResults.globalScores[normSub];
+                    if (subScore && subScore.isScored && subScore.points !== null) {
+                        sum += subScore.points;
+                        subCriteriaAvgCount += 1;
+                    }
+                });
+                // Always compute a value; when none are scored yet, show 0 pts (0/x)
+                subCriteriaAvgPoints = subCriteriaAvgCount > 0 ? (sum / subCriteriaAvgCount) : 0;
 		            }
 		
 		            // Compute a simple average over all linked criteria in the
@@ -1233,21 +1259,26 @@ const FormArea = ({
 		            // computation map above. We always track counts so that we
 		            // can show "0/X" even when none of the linked criteria have
 		            // been scored yet.
-		            if (isRoot && calculatedFieldScore?.rootSources && Array.isArray(calculatedFieldScore.rootSources)) {
-		                const sources = calculatedFieldScore.rootSources;
-		                linkedExpectedCount = sources.length;
-		                let sum = 0;
-		                sources.forEach(src => {
-		                    if (!src) return;
-		                    if (src.isScored && src.points !== null && typeof src.points === 'number') {
-		                        sum += src.points;
-		                        linkedAvgCount += 1;
-		                    }
-		                });
-		                if (linkedAvgCount > 0) {
-		                    linkedAvgPoints = sum / linkedAvgCount;
-		                }
-		            }
+            if (isRoot && calculatedFieldScore?.rootSources && Array.isArray(calculatedFieldScore.rootSources)) {
+                const allSources = calculatedFieldScore.rootSources;
+                // Exclude visual-only links (-G / -B) from debug averages and counts
+                const effectiveSources = allSources.filter(src => {
+                    const code = typeof src === 'string' ? src : src.code;
+                    return !String(code || '').match(/-(G|B)$/i);
+                });
+                linkedExpectedCount = effectiveSources.length;
+                let sum = 0;
+                effectiveSources.forEach(src => {
+                    if (!src) return;
+                    if (src.isScored && src.points !== null && typeof src.points === 'number') {
+                        sum += src.points;
+                        linkedAvgCount += 1;
+                    }
+                });
+                if (linkedAvgCount > 0) {
+                    linkedAvgPoints = sum / linkedAvgCount;
+                }
+            }
 
 	            // Compute the parent criterion's score so we can surface it
 	            // next to the Comment label instead of inside the textarea.
@@ -1289,15 +1320,17 @@ const FormArea = ({
 	            const isAssessorUserField =
 	                labelUpper.includes('FAC_ASS_ASSESSOR_USER_ID') ||
 	                labelUpper.includes('ASSESSOR USER ID');
-	            const isFacilityGroupField =
-	                field.id === 'pzenrgsSny3' ||
-	                labelLower.includes('facility assessment group');
-	            const isTechnicalField =
-	                isADSection &&
-	                (isEnrollmentField ||
-	                    isTeiField ||
-	                    isAssessorUserField ||
-	                    isFacilityGroupField);
+            const isFacilityGroupField =
+                field.id === 'pzenrgsSny3' ||
+                labelLower.includes('facility assessment group');
+            // Do NOT treat Facility Assessment Group as a technical (read-only) field.
+            // It must remain editable so that when loading an existing event from the
+            // table the corresponding group value is shown and forms can react to it.
+            const isTechnicalField =
+                isADSection &&
+                (isEnrollmentField ||
+                    isTeiField ||
+                    isAssessorUserField);
 
 		            // Look up EMS standard/intent tooltip for this data element code
 		            const criterionTooltip = (!isCommentField && field.code) ? getCriterionTooltip(field.code, activeLinks, criterionIndex, calculatedFieldScore) : '';
@@ -1472,16 +1505,21 @@ const FormArea = ({
 		                                    Standard summary
 		                                </button>
 		                            )}
-	                            {criterionTooltip && (
-	                                <button
-	                                    type="button"
-	                                    className="ems-info-icon"
-	                                    data-ems-tooltip={criterionTooltip}
-	                                    aria-label="View EMS standard and intent"
-	                                >
-	                                    ?
-	                                </button>
-	                            )}
+                            {criterionTooltip && (
+                                <button
+                                    type="button"
+                                    className="ems-info-icon"
+                                    data-ems-tooltip={criterionTooltip}
+                                    aria-label="View EMS standard and intent"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setOpenCriterionTooltip(criterionTooltip);
+                                    }}
+                                >
+                                    ?
+                                </button>
+                            )}
 	                        </div>
 	                        {isCritical && <span className="critical-badge">CRITICAL</span>}
 	                    </div>
@@ -1507,15 +1545,28 @@ const FormArea = ({
 	                    )}
 	                    {!isStandardCriterion && (field.type === 'select' ? (
                         <>
-                            {calculatedFieldScore && (calculatedFieldScore.points !== null || isRoot) && (
+                            {calculatedFieldScore && (
+                                // Show root panel only when there is something meaningful to show:
+                                // numeric points OR draft points OR at least one effective linked criterion
+                                (calculatedFieldScore.points !== null || (isRoot && (rootDraftPoints !== null || linkedExpectedCount > 0)))
+                            ) && (
                                 <div className={`${isRoot ? 'root-score-display' : 'linked-score-display'}`} style={{ marginBottom: '10px', padding: '10px', backgroundColor: isRoot ? '#e2e8f0' : '#f0f4f8', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: isRoot ? '1px solid #cbd5e1' : '1px dashed #cbd5e1' }}>
                                     <span style={{ fontWeight: '600', color: '#2d3748', fontSize: '0.9em' }}>
-                                        {isRoot ? (calculatedFieldScore.response === 'Pending' ? 'Root Score Pending:' : 'Calculated Root Score:') : 'Criterion Score:'}
+                                        {isRoot ? 'Calculated Root Score:' : 'Criterion Score:'}
                                     </span>
                                     <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                        <span style={{ fontWeight: 'bold', fontSize: '1.05em', color: '#2b3a8e' }}>
-                                            {calculatedFieldScore.response === 'Pending' ? '--- pts' : (calculatedFieldScore.points !== null ? `${Number.isInteger(calculatedFieldScore.points) ? calculatedFieldScore.points : calculatedFieldScore.points.toFixed(1)} pts` : '--- pts')}
-                                        </span>
+	                                        <span style={{ fontWeight: 'bold', fontSize: '1.05em', color: '#2b3a8e' }}>
+	                                            {(() => {
+	                                                const effectivePoints =
+	                                                    (calculatedFieldScore.points !== null && calculatedFieldScore.points !== undefined)
+	                                                        ? calculatedFieldScore.points
+                                                        : (isRoot && rootDraftPoints !== null
+	                                                            ? rootDraftPoints
+	                                                            : null);
+	                                                if (effectivePoints === null) return '--- pts';
+	                                                return `${Number.isInteger(effectivePoints) ? effectivePoints : effectivePoints.toFixed(1)} pts`;
+	                                            })()}
+	                                        </span>
                                         <span style={{
                                             padding: '2px 8px',
                                             borderRadius: '12px',
@@ -1547,19 +1598,15 @@ const FormArea = ({
                                             </button>
                                         )}
                                     </div>
-		                            {isRoot && subCriteriaAvgPoints !== null && (
+                            {isRoot && subCriteriaExpectedCount > 0 && (
 		                                <div style={{ marginTop: '4px', fontSize: '0.8em', color: '#4a5568' }}>
 		                                    Sub-criteria average (configured):{' '}
 		                                    {Number.isInteger(subCriteriaAvgPoints)
 		                                        ? subCriteriaAvgPoints
 		                                        : subCriteriaAvgPoints.toFixed(1)}{' '}
 		                                    pts
-		                                    {subCriteriaExpectedCount > 0 && (
-		                                        <>
-		                                            {' '}
-		                                            ({subCriteriaAvgCount}/{subCriteriaExpectedCount})
-		                                        </>
-		                                    )}
+                                    {' '}
+                                    ({subCriteriaAvgCount}/{subCriteriaExpectedCount})
 		                                </div>
 		                            )}
 		                            {isRoot && linkedExpectedCount > 0 && (
@@ -1584,10 +1631,13 @@ const FormArea = ({
                                 id={`field-${field.id}`} // Helper for testing
                                 disabled={isRoot || (!isParentAnswered && isCommentField) || isTechnicalField}
                             >
-                                <option value="">{isRoot ? "Auto-calculated from linked criteria..." : "Select..."}</option>
-                                {isRoot && calculatedFieldScore?.response === 'Pending' && (
-                                    <option value="Pending">Pending...</option>
-                                )}
+                                <option value="">
+                                    {isRoot
+                                        ? ((linkedExpectedCount > 0 || (rootDraftPoints !== null))
+                                            ? 'Auto-calculated from configured criteria'
+                                            : 'Not auto-calculated (no effective linked criteria)')
+                                        : 'Select...'}
+                                </option>
                                 {(() => {
                                     const options = field.options || [];
                                     const groups = {};
@@ -1642,70 +1692,74 @@ const FormArea = ({
                                 })()}
 	                            </select>
 	                        </>
-		                    ) : (
-		                        <FieldInput
-		                            type={isCommentField ? 'textarea' : field.type}
-		                            className={`form-control ${formData[`is_critical_${field.id}`] && (!questionValue || questionValue === '') ? 'mandatory-warning' : ''}`}
-		                            value={(() => {
-	                                const rawValue = formData[field.id] || '';
-	                                const isCommentLike =
-	                                    isCommentField ||
-	                                    (typeof rawLabel === 'string' && /-comments\b/i.test(rawLabel));
+                            ) : (
+                                isCommentField ? (
+                                    (() => {
+                                        // Split the single DHIS2 comment value into two parts using '|'
+                                        const splitCommentValue = (raw) => {
+                                            const str = String(raw || '');
+                                            const idx = str.indexOf('|');
+                                            if (idx === -1) return { comments: str, recommendations: '' };
+                                            return { comments: str.slice(0, idx), recommendations: str.slice(idx + 1) };
+                                        };
+                                        const joinCommentValue = (a, b) => `${a || ''}|${b || ''}`;
 
-	                                let displayValue = rawValue;
+                                        // Strip any injected tags from display only
+                                        const stripTags = (txt) => (txt || '').replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '').trim();
 
-	                                if (isCommentLike && typeof rawLabel === 'string' && rawLabel && typeof rawValue === 'string') {
-	                                    const trimmedValue = rawValue.trim();
-	                                    const trimmedLabel = rawLabel.trim();
+                                        const parts = splitCommentValue(formData[field.id] || '');
+                                        const disabled = (!isParentAnswered && isCommentField) || isTechnicalField;
+                                        const baseClass = `form-control ${formData[`is_critical_${field.id}`] && (!questionValue || questionValue === '') ? 'mandatory-warning' : ''}`;
 
-	                                    // Case 1: stored value is just the label (with maybe a bit
-	                                    // of whitespace). Treat as empty comment.
-	                                    if (
-	                                        trimmedValue === trimmedLabel ||
-	                                        (trimmedValue.startsWith(trimmedLabel) &&
-	                                            trimmedValue.length <= trimmedLabel.length + 5)
-	                                    ) {
-	                                        displayValue = '';
-	                                    } else if (rawValue.includes(rawLabel)) {
-	                                        // Case 2: value contains the label followed by assessor
-	                                        // text. Strip the label portion from the front so the
-	                                        // assessor only sees their own narrative.
-	                                        displayValue = rawValue.replace(rawLabel, '').trimStart();
-	                                    } else {
-	                                        // Case 3: specific Hospital placeholder where the
-	                                        // full criterion statement has been copied into the
-	                                        // comment value (e.g. "7.1.1.1-comments HOSP There are
-	                                        // documented risk management processes for the
-	                                        // identification of all risks ..."). Remove that
-	                                        // boilerplate sentence and keep only any assessor
-	                                        // narrative that comes after it.
-	                                        const placeholderCore =
-	                                            'HOSP There are documented risk management processes for the identification of all risks';
-	                                        const idx = rawValue.indexOf(placeholderCore);
-	                                        if (idx !== -1) {
-	                                            displayValue = rawValue.substring(idx + placeholderCore.length).trimStart();
-	                                        }
-	                                    }
-	                                }
+                                        const handlePartChange = (which, newVal) => {
+                                            const current = splitCommentValue(formData[field.id] || '');
+                                            const next = joinCommentValue(
+                                                which === 'comments' ? newVal : current.comments,
+                                                which === 'recommendations' ? newVal : current.recommendations
+                                            );
+                                            saveField(field.id, next);
+                                        };
 
-	            // For all comment fields, hide any injected score/severity tags
-	            // from the textarea. The tags remain in the stored value (via
-	            // handleCommentBlur / the scoring sync effect) but are not
-	            // shown to the assessor.
-	            if (isCommentLike && typeof displayValue === 'string' && displayValue) {
-	                                    displayValue = displayValue
-	                                        .replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '')
-	                                        .trim();
-	                                }
-
-	                                return displayValue;
-		                            })()}
-		                            onChange={(e) => handleInputChange(e, field.id)}
-		                            onBlur={isCommentField ? () => handleCommentBlur(field.id) : undefined}
-		                            id={`field-${field.id}`}
-		                            disabled={(!isParentAnswered && isCommentField) || isTechnicalField}
-		                        />
-		                    ))}
+                                        return (
+                                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                                                <div>
+                                                    <label className="standard-summary-label" htmlFor={`field-${field.id}-comments`}>Comments</label>
+                                                    <textarea
+                                                        id={`field-${field.id}-comments`}
+                                                        className={baseClass}
+                                                        rows={3}
+                                                        value={stripTags(parts.comments)}
+                                                        onChange={(e) => handlePartChange('comments', e.target.value)}
+                                                        onBlur={() => handleCommentBlur(field.id)}
+                                                        disabled={disabled}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <label className="standard-summary-label" htmlFor={`field-${field.id}-recs`}>Recommendations</label>
+                                                    <textarea
+                                                        id={`field-${field.id}-recs`}
+                                                        className={baseClass}
+                                                        rows={3}
+                                                        value={stripTags(parts.recommendations)}
+                                                        onChange={(e) => handlePartChange('recommendations', e.target.value)}
+                                                        onBlur={() => handleCommentBlur(field.id)}
+                                                        disabled={disabled}
+                                                    />
+                                                </div>
+                                            </div>
+                                        );
+                                    })()
+                                ) : (
+                                    <FieldInput
+                                        type={field.type}
+                                        className={`form-control ${formData[`is_critical_${field.id}`] && (!questionValue || questionValue === '') ? 'mandatory-warning' : ''}`}
+                                        value={formData[field.id] || ''}
+                                        onChange={(e) => handleInputChange(e, field.id)}
+                                        id={`field-${field.id}`}
+                                        disabled={isTechnicalField}
+                                    />
+                                )
+                            ))}
                 </div>
             );
         });
@@ -1760,33 +1814,64 @@ const FormArea = ({
 	
 	            // If the assessor currently has focus in this comment field,
 	            // don't auto-rewrite the value underneath them.
-	            if (typeof document !== 'undefined') {
-	                const activeEl = document.activeElement;
-	                if (activeEl && activeEl.id === `field-${commentFieldId}`) {
-	                    continue;
-	                }
-	            }
+            if (typeof document !== 'undefined') {
+                const activeEl = document.activeElement;
+                if (activeEl && typeof activeEl.id === 'string') {
+                    const id = activeEl.id;
+                    // Skip auto-annotating while the assessor is typing in any of
+                    // the comment textareas related to this comment field. In the
+                    // split UI we render two textareas with ids:
+                    //   field-<commentFieldId>-comments
+                    //   field-<commentFieldId>-recs
+                    // Older UIs may still use: field-<commentFieldId>
+                    const isEditingThisComment =
+                        id === `field-${commentFieldId}` ||
+                        id === `field-${commentFieldId}-comments` ||
+                        id === `field-${commentFieldId}-recs` ||
+                        id.startsWith(`field-${commentFieldId}-`);
+                    if (isEditingThisComment) {
+                        continue;
+                    }
+                }
+            }
 	
 	            const isRoot = calculatedScore.isRoot || false;
 	            const isDraft = calculatedScore.isDraft || false;
 	
-	            // Use normalized value if available for consistent tagging
-	            const statusText = calculatedScore.normalizedValue || calculatedScore.response || 'NA';
-	            const pointsText = calculatedScore.points !== null ? `${parseFloat(calculatedScore.points).toFixed(0)} pts` : '0 pts';
-	
-	            const rootSources = (calculatedScore.rootSources || []).map(s => typeof s === 'string' ? s : s.code);
-	            const rootSuffix = rootSources.length > 0 ? ` -root(${rootSources.join(',')})` : '';
-	
-	            let scoreTag = `[SCORE: ${pointsText} - ${statusText}${rootSuffix}]`;
-	            if (isRoot) {
-	                scoreTag = isDraft
-	                    ? `[INCOMPLETE ROOT SCORE: ${pointsText} - ${statusText}${rootSuffix}]`
-	                    : `[ROOT SCORE: ${pointsText} - ${statusText}${rootSuffix}]`;
-	            }
-	
-	            // Only update if there's an actual response value (not empty)
-	            // or if it's an auto-calculated Root score
-	            const hasResponse = isRoot || (formData[field.id] && formData[field.id] !== '' && formData[field.id] !== 'NA');
+            // Use normalized value if available for consistent tagging
+            const statusText = calculatedScore.normalizedValue || calculatedScore.response || 'NA';
+            const pointsText = calculatedScore.points !== null ? `${parseFloat(calculatedScore.points).toFixed(0)} pts` : '0 pts';
+
+            // For roots, exclude -G/-B visual-only links when constructing suffix
+            const allRootCodes = (calculatedScore.rootSources || []).map(s => typeof s === 'string' ? s : s.code);
+            const effectiveRootCodes = allRootCodes.filter(c => !String(c || '').match(/-(G|B)$/i));
+            const isPureVisualOnlyRoot = isRoot && effectiveRootCodes.length === 0;
+
+            if (isPureVisualOnlyRoot) {
+                // Clean any stale tags but do not append a new tag
+                const cleaned = currentComment
+                    .replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '')
+                    .replace(/\[object Object\](\)]*)?/g, '')
+                    .trim();
+                if (cleaned !== currentComment) {
+                    updates[commentFieldId] = cleaned;
+                    hasUpdates = true;
+                }
+                continue;
+            }
+
+            const rootSuffix = isRoot && effectiveRootCodes.length > 0 ? ` -root(${effectiveRootCodes.join(',')})` : '';
+
+            let scoreTag = `[SCORE: ${pointsText} - ${statusText}${rootSuffix}]`;
+            if (isRoot) {
+                scoreTag = isDraft
+                    ? `[INCOMPLETE ROOT SCORE: ${pointsText} - ${statusText}${rootSuffix}]`
+                    : `[ROOT SCORE: ${pointsText} - ${statusText}${rootSuffix}]`;
+            }
+
+            // Only update if there's an actual response value (not empty)
+            // or if it's an auto-calculated Root score with at least one effective linked criterion
+            const hasResponse = (isRoot && effectiveRootCodes.length > 0) || (formData[field.id] && formData[field.id] !== '' && formData[field.id] !== 'NA');
 	
 	            if (hasResponse) {
 	                // Remove any old score/severity tags and also common junk like [object Object]
@@ -1849,10 +1934,19 @@ const FormArea = ({
                     const hasParentResponse = isRoot || (formData[parentFieldId] && formData[parentFieldId] !== '');
 
                     if (hasParentResponse) {
-                        const isDraft = calculatedScore.isDraft || false;
-                        const rootSources = (calculatedScore.rootSources || []).map(s => typeof s === 'string' ? s : s.code);
-                        const rootSuffix = rootSources.length > 0 ? ` -root(${rootSources.join(',')})` : '';
+                    const isDraft = calculatedScore.isDraft || false;
+                    const allCodes = (calculatedScore.rootSources || []).map(s => typeof s === 'string' ? s : s.code);
+                    const effectiveCodes = allCodes.filter(c => !String(c || '').match(/-(G|B)$/i));
+                    const isPureVisualOnlyRoot = isRoot && effectiveCodes.length === 0;
 
+                    // Remove any old score tags first and also common junk
+                    newComment = newComment
+                        .replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '')
+                        .replace(/\[object Object\](\)]*)?/g, '')
+                        .trim();
+
+                    if (!isPureVisualOnlyRoot) {
+                        const rootSuffix = isRoot && effectiveCodes.length > 0 ? ` -root(${effectiveCodes.join(',')})` : '';
                         let scoreTag = `[SCORE: ${parseFloat(calculatedScore.points).toFixed(0)} pts - ${calculatedScore.response}${rootSuffix}]`;
                         if (isRoot) {
                             if (isDraft) {
@@ -1861,14 +1955,9 @@ const FormArea = ({
                                 scoreTag = `[ROOT SCORE: ${parseFloat(calculatedScore.points).toFixed(0)} pts - ${calculatedScore.response}${rootSuffix}]`;
                             }
                         }
-
-                        // Remove any old score tags first and also common junk
-                        newComment = newComment
-                            .replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '')
-                            .replace(/\[object Object\](\)]*)?/g, '')
-                            .trim();
-                        // Append the new one
+                        // Append the new one only when there are effective links
                         newComment = newComment ? `${newComment} ${scoreTag}` : scoreTag;
+                    }
                     }
                 }
             }
@@ -1936,6 +2025,16 @@ const FormArea = ({
             return;
         }
 
+    // Validation: "Type of Assessment" must be selected in Assessment Details
+    if (typeOfAssessmentDeId) {
+      const v = formData?.[typeOfAssessmentDeId];
+      if (v === undefined || v === null || String(v).trim() === '' || String(v).toUpperCase() === 'NA') {
+        setSubmitResult({ success: false, message: '❌ Please select a Type of Assessment in Assessment Details before saving.' });
+        setIsSubmitting(false);
+        return;
+      }
+    }
+
 	        try {
 	            // Priority 1: Official Assignment IDs (The Source of Truth)
 	            // Priority 2: Locally saved internal IDs (From previous successes)
@@ -1955,25 +2054,51 @@ const FormArea = ({
 	                scoringSnapshot: createAssessmentSnapshot(scoringResults)
 		            };
 		
-		            console.log('🚀 Starting Tracker Enrollment Workflow...', {
-		                submitOrgUnit: orgUnit,
-		                assignmentOrgUnitId: selectedFacility?.orgUnitId,
-		                assignmentOrgUnitName: selectedFacility?.orgUnitName,
-		                programOrgUnitId: selectedFacility?.programOrgUnitId,
-		            });
-            // Capture generated IDs to prevent duplicates on retry
-            const result = await api.submitTrackerAssessment(
-                enrichedData,
+            console.log('🚀 Starting Event PUT workflow...', {
+                submitOrgUnit: orgUnit,
+                assignmentOrgUnitId: selectedFacility?.orgUnitId,
+                assignmentOrgUnitName: selectedFacility?.orgUnitName,
+                programOrgUnitId: selectedFacility?.programOrgUnitId,
+            });
+
+            // 1) Resolve latest DHIS2 survey Event ID for this TEI/program/stage (prefer latest on server)
+            const programId = configuration?.program?.id || 'G2gULe4jsfs';
+            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+            const teiId = enrichedData.teiId_internal;
+            if (!teiId) {
+                throw new Error('Missing TEI ID; cannot resolve latest survey event.');
+            }
+            let latestEventId = null;
+            try {
+                latestEventId = await api.getLatestSurveyEventId({
+                    programId,
+                    stageId,
+                    teiId,
+                    orgUnitId: orgUnit
+                });
+            } catch (resolveErr) {
+                console.warn('⚠️ Could not resolve latest survey event; falling back to local eventId_internal if present.', resolveErr);
+            }
+
+            // Prefer an explicitly selected/loaded event id first (e.g. from clicking a row),
+            // then fall back to server-latest, then any legacy fields.
+            const putEventId = formData.eventId_internal || formData.event || formData.eventId || latestEventId;
+            if (!putEventId) {
+                throw new Error('Missing survey Event ID (latest on server and local draft are both unavailable).');
+            }
+
+            // Persist the resolved event id into the draft and use it for the payload
+            try { saveField('eventId_internal', putEventId); } catch (_) {}
+            const payloadData = { ...enrichedData, eventId_internal: putEventId };
+
+            const result = await api.submitEventPut(
+                payloadData,
                 configuration,
-                orgUnit,
-                (key, id) => {
-                    console.log(`💾 Persisting ${key} to draft: ${id}`);
-                    saveField(key, id);
-                }
+                orgUnit
             );
 
-            // Extract the Event ID using our unified helper (handles v41 tracker vs legacy)
-            const dhis2EventId = api.extractEventId(result);
+            // For the PUT flow, we already know the target Event ID
+            const dhis2EventId = putEventId;
 
 	            if (activeEventId) {
 	                await indexedDBService.markAsSynced(activeEventId, dhis2EventId || 'synced');
@@ -2166,7 +2291,7 @@ const FormArea = ({
 		                                onClick={() => setShowPiSummary(prev => !prev)}
 		                            >
 		                                <span>
-		                                    PI summary
+                                    SE summary
 		                                    <span className="standard-summary-pi-inline">
 		                                        {' Overall: '}
 		                                        {Number(sectionPiDraftScore || 0).toFixed(1)}%
@@ -2360,6 +2485,24 @@ const FormArea = ({
 	                    </button>
 	                )}
             </div>
+            {/* Click-to-open persistent tooltip panel */}
+            {openCriterionTooltip && (
+                <div className="scoring-modal-overlay" onClick={() => setOpenCriterionTooltip(null)}>
+                    <div
+                        className="scoring-modal-content"
+                        style={{ maxWidth: '900px', maxHeight: '85vh' }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="scoring-modal-header">
+                            <div>Criterion information</div>
+                            <button className="close-modal-btn" onClick={() => setOpenCriterionTooltip(null)} aria-label="Close">&times;</button>
+                        </div>
+                        <div className="scoring-modal-body" style={{ whiteSpace: 'pre-line' }}>
+                            {openCriterionTooltip}
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };

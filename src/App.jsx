@@ -10,6 +10,7 @@ import { transformMetadata } from './utils/transformers';
 import { useIncrementalSave } from './hooks/useIncrementalSave';
 import { normalizeCriterionCode } from './utils/normalization';
 import { useAssessmentScoring } from './hooks/useAssessmentScoring';
+import { setHospitalSubcriteriaConfig } from './utils/scoring';
 import emsConfig from './assets/ems_config.json';
 import mortuaryConfig from './assets/mortuary_config.json';
 import clinicsConfig from './assets/clinics_config.json';
@@ -18,12 +19,13 @@ import emsLinks from './assets/ems_links.json';
 import mortuaryLinks from './assets/mortuary_links.json';
 import clinicsLinks from './assets/clinics_links.json';
 import hospitalLinks from './assets/hospital_links.json';
+import { decorateHospitalLinksWithMatrixTags } from './utils/hospitalMatrixTags';
 import './App.css';
+import Report from './pages/Report';
 
-// Precompute scoring metadata (links + severity) for each programme type
-// once at module load time. This avoids rebuilding large lookup tables on
-// every render or group change, which was causing noticeable pauses when
-// switching groups/SEs.
+// Helper to build scoring metadata (links + severity) for each programme
+// type. The actual programmeScoringMeta object is built inside AppContent so
+// that it can react to configuration version changes.
 const buildScoringMeta = (config, configKey, links) => {
   const linksDataLookup = {};
   (links || []).forEach(linkObj => {
@@ -54,13 +56,6 @@ const buildScoringMeta = (config, configKey, links) => {
   return { linksDataLookup, severityLookup };
 };
 
-const programmeScoringMeta = {
-  ems: buildScoringMeta(emsConfig, 'ems_full_configuration', emsLinks),
-  mortuary: buildScoringMeta(mortuaryConfig, 'mortuary_full_configuration', mortuaryLinks),
-  clinics: buildScoringMeta(clinicsConfig, 'clinics_full_configuration', clinicsLinks),
-  hospital: buildScoringMeta(hospitalConfig, 'hospital_full_configuration', hospitalLinks)
-};
-
 const PrivateRoute = ({ children }) => {
 	  const { user, authInitializing } = useApp();
 	  const location = useLocation();
@@ -75,11 +70,21 @@ const PrivateRoute = ({ children }) => {
 	  return user ? children : <Navigate to="/login" state={{ from: location }} replace />;
 };
 
-const AppContent = () => {
-	  const { user, setUser, setConfiguration, setUserAssignments, configuration, showToast } = useApp();
+	const AppContent = () => {
+		  const {
+		    user,
+		    setUser,
+		    setConfiguration,
+		    setUserAssignments,
+		    configuration,
+		    showToast,
+		    configBundles,
+		    activeConfigVersionId,
+		  } = useApp();
 	  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
+  const [isFormLoading, setIsFormLoading] = useState(false);
 
   // Navigation State
   const [groups, setGroups] = useState([]);
@@ -87,17 +92,28 @@ const AppContent = () => {
   const [activeSection, setActiveSection] = useState(null);
 
 	  // Data State
-	  const [assignments, setAssignments] = useState([]);
+		  const [assignments, setAssignments] = useState([]);
 	  const [selectedFacility, setSelectedFacility] = useState(null);
 	
 	  // Data element ID for "SURV-Facility Assessment Group"
-	  const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
+		  const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
 	
 	  const getGroupLabelForStorage = (group) => {
 	    if (!group) return '';
 	    // Prefer human-readable name for clarity in the Assessment Details section
 	    return group.name || group.id || '';
 	  };
+
+  // Map a free-text Assessment Group value to an internal group id
+  const resolveGroupIdFromText = React.useCallback((text) => {
+    if (!text) return null;
+    const t = String(text).toLowerCase();
+    if (t.includes('hosp')) return 'HOSPITAL';
+    if (t.includes('clinic')) return 'CLINICS';
+    if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
+    if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
+    return null;
+  }, []);
 	
 	  // Generate Event ID safely - unique per assessment *and group*
 	  // so each (assessment, group) gets its own draft/event.
@@ -157,7 +173,7 @@ const AppContent = () => {
 	  // Always store a friendly facility name in the draft so the
 	  // Dashboard and Survey Preview can display it instead of
 	  // falling back to "Unknown Facility".
-	  const facilityNameInternal = formData?.facilityName_internal;
+		  const facilityNameInternal = formData?.facilityName_internal;
 	  useEffect(() => {
 	    if (!selectedFacility) return;
 
@@ -177,15 +193,79 @@ const AppContent = () => {
 	    saveField('facilityName_internal', targetName);
 	  }, [selectedFacility, facilityNameInternal, saveField]);
 
-  // Load data when activeEventId changes
+  // Load data when activeEventId changes, and show loader during hydration
   useEffect(() => {
-    if (activeEventId) {
-      loadFormData();
-    }
+    if (!activeEventId) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        setIsFormLoading(true);
+        await loadFormData();
+      } finally {
+        if (!cancelled) setIsFormLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
   }, [activeEventId, loadFormData]);
 
-	  const location = useLocation();
+		  const location = useLocation();
 	  const assessmentIdParam = searchParams.get('assessmentId');
+
+		  // Build programme-specific scoring metadata (links + severity) based on
+		  // the currently active configuration version. Falls back to on-disk JSON
+		  // when versioned bundles are not yet initialised.
+		  const programmeScoringMeta = React.useMemo(() => {
+		    const bundle =
+		      configBundles && activeConfigVersionId
+		        ? configBundles[activeConfigVersionId]
+		        : null;
+
+		    const sourceConfig = bundle && bundle.config
+		      ? bundle.config
+		      : { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig };
+
+    const baseLinks = bundle && bundle.links
+      ? bundle.links
+      : {
+          ems: emsLinks,
+          mortuary: mortuaryLinks,
+          clinics: clinicsLinks,
+          hospital: hospitalLinks,
+        };
+
+    // Decorate Hospital links with visual -G / -B tags based on matrix.json so
+    // that the scoring layer and UI can recognise which links are green/blue
+    // in the dependency matrix. The tags are purely visual; the scoring core
+    // strips them before looking up criteria and may choose to exclude them
+    // from root computations.
+    const effectiveLinks = {
+      ...baseLinks,
+      hospital: decorateHospitalLinksWithMatrixTags(baseLinks.hospital || hospitalLinks),
+    };
+
+    return {
+      ems: buildScoringMeta(sourceConfig, 'ems_full_configuration', effectiveLinks.ems || emsLinks),
+      mortuary: buildScoringMeta(sourceConfig, 'mortuary_full_configuration', effectiveLinks.mortuary || mortuaryLinks),
+      clinics: buildScoringMeta(sourceConfig, 'clinics_full_configuration', effectiveLinks.clinics || clinicsLinks),
+      hospital: buildScoringMeta(sourceConfig, 'hospital_full_configuration', effectiveLinks.hospital || hospitalLinks),
+    };
+		  }, [configBundles, activeConfigVersionId]);
+
+		  // Keep the scoring core's hospital sub-criteria map in sync with the
+		  // active configuration version so that root scores use the correct
+		  // configured sub-criteria set per version.
+		  useEffect(() => {
+		    const bundle =
+		      configBundles && activeConfigVersionId
+		        ? configBundles[activeConfigVersionId]
+		        : null;
+		    if (bundle && bundle.compute) {
+		      setHospitalSubcriteriaConfig(bundle.compute);
+		    } else {
+		      // Fall back to the default asset config inside scoring.js
+		      setHospitalSubcriteriaConfig(null);
+		    }
+		  }, [configBundles, activeConfigVersionId]);
 
   // Load initial data once when the user is available. This is resilient to
   // hot-reloads or remounts where `configuration` or `groups` might be reset.
@@ -260,11 +340,68 @@ const AppContent = () => {
 	    }
 	  }, [location.state, searchParams, assignments]);
 
+  // Track whether we've applied navigation preloads for the current selection
+  const preloadAppliedRef = React.useRef(null);
+  // Track whether we've aligned Facility Assessment Group to baseline for the
+  // current facility/selection to avoid repeated network fetches on re-renders.
+  const baselineAlignRef = React.useRef(null);
+
   // Auto-populate Assessment Details from selected assessment
   useEffect(() => {
     const nameLower = (activeSection?.name || '').toLowerCase().trim();
     const isADSection =
       nameLower === 'assessment details' || nameLower === 'assessment_details';
+
+    // If navigation carried a baseline event id, persist it to the draft so
+    // the Save flow can reuse it without refetching.
+    const navBaselineEventId = selectedFacility?.baselineEventId;
+    if (navBaselineEventId && !formData?.eventId_internal) {
+      console.log('📝 App: Storing baseline eventId_internal from navigation state:', navBaselineEventId);
+      saveField('eventId_internal', navBaselineEventId);
+    }
+
+    // If navigation carried preloaded DE values (e.g., Assessment Group from a
+    // clicked event row), persist them early so dependent forms render correctly.
+    const preload = selectedFacility?.preloadDataValues || null;
+    const preloadKey = JSON.stringify({
+      a: assessmentIdParam || null,
+      tei: selectedFacility?.trackedEntityInstance || selectedFacility?.scheduleTeiId || null,
+      ev: selectedFacility?.baselineEventId || selectedFacility?.eventId || null,
+      pre: preload || {}
+    });
+    if (preload && typeof preload === 'object' && preloadAppliedRef.current !== preloadKey) {
+      const preloadMode = selectedFacility?.preloadMode || 'MERGE'; // REPLACE | MERGE
+      Object.entries(preload).forEach(([deId, value]) => {
+        const existing = formData?.[deId];
+        const existingNorm = existing === undefined || existing === null ? '' : String(existing);
+        const valueNorm = value === undefined || value === null ? '' : String(value);
+        const isDifferent = existingNorm !== valueNorm;
+        const isExistingEmpty = existingNorm === '';
+        const isValuePresent = valueNorm !== '';
+        const shouldApply =
+          preloadMode === 'REPLACE' ? isDifferent : (isExistingEmpty && isValuePresent);
+        if (shouldApply) {
+          console.log('📝 App: Applying preload value:', deId, value);
+          saveField(deId, value);
+        }
+      });
+      preloadAppliedRef.current = preloadKey;
+
+      // If a preloaded Facility Assessment Group is present, switch the active
+      // group immediately so the correct forms render even before formData updates.
+      const preloadedGroupText = preload[FACILITY_GROUP_DE_ID];
+      if (preloadedGroupText && groups && groups.length > 0) {
+        const targetId = resolveGroupIdFromText(preloadedGroupText);
+        if (targetId && activeGroup?.id !== targetId) {
+          const found = groups.find(g => g.id === targetId);
+          if (found) {
+            console.log('🎯 App: Preselecting group from preloaded value →', found.name || found.id);
+            setActiveGroup(found);
+            if (found.sections && found.sections.length > 0) setActiveSection(found.sections[0]);
+          }
+        }
+      }
+    }
 
     // Corrected keys for raw data from api.getAssignments
     const enrollmentId =
@@ -314,13 +451,55 @@ const AppContent = () => {
         );
         saveField(enrField.id, enrollmentId);
       }
-      if (groupField && activeGroup && !formData[groupField.id]) {
-        const groupLabel = getGroupLabelForStorage(activeGroup);
-        if (groupLabel) {
-          console.log(
-            `📝 App: Auto-populating Facility Assessment Group: ${groupLabel}`
-          );
-          saveField(groupField.id, groupLabel);
+      // Avoid overwriting a preloaded group value from a clicked event.
+      const preloadedGroupText = preload && preload[FACILITY_GROUP_DE_ID];
+      // If we didn't preload from a clicked event, resolve the facility's
+      // Baseline Assessment Group from DHIS2. This both fills an empty field and
+      // corrects a mismatched saved draft (e.g. defaulted Mortuary).
+      if (groupField && !preloadedGroupText) {
+        const programId = configuration?.program?.id || 'G2gULe4jsfs';
+        const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+        const orgUnitId =
+          selectedFacility?.orgUnitId ||
+          (typeof selectedFacility?.orgUnit === 'string' ? selectedFacility.orgUnit : selectedFacility?.orgUnit?.id) ||
+          selectedFacility?.facilityId ||
+          selectedFacility?.programOrgUnitId ||
+          null;
+        const teiForBaseline =
+          selectedFacility?.trackedEntityInstance ||
+          selectedFacility?.scheduleTeiId ||
+          formData.teiId_internal ||
+          null;
+
+        const baselineKey = teiForBaseline && orgUnitId ? `${teiForBaseline}|${orgUnitId}|${programId}|${stageId}` : null;
+        if (teiForBaseline && orgUnitId && baselineAlignRef.current !== baselineKey) {
+          (async () => {
+            try {
+              const baselineGroup = await api.getBaselineAssessmentGroup({ teiId: teiForBaseline, orgUnitId, programId, stageId });
+              if (baselineGroup && String(baselineGroup).trim() !== '') {
+                const currentText = formData[groupField.id];
+                const currentId = resolveGroupIdFromText(currentText);
+                const targetId = resolveGroupIdFromText(baselineGroup);
+                // Align the field to the baseline group if it's empty or mismatched
+                if (!currentText || currentId !== targetId) {
+                  console.log('📝 App: Setting Facility Assessment Group from Baseline:', baselineGroup);
+                  saveField(groupField.id, baselineGroup);
+                }
+                // Also switch activeGroup immediately so correct forms render
+                if (targetId && groups && groups.length > 0 && activeGroup?.id !== targetId) {
+                  const found = groups.find(g => g.id === targetId);
+                  if (found) {
+                    setActiveGroup(found);
+                    if (found.sections && found.sections.length > 0) setActiveSection(found.sections[0]);
+                  }
+                }
+                baselineAlignRef.current = baselineKey;
+              }
+            } catch (e) {
+              console.warn('App: Failed to resolve Baseline Assessment Group (non-fatal)', e);
+              baselineAlignRef.current = baselineKey; // avoid retry loop on hard errors
+            }
+          })();
         }
       }
       if (assessorField && user?.id && !formData[assessorField.id]) {
@@ -330,7 +509,23 @@ const AppContent = () => {
         saveField(assessorField.id, user.id);
       }
     }
-  }, [selectedFacility, activeSection, activeGroup, saveField, formData, user?.id]);
+  }, [selectedFacility, activeSection, activeGroup, saveField, formData, user?.id, assessmentIdParam, groups]);
+
+  // Keep activeGroup in sync with the Facility Assessment Group field value so
+  // that when opening an existing event (e.g., Hospital), the Hospital forms
+  // load automatically even if the default group was Mortuary.
+  useEffect(() => {
+    const txt = formData?.[FACILITY_GROUP_DE_ID];
+    if (!txt || !groups || groups.length === 0) return;
+    const targetId = resolveGroupIdFromText(txt);
+    if (!targetId || activeGroup?.id === targetId) return;
+    const found = groups.find(g => g.id === targetId);
+    if (found) {
+      console.log('🎯 App: Switching active group based on Assessment Group field →', found.name || found.id);
+      setActiveGroup(found);
+      if (found.sections && found.sections.length > 0) setActiveSection(found.sections[0]);
+    }
+  }, [formData?.[FACILITY_GROUP_DE_ID], groups]);
 
   // Assessment Details Prerequisite Check
   const isADComplete = React.useMemo(() => {
@@ -374,8 +569,31 @@ const AppContent = () => {
 	    });
 	  }, [groups, formData]);
 
-	  // Scoring Integration: Map flat formData to hierarchical structure for the scoring hook
-	  const assessmentDetailsForScoring = React.useMemo(() => {
+		  // Scoring Integration: Map flat formData to hierarchical structure for the scoring hook
+  // Build a lightweight fingerprint of only the values that affect scoring
+  const scoringDeps = React.useMemo(() => {
+    try {
+      if (!activeGroup || !formData) return '[]';
+      const pairs = [];
+      const groupsToScan = [activeGroup];
+      groupsToScan.forEach(g => {
+        (g.sections || []).forEach(sec => {
+          (sec.fields || []).forEach(f => {
+            if (f && f.type === 'select') {
+              const critKey = f && (f.commentFieldId ? `is_critical_${f.commentFieldId}` : `is_critical_${f.id}`);
+              pairs.push([f.id, formData[f.id] ?? null]);
+              if (critKey) pairs.push([critKey, formData[critKey] ?? null]);
+            }
+          });
+        });
+      });
+      return JSON.stringify(pairs);
+    } catch (e) {
+      return '[]';
+    }
+  }, [activeGroup, formData]);
+
+  const assessmentDetailsForScoring = React.useMemo(() => {
     if (!groups || groups.length === 0 || !formData) return { sections: [] };
 
     // Determine which configuration to use based on the active group
@@ -388,7 +606,7 @@ const AppContent = () => {
     const isHospital =
       activeGroup?.id === 'HOSPITAL' || activeGroup?.name === 'Hospital';
 
-    const programmeType = isMortuary
+		    const programmeType = isMortuary
       ? 'mortuary'
       : isClinics
       ? 'clinics'
@@ -396,8 +614,8 @@ const AppContent = () => {
       ? 'hospital'
       : 'ems';
 
-	    // Use precomputed lookups for this programme type (built once at module
-	    // load) instead of rebuilding them on each render.
+		    	// Use precomputed lookups for this programme type from the
+		    	// programmeScoringMeta map instead of rebuilding them on each render.
 	    const { linksDataLookup, severityLookup } =
 	      programmeScoringMeta[programmeType] || programmeScoringMeta.ems;
 
@@ -418,8 +636,15 @@ const AppContent = () => {
 	            .map(f => {
 	              const code = f.code || f.id;
 	              const normalizedCode = normalizeCriterionCode(code);
-	              const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
-	              const isRoot = linksData.linked_criteria.length > 0; // Auto-calculated ONLY if it calculates from others
+                  const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
+                  // Treat links suffixed with -G / -B as visual-only. A criterion
+                  // is considered a real root ONLY if there is at least one
+                  // effective (non -G/-B) linked criterion. Otherwise, allow
+                  // manual scoring like a normal leaf.
+                  const rawLinks = Array.isArray(linksData.linked_criteria) ? linksData.linked_criteria : [];
+                  const effectiveLinks = rawLinks.filter(l => !String(l || '').trim().match(/-(G|B)$/i));
+                  const hasEffectiveLinks = effectiveLinks.length > 0;
+                  const isRoot = hasEffectiveLinks;
 	              const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
 	
 	              return {
@@ -428,8 +653,11 @@ const AppContent = () => {
 	                response: formData[f.id] || 'NA',
 	                // Check for critical flag in formData (appended by FormArea toggle)
 	                isCritical: Boolean(formData[`is_critical_${f.commentFieldId}`] || formData[`is_critical_${f.id}`]),
-	                isRoot,
-	                links: linksData.linked_criteria,
+                    isRoot,
+                    // Provide only effective (non -G/-B) links to the scorer so
+                    // that criteria with purely visual links behave as leaves and
+                    // can be scored manually.
+                    links: effectiveLinks,
 	                roots: linksData.roots,
 	                severity
 	              };
@@ -437,7 +665,7 @@ const AppContent = () => {
 	        }]
 	      }))
 	    };
-	  }, [activeGroup, formData]);
+  }, [activeGroup, scoringDeps]);
 
 		  const scoringResults = useAssessmentScoring(assessmentDetailsForScoring);
 
@@ -481,7 +709,16 @@ const AppContent = () => {
             {isLoading ? (
               <div className="loading-screen">Loading Configuration...</div>
             ) : (
-              <Layout
+              <>
+                {isFormLoading && (
+                  <div className="form-loader-overlay">
+                    <div className="form-loader-card">
+                      <div className="form-loader-spinner" />
+                      <div className="form-loader-text">Loading survey…</div>
+                    </div>
+                  </div>
+                )}
+                <Layout
                 // Navigation Props
                 groups={groups}
                 activeGroup={activeGroup}
@@ -497,7 +734,7 @@ const AppContent = () => {
 				                scoringResults={scoringResults}
 				                isAssignedAssessment={Boolean(assessmentIdParam)}
 				                isScoringPending={isScoringPending}
-              >
+                  >
                 <FormArea
                   activeSection={activeSection}
                   selectedFacility={selectedFacility}
@@ -514,7 +751,17 @@ const AppContent = () => {
 		                  onCriterionChange={handleCriterionChange}
                 />
               </Layout>
+            </>
             )}
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/report"
+        element={
+          <PrivateRoute>
+            <Report />
           </PrivateRoute>
         }
       />

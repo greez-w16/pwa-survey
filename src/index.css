@@ -9,6 +9,44 @@ body {
 	background: #f3f4f6;
 }
 
+/* Modern full-screen loader shown while a selected event hydrates the form */
+.form-loader-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+.form-loader-card {
+  background: #0b1220;
+  color: #e5e7eb;
+  padding: 18px 22px;
+  border-radius: 10px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1px solid rgba(148,163,184,0.25);
+}
+.form-loader-spinner {
+  width: 22px;
+  height: 22px;
+  border: 3px solid rgba(148,163,184,0.35);
+  border-top-color: #60a5fa;
+  border-radius: 50%;
+  animation: form-loader-spin 0.9s linear infinite;
+}
+.form-loader-text {
+  font-weight: 600;
+  letter-spacing: 0.2px;
+}
+@keyframes form-loader-spin {
+  to { transform: rotate(360deg); }
+}
+
 body::after {
   content: "";
   position: fixed;

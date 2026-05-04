@@ -2,6 +2,15 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { api } from '../services/api';
 import indexedDBService from '../services/indexedDBService';
 import { useStorage } from '../hooks/useStorage';
+import emsConfig from '../assets/ems_config.json';
+import mortuaryConfig from '../assets/mortuary_config.json';
+import clinicsConfig from '../assets/clinics_config.json';
+import hospitalConfig from '../assets/hospital_config.json';
+import emsLinks from '../assets/ems_links.json';
+import mortuaryLinks from '../assets/mortuary_links.json';
+import clinicsLinks from '../assets/clinics_links.json';
+import hospitalLinks from '../assets/hospital_links.json';
+import hospitalComputeCriteria from '../assets/hospital_compute_criteria.json';
 
 const AppContext = createContext();
 
@@ -24,6 +33,12 @@ export const AppProvider = ({ children }) => {
 
     const [pendingEvents, setPendingEvents] = useState([]);
 
+	    // Versioned configuration state: metadata (V1, V2, etc.) and the
+	    // actual per-version config bundles used by scoring and helpers.
+	    const [configVersions, setConfigVersions] = useState([]);
+	    const [activeConfigVersionId, setActiveConfigVersionId] = useState(null);
+	    const [configBundles, setConfigBundles] = useState({});
+
 	    useEffect(() => {
 	        const handleOnline = () => setIsOnline(true);
 	        const handleOffline = () => setIsOnline(false);
@@ -34,6 +49,112 @@ export const AppProvider = ({ children }) => {
 	            window.removeEventListener('offline', handleOffline);
 	        };
 	    }, []);
+
+		    // Initialise configuration versions metadata and per-version bundles
+		    // from localStorage. This centralises versioning so that both the
+		    // Dashboard (editor) and the scoring engine can use the same active
+		    // configuration.
+		    useEffect(() => {
+		        // --- Load or initialise versions metadata ---
+		        let versionsPayload = null;
+		        const savedVersionsRaw = localStorage.getItem('qims_config_versions');
+		        if (savedVersionsRaw) {
+		            try {
+		                const parsed = JSON.parse(savedVersionsRaw);
+		                if (parsed && Array.isArray(parsed.versions) && parsed.versions.length > 0) {
+		                    versionsPayload = parsed;
+		                }
+		            } catch (e) {
+		                console.error('AppContext: Failed to parse saved configuration versions', e);
+		            }
+		        }
+
+		        if (!versionsPayload) {
+		            const defaultVersion = {
+		                id: 'v1',
+		                name: 'V1 \u2013 Baseline configuration',
+		                description: 'Initial configuration combining Service Elements, Criteria Linkages and Computation rules.',
+		                status: 'ACTIVE',
+		                createdAt: new Date().toISOString(),
+		            };
+		            versionsPayload = {
+		                activeVersionId: defaultVersion.id,
+		                versions: [defaultVersion],
+		            };
+		            try {
+		                localStorage.setItem('qims_config_versions', JSON.stringify(versionsPayload));
+		            } catch (e) {
+		                console.error('AppContext: Failed to persist default configuration version', e);
+		            }
+		        }
+
+		        setConfigVersions(versionsPayload.versions);
+		        setActiveConfigVersionId(versionsPayload.activeVersionId);
+
+		        // --- Load or initialise per-version bundles ---
+		        const savedBundlesRaw = localStorage.getItem('qims_config_bundles');
+		        if (savedBundlesRaw) {
+		            try {
+		                const parsedBundles = JSON.parse(savedBundlesRaw) || {};
+		                setConfigBundles(parsedBundles);
+		                return;
+		            } catch (e) {
+		                console.error('AppContext: Failed to parse configuration bundles', e);
+		            }
+		        }
+
+		        // No bundles saved yet 
+		        // Build a baseline bundle from on-disk JSON and any legacy
+		        // overrides stored in custom_ems_config / custom_ems_links.
+		        let baseConfig = null;
+		        const legacyConfigRaw = localStorage.getItem('custom_ems_config');
+		        if (legacyConfigRaw) {
+		            try {
+		                baseConfig = JSON.parse(legacyConfigRaw);
+		            } catch (e) {
+		                console.error('AppContext: Failed to parse legacy custom_ems_config', e);
+		            }
+		        }
+		        if (!baseConfig) {
+		            baseConfig = { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig };
+		        }
+
+		        let baseLinks = null;
+		        const legacyLinksRaw = localStorage.getItem('custom_ems_links');
+		        if (legacyLinksRaw) {
+		            try {
+		                baseLinks = JSON.parse(legacyLinksRaw);
+		            } catch (e) {
+		                console.error('AppContext: Failed to parse legacy custom_ems_links', e);
+		            }
+		        }
+		        if (!baseLinks) {
+		            baseLinks = {
+		                ems: emsLinks,
+		                mortuary: mortuaryLinks,
+		                clinics: clinicsLinks,
+		                hospital: hospitalLinks,
+		            };
+		        }
+
+		        const baselineBundle = {
+		            config: baseConfig,
+		            links: baseLinks,
+		            compute: hospitalComputeCriteria,
+		        };
+
+		        const initialBundles = {};
+		        versionsPayload.versions.forEach(v => {
+		            initialBundles[v.id] = JSON.parse(JSON.stringify(baselineBundle));
+		        });
+
+		        setConfigBundles(initialBundles);
+		        try {
+		            localStorage.setItem('qims_config_bundles', JSON.stringify(initialBundles));
+		        } catch (e) {
+		            console.error('AppContext: Failed to persist default configuration bundles', e);
+		        }
+		    }, []);
 
 	    // Load initial user session and their facility assignments.
 	    // To avoid unnecessary network traffic on the login page, we only
@@ -69,12 +190,23 @@ export const AppProvider = ({ children }) => {
 	        checkAuth();
 	    }, []);
 
-	    const logout = async () => {
-	        await storage.clearAuth();
-	        setUser(null);
-	        setUserAssignments([]);
-	        // Additional cleanup if needed
-	    };
+    const logout = async () => {
+        // Clear any persisted auth in IndexedDB and localStorage so subsequent
+        // requests won't carry Authorization headers and the app re-renders to login.
+        try {
+            await storage.clearAuth();
+        } catch (e) {
+            console.warn('AppContext.logout: clearAuth failed (non-fatal)', e);
+        }
+        try {
+            localStorage.removeItem('dhis2_auth');
+            localStorage.removeItem('dhis2_user');
+        } catch (e) {
+            console.warn('AppContext.logout: localStorage cleanup failed (non-fatal)', e);
+        }
+        setUser(null);
+        setUserAssignments([]);
+    };
 
     const showToast = (message, type = 'info') => {
         console.log(`[TOAST] ${type.toUpperCase()}: ${message}`);
@@ -121,24 +253,33 @@ export const AppProvider = ({ children }) => {
 
             for (const draft of pending) {
                 try {
+                    const programId = configuration?.program?.id || 'G2gULe4jsfs';
+                    const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
                     const orgUnit = draft.formData?.orgUnit || draft.orgUnit;
-                    console.log(`🔄 AppContext: Syncing draft ${draft.eventId} via Tracker workflow...`);
+                    const teiId = draft.formData?.teiId_internal;
 
-                    const result = await api.submitTrackerAssessment(
-                        draft.formData,
-                        configuration,
-                        orgUnit,
-                        async (key, id) => {
-                            // Persist generated IDs to IndexedDB for background retries
-                            console.log(`🔄 AppContext: Saving ${key} to draft ${draft.eventId}`);
-                            const updatedFormData = { ...draft.formData, [key]: id };
-                            await indexedDBService.saveFormData(draft.eventId, updatedFormData);
-                        }
-                    );
+                    if (!orgUnit) throw new Error('Missing orgUnit in draft for sync');
+                    if (!teiId) throw new Error('Missing TEI ID in draft for sync');
 
-                    // Extract the DHIS2 event ID using our unified helper
-                    const dhis2Id = api.extractEventId(result);
-                    await indexedDBService.markAsSynced(draft.eventId, dhis2Id);
+                    // Resolve latest survey event id first (server truth), with fallback to local stored id
+                    let latestEventId = null;
+                    try {
+                        latestEventId = await api.getLatestSurveyEventId({ programId, stageId, teiId, orgUnitId: orgUnit });
+                    } catch (e) {
+                        console.warn(`⚠️ Could not fetch latest event id for ${draft.eventId}; falling back to local`, e);
+                    }
+                    // Prefer an explicitly stored event id if present; otherwise, use latest from server
+                    const eventIdForPut = draft.formData?.eventId_internal || latestEventId;
+                    if (!eventIdForPut) throw new Error('No survey Event ID available for PUT');
+
+                    // Persist the event id into the draft so subsequent retries are consistent
+                    const withEvent = { ...draft.formData, eventId_internal: eventIdForPut };
+                    await indexedDBService.saveFormData(draft.eventId, withEvent);
+
+                    // Submit via the same PUT flow as the in-form Save
+                    await api.submitEventPut(withEvent, configuration, orgUnit);
+
+                    await indexedDBService.markAsSynced(draft.eventId, eventIdForPut);
                     synced++;
                 } catch (err) {
                     console.error(`❌ Failed to sync draft ${draft.eventId}:`, err);
@@ -163,22 +304,30 @@ export const AppProvider = ({ children }) => {
             const draft = await indexedDBService.getFormData(eventId);
             if (!draft) throw new Error('Draft not found');
             const orgUnit = draft.formData?.orgUnit || draft.orgUnit;
+            const programId = configuration?.program?.id || 'G2gULe4jsfs';
+            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+            const teiId = draft.formData?.teiId_internal;
 
-            console.log(`🔄 AppContext: Retrying sync for ${eventId} via Tracker workflow...`);
-            const result = await api.submitTrackerAssessment(
-                draft.formData,
-                configuration,
-                orgUnit,
-                async (key, id) => {
-                    console.log(`🔄 AppContext: Saving ${key} to draft ${eventId}`);
-                    const updatedFormData = { ...draft.formData, [key]: id };
-                    await indexedDBService.saveFormData(eventId, updatedFormData);
-                }
-            );
+            if (!orgUnit) throw new Error('Missing orgUnit in draft');
+            if (!teiId) throw new Error('Missing TEI ID in draft');
 
-            // Extract the DHIS2 event ID using our unified helper
-            const dhis2Id = api.extractEventId(result);
-            await indexedDBService.markAsSynced(eventId, dhis2Id);
+            console.log(`🔄 AppContext: Retrying sync for ${eventId} via Events PUT flow...`);
+
+            let latestEventId = null;
+            try {
+                latestEventId = await api.getLatestSurveyEventId({ programId, stageId, teiId, orgUnitId: orgUnit });
+            } catch (e) {
+                console.warn('⚠️ Could not resolve latest survey event id; falling back to local eventId_internal', e);
+            }
+            const eventIdForPut = draft.formData?.eventId_internal || latestEventId;
+            if (!eventIdForPut) throw new Error('No survey Event ID available for PUT');
+
+            const withEvent = { ...draft.formData, eventId_internal: eventIdForPut };
+            await indexedDBService.saveFormData(eventId, withEvent);
+
+            await api.submitEventPut(withEvent, configuration, orgUnit);
+
+            await indexedDBService.markAsSynced(eventId, eventIdForPut);
             await refreshStats();
             showToast('Event synced successfully.', 'success');
             return true;
@@ -209,8 +358,8 @@ export const AppProvider = ({ children }) => {
         }
     };
 
-
-		    const value = useMemo(() => ({
+	    
+	    		    const value = useMemo(() => ({
 	        user,
 	        setUser,
 	        configuration,
@@ -226,10 +375,27 @@ export const AppProvider = ({ children }) => {
 		        clearAllInspections,
 		        // Backwards-compatible alias for Dashboard "Reset Local Data" button
 		        clearAllSurveys: clearAllInspections,
+		        configVersions,
+		        setConfigVersions,
+		        activeConfigVersionId,
+		        setActiveConfigVersionId,
+		        configBundles,
+		        setConfigBundles,
 	        showToast,
 	        logout,
 	        authInitializing,
-	    }), [user, configuration, userAssignments, isOnline, stats, pendingEvents, authInitializing]);
+		    }), [
+		        user,
+		        configuration,
+		        userAssignments,
+		        isOnline,
+		        stats,
+		        pendingEvents,
+		        authInitializing,
+		        configVersions,
+		        activeConfigVersionId,
+		        configBundles,
+		    ]);
 
     return (
         <AppContext.Provider value={value}>

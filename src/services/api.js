@@ -729,6 +729,88 @@ export const api = {
         return await response.json();
     },
 
+    // Fetch a simple list of events for a given filter (helper)
+    getEventsList: async ({
+        programId,
+        stageId,
+        teiId,
+        enrollmentId,
+        orgUnitId,
+        ouMode = 'SELECTED',
+        order = 'eventDate:desc',
+        fields = 'event,eventDate,status,program,programStage,orgUnit,trackedEntityInstance'
+    }) => {
+        const params = [
+            'paging=false',
+            programId ? `program=${programId}` : null,
+            stageId ? `programStage=${stageId}` : null,
+            teiId ? `trackedEntityInstance=${teiId}` : null,
+            enrollmentId ? `enrollment=${enrollmentId}` : null,
+            orgUnitId ? `orgUnit=${orgUnitId}` : null,
+            orgUnitId ? `ouMode=${ouMode}` : null,
+            order ? `order=${order}` : null,
+            fields ? `fields=${fields}` : null
+        ].filter(Boolean).join('&');
+        const url = `${BASE_URL}/api/events?${params}`;
+        const resp = await fetch(url, { headers: getHeaders() });
+        if (!resp.ok) throw new Error(`Failed to fetch events list: ${resp.status}`);
+        const data = await resp.json();
+        return data.events || [];
+    },
+
+    // Fetch Programme Setup events for a scheduling enrollment (K9O5fdoBmKf / M2RdEI7Tbqr)
+    getSetupEventsForEnrollment: async (enrollmentId) => {
+        if (!enrollmentId) return [];
+        const PROGRAM_ID = 'K9O5fdoBmKf';
+        const STAGE_ID = 'M2RdEI7Tbqr';
+        return await api.getEventsList({
+            programId: PROGRAM_ID,
+            stageId: STAGE_ID,
+            enrollmentId,
+            order: 'eventDate:desc',
+            fields: 'event,eventDate,status'
+        });
+    },
+
+    // Fetch main survey events for a TEI in the target program/stage
+    getSurveyEventsForTei: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37',
+        fields = 'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]' }) => {
+        if (!teiId) return [];
+        return await api.getEventsList({
+            programId,
+            stageId,
+            teiId,
+            orgUnitId,
+            ouMode: 'DESCENDANTS',
+            order: 'eventDate:desc',
+            fields
+        });
+    },
+
+    // Resolve the baseline Assessment Group value (DE pzenrgsSny3) from the earliest
+    // event for this TEI/program/stage (scoped to orgUnit when provided).
+    getBaselineAssessmentGroup: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37' }) => {
+        if (!teiId) return null;
+        try {
+            const events = await api.getEventsList({
+                programId,
+                stageId,
+                teiId,
+                orgUnitId,
+                ouMode: 'DESCENDANTS',
+                order: 'eventDate:asc',
+                fields: 'event,eventDate,status,dataValues[dataElement,value]'
+            });
+            if (!Array.isArray(events) || events.length === 0) return null;
+            const baseline = events[0];
+            const dv = (baseline.dataValues || []).find(d => d.dataElement === 'pzenrgsSny3');
+            return dv?.value || null;
+        } catch (e) {
+            console.warn('getBaselineAssessmentGroup failed (non-fatal)', e);
+            return null;
+        }
+    },
+
     /**
      * Formats form data into DHIS2 data values.
      */
@@ -747,6 +829,172 @@ export const api = {
                 dataElement,
                 value: String(value)
             }));
+    },
+
+    /**
+     * Find the latest event ID for a TEI in a given program/stage (optionally constrained to orgUnit).
+     * Returns the newest event's UID or null if none found.
+     */
+    getLatestSurveyEventId: async ({ programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37', teiId, orgUnitId }) => {
+        const fields = 'event,eventDate,lastUpdated,status,program,programStage,orgUnit,trackedEntityInstance';
+        const params = [
+            `paging=false`,
+            `program=${encodeURIComponent(programId)}`,
+            `programStage=${encodeURIComponent(stageId)}`,
+            teiId ? `trackedEntityInstance=${encodeURIComponent(teiId)}` : null,
+            orgUnitId ? `orgUnit=${encodeURIComponent(orgUnitId)}` : null,
+            orgUnitId ? `ouMode=SELECTED` : null,
+            `order=lastUpdated:desc`,
+            `fields=${fields}`
+        ].filter(Boolean).join('&');
+
+        const url = `${BASE_URL}/api/events?${params}`;
+        const response = await fetch(url, { headers: getHeaders() });
+        if (!response.ok) {
+            const text = await response.text().catch(() => '');
+            throw new Error(`Failed to fetch latest survey event: ${response.status} ${text}`);
+        }
+        const data = await response.json();
+        const events = data.events || [];
+        return events.length > 0 ? events[0].event : null;
+    },
+
+    /**
+     * Alternate save path: Update a single Event via Events API using PUT
+     * to /api/events/{eventId}/{dataElementId} with a full event body.
+     *
+     * Contract requested by client:
+     *   URL:   /qims/api/events/EVENT_ID/BKs2OwTxyYa
+     *   Method: PUT
+     *   Body:  {
+     *            event, orgUnit, program, programStage, status,
+     *            trackedEntityInstance, dataValues[{ dataElement,value,providedElsewhere:false }]
+     *          }
+     */
+    submitEventPut: async (formData, configuration, orgUnitId) => {
+        const PROGRAM_ID = configuration?.program?.id || 'G2gULe4jsfs';
+        const STAGE_ID = configuration?.programStage?.id || 'HpHD6u6MV37';
+        const DE_FACILITY_TEI_ID = 'BKs2OwTxyYa';
+
+        // Event and TEI identifiers expected to be present in the draft
+        const eventId = formData.eventId_internal || formData.event || formData.eventId;
+        if (!eventId) {
+            throw new Error('Missing DHIS2 event ID (eventId_internal) required for PUT /api/events/{id}/...');
+        }
+
+        const teiId = formData.teiId_internal || null;
+
+        // Collect SE narrative summaries as DHIS2 event notes
+        const seSummaryNotes = Object.entries(formData || {})
+            .filter(([key, value]) =>
+                key.startsWith('se_summary_') &&
+                value !== undefined && value !== null && String(value).trim() !== ''
+            )
+            .map(([key, value]) => {
+                const sectionId = key.replace('se_summary_', '') || 'unknown-section';
+                return { value: `SE summary (${sectionId}): ${String(value).trim()}` };
+            });
+
+        // Build data values: include TEI mapping on DE_FACILITY_TEI_ID and all other form DEs
+        const baseDvs = api.formatDataValues(formData) // {dataElement, value}
+            .map(dv => ({ ...dv, providedElsewhere: false }));
+
+        if (teiId) {
+            const idx = baseDvs.findIndex(d => d.dataElement === DE_FACILITY_TEI_ID);
+            const teiDv = { dataElement: DE_FACILITY_TEI_ID, value: String(teiId), providedElsewhere: false };
+            if (idx >= 0) baseDvs[idx] = teiDv; else baseDvs.unshift(teiDv);
+        }
+
+        // Ensure Assessment Group (pzenrgsSny3) matches baseline group's value for this TEI
+        try {
+            if (teiId) {
+                const baselineGroup = await api.getBaselineAssessmentGroup({ teiId, orgUnitId, programId: PROGRAM_ID, stageId: STAGE_ID });
+                if (baselineGroup && String(baselineGroup).trim() !== '') {
+                    const AG_DE = 'pzenrgsSny3';
+                    const idxAg = baseDvs.findIndex(d => d.dataElement === AG_DE);
+                    const agDv = { dataElement: AG_DE, value: String(baselineGroup), providedElsewhere: false };
+                    if (idxAg >= 0) baseDvs[idxAg] = agDv; else baseDvs.push(agDv);
+                }
+            }
+        } catch (e) {
+            console.warn('submitEventPut: could not align Assessment Group to baseline (non-fatal)', e);
+        }
+
+        const body = {
+            event: eventId,
+            orgUnit: orgUnitId,
+            program: PROGRAM_ID,
+            programStage: STAGE_ID,
+            status: 'COMPLETED',
+            ...(teiId ? { trackedEntityInstance: teiId } : {}),
+            dataValues: baseDvs,
+            ...(seSummaryNotes.length > 0 ? { notes: seSummaryNotes } : {})
+        };
+
+        const url = `${BASE_URL}/api/events/${encodeURIComponent(eventId)}/${DE_FACILITY_TEI_ID}`;
+        console.log('📤 PUT Event to DHIS2:', { url: url.replace(BASE_URL, '/qims'), body });
+
+        const response = await fetch(url, {
+            method: 'PUT',
+            headers: getHeaders(),
+            body: JSON.stringify(body)
+        });
+
+        let data = null;
+        try {
+            data = await response.json();
+        } catch (_) {
+            // Some DHIS2 endpoints return empty body on success; keep null
+        }
+
+        if (!response.ok) {
+            const errMsg = (data && (data.message || data.response?.importSummaries?.[0]?.description)) || `Event PUT failed: ${response.status}`;
+            console.error('❌ Event PUT failed:', data || response.statusText);
+            throw new Error(errMsg);
+        }
+
+        return data || { status: 'OK' };
+    },
+
+    /**
+     * Create a new survey Event in the target program/stage for a TEI/orgUnit.
+     * Returns the created event UID.
+     */
+    createSurveyEvent: async ({ programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37', orgUnitId, teiId, status = 'ACTIVE', eventDate = null, enrollmentId = null, notes = [], dataValues = [] }) => {
+        if (!orgUnitId) throw new Error('createSurveyEvent: orgUnitId is required');
+        if (!teiId) throw new Error('createSurveyEvent: teiId is required');
+
+        const today = new Date().toISOString().slice(0, 10);
+        let resolvedEnrollment = enrollmentId || null;
+        if (!resolvedEnrollment) {
+            try {
+                const teiResult = await api.getTrackedEntityInstances([teiId]);
+                const tei = (teiResult?.trackedEntityInstances || []).find(t => t.trackedEntityInstance === teiId);
+                const existingEnrollment = tei?.enrollments?.find(e => e.program === programId && !e.deleted && (!e.status || e.status === 'ACTIVE'));
+                if (existingEnrollment?.enrollment) resolvedEnrollment = existingEnrollment.enrollment;
+            } catch (e) {
+                console.warn('createSurveyEvent: could not resolve existing enrollment (non-fatal)', e);
+            }
+        }
+
+        const eventPayload = {
+            trackedEntityInstance: teiId,
+            program: programId,
+            programStage: stageId,
+            orgUnit: orgUnitId,
+            status,
+            eventDate: eventDate || today,
+            notes: Array.isArray(notes) ? notes : [],
+            dataValues: Array.isArray(dataValues) ? dataValues.map(dv => ({ ...dv, providedElsewhere: dv?.providedElsewhere === true ? true : false })) : []
+        };
+        if (resolvedEnrollment) eventPayload.enrollment = resolvedEnrollment;
+
+        const result = await api.submitEvent(eventPayload);
+        const createdId = api.extractEventId(result);
+        if (!createdId) {
+            throw new Error('Failed to create survey event: missing event UID in response');
+        }
+        return createdId;
     },
 
     /**
@@ -937,7 +1185,7 @@ export const api = {
      */
     submitEvent: async (eventPayload) => {
         console.log('📤 Submitting event to DHIS2 (Legacy):', eventPayload);
-        const response = await fetch(`${BASE_URL}/api/events`, {
+        const response = await fetch(`${BASE_URL}/api/events.json`, {
             method: 'POST',
             headers: getHeaders(),
             body: JSON.stringify({ events: [eventPayload] })

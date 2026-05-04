@@ -14,65 +14,76 @@ import hospitalComputeCriteria from '../assets/hospital_compute_criteria.json';
  * NA = Excluded from maxScore
  */
 
-// Pre-compute a map of root criterion -> configured sub-criteria codes for Hospital.
-// Shape: { "7.1.1.1": ["7.1.1.2", "7.1.1.3", ...], ... }
-const HOSPITAL_SUBCRITERIA_MAP = (() => {
-    const map = {};
-    try {
-        const seList = hospitalComputeCriteria?.hospital_standards_config?.service_elements || [];
-        seList.forEach(se => {
-            (se.root_criteria || []).forEach(root => {
-                if (!root || !root.id) return;
-                const rootCode = normalizeCriterionCode(root.id);
-                if (!rootCode) return;
-                const subs = Array.isArray(root.sub_criteria)
-                    ? root.sub_criteria.map(code => normalizeCriterionCode(code)).filter(Boolean)
-                    : [];
-                if (subs.length > 0) {
-                    map[rootCode] = subs;
-                }
-            });
-        });
-    } catch (e) {
-        // Fail quietly; scoring will simply ignore configured sub-criteria
-        // if the configuration JSON is missing or malformed.
-        // eslint-disable-next-line no-console
-        console.error('scoring: failed to build hospital sub-criteria map', e);
-    }
-    return map;
-})();
-
-/**
- * Helper to calculate points for a single Linked criterion based on severity and response
- */
-export const calculatePointsForLink = (response, severity) => {
-    if (!response || response === 'NA') return null;
-
-    const res = String(response).toUpperCase().trim();
-
-    // C is a flat 80 points regardless of severity (Standard Botswana Rule)
-    if (/^([A-Z]+_)?(C|FC|FULL|COMPLIANT)$/.test(res) && !res.includes('NON') || (res.includes('COMPLIANT') && !res.includes('NON') && !res.includes('PARTIAL'))) {
-        return 80;
-    }
-
-    // PC scales based on severity (1=75, 2=65, 3=55, 4=45)
-    // Matches PC, PARTIAL, SUBSTANTIAL, EMS_PC, Q_PC, etc.
-    if (/^([A-Z]+_)?(PC|PARTIAL|SUBSTANTIAL)$/.test(res) || res.includes('PARTIAL')) {
-        let severityNum = parseInt(severity, 10);
-        if (isNaN(severityNum)) severityNum = 1;
-        return 75 - ((severityNum - 1) * 10);
-    }
-
-    // NC scales based on severity (1=35, 2=25, 3=15, 4=5)
-    // Matches NC, NON, NON_COMPLIANT, NON-COMPLIANT, NOT_MET, etc.
-    if (/^([A-Z]+_)?(NC|NON|NON_COMPLIANT|NON-COMPLIANT|NOT_MET|FAIL)$/.test(res) || res.includes('NON') || res.includes('FAIL')) {
-        let severityNum = parseInt(severity, 10);
-        if (isNaN(severityNum)) severityNum = 1;
-        return 35 - ((severityNum - 1) * 10);
-    }
-
-    return null; // NA or unhandled
+	// Helper to build a map of root criterion -> configured sub-criteria codes for
+	// Hospital from a hospital_compute_criteria-style JSON object.
+	// Shape: { "7.1.1.1": ["7.1.1.2", "7.1.1.3", ...], ... }
+export const buildHospitalSubcriteriaMap = (computeConfig) => {
+	    const map = {};
+	    if (!computeConfig) return map;
+	    try {
+	        const seList = computeConfig?.hospital_standards_config?.service_elements || [];
+	        seList.forEach(se => {
+	            (se.root_criteria || []).forEach(root => {
+	                if (!root || !root.id) return;
+	                const rootCode = normalizeCriterionCode(root.id);
+	                if (!rootCode) return;
+	                const subs = Array.isArray(root.sub_criteria)
+	                    ? root.sub_criteria.map(code => normalizeCriterionCode(code)).filter(Boolean)
+	                    : [];
+	                if (subs.length > 0) {
+	                    map[rootCode] = subs;
+	                }
+	            });
+	        });
+	    } catch (e) {
+	        // Fail quietly; scoring will simply ignore configured sub-criteria
+	        // if the configuration JSON is missing or malformed.
+	        // eslint-disable-next-line no-console
+	        console.error('scoring: failed to build hospital sub-criteria map', e);
+	    }
+	    return map;
 };
+
+	// Mutable map so that the host app can swap in a different configuration per
+	// version at runtime while keeping the scoring core pure in terms of
+	// arguments.
+let HOSPITAL_SUBCRITERIA_MAP = buildHospitalSubcriteriaMap(hospitalComputeCriteria);
+
+export const setHospitalSubcriteriaConfig = (computeConfig) => {
+	    HOSPITAL_SUBCRITERIA_MAP = buildHospitalSubcriteriaMap(computeConfig || hospitalComputeCriteria);
+};
+
+	/**
+	 * Helper to calculate points for a single Linked criterion based on severity and response
+	 */
+	export const calculatePointsForLink = (response, severity) => {
+	    if (!response || response === 'NA') return null;
+	
+	    const res = String(response).toUpperCase().trim();
+	
+	    // C is now a flat 100 points regardless of severity (full compliance)
+	    if (/^([A-Z]+_)?(C|FC|FULL|COMPLIANT)$/.test(res) && !res.includes('NON') || (res.includes('COMPLIANT') && !res.includes('NON') && !res.includes('PARTIAL'))) {
+	        return 100;
+	    }
+	
+	    // PC scales based on severity (1=75, 2=65, 3=55, 4=45)
+	    // Matches PC, PARTIAL, SUBSTANTIAL, EMS_PC, Q_PC, etc.
+	    if (/^([A-Z]+_)?(PC|PARTIAL|SUBSTANTIAL)$/.test(res) || res.includes('PARTIAL')) {
+	        let severityNum = parseInt(severity, 10);
+	        if (isNaN(severityNum)) severityNum = 1;
+	        return 75 - ((severityNum - 1) * 10);
+	    }
+	
+	    // NC scales based on severity (1=35, 2=25, 3=15, 4=5)
+	    // Matches NC, NON, NON_COMPLIANT, NON-COMPLIANT, NOT_MET, etc.
+	    if (/^([A-Z]+_)?(NC|NON|NON_COMPLIANT|NON-COMPLIANT|NOT_MET|FAIL)$/.test(res) || res.includes('NON') || res.includes('FAIL')) {
+	        let severityNum = parseInt(severity, 10);
+	        if (isNaN(severityNum)) severityNum = 1;
+	        return 35 - ((severityNum - 1) * 10);
+	    }
+	
+	    return null; // NA or unhandled
+	};
 
 /**
  * Computes deep recursive graph scores for all criteria.
@@ -84,6 +95,7 @@ export const computeGraphScores = (criteriaMap) => {
     const globalScores = {};
     const currentlyResolving = new Set(); // To detect circular dependencies
 
+    const warnedCircular = new Set();
     const computeCriterion = (code) => {
         if (globalScores[code]) return globalScores[code];
 
@@ -93,7 +105,10 @@ export const computeGraphScores = (criteriaMap) => {
         }
 
         if (currentlyResolving.has(code)) {
-            console.warn(`Circular dependency detected involving ${code}. Breaking loop.`);
+            if (!warnedCircular.has(code)) {
+                console.warn(`Circular dependency detected involving ${code}. Breaking loop.`);
+                warnedCircular.add(code);
+            }
             return { points: null, response: 'NA', rawResponse: 'NA', isRoot: false, isDraft: true, criticalFail: false, isScored: false };
         }
 
@@ -103,13 +118,18 @@ export const computeGraphScores = (criteriaMap) => {
 
         const { id, response, isRoot, links, severity, isCritical, roots } = criterion;
 
-        let points = null;
-        let isScored = false;
-        let isDraft = false;
-        let criticalFail = false;
-        let calculatedResponse = response;
-        let sumLinkedPoints = 0;
-        let countScoredLinks = 0;
+	        let points = null;
+	        let isScored = false;
+	        let isDraft = false;
+	        let criticalFail = false;
+	        let calculatedResponse = response;
+	        let sumLinkedPoints = 0;
+	        let countScoredLinks = 0;
+	        // For roots, we also track a draft numeric value that may be
+	        // available even while the root is still in a Pending state
+	        // (some children not yet assessed). This lets the UI show a
+	        // provisional "Calculated Root Score" instead of "--- pts".
+	        let rootDraftPoints = null;
 
         // NA check entirely ignores non-roots
         if (response === 'NA' && !isRoot) {
@@ -131,107 +151,144 @@ export const computeGraphScores = (criteriaMap) => {
             criticalFail = true;
         }
 
-        if (links && links.length > 0) {
+	            if (links && links.length > 0) {
             // ROOT CRITERION LOGIC (Recursive)
             let ncPcCount = 0;
             let anyChildCriticalFail = false;
+            let effectiveLinkCount = 0; // counts links that actually participate (not -G/-B)
 
             for (const linkCode of links) {
-                const normalizedLink = normalizeCriterionCode(linkCode);
+                const rawLink = String(linkCode || '').trim();
+                // Detect optional visual tag suffix "-G" or "-B" and strip it
+                // for lookup while keeping the suffix for display.
+                const tagMatch = rawLink.match(/^(.*?)-([GB])$/i);
+                const baseLink = tagMatch ? tagMatch[1] : rawLink;
+                const visualTag = tagMatch ? String(tagMatch[2]).toUpperCase() : null; // 'G' | 'B' | null
+
+                const normalizedLink = normalizeCriterionCode(baseLink);
                 const childRes = computeCriterion(normalizedLink);
 
                 rootSourcesInfo.push({
-                    code: linkCode,
+                    code: rawLink,
                     points: childRes.points,
                     response: childRes.response,
                     isScored: childRes.isScored,
                     isCritical: childRes.isCritical
                 });
 
-                if (childRes.criticalFail || (childRes.isCritical && String(childRes.response).toUpperCase().includes('NC'))) {
-                    anyChildCriticalFail = true;
-                }
+                // Exclude G/B-tagged links from numeric/root-state effects.
+                const isExcludedByTag = visualTag === 'G' || visualTag === 'B';
 
-                if (childRes.isDraft || !childRes.isScored) {
-                    isDraft = true; // Still missing 100% full assessment
-                }
+                if (!isExcludedByTag) {
+                    effectiveLinkCount++;
+                    if (childRes.criticalFail || (childRes.isCritical && String(childRes.response).toUpperCase().includes('NC'))) {
+                        anyChildCriticalFail = true;
+                    }
 
-                if (childRes.isScored && childRes.points !== null) {
-                    countScoredLinks++;
-                    sumLinkedPoints += childRes.points;
+                    if (childRes.isDraft || !childRes.isScored) {
+                        isDraft = true; // Still missing 100% full assessment
+                    }
 
-                    const lRes = String(childRes.response).toUpperCase();
-                    const isC = /^([A-Z]+_)?(C|FC|FULL|COMPLIANT)$/.test(lRes) && !lRes.includes('NON') || (lRes.includes('COMPLIANT') && !lRes.includes('NON') && !lRes.includes('PARTIAL'));
-                    if (!isC) {
-                        ncPcCount++;
+                    if (childRes.isScored && childRes.points !== null) {
+                        countScoredLinks++;
+                        sumLinkedPoints += childRes.points;
+
+                        const lRes = String(childRes.response).toUpperCase();
+                        const isC = /^([A-Z]+_)?(C|FC|FULL|COMPLIANT)$/.test(lRes) && !lRes.includes('NON') || (lRes.includes('COMPLIANT') && !lRes.includes('NON') && !lRes.includes('PARTIAL'));
+                        if (!isC) {
+                            ncPcCount++;
+                        }
                     }
                 }
             }
 
-            if (isRoot) {
-                isScored = !isDraft; // Strict: Root is ONLY scored if all children are finalized
-            }
-
-            if (countScoredLinks > 0) {
-                const draftAvg = sumLinkedPoints / countScoredLinks;
-
-                // Base linked-criteria average used for display and, when
-                // no special configuration applies, for the root's numeric
-                // score.
-                const linkedAvgForCombination = draftAvg;
-
-                // --- Majority Rule Override (Dynamic live evaluation based on scored links) ---
-                let finalPoints = draftAvg;
-                if (countScoredLinks > 1 && ncPcCount > (countScoredLinks / 2)) {
-                    const cThreshold = calculatePointsForLink('C', severity) || 80;
-                    const pcThreshold = calculatePointsForLink('PC', severity) || 55;
-
-                    // If more than 75% are failing (NC/PC), force score into NC range
-                    if (ncPcCount > (countScoredLinks * 0.75)) {
-                        finalPoints = Math.min(finalPoints, pcThreshold - 1);
-                    } else {
-                        // If >50% are failing, force score into PC range (at most)
-                        finalPoints = Math.min(finalPoints, cThreshold - 1);
+                if (isRoot) {
+                    // If all links are excluded (e.g., all are -G/-B visual-only),
+                    // this root must remain unscored/pending.
+                    if (effectiveLinkCount === 0) {
+                        isDraft = true;
                     }
-                }
-                // --- Hospital computation rule: for configured roots, set the
-                // root's numeric score to the average of:
-                //   (a) linked-criteria average (graph), and
-                //   (b) average of configured sub-criteria (from
-                //       hospital_compute_criteria.json), when both are
-                //       available. If only one side has data, fall back to it.
+	                    // A root is considered "finalized" only when all linked
+	                    // children have been assessed. However, we still want a
+	                    // draft numeric score while it is Pending so that the UI
+	                    // can show something more useful than "--- pts".
+	                    isScored = !isDraft;
+	                }
+	
+	                // Compute a draft average over scored linked criteria (if any)
+	                // and then apply the majority rule override and Hospital
+	                // sub-criteria combination to derive a candidate numeric
+	                // score for this root.
+                let linkedAvgForCombination = null;
+	                if (countScoredLinks > 0) {
+                        const draftAvg = sumLinkedPoints / countScoredLinks;
+                        linkedAvgForCombination = draftAvg;
+	
+	                    // --- Majority Rule Override (Dynamic live evaluation based on scored links) ---
+	                    let majorityAdjusted = draftAvg;
+	                    if (countScoredLinks > 1 && ncPcCount > (countScoredLinks / 2)) {
+	                        const cThreshold = calculatePointsForLink('C', severity) || 80;
+	                        const pcThreshold = calculatePointsForLink('PC', severity) || 55;
+	
+	                        // If more than 75% are failing (NC/PC), force score into NC range
+	                        if (ncPcCount > (countScoredLinks * 0.75)) {
+	                            majorityAdjusted = Math.min(majorityAdjusted, pcThreshold - 1);
+	                        } else {
+	                            // If >50% are failing, force score into PC range (at most)
+	                            majorityAdjusted = Math.min(majorityAdjusted, cThreshold - 1);
+	                        }
+	                    }
+	
+	                    // Use the majority-adjusted value as the starting
+	                    // candidate for the root's numeric score.
+	                    rootDraftPoints = majorityAdjusted;
+	                }
+	
+	                // --- Hospital computation rule: for configured roots, set the
+	                // root's numeric score to the average of:
+	                //   (a) linked-criteria average (graph), and
+	                //   (b) average of configured sub-criteria (from
+	                //       hospital_compute_criteria.json), when both are
+	                //       available. If only one side has data, fall back to it.
                 const normalizedCode = normalizeCriterionCode(code);
                 const configuredSubs = HOSPITAL_SUBCRITERIA_MAP[normalizedCode];
-                if (configuredSubs && configuredSubs.length > 0) {
-                    let cfgSum = 0;
-                    let cfgCount = 0;
-                    configuredSubs.forEach(subRaw => {
-                        const subCode = normalizeCriterionCode(subRaw);
-                        if (!subCode) return;
-                        const subRes = computeCriterion(subCode);
-                        if (subRes && subRes.isScored && subRes.points !== null) {
-                            cfgSum += subRes.points;
-                            cfgCount += 1;
-                        }
-                    });
-
+                // IMPORTANT: If this root has zero effective links (all links are
+                // visual-only -G/-B), do NOT compute a numeric draft from
+                // configured sub-criteria either. The requirement is that such
+                // roots are not auto-scored at all.
+                if (configuredSubs && configuredSubs.length > 0 && effectiveLinkCount > 0) {
+	                    let cfgSum = 0;
+	                    let cfgCount = 0;
+	                    configuredSubs.forEach(subRaw => {
+	                        const subCode = normalizeCriterionCode(subRaw);
+	                        if (!subCode) return;
+	                        const subRes = computeCriterion(subCode);
+	                        if (subRes && subRes.isScored && subRes.points !== null) {
+	                            cfgSum += subRes.points;
+	                            cfgCount += 1;
+	                        }
+	                    });
+	
                     const subAvg = cfgCount > 0 ? (cfgSum / cfgCount) : null;
                     const linkedAvg = linkedAvgForCombination;
 
-                    if (subAvg !== null && linkedAvg !== null) {
-                        finalPoints = (subAvg + linkedAvg) / 2;
-                    } else if (subAvg !== null) {
-                        finalPoints = subAvg;
-                    } else if (linkedAvg !== null) {
-                        finalPoints = linkedAvg;
+                    // Option B: Always treat the missing side as 0, and divide by 2
+                    // (only for configured Hospital roots). If both sides are
+                    // missing (null), leave rootDraftPoints unchanged so the
+                    // root can remain Pending with no provisional score.
+                    if (subAvg !== null || linkedAvg !== null) {
+                        const a = (subAvg !== null) ? subAvg : 0;
+                        const b = (linkedAvg !== null) ? linkedAvg : 0;
+                        rootDraftPoints = (a + b) / 2;
                     }
-                }
-
-                // If not draft (all links assessed), set the official points
-                if (!isDraft) {
-                    points = finalPoints;
-                }
-            }
+	                }
+	
+	                // If all children have been assessed and we have a
+	                // candidate numeric value, promote it to the official
+	                // points value. Otherwise it remains a draft-only figure.
+	                if (!isDraft && rootDraftPoints !== null) {
+	                    points = rootDraftPoints;
+	                }
 
             // Safety override
             if (anyChildCriticalFail) {
@@ -250,7 +307,9 @@ export const computeGraphScores = (criteriaMap) => {
             }
         }
 
-        let displayRes = isScored ? calculatedResponse : 'NA';
+        // If a root has not been finalized, present it as Pending rather than NA
+        // so the UI can reflect that it is intentionally not auto-scored.
+        let displayRes = isScored ? calculatedResponse : (isRoot ? 'Pending' : 'NA');
 
         // Derive response for roots or critical fails
         if (isScored && (isRoot || criticalFail)) {
@@ -277,20 +336,26 @@ export const computeGraphScores = (criteriaMap) => {
             else if (/^([A-Z]+_)?(NC|NON|NON_COMPLIANT|NON-COMPLIANT|NOT_MET|FAIL)$/.test(dispStr) || dispStr.includes('NON') || dispStr.includes('FAIL')) displayRes = 'NC';
         }
 
-        const res = {
-            points: (isScored && points !== null) ? points : null,
-            response: displayRes,
-            rawResponse: response, // Keep original response for UI logic fallback
-            normalizedValue: displayRes,
-            isRoot,
-            isDraft,
-            criticalFail,
-            isScored,
-            isCritical,
-            draftAvg: countScoredLinks > 0 ? (sumLinkedPoints / countScoredLinks) : null,
-            countScoredLinks,
-            rootSources: rootSourcesInfo
-        };
+	            const res = {
+	                points: (isScored && points !== null) ? points : null,
+	                response: displayRes,
+	                rawResponse: response, // Keep original response for UI logic fallback
+	                normalizedValue: displayRes,
+	                isRoot,
+	                isDraft,
+	                criticalFail,
+	                isScored,
+	                isCritical,
+	                // Average over scored linked criteria only (used in some
+	                // debug views).
+	                draftAvg: countScoredLinks > 0 ? (sumLinkedPoints / countScoredLinks) : null,
+	                countScoredLinks,
+	                // Draft combined root score (after majority rule and, for
+	                // Hospital, sub-criteria combination). This may be non-null
+	                // even while the root is still Pending.
+	                rootDraftPoints,
+	                rootSources: rootSourcesInfo
+	            };
 
         globalScores[code] = res;
         currentlyResolving.delete(code);
