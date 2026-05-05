@@ -23,7 +23,7 @@ import { decorateHospitalLinksWithMatrixTags } from './utils/hospitalMatrixTags'
 import './App.css';
 import Report from './pages/Report';
 
-// Helper to build scoring metadata (links + severity) for each programme
+// Helper to build scoring metadata (links + severity + critical) for each programme
 // type. The actual programmeScoringMeta object is built inside AppContent so
 // that it can react to configuration version changes.
 const buildScoringMeta = (config, configKey, links) => {
@@ -37,6 +37,7 @@ const buildScoringMeta = (config, configKey, links) => {
   });
 
   const severityLookup = {};
+  const criticalLookup = {};
   try {
     (config?.[configKey] || []).forEach(se => {
       (se.sections || []).forEach(section => {
@@ -44,6 +45,7 @@ const buildScoringMeta = (config, configKey, links) => {
           (standard.criteria || []).forEach(crit => {
             if (crit && crit.id) {
               severityLookup[crit.id] = crit.severity || 1;
+              criticalLookup[crit.id] = Boolean(crit.is_critical);
             }
           });
         });
@@ -53,7 +55,7 @@ const buildScoringMeta = (config, configKey, links) => {
     console.error('App: Error building severity lookup for', configKey, e);
   }
 
-  return { linksDataLookup, severityLookup };
+  return { linksDataLookup, severityLookup, criticalLookup };
 };
 
 const PrivateRoute = ({ children }) => {
@@ -614,10 +616,10 @@ const PrivateRoute = ({ children }) => {
       ? 'hospital'
       : 'ems';
 
-		    	// Use precomputed lookups for this programme type from the
-		    	// programmeScoringMeta map instead of rebuilding them on each render.
-	    const { linksDataLookup, severityLookup } =
-	      programmeScoringMeta[programmeType] || programmeScoringMeta.ems;
+    // Use precomputed lookups for this programme type from the
+    // programmeScoringMeta map instead of rebuilding them on each render.
+    const { linksDataLookup, severityLookup, criticalLookup } =
+      programmeScoringMeta[programmeType] || programmeScoringMeta.ems;
 
 	    // Only include sections for the *active* group in scoring so that
 	    // switching groups does not require recomputing scores for every other
@@ -647,19 +649,29 @@ const PrivateRoute = ({ children }) => {
                   const isRoot = hasEffectiveLinks;
 	              const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
 	
-	              return {
+                  return {
 	                id: f.id,
 	                code: code,
-	                response: formData[f.id] || 'NA',
-	                // Check for critical flag in formData (appended by FormArea toggle)
-	                isCritical: Boolean(formData[`is_critical_${f.commentFieldId}`] || formData[`is_critical_${f.id}`]),
+                    response: formData[f.id] || 'NA',
+                    // Critical flag: prefer explicit UI toggle if present; otherwise fallback to config
+                    isCritical: (function() {
+                      const uiToggle = (formData[`is_critical_${f.commentFieldId}`]);
+                      if (uiToggle !== undefined && uiToggle !== null) return Boolean(uiToggle);
+                      return Boolean(criticalLookup[normalizedCode] || criticalLookup[code]);
+                    })(),
                     isRoot,
                     // Provide only effective (non -G/-B) links to the scorer so
                     // that criteria with purely visual links behave as leaves and
                     // can be scored manually.
                     links: effectiveLinks,
 	                roots: linksData.roots,
-	                severity
+                    severity,
+                    // Manual override support for root criteria: enable and value
+                    ...(function() {
+                      const raw = formData[`override_${f.id}`];
+                      const enabled = (raw === true) || (raw === 1) || (String(raw).toLowerCase() === 'true') || (String(raw) === '1');
+                      return enabled ? { overrideEnabled: true, overrideResponse: formData[f.id] || 'NA' } : {};
+                    })()
 	              };
 	            })
 	        }]

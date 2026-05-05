@@ -204,6 +204,63 @@ export const AppProvider = ({ children }) => {
         } catch (e) {
             console.warn('AppContext.logout: localStorage cleanup failed (non-fatal)', e);
         }
+
+        // Also clear any IndexedDB data related to saved form drafts and cached app data
+        try {
+            // Clear InspectionFormDB/formData via our service
+            await indexedDBService.clearStore();
+        } catch (e) {
+            console.warn('AppContext.logout: clearing InspectionFormDB failed (non-fatal)', e);
+        }
+
+        try {
+            // Best-effort clear of other app stores in DHIS2PWA (events, metadata, configuration, stats)
+            await new Promise((resolve) => {
+                const request = indexedDB.open('DHIS2PWA');
+                request.onsuccess = () => {
+                    const db = request.result;
+                    const stores = ['events', 'metadata', 'configuration', 'stats'].filter((name) =>
+                        db.objectStoreNames && db.objectStoreNames.contains(name)
+                    );
+                    if (stores.length === 0) {
+                        db.close();
+                        resolve();
+                        return;
+                    }
+                    const tx = db.transaction(stores, 'readwrite');
+                    stores.forEach((name) => {
+                        try { tx.objectStore(name).clear(); } catch (_) { /* ignore */ }
+                    });
+                    tx.oncomplete = () => { db.close(); resolve(); };
+                    tx.onerror = () => { db.close(); resolve(); };
+                };
+                request.onerror = () => resolve();
+                request.onblocked = () => resolve();
+            });
+        } catch (e) {
+            console.warn('AppContext.logout: clearing DHIS2PWA stores failed (non-fatal)', e);
+        }
+
+        // Clear Service Worker caches to remove any offline data/assets
+        try {
+            if ('caches' in window) {
+                const keys = await caches.keys();
+                await Promise.all(keys.map((k) => caches.delete(k)));
+            }
+        } catch (e) {
+            console.warn('AppContext.logout: clearing SW caches failed (non-fatal)', e);
+        }
+
+        // Nudge service workers to update after cache clear
+        try {
+            if ('serviceWorker' in navigator) {
+                const regs = await navigator.serviceWorker.getRegistrations();
+                await Promise.all(regs.map((r) => r.update()));
+            }
+        } catch (e) {
+            console.warn('AppContext.logout: updating service worker failed (non-fatal)', e);
+        }
+
         setUser(null);
         setUserAssignments([]);
     };

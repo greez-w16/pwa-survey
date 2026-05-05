@@ -646,7 +646,7 @@ const FormArea = ({
         if (activeSection) console.log(`FormArea Rendering Section: ${activeSection.name}`);
     }, [activeSection]);
 
-    const { configuration } = useApp();
+    const { configuration, showToast } = useApp();
 
     // Submit state
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -665,6 +665,58 @@ const FormArea = ({
     // Known fallback if present in your environment
     return match?.id || 'LNszX9xHx8s';
   }, [configuration]);
+
+  // Helper: determine if a value represents the Baseline assessment type
+  const isBaselineType = (val) => {
+    if (val === undefined || val === null) return false;
+    const raw = String(val);
+    if (raw === 'Baseline Assessment ') return true; // exact known label (with space)
+    const trimmed = raw.trim();
+    const v = trimmed.toLowerCase();
+    if (v === 'baseline' || v === 'baseline assessment' || v === 'base-line') return true;
+    if (v === 'fac_ass_baseline' || v === 'baseline_assessment' || v === 'baseline_survey') return true;
+    if (v.includes('baseline')) return true;
+    return false;
+  };
+
+  // Track if a baseline assessment (by Type of Assessment) already exists for this facility/TEI
+  const [hasExistingBaseline, setHasExistingBaseline] = useState(false);
+
+  React.useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        if (!configuration || !typeOfAssessmentDeId || !selectedFacility) return;
+
+        // Resolve TEI and orgUnit for this assessment context
+        const teiId = selectedFacility?.trackedEntityInstance || selectedFacility?.scheduleTeiId || formData?.teiId_internal;
+        const orgUnitId =
+          selectedFacility?.orgUnitId ||
+          (typeof selectedFacility?.orgUnit === 'string' ? selectedFacility.orgUnit : selectedFacility?.orgUnit?.id) ||
+          selectedFacility?.facilityId ||
+          selectedFacility?.programOrgUnitId ||
+          null;
+        if (!teiId) return;
+
+        const programId = configuration?.program?.id || 'G2gULe4jsfs';
+        const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+
+        // Fetch existing survey events and check if any (other than current) is baseline-typed
+        const events = await api.getSurveyEventsForTei({ teiId, orgUnitId, programId, stageId });
+        const currentEventId = formData?.eventId_internal || formData?.event || formData?.eventId || null;
+        const exists = (Array.isArray(events) ? events : []).some(ev => {
+          if (!ev || (currentEventId && ev.event === currentEventId)) return false;
+          const dv = (ev.dataValues || []).find(d => d && d.dataElement === typeOfAssessmentDeId);
+          return dv && isBaselineType(dv.value);
+        });
+        if (!cancelled) setHasExistingBaseline(exists);
+      } catch (e) {
+        // If we cannot resolve, keep default false (do not block user unnecessarily)
+        if (!cancelled) setHasExistingBaseline(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [configuration, typeOfAssessmentDeId, selectedFacility, formData?.eventId_internal]);
 
     // Reset submit status if data changes after successful submission
     // This allows the user to "Update" DHIS2
@@ -795,24 +847,44 @@ const FormArea = ({
 		                .map((f) => f.id);
 		            if (!selectIds.length) return;
 		
-		            let totalPoints = 0;
-		            let scoredCount = 0;
-		            let hasCriticalFail = false;
+            let totalPoints = 0;
+            let scoredCount = 0;
+            let hasCriticalFail = false;
+            // Track worst scored CRITICAL status within this x.x.x group for capping
+            let worstCritical = null; // 'NC' | 'PC' | null
 		
-		            selectIds.forEach((id) => {
-		                const score = criteriaScores[id];
-		                if (!score) return;
-		                if (score.criticalFail) hasCriticalFail = true;
-		                if (score.isScored && score.points !== null) {
-		                    totalPoints += score.points;
-		                    scoredCount += 1;
-		                }
-		            });
+            selectIds.forEach((id) => {
+                const score = criteriaScores[id];
+                if (!score) return;
+                if (score.criticalFail) hasCriticalFail = true;
+                if (score.isScored && score.points !== null) {
+                    totalPoints += score.points;
+                    scoredCount += 1;
+                }
+                // Determine worst scored critical child status for this subgroup
+                if (score.isCritical && score.isScored && typeof score.response === 'string') {
+                    const r = score.response.toUpperCase();
+                    if (/^(NC|NON|NON_COMPLIANT|NON-COMPLIANT|NOT_MET|FAIL)$/.test(r) || r.includes('NON') || r.includes('FAIL')) {
+                        worstCritical = 'NC';
+                    } else if (!worstCritical || worstCritical !== 'NC') {
+                        if (/^(PC|PARTIAL|SUBSTANTIAL)$/.test(r) || r.includes('PARTIAL')) {
+                            worstCritical = 'PC';
+                        }
+                    }
+                }
+            });
 		
-		            let avgPercent = scoredCount ? totalPoints / scoredCount : 0;
-		            if (hasCriticalFail) {
-		                avgPercent = 0;
-		            }
+                        // Compute raw average first so we can show it in tooltips
+                        const rawPercent = scoredCount ? totalPoints / scoredCount : 0;
+                        let avgPercent = rawPercent;
+                        // Do NOT zero the standard just because a critical child is NC.
+                        // The correct behaviour is to apply a cap (20% for NC, 60% for PC)
+                        // while preserving the actual computed average if it is already lower.
+            // Apply subgroup-level cap based on worstCritical within this x.x.x
+            if (worstCritical) {
+                const cap = worstCritical === 'NC' ? 20 : 60;
+                if (avgPercent > cap) avgPercent = cap;
+            }
 		
 		            // Find the first x.x.x Standard row in this subsection so we can
 		            // attach the draft score (and label) to a specific Standard.
@@ -850,11 +922,13 @@ const FormArea = ({
 		                return;
 		            }
 		
-		            result[subsectionIndex] = {
+                        result[subsectionIndex] = {
 		                code: standardCode,
 		                title: standardTitle || standardCode,
 		                percent: avgPercent,
-		                criticalFail: hasCriticalFail,
+                            rawPercent,
+                criticalFail: hasCriticalFail,
+                ...(worstCritical ? { cappedByCritical: worstCritical } : {}),
 		            };
 		        });
 		
@@ -997,13 +1071,14 @@ const FormArea = ({
 			            if (Number.isFinite(raw)) value = raw;
 			            if (stdEntry.criticalFail) buckets[piCode].criticalFail = true;
 			
-			            buckets[piCode].standards.push({
-			                code: stdEntry.code,
-			                title: stdEntry.title,
-			                percent: value,
-			                criticalFail: stdEntry.criticalFail,
-			                subsectionIndex: idx,
-			            });
+            buckets[piCode].standards.push({
+                code: stdEntry.code,
+                title: stdEntry.title,
+                percent: value,
+                criticalFail: stdEntry.criticalFail,
+                cappedByCritical: stdEntry.cappedByCritical,
+                subsectionIndex: idx,
+            });
 			        }
 			
 			        buckets[piCode].total += value;
@@ -1131,6 +1206,9 @@ const FormArea = ({
             }
 	            
 	            const isRoot = calculatedFieldScore?.isRoot || false;
+                    // Root score manual override toggle (stored per criterion id)
+                    const overrideRaw = formData[`override_${field.id}`];
+                    const overrideOn = (overrideRaw === true) || (overrideRaw === 1) || (String(overrideRaw).toLowerCase() === 'true') || (String(overrideRaw) === '1');
 	            const rootDraftPoints = isRoot && calculatedFieldScore
 	                ? (typeof calculatedFieldScore.rootDraftPoints === 'number'
 	                    ? calculatedFieldScore.rootDraftPoints
@@ -1471,7 +1549,7 @@ const FormArea = ({
 	                                    {commentScorePillText}
 	                                </span>
 	                            )}
-		                            {isStandardCriterion && subsectionStandardScore && (
+                                {isStandardCriterion && subsectionStandardScore && (
 		                                <span
 		                                    className="standard-score-pill"
 		                                    style={{
@@ -1480,7 +1558,7 @@ const FormArea = ({
 		                                        fontWeight: 600,
 		                                        padding: '2px 8px',
 		                                        borderRadius: '12px',
-		                                        backgroundColor: 'rgba(43, 58, 142, 0.1)',
+                                            backgroundColor: 'rgba(43, 58, 142, 0.1)',
 		                                        color: '#2b3a8e',
 		                                        border: '1px solid rgba(43, 58, 142, 0.35)'
 		                                    }}
@@ -1491,6 +1569,24 @@ const FormArea = ({
 		                                    {subsectionStandardScore.percent.toFixed(1)}% Score (Not Saved)
 		                                </span>
 		                            )}
+                                {isStandardCriterion && subsectionStandardScore?.cappedByCritical && (
+                                    <span
+                                        className="standard-cap-pill"
+                                        title={`Capped due to critical item: ${subsectionStandardScore.cappedByCritical}`}
+                                        style={{
+                                            marginLeft: '8px',
+                                            fontSize: '0.75em',
+                                            fontWeight: 700,
+                                            padding: '2px 8px',
+        										borderRadius: '12px',
+                                            backgroundColor: subsectionStandardScore.cappedByCritical === 'NC' ? '#fde8e8' : '#fff8e1',
+                                            color: subsectionStandardScore.cappedByCritical === 'NC' ? '#a61b1b' : '#92400e',
+                                            border: '1px solid rgba(0,0,0,0.1)'
+                                        }}
+                                    >
+                                        Capped ({subsectionStandardScore.cappedByCritical})
+                                    </span>
+                                )}
 		                            {isStandardCriterion && standardSummaryCommentId && (
 		                                <button
 		                                    type="button"
@@ -1597,6 +1693,29 @@ const FormArea = ({
                                                 ℹ️ Details
                                             </button>
                                         )}
+                                        {isRoot && (
+                                            <label style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginLeft: 10, fontSize: '0.8em', color: '#2d3748' }}>
+                                                <input
+                                                    type="checkbox"
+                                                    checked={overrideOn}
+                                                    onChange={(e) => {
+                                                        const next = e.target.checked;
+                                                        saveField(`override_${field.id}`, next ? true : false);
+                                                        if (next) {
+                                                            // When enabling override, prefill with current auto status if it's a concrete value
+                                                            const autoVal = (calculatedFieldScore && ['C','PC','NC'].includes(String(calculatedFieldScore.response)))
+                                                                ? calculatedFieldScore.response
+                                                                : '';
+                                                            saveField(field.id, autoVal);
+                                                        } else {
+                                                            // When disabling override, clear any manual value to avoid submitting it
+                                                            saveField(field.id, '');
+                                                        }
+                                                    }}
+                                                />
+                                                Override score
+                                            </label>
+                                        )}
                                     </div>
                             {isRoot && subCriteriaExpectedCount > 0 && (
 		                                <div style={{ marginTop: '4px', fontSize: '0.8em', color: '#4a5568' }}>
@@ -1626,20 +1745,32 @@ const FormArea = ({
                             )}
                             <select
                                 className="form-control"
-                                value={isRoot && calculatedFieldScore ? (calculatedFieldScore.normalizedValue || calculatedFieldScore.response) : (formData[field.id] || '')}
+                                value={(isRoot && !overrideOn)
+                                    ? (calculatedFieldScore ? (calculatedFieldScore.normalizedValue || calculatedFieldScore.response) : '')
+                                    : (formData[field.id] || '')}
                                 onChange={(e) => handleInputChange(e, field.id)}
                                 id={`field-${field.id}`} // Helper for testing
-                                disabled={isRoot || (!isParentAnswered && isCommentField) || isTechnicalField}
+                                disabled={(isRoot && !overrideOn) || (!isParentAnswered && isCommentField) || isTechnicalField}
                             >
                                 <option value="">
                                     {isRoot
-                                        ? ((linkedExpectedCount > 0 || (rootDraftPoints !== null))
-                                            ? 'Auto-calculated from configured criteria'
-                                            : 'Not auto-calculated (no effective linked criteria)')
+                                        ? (!overrideOn
+                                            ? ((linkedExpectedCount > 0 || (rootDraftPoints !== null))
+                                                ? 'Auto-calculated from configured criteria'
+                                                : 'Not auto-calculated (no effective linked criteria)')
+                                            : 'Select...')
                                         : 'Select...'}
                                 </option>
                                 {(() => {
-                                    const options = field.options || [];
+                                    const options = (field.options || []).filter((opt) => {
+                                        // If a Baseline already exists for this facility, hide any Baseline-type option
+                                        if (field.id === typeOfAssessmentDeId && hasExistingBaseline) {
+                                            const val = typeof opt === 'object' ? opt.value : opt;
+                                            const label = typeof opt === 'object' ? opt.label : opt;
+                                            return !(isBaselineType(val) || isBaselineType(label));
+                                        }
+                                        return true;
+                                    });
                                     const groups = {};
                                     const ungrouped = [];
 
@@ -1772,8 +1903,19 @@ const FormArea = ({
         return <div className="form-area-empty">Please select a section</div>;
     }
 
-	    const handleInputChange = (e, fieldId) => {
-	        const value = e.target.value;
+    const handleInputChange = (e, fieldId) => {
+        const value = e.target.value;
+
+        // Guard: prevent setting Type of Assessment to Baseline if one already exists
+        if (typeOfAssessmentDeId && fieldId === typeOfAssessmentDeId) {
+            if (isBaselineType(value) && hasExistingBaseline) {
+                if (typeof showToast === 'function') {
+                    showToast('A Baseline assessment already exists for this facility. Please choose a different Type of Assessment.', 'error');
+                }
+                // Do not persist the change
+                return;
+            }
+        }
 	
 	        const field = activeSection?.fields?.find(f => f.id === fieldId);
 	        if (field?.type === 'select' && typeof onCriterionChange === 'function') {
@@ -2030,6 +2172,12 @@ const FormArea = ({
       const v = formData?.[typeOfAssessmentDeId];
       if (v === undefined || v === null || String(v).trim() === '' || String(v).toUpperCase() === 'NA') {
         setSubmitResult({ success: false, message: '❌ Please select a Type of Assessment in Assessment Details before saving.' });
+        setIsSubmitting(false);
+        return;
+      }
+      // Additional rule: prevent Baseline type if a Baseline assessment already exists for this facility
+      if (isBaselineType(v) && hasExistingBaseline) {
+        setSubmitResult({ success: false, message: '❌ A Baseline assessment already exists for this facility. Please choose a different Type of Assessment.' });
         setIsSubmitting(false);
         return;
       }
@@ -2392,6 +2540,24 @@ const FormArea = ({
                                                                 >
                                                                     {Number(std.percent || 0).toFixed(1)}%
                                                                 </span>
+                                                                {std.cappedByCritical && (
+                                                                    <span
+                                                                        className="standard-summary-cap-pill"
+                                                                        title={`Capped due to critical item: ${std.cappedByCritical}`}
+                                                                        style={{
+                                                                            marginLeft: '6px',
+                                                                            fontSize: '0.7em',
+                                                                            fontWeight: 700,
+                                                                            padding: '1px 6px',
+                                                                            borderRadius: '10px',
+                                                                            backgroundColor: std.cappedByCritical === 'NC' ? '#fde8e8' : '#fff8e1',
+                                                                            color: std.cappedByCritical === 'NC' ? '#a61b1b' : '#92400e',
+                                                                            border: '1px solid rgba(0,0,0,0.1)'
+                                                                        }}
+                                                                    >
+                                                                        Capped ({std.cappedByCritical})
+                                                                    </span>
+                                                                )}
                                                                 {std.criticalFail && (
                                                                     <span className="standard-summary-critical-flag">
                                                                         CF

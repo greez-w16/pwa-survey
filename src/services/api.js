@@ -819,6 +819,8 @@ export const api = {
             .filter(([key, value]) => {
                 if (key.startsWith('is_critical_')) return false;
                 if (key.endsWith('_internal')) return false;
+                // Local UI-only flags for manual root overrides
+                if (key.startsWith('override_')) return false;
 	                // SE narrative summaries are stored as event comments/notes,
 	                // not as data elements.
 	                if (key.startsWith('se_summary_')) return false;

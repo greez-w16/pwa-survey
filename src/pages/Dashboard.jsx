@@ -124,6 +124,11 @@ export function Dashboard() {
 		    const [selectedComputeSeId, setSelectedComputeSeId] = useState(null);
 		    const [draftComputeConfig, setDraftComputeConfig] = useState(null);
 
+  // Accreditation Assignments (separate programme)
+  const [isAccredAssessmentsCollapsed, setIsAccredAssessmentsCollapsed] = useState(true);
+  const [accredAssignments, setAccredAssignments] = useState([]);
+  const [accredLoading, setAccredLoading] = useState(false);
+
     // Integrated Hook for new scheduling-based assignments. When this hook
     // is unavailable or fails, we gracefully fall back to the legacy
     // userAssignments loaded in AppContext from api.getAssignments.
@@ -152,14 +157,33 @@ export function Dashboard() {
 			    };
 			    const assessmentsLoading = hookLoading;
 
-	    const handleLogout = async () => {
-	        try {
-	            await logout();
-	            navigate('/login');
-	        } catch (e) {
-	            console.error('Error during logout from dashboard:', e);
-	        }
-	    };
+  // Load Accreditation assignments for current user from accreditation programme
+  useEffect(() => {
+    const fetchAccred = async () => {
+      if (!user || !user.id) { setAccredAssignments([]); return; }
+      try {
+        setAccredLoading(true);
+        // Programme/Stage provided by user: use as programme id for assignments API
+        const ACCRED_PROGRAM_ID = 'LdC7RuQVGF5';
+        const list = await api.getAssignments(ACCRED_PROGRAM_ID, user.id).catch(() => []);
+        setAccredAssignments(Array.isArray(list) ? list : []);
+      } finally {
+        setAccredLoading(false);
+      }
+    };
+    fetchAccred();
+  }, [user]);
+
+    const handleLogout = async () => {
+        const confirmed = window.confirm('Logout now? Unsynced drafts will be lost.');
+        if (!confirmed) return;
+        try {
+            await logout();
+            navigate('/login');
+        } catch (e) {
+            console.error('Error during logout from dashboard:', e);
+        }
+    };
 
     const handleConfirmClear = async () => {
         const success = await clearAllSurveys();
@@ -804,6 +828,56 @@ export function Dashboard() {
                     </div>
                 </div>
             </div>
+            {/* Accreditation Assessments List */}
+            <div className={`forms-section assessments-section ${isAccredAssessmentsCollapsed ? 'collapsed' : ''}`}>
+                <div className="section-header" onClick={() => setIsAccredAssessmentsCollapsed(!isAccredAssessmentsCollapsed)} style={{ cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span style={{ transform: isAccredAssessmentsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block' }}>▼</span>
+                        <h3>Assigned Accreditation Assessments</h3>
+                    </div>
+                </div>
+                {!isAccredAssessmentsCollapsed && (
+                    <div className="forms-list">
+                        {accredLoading ? (
+                            <div className="loading">Loading Accreditation Assessments...</div>
+                        ) : accredAssignments.length === 0 ? (
+                            <div className="empty-state">No accreditation assessments assigned</div>
+                        ) : (
+                            accredAssignments.map((assessment) => {
+                                const facilityId = assessment.facilityId || assessment.orgUnitId || assessment.orgUnit || '';
+                                const displayId = facilityId && facilityId !== 'N/A' ? ` (${facilityId})` : '';
+                                const isSynced = false;
+                                return (
+                                    <div key={`accred-${assessment.enrollment || assessment.eventId || assessment.trackedEntityInstance}`} className="form-item assessment-item">
+                                        <div className="form-info">
+                                            <div className="form-header-row">
+                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <h4>{assessment.orgUnitName}{displayId}</h4>
+                                                    {assessment.parentOrgUnitName && (
+                                                        <span style={{ fontSize: '0.85em', color: '#666', marginTop: '-4px' }}>
+                                                            Parent: {assessment.parentOrgUnitName}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="form-status success">ACCREDITATION</div>
+                                            </div>
+                                            <p>Enrollment: {assessment.enrollment}</p>
+                                        </div>
+                                        <div className="form-actions">
+                                            <button
+                                                className={`btn ${isSynced ? 'btn-secondary' : 'btn-primary'} btn-sm`}
+                                                onClick={() => handleOpenAssessment(assessment)}
+                                            >
+                                                Conduct Survey
+                                            </button>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                )}
+            </div>
 
             {/* Assessments List */}
             <div className={`forms-section assessments-section ${isAssessmentsCollapsed ? 'collapsed' : ''}`}>
@@ -816,6 +890,7 @@ export function Dashboard() {
                         }}>▼</span>
                         <h3>Assigned Assessments</h3>
                     </div>
+
                 </div>
 		                {!isAssessmentsCollapsed && (
 		                    <div style={{ fontSize: '0.8rem', color: '#666', padding: '0.25rem 1rem' }}>
@@ -934,6 +1009,7 @@ export function Dashboard() {
                                             <th style={{ padding: '6px 8px' }}>Type of assessment</th>
                                             <th style={{ padding: '6px 8px' }}>Assessment group</th>
                                             <th style={{ padding: '6px 8px' }}>Status</th>
+                                            <th style={{ padding: '6px 8px' }}>Report</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -949,6 +1025,31 @@ export function Dashboard() {
                                                                                 <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
                                                                                 <td style={{ padding: '6px 8px', color: '#334155' }}>{getGroupValue(ev)}</td>
                                                                                 <td style={{ padding: '6px 8px' }}>{ev.status || '-'}</td>
+                                                                                <td style={{ padding: '6px 8px' }}>
+                                                                                    <button
+                                                                                        className="btn btn-secondary btn-xs"
+                                                                                        onClick={(e) => {
+                                                                                            e.stopPropagation();
+                                                                                            const baselineDate = rows.reduce((acc, r) => {
+                                                                                                if (!r || !r.eventDate) return acc;
+                                                                                                if (!acc) return r.eventDate;
+                                                                                                return (new Date(r.eventDate) < new Date(acc)) ? r.eventDate : acc;
+                                                                                            }, null);
+                                                                                            const ou = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || '';
+                                                                                            const tei = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
+                                                                                            const q = new URLSearchParams({
+                                                                                                facilityId: ou || '',
+                                                                                                teiId: tei || '',
+                                                                                                start: baselineDate || '',
+                                                                                                end: ev.eventDate || '',
+                                                                                                eventId: ev.event || ''
+                                                                                            }).toString();
+                                                                                            navigate(`/report?${q}`);
+                                                                                        }}
+                                                                                    >
+                                                                                        View Report
+                                                                                    </button>
+                                                                                </td>
                                                                             </tr>
                                                                         ))}
                                     </tbody>

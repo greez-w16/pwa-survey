@@ -116,13 +116,18 @@ export const computeGraphScores = (criteriaMap) => {
 
         const rootSourcesInfo = []; // To store details of linked children for traceability
 
-        const { id, response, isRoot, links, severity, isCritical, roots } = criterion;
+        const { id, response, isRoot, links, severity, isCritical, roots, overrideEnabled, overrideResponse } = criterion;
 
-	        let points = null;
-	        let isScored = false;
-	        let isDraft = false;
-	        let criticalFail = false;
-	        let calculatedResponse = response;
+        let points = null;
+        let isScored = false;
+        let isDraft = false;
+        let criticalFail = false;
+        // Prefer an explicit overrideResponse when provided; this allows
+        // manual overrides for root criteria. If not provided, fall back to
+        // the criterion's own response.
+        let calculatedResponse = (overrideResponse !== undefined && overrideResponse !== null && String(overrideResponse).trim() !== '')
+            ? overrideResponse
+            : response;
 	        let sumLinkedPoints = 0;
 	        let countScoredLinks = 0;
 	        // For roots, we also track a draft numeric value that may be
@@ -139,11 +144,13 @@ export const computeGraphScores = (criteriaMap) => {
             return res;
         }
 
-        // --- Critical Risk Veto Rule (PC -> NC if safety risk) ---
-        const resForVeto = String(response).toUpperCase().trim();
-        if (isCritical && (/^([A-Z]+_)?(PC|PARTIAL|SUBSTANTIAL)$/.test(resForVeto) || resForVeto.includes('PARTIAL'))) {
-            calculatedResponse = 'NC'; // Force to NC logic
-        }
+        // Track whether we short-circuit root computation due to a manual override
+        let manualOverrideActive = false;
+
+        // --- Critical Risk Rule update ---
+        // Do NOT force PC -> NC for critical criteria. We only treat explicit
+        // NC as a critical failure. PC remains PC and will be handled via
+        // standard-level capping (60%) where applicable.
 
         // --- Standard Failure Rule ---
         const calcResStr = String(calculatedResponse).toUpperCase().trim();
@@ -151,11 +158,32 @@ export const computeGraphScores = (criteriaMap) => {
             criticalFail = true;
         }
 
-	            if (links && links.length > 0) {
+            // Determine if a manual override should short-circuit root computation.
+            // We treat a root as manually overridden if either:
+            //  - overrideEnabled is truthy AND an overrideResponse is present; OR
+            //  - (for read-only contexts like Report) the root has a non-NA, non-empty
+            //    response value (stored in the event), implying a user-entered value.
+            const hasOverrideResponse = (overrideResponse !== undefined && overrideResponse !== null && String(overrideResponse).trim() !== '' && String(overrideResponse).toUpperCase() !== 'NA');
+            const overrideFlag = (overrideEnabled === true || String(overrideEnabled).toLowerCase() === 'true' || overrideEnabled === 1 || overrideEnabled === '1');
+            manualOverrideActive = isRoot && (hasOverrideResponse || (overrideFlag && String(response || '').trim() !== '' && String(response || '').toUpperCase() !== 'NA'));
+
+            if (manualOverrideActive) {
+                // Treat overridden root like a leaf: compute points directly from
+                // the (possibly veto-adjusted) calculatedResponse and bypass links.
+                const calculatedPoints = calculatePointsForLink(calculatedResponse, severity);
+                if (calculatedPoints !== null) {
+                    points = calculatedPoints;
+                    isScored = true;
+                    isDraft = false;
+                }
+            } else if (links && links.length > 0) {
             // ROOT CRITERION LOGIC (Recursive)
             let ncPcCount = 0;
             let anyChildCriticalFail = false;
             let effectiveLinkCount = 0; // counts links that actually participate (not -G/-B)
+                // Track critical child statuses (normalized) to optionally force
+                // the root's label to match the worst critical child's label.
+                const criticalChildStatuses = [];
 
             for (const linkCode of links) {
                 const rawLink = String(linkCode || '').trim();
@@ -181,6 +209,19 @@ export const computeGraphScores = (criteriaMap) => {
 
                 if (!isExcludedByTag) {
                     effectiveLinkCount++;
+                    // Capture critical child status buckets: NC > PC > NA
+                    if (childRes.isCritical) {
+                        const cr = String(childRes.response || '').toUpperCase();
+                        if (cr !== 'C' && cr !== 'COMPLIANT' && cr !== 'FULL' && cr !== 'PENDING') {
+                            if (/(NC|NON|NON_COMPLIANT|NON-COMPLIANT|NOT_MET|FAIL)/.test(cr)) {
+                                criticalChildStatuses.push('NC');
+                            } else if (/(PC|PARTIAL|SUBSTANTIAL)/.test(cr)) {
+                                criticalChildStatuses.push('PC');
+                            } else if (cr === 'NA') {
+                                criticalChildStatuses.push('NA');
+                            }
+                        }
+                    }
                     if (childRes.criticalFail || (childRes.isCritical && String(childRes.response).toUpperCase().includes('NC'))) {
                         anyChildCriticalFail = true;
                     }
@@ -202,7 +243,39 @@ export const computeGraphScores = (criteriaMap) => {
                 }
             }
 
-                if (isRoot) {
+                // If any critical child is non-C, force this root's categorical
+                // result to the worst critical child's label and bypass numeric
+                // aggregation. Section-level critical fail remains governed by the
+                // child's own criticalFail flag.
+                let forcedByCriticalChild = false;
+                let forcedRootNa = false;
+                if (criticalChildStatuses.length > 0) {
+                    let forced = null;
+                    if (criticalChildStatuses.includes('NC')) forced = 'NC';
+                    else if (criticalChildStatuses.includes('PC')) forced = 'PC';
+                    else if (criticalChildStatuses.includes('NA')) forced = 'NA';
+                    if (forced) {
+                        calculatedResponse = forced;
+                        if (forced === 'NA') {
+                            points = null;
+                            isScored = false;
+                            isDraft = false;
+                            forcedRootNa = true;
+                        } else {
+                            const p = calculatePointsForLink(forced, severity);
+                            if (p !== null) {
+                                points = p;
+                                isScored = true;
+                                isDraft = false;
+                            }
+                        }
+                        // Avoid zeroing the root via safety override below
+                        anyChildCriticalFail = false;
+                        forcedByCriticalChild = true;
+                    }
+                }
+
+                if (!forcedByCriticalChild && isRoot) {
                     // If all links are excluded (e.g., all are -G/-B visual-only),
                     // this root must remain unscored/pending.
                     if (effectiveLinkCount === 0) {
@@ -256,7 +329,7 @@ export const computeGraphScores = (criteriaMap) => {
                 // visual-only -G/-B), do NOT compute a numeric draft from
                 // configured sub-criteria either. The requirement is that such
                 // roots are not auto-scored at all.
-                if (configuredSubs && configuredSubs.length > 0 && effectiveLinkCount > 0) {
+                if (!forcedByCriticalChild && configuredSubs && configuredSubs.length > 0 && effectiveLinkCount > 0) {
 	                    let cfgSum = 0;
 	                    let cfgCount = 0;
 	                    configuredSubs.forEach(subRaw => {
@@ -286,7 +359,7 @@ export const computeGraphScores = (criteriaMap) => {
 	                // If all children have been assessed and we have a
 	                // candidate numeric value, promote it to the official
 	                // points value. Otherwise it remains a draft-only figure.
-	                if (!isDraft && rootDraftPoints !== null) {
+                if (!forcedByCriticalChild && !isDraft && rootDraftPoints !== null) {
 	                    points = rootDraftPoints;
 	                }
 
@@ -298,7 +371,7 @@ export const computeGraphScores = (criteriaMap) => {
                 isDraft = false; // Critical failure terminates the draft state
             }
 
-        } else {
+            } else if (!manualOverrideActive) {
             // INDIVIDUAL (LEAF) CRITERION LOGIC
             const calculatedPoints = calculatePointsForLink(calculatedResponse, severity);
             if (calculatedPoints !== null) {
@@ -309,7 +382,16 @@ export const computeGraphScores = (criteriaMap) => {
 
         // If a root has not been finalized, present it as Pending rather than NA
         // so the UI can reflect that it is intentionally not auto-scored.
-        let displayRes = isScored ? calculatedResponse : (isRoot ? 'Pending' : 'NA');
+            let displayRes = isScored ? calculatedResponse : (isRoot ? 'Pending' : 'NA');
+            // If the root was explicitly forced to NA by a critical child's NA,
+            // show NA instead of Pending to reflect the rule.
+            if (!isScored && isRoot) {
+                // We don't have access to forcedRootNa here directly; infer it
+                // from calculatedResponse when unscored.
+                if (String(calculatedResponse).toUpperCase() === 'NA') {
+                    displayRes = 'NA';
+                }
+            }
 
         // Derive response for roots or critical fails
         if (isScored && (isRoot || criticalFail)) {
@@ -336,7 +418,7 @@ export const computeGraphScores = (criteriaMap) => {
             else if (/^([A-Z]+_)?(NC|NON|NON_COMPLIANT|NON-COMPLIANT|NOT_MET|FAIL)$/.test(dispStr) || dispStr.includes('NON') || dispStr.includes('FAIL')) displayRes = 'NC';
         }
 
-	            const res = {
+            const res = {
 	                points: (isScored && points !== null) ? points : null,
 	                response: displayRes,
 	                rawResponse: response, // Keep original response for UI logic fallback
@@ -346,6 +428,9 @@ export const computeGraphScores = (criteriaMap) => {
 	                criticalFail,
 	                isScored,
 	                isCritical,
+                // For diagnostics, surface whether a manual override was applied
+                // (root treated as a leaf) during this computation.
+                isOverridden: Boolean(manualOverrideActive && isRoot),
 	                // Average over scored linked criteria only (used in some
 	                // debug views).
 	                draftAvg: countScoredLinks > 0 ? (sumLinkedPoints / countScoredLinks) : null,

@@ -15,14 +15,16 @@ import { useApp } from '../../contexts/AppContext';
 		    const { user, logout } = useApp();
 	    const [showSettings, setShowSettings] = React.useState(false);
 
-	    const handleLogout = async () => {
-	        try {
-	            await logout();
-	            navigate('/login');
-	        } catch (e) {
-	            console.error('Error during logout:', e);
-	        }
-	    };
+    const handleLogout = async () => {
+        const confirmed = window.confirm('Logout now? Unsynced drafts will be lost.');
+        if (!confirmed) return;
+        try {
+            await logout();
+            navigate('/login');
+        } catch (e) {
+            console.error('Error during logout:', e);
+        }
+    };
 
     return (
         <header className="app-header">

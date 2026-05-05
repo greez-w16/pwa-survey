@@ -43,6 +43,17 @@ export default function Report() {
   const [baselineAssessment, setBaselineAssessment] = useState(null);
   const [baselineProvisioned, setBaselineProvisioned] = useState(false);
   const [sectionLabels, setSectionLabels] = useState({});
+  const [sectionChartLabels, setSectionChartLabels] = useState({});
+  // Helper: identify the non-SE metadata section often named "Assessment Details"
+  const isAssessmentDetailsSection = (section) => {
+    if (!section) return false;
+    const id = String(section.id || '').toLowerCase();
+    const code = String(section.code || '').toLowerCase();
+    const name = String(section.name || section.se_name || section.title || '').toLowerCase();
+    if (id === 'ad' || id === 'assessment_details' || id === 'assessment-details') return true;
+    if (code === 'ad' || code === 'assessment_details' || code === 'assessment-details') return true;
+    return name.includes('assessment details');
+  };
 
   const programId = configuration?.program?.id || 'G2gULe4jsfs';
   const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
@@ -73,18 +84,21 @@ export default function Report() {
         linksDataLookup[linkObj.criteria] = { roots: linkObj.root || [], linked_criteria: linkObj.linked_criteria || [] };
       });
       const severityLookup = {};
+      const criticalLookup = {};
       try {
         (config?.[key] || []).forEach(se => {
           (se.sections || []).forEach(section => {
             (section.standards || []).forEach(standard => {
               (standard.criteria || []).forEach(crit => {
-                if (crit && crit.id) severityLookup[crit.id] = crit.severity || 1;
+                if (!crit || !crit.id) return;
+                severityLookup[crit.id] = crit.severity || 1;
+                criticalLookup[crit.id] = Boolean(crit.is_critical);
               });
             });
           });
         });
       } catch {}
-      return { linksDataLookup, severityLookup };
+      return { linksDataLookup, severityLookup, criticalLookup };
     };
 
     return {
@@ -355,10 +369,56 @@ export default function Report() {
 
         setReportAssessment(assessment);
         setBaselineAssessment(baselineAssess);
-        // Build section label map for display
+        // Build section label map for display (exclude Assessment Details; prefer SE name)
         const labels = {};
-        targetSections.forEach(s => { labels[s.id] = s.code || s.name || s.id; });
+        const chartLabels = {};
+        // Build a quick se_id -> se_name map from on-disk configs for friendly names
+        const seNameMap = (() => {
+          try {
+            let arr = [];
+            if (programmeType === 'hospital') arr = hospitalConfig.hospital_full_configuration || [];
+            else if (programmeType === 'clinics') arr = clinicsConfig.clinics_full_configuration || [];
+            else if (programmeType === 'ems') arr = emsConfig.ems_full_configuration || [];
+            else if (programmeType === 'mortuary') arr = mortuaryConfig.mortuary_full_configuration || [];
+            const map = {};
+            (arr || []).forEach(se => {
+              const n = parseInt(String(se.se_id || ''), 10);
+              if (!Number.isNaN(n)) map[n] = se.se_name || se.name || se.title || '';
+            });
+            return map;
+          } catch { return {}; }
+        })();
+
+        targetSections
+          .filter(s => !isAssessmentDetailsSection(s))
+          .forEach((s, idx) => {
+            const baseName = s.se_name || s.name || s.title || s.code || s.id;
+            labels[s.id] = baseName;
+            // Determine SE number from se_id, then code/id (e.g., HOSP_SE7), else fallback to order index
+            let seNum = null;
+            if (s.se_id !== undefined && s.se_id !== null && String(s.se_id).trim() !== '') {
+              const n = parseInt(String(s.se_id), 10);
+              if (!Number.isNaN(n)) seNum = n;
+            }
+            if (seNum === null) {
+              const codeStr = String(s.code || s.id || '');
+              const seMatch = codeStr.match(/se\s*[_-]*\s*(\d+)/i) || codeStr.match(/(\d+)/);
+              if (seMatch) {
+                const n = parseInt(seMatch[1] || seMatch[0], 10);
+                if (!Number.isNaN(n)) seNum = n;
+              }
+            }
+            if (seNum === null) seNum = idx + 1;
+            const official = seNameMap[seNum];
+            const cleanedName = String(official || baseName || '')
+              .replace(/^\s*se\s*\d+\s*[-:\u2013\u2014]?\s*/i, '')
+              .replace(/^\s*\d+\s*[-:\u2013\u2014]?\s*/i, '')
+              .replace(/_/g, ' ')
+              .trim();
+            chartLabels[s.id] = `SE ${seNum} ${cleanedName}`;
+          });
         setSectionLabels(labels);
+        setSectionChartLabels(chartLabels);
         setReportInfo({
           groupId,
           groupLabel: groupObj?.name || groupId,
@@ -376,8 +436,102 @@ export default function Report() {
     })();
   };
 
+  // If query params are provided (from Dashboard "View Report"), prefill and auto-generate
+  useEffect(() => {
+    try {
+      const sp = new URLSearchParams(window.location.search);
+      const facilityId = sp.get('facilityId');
+      const start = sp.get('start');
+      const end = sp.get('end');
+      if (facilityId) setSelectedFacilityId(facilityId);
+      if (start) setStartDate(start.split('T')[0] || start);
+      if (end) setEndDate(end.split('T')[0] || end);
+      if (facilityId) {
+        // Delay auto-generate slightly to allow facilityOptions to be ready
+        const t = setTimeout(() => handleGenerate(), 250);
+        return () => clearTimeout(t);
+      }
+    } catch {}
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   const scoring = useAssessmentScoring(reportAssessment || { sections: [] });
   const baselineScoring = useAssessmentScoring(baselineAssessment || { sections: [] });
+
+  // Collapsible state for Facility Overview
+  const [isFacilityOverviewCollapsed, setIsFacilityOverviewCollapsed] = useState(true);
+  // Collapsible state for Baseline vs Latest (per SE)
+  const [isBaselineVsLatestCollapsed, setIsBaselineVsLatestCollapsed] = useState(true);
+
+  // Build Facility Overview rows (per SE)
+  const facilityOverview = useMemo(() => {
+    if (!reportAssessment || !baselineAssessment || !reportInfo) return [];
+    const latestSections = reportAssessment.sections || [];
+    const baseSections = baselineAssessment.sections || [];
+    const latestById = Object.fromEntries(latestSections.map(s => [s.id, s]));
+    const baseById = Object.fromEntries(baseSections.map(s => [s.id, s]));
+
+    const norm = (v) => {
+      const s = String(v || '').trim().toLowerCase();
+      if (s === '2' || s === 'yes' || s === 'y' || s === 'compliant' || s === 'c') return 'C';
+      if (s === '1' || s === 'partial' || s === 'partially compliant' || s === 'pc') return 'PC';
+      if (s === '0' || s === 'no' || s === 'n' || s === 'non compliant' || s === 'non-compliant' || s === 'nc') return 'NC';
+      return 'NA';
+    };
+
+    const getCounts = (critList) => {
+      const out = { C: 0, PC: 0, NC: 0, NA: 0 };
+      critList.forEach(c => { out[norm(c.response)]++; });
+      return out;
+    };
+
+    const blSecs = Array.isArray(baselineScoring?.sections) ? baselineScoring.sections : [];
+    const ltSecs = Array.isArray(scoring?.sections) ? scoring.sections : [];
+    const blPct = Object.fromEntries(blSecs.map(s => [s.id, s.percent]));
+    const ltPct = Object.fromEntries(ltSecs.map(s => [s.id, s.percent]));
+
+    const ids = Object.keys(sectionLabels || {});
+    return ids.map((id, idx) => {
+      const name = sectionLabels[id] || id;
+      const baseCrit = (((baseById[id]||{}).standards||[{}])[0].criteria)||[];
+      const lateCrit = (((latestById[id]||{}).standards||[{}])[0].criteria)||[];
+      const baseCounts = getCounts(baseCrit);
+      const lateCounts = getCounts(lateCrit);
+      const completed = baseCrit.reduce((acc, bc) => {
+        const code = bc.code;
+        const wasDef = ['NC','PC'].includes(norm(bc.response));
+        if (!wasDef) return acc;
+        const lc = lateCrit.find(x => x.code === code);
+        if (lc && norm(lc.response) === 'C') return acc + 1;
+        return acc;
+      }, 0);
+
+      // Critical criteria counts
+      // Try to detect programme type from reportInfo.groupId
+      const programmeType = (reportInfo.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo.groupId === 'CLINICS') ? 'clinics' : (reportInfo.groupId === 'SE') ? 'ems' : 'mortuary';
+      const criticalLookup = (programmeScoringMeta[programmeType] && programmeScoringMeta[programmeType].criticalLookup) || {};
+      const getCritical = (list) => list.filter(c => criticalLookup[c.code] === true);
+      const baseCritCritical = getCritical(baseCrit);
+      const lateCritCritical = getCritical(lateCrit);
+      const baseCriticalCounts = getCounts(baseCritCritical);
+      const lateCriticalCounts = getCounts(lateCritCritical);
+
+      return {
+        seIndex: idx + 1,
+        seName: name,
+        baselinePercent: Number.isFinite(blPct[id]) ? Number(blPct[id]).toFixed(0) : '—',
+        latestPercent: Number.isFinite(ltPct[id]) ? Number(ltPct[id]).toFixed(0) : '—',
+        blDefs: { total: baseCounts.NC + baseCounts.PC, NC: baseCounts.NC, PC: baseCounts.PC },
+        completed,
+        remaining: { total: lateCounts.NC + lateCounts.PC, NC: lateCounts.NC, PC: lateCounts.PC },
+        critical: { total: baseCritCritical.length, NC: baseCriticalCounts.NC, PC: baseCriticalCounts.PC },
+        criticalRemaining: { total: lateCritCritical.length, NC: lateCriticalCounts.NC, PC: lateCriticalCounts.PC },
+        latestDate: reportInfo.latestDate ? new Date(reportInfo.latestDate).toLocaleDateString() : '—',
+        policies: { NC: 0, PC: 0, C: 0, total: 0 },
+        qiCompliance: 'N/A',
+      };
+    });
+  }, [reportAssessment, baselineAssessment, baselineScoring, scoring, sectionLabels, reportInfo, programmeScoringMeta]);
 
   return (
     <div className="dashboard-container" style={{ padding: '16px' }}>
@@ -477,79 +631,168 @@ export default function Report() {
               </div>
             </div>
 
+            {/* Facility Overview (collapsible) */}
+            <div style={{ marginTop: 18 }}>
+              <div
+                className="section-header"
+                onClick={() => setIsFacilityOverviewCollapsed(!isFacilityOverviewCollapsed)}
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+              >
+                <span
+                  style={{
+                    transform: isFacilityOverviewCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s ease',
+                    display: 'inline-block',
+                  }}
+                >
+                  ▼
+                </span>
+                <h3 style={{ margin: 0 }}>Facility Overview</h3>
+              </div>
+              {!isFacilityOverviewCollapsed && (
+              <div style={{ overflowX: 'auto', marginTop: 8 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>
+                  <thead>
+                    <tr>
+                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>SE</th>
+                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Service</th>
+                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Overall baseline score</th>
+                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Overall progress score</th>
+                      <th colSpan={3} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Deficiencies identified at baseline</th>
+                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Deficiencies completed to date</th>
+                      <th colSpan={3} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Remaining deficiencies to be addressed</th>
+                      <th colSpan={3} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Critical Criteria</th>
+                      <th colSpan={3} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Critical Criteria Remaining</th>
+                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Most recent assessment date</th>
+                      <th colSpan={4} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Policies &amp; Procedures</th>
+                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6, whiteSpace: 'nowrap' }}>Quality improvement standard compliance</th>
+                    </tr>
+                    <tr>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>Total</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>NC</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>PC</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>Total</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>NC</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>PC</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>Total</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>NC</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>PC</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>Total</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>NC</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>PC</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>NC</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>PC</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>C</th>
+                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>Total</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {facilityOverview.map(row => (
+                      <tr key={`ov-${row.seIndex}`}>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6 }}>{row.seIndex}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6 }}>{row.seName}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.baselinePercent}%</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.latestPercent}%</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.blDefs.total}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.blDefs.NC}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.blDefs.PC}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.completed}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.remaining.total}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.remaining.NC}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.remaining.PC}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.critical.total}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.critical.NC}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.critical.PC}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.criticalRemaining.total}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.criticalRemaining.NC}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.criticalRemaining.PC}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6 }}>{row.latestDate}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.policies.NC}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.policies.PC}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.policies.C}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.policies.total}</td>
+                        <td style={{ border: '1px solid #e2e8f0', padding: 6 }}>{row.qiCompliance}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              )}
+            </div>
+
             {/* Baseline vs Latest (per SE) */}
             <div style={{ marginTop: 18 }}>
-              <h3 style={{ margin: '8px 0' }}>Baseline vs Latest (per SE)</h3>
-              {/* Simple legend */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, color: '#64748b', fontSize: 12 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 12, height: 12, background: '#34d399', display: 'inline-block', borderRadius: 2 }} />
-                  <span>Baseline</span>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <span style={{ width: 12, height: 12, background: '#60a5fa', display: 'inline-block', borderRadius: 2 }} />
-                  <span>{reportInfo?.latestType || 'Latest assessment'}</span>
-                </div>
+              <div
+                className="section-header"
+                onClick={() => setIsBaselineVsLatestCollapsed(!isBaselineVsLatestCollapsed)}
+                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+              >
+                <span
+                  style={{
+                    transform: isBaselineVsLatestCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                    transition: 'transform 0.2s ease',
+                    display: 'inline-block',
+                  }}
+                >
+                  {'\u25BC'}
+                </span>
+                <h3 style={{ margin: 0 }}>Baseline vs Latest (per SE)</h3>
               </div>
-              {(() => {
-                const bl = Array.isArray(baselineScoring?.sections) ? baselineScoring.sections : [];
-                const lt = Array.isArray(scoring?.sections) ? scoring.sections : [];
-                const blMap = Object.fromEntries(bl.map(s => [s.id, s.percent]));
-                const ltMap = Object.fromEntries(lt.map(s => [s.id, s.percent]));
-                const ids = Object.keys(sectionLabels || {});
-                if (ids.length === 0) return (<div style={{ color: '#64748b' }}>No section breakdown available.</div>);
-                const chartData = ids.map(id => ({
-                  name: sectionLabels[id] || id,
-                  Baseline: Number.isFinite(blMap[id]) ? Number(blMap[id]) : 0,
-                  Latest: Number.isFinite(ltMap[id]) ? Number(ltMap[id]) : 0,
-                }));
-                return (
-                  <>
-                    <div style={{ width: '100%', height: 320, marginBottom: 12 }}>
-                      <ResponsiveContainer width="100%" height="100%">
-                        <BarChart data={chartData} margin={{ top: 8, right: 16, bottom: 24, left: 0 }}>
-                          <CartesianGrid strokeDasharray="3 3" />
-                          <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={60} />
-                          <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
-                          <Tooltip formatter={(v) => `${Number(v).toFixed(1)}%`} />
-                          <Legend />
-                          <Bar dataKey="Baseline" fill="#34d399" />
-                          <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#60a5fa" />
-                        </BarChart>
-                      </ResponsiveContainer>
+              {!isBaselineVsLatestCollapsed && (
+                <>
+                  {/* Simple legend */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8, color: '#64748b', fontSize: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 12, height: 12, background: '#60a5fa', display: 'inline-block', borderRadius: 2 }} />
+                      <span>Baseline</span>
                     </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(260px, 1fr))', gap: 12 }}>
-                      {ids.map(id => {
-                      const name = sectionLabels[id] || id;
-                      const b = Number.isFinite(blMap[id]) ? blMap[id] : null;
-                      const l = Number.isFinite(ltMap[id]) ? ltMap[id] : null;
-                      return (
-                        <div key={`cmp-${id}`} style={{ border: '1px solid #e5e7eb', borderRadius: 8, padding: 12 }}>
-                          <div style={{ fontWeight: 600, marginBottom: 8 }}>{name}</div>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                            <div>
-                              <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>Baseline ({name})</div>
-                              <div style={{ height: 14, background: '#f1f5f9', borderRadius: 6, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                                <div style={{ width: `${(b && b > 0) ? Math.max(4, Math.min(100, b)) : 0}%`, height: '100%', background: '#34d399' }} />
-                              </div>
-                              <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>{b !== null ? `${b.toFixed(1)}%` : (baselineProvisioned ? '— (provisioned)' : '—')}</div>
-                            </div>
-                            <div>
-                              <div style={{ fontSize: 12, color: '#64748b', marginBottom: 4 }}>{(reportInfo?.latestType || 'Latest assessment')} ({name})</div>
-                              <div style={{ height: 14, background: '#f1f5f9', borderRadius: 6, overflow: 'hidden', border: '1px solid #e2e8f0' }}>
-                                <div style={{ width: `${(l && l > 0) ? Math.max(4, Math.min(100, l)) : 0}%`, height: '100%', background: '#60a5fa' }} />
-                              </div>
-                              <div style={{ fontSize: 12, color: '#475569', marginTop: 4 }}>{l !== null ? `${l.toFixed(1)}%` : '—'}</div>
-                            </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ width: 12, height: 12, background: '#ef4444', display: 'inline-block', borderRadius: 2 }} />
+                      <span>{reportInfo?.latestType || 'Latest assessment'}</span>
+                    </div>
+                  </div>
+                  {(() => {
+                    const bl = Array.isArray(baselineScoring?.sections) ? baselineScoring.sections : [];
+                    const lt = Array.isArray(scoring?.sections) ? scoring.sections : [];
+                    const blMap = Object.fromEntries(bl.map(s => [s.id, s.percent]));
+                    const ltMap = Object.fromEntries(lt.map(s => [s.id, s.percent]));
+                    // Exclude "Assessment Details" from the chart explicitly
+                    const ids = Object.keys(sectionChartLabels || {}).filter((sid) => {
+                      const lbl = String((sectionChartLabels[sid] || sectionLabels[sid] || '')).toLowerCase();
+                      const idLower = String(sid || '').toLowerCase();
+                      if (!lbl) return false;
+                      if (lbl.includes('assessment details')) return false;
+                      if (idLower === 'ad' || idLower === 'assessment-details' || idLower === 'assessment_details') return false;
+                      return true;
+                    });
+                    if (ids.length === 0) return (<div style={{ color: '#64748b' }}>No section breakdown available.</div>);
+                    const chartData = ids.map(id => ({
+                      name: sectionChartLabels[id] || sectionLabels[id] || id,
+                      Baseline: Number.isFinite(blMap[id]) ? Number(blMap[id]) : 0,
+                      Latest: Number.isFinite(ltMap[id]) ? Number(ltMap[id]) : 0,
+                    }));
+                    const chartWidth = Math.max(700, ids.length * 140);
+                    return (
+                      <>
+                        <div style={{ width: '100%', overflowX: 'auto', marginBottom: 12 }}>
+                          <div style={{ width: chartWidth, height: 320 }}>
+                            <BarChart width={chartWidth} height={320} data={chartData} margin={{ top: 8, right: 16, bottom: 24, left: 0 }}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={60} />
+                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
+                              <Tooltip formatter={(v) => `${Number(v).toFixed(1)}%`} />
+                              <Legend />
+                              <Bar dataKey="Baseline" fill="#60a5fa" />
+                              <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#ef4444" />
+                            </BarChart>
                           </div>
                         </div>
-                      );
-                    })}
-                    </div>
-                  </>
-                );
-              })()}
+                        
+                      </>
+                    );
+                  })()}
+                </>
+              )}
             </div>
           </div>
         )}
