@@ -1896,6 +1896,83 @@ const FormArea = ({
         });
     };
 
+    // Testing helper: randomize answers and comments across all SEs in the active group
+    const randomizeAllAnswers = React.useCallback(() => {
+        try {
+            // Find current group from activeSection
+            const currentGroup = Array.isArray(groups)
+                ? groups.find(g => Array.isArray(g.sections) && g.sections.some(s => s.id === activeSection?.id))
+                : null;
+            const targetSections = currentGroup?.sections || [];
+            if (!targetSections.length) {
+                if (typeof showToast === 'function') showToast('No sections available to randomize.', 'warning');
+                return;
+            }
+            if (!window.confirm('Randomize all criterion responses and comments across all sections in this group? This will overwrite existing values.')) {
+                return;
+            }
+
+            // Helper: pick weighted random among available options (favor C)
+            const pickFromOptions = (field) => {
+                const rawOpts = Array.isArray(field?.options) ? field.options : [];
+                const norm = (x) => String(x || '').toUpperCase().trim();
+                const values = rawOpts.map(o => (typeof o === 'object' ? (o.value || o.val || o.code || o.label || o.name) : o)).map(norm);
+                const pool = [];
+                const pushIf = (code, weight) => { if (values.some(v => v === code)) pool.push(...Array(weight).fill(code)); };
+                // Approximate distribution: C 55%, PC 30%, NC 12%, NA 3% (if NA exists)
+                pushIf('C', 55); pushIf('COMPLIANT', 55);
+                pushIf('PC', 30); pushIf('PARTIAL', 30); pushIf('SUBSTANTIAL', 10);
+                pushIf('NC', 12); pushIf('NON', 12); pushIf('NON-COMPLIANT', 12);
+                if (values.includes('NA')) pool.push(...Array(3).fill('NA'));
+                if (pool.length === 0) {
+                    // Fallback to first available
+                    return rawOpts.length > 0 ? (typeof rawOpts[0] === 'object' ? (rawOpts[0].value || rawOpts[0].code || rawOpts[0].label || rawOpts[0].name) : rawOpts[0]) : '';
+                }
+                const choice = pool[Math.floor(Math.random() * pool.length)];
+                // Map back to the exact option token if needed
+                const match = rawOpts.find(o => {
+                    const v = typeof o === 'object' ? (o.value || o.val || o.code || o.label || o.name) : o;
+                    return norm(v) === choice;
+                });
+                return typeof match === 'object' ? (match.value || match.val || match.code || match.label || match.name) : match;
+            };
+
+            const isAssessmentDetails = (sec) => {
+                const name = String(sec?.name || '').toLowerCase();
+                return name === 'assessment details' || name === 'assessment_details';
+            };
+
+            // First pass: set all select values
+            targetSections.filter(s => !isAssessmentDetails(s)).forEach(section => {
+                (section.fields || []).forEach(f => {
+                    if (f && f.type === 'select' && f.id) {
+                        const val = pickFromOptions(f);
+                        try { saveField(f.id, val); } catch (_) {}
+                    }
+                });
+            });
+
+            // Second pass: set comments where present
+            const randText = () => {
+                const words = ['good', 'fair', 'requires', 'attention', 'policy', 'procedure', 'training', 'evidence', 'documented', 'verified'];
+                return Array.from({ length: 6 }, () => words[Math.floor(Math.random() * words.length)]).join(' ');
+            };
+            targetSections.filter(s => !isAssessmentDetails(s)).forEach(section => {
+                (section.fields || []).forEach(f => {
+                    // Comment fields usually have questionFieldId set
+                    if (f && f.id && f.type !== 'select' && (f.questionFieldId || f.isCommentField)) {
+                        const combined = `${randText()} | ${randText()}`;
+                        try { saveField(f.id, combined); } catch (_) {}
+                    }
+                });
+            });
+
+            if (typeof showToast === 'function') showToast('Randomized answers and comments across all sections.', 'success');
+        } catch (e) {
+            console.warn('Randomize answers failed', e);
+            if (typeof showToast === 'function') showToast('Randomize failed (see console).', 'error');
+        }
+    }, [groups, activeSection, saveField, showToast]);
     if (!activeSection) {
         if (!selectedFacility) {
             return <div className="form-area-empty">Please select a facility and a section</div>;
@@ -2239,11 +2316,9 @@ const FormArea = ({
             try { saveField('eventId_internal', putEventId); } catch (_) {}
             const payloadData = { ...enrichedData, eventId_internal: putEventId };
 
-            const result = await api.submitEventPut(
-                payloadData,
-                configuration,
-                orgUnit
-            );
+            const result = await (api.submitEventPutBatched
+                ? api.submitEventPutBatched(payloadData, configuration, orgUnit, { batchSize: 150, interChunkDelayMs: 75 })
+                : api.submitEventPut(payloadData, configuration, orgUnit));
 
             // For the PUT flow, we already know the target Event ID
             const dhis2EventId = putEventId;
@@ -2252,7 +2327,11 @@ const FormArea = ({
 	                await indexedDBService.markAsSynced(activeEventId, dhis2EventId || 'synced');
 	            }
 	
-	            setSubmitResult({ success: true, message: '✅ Saved successfully (data will sync to DHIS2 when online).' });
+            if (result && result.chunks) {
+                setSubmitResult({ success: true, message: `✅ Saved successfully in ${result.chunks} batches.` });
+            } else {
+                setSubmitResult({ success: true, message: '✅ Saved successfully (data will sync to DHIS2 when online).' });
+            }
         } catch (err) {
             console.error('❌ Tracker workflow failed:', err);
             if (activeEventId) await indexedDBService.markAsFailed(activeEventId, err.message);
@@ -2328,6 +2407,14 @@ const FormArea = ({
                             title="View Scoring Logic Summary"
                         >
                             📊 Scoring Logic
+                        </button>
+                        <button
+                            className="scoring-logic-btn"
+                            onClick={randomizeAllAnswers}
+                            title="Randomize all criterion answers and comments across all sections in this group (testing only)"
+                            style={{ marginLeft: 8, background: '#374151', color: '#fff' }}
+                        >
+                            🎲 Randomize Answers
                         </button>
                     </div>
                 </div>
@@ -2621,6 +2708,15 @@ const FormArea = ({
                             style={{ opacity: isLastSubsection ? 0.5 : 1 }}
                         >
                             Next Page →
+                        </button>
+                        {/* Testing: Randomize all answers/comments across this group's sections */}
+                        <button
+                            className="nav-btn"
+                            onClick={randomizeAllAnswers}
+                            title="Randomize all criterion answers and comments across all sections in this group"
+                            style={{ marginLeft: '8px', background: '#374151', color: '#fff' }}
+                        >
+                            Randomize Answers (all SEs)
                         </button>
                     </div>
                 )}

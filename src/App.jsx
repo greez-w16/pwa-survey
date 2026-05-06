@@ -22,6 +22,7 @@ import hospitalLinks from './assets/hospital_links.json';
 import { decorateHospitalLinksWithMatrixTags } from './utils/hospitalMatrixTags';
 import './App.css';
 import Report from './pages/Report';
+import Admin from './pages/Admin';
 
 // Helper to build scoring metadata (links + severity + critical) for each programme
 // type. The actual programmeScoringMeta object is built inside AppContent so
@@ -774,6 +775,15 @@ const PrivateRoute = ({ children }) => {
         element={
           <PrivateRoute>
             <Report />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/admin"
+        element={
+          <PrivateRoute>
+            <Admin />
           </PrivateRoute>
         }
       />

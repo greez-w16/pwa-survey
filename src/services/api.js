@@ -18,8 +18,10 @@ const getHeaders = (username, password) => {
 };
 
 export const api = {
-	    // Debug info for scheduling assignments; populated by getSchedulingAssignments
+    // Debug info for scheduling assignments; populated by getSchedulingAssignments
 	    _schedulingDebug: null,
+    // Simple in-memory cache for DHIS2 user display names
+    _userDisplayCache: {},
 
 	    login: async (username, password) => {
         const url = `${BASE_URL}/api/me?fields=id,displayName,username,organisationUnits[id,name]`;
@@ -47,6 +49,170 @@ export const api = {
             throw new Error(`Login failed: Invalid JSON response from server. Check console for details.`);
         }
     },
+
+    /**
+     * Resolve DHIS2 user display names for a list of identifiers. The identifiers
+     * can be either user IDs (UIDs) or usernames. Returns a map of
+     * { key -> { id, username, displayName } } and caches results in-memory.
+     */
+    resolveUserDisplayNames: async (values) => {
+        try {
+            if (!Array.isArray(values) || values.length === 0) return {};
+            const result = {};
+            const cache = api._userDisplayCache || (api._userDisplayCache = {});
+
+            // Expand composite keys like "id|username" into individual keys
+            const expanded = new Set();
+            values.forEach(v => {
+                if (!v) return;
+                String(v).split('|').forEach(part => {
+                    const k = String(part || '').trim();
+                    if (k) expanded.add(k);
+                });
+            });
+
+            // Seed from cache
+            const unknown = [];
+            expanded.forEach(k => {
+                if (cache[k]) {
+                    result[k] = cache[k];
+                } else {
+                    unknown.push(k);
+                }
+            });
+
+            if (unknown.length === 0) return result;
+
+            // Partition into likely IDs (11-char DHIS2 UID) and usernames (others)
+            const uidLike = unknown.filter(k => /^[A-Za-z0-9]{11}$/.test(k));
+            const usernames = unknown.filter(k => !/^[A-Za-z0-9]{11}$/.test(k));
+
+            const collected = [];
+
+            // Helper to fetch with a specific filter
+            const fetchUsers = async (filterField, list) => {
+                if (list.length === 0) return [];
+                const bracket = `[${list.map(encodeURIComponent).join(',')}]`;
+                const url = `${BASE_URL}/api/users.json?paging=false&fields=id,username,displayName&filter=${filterField}:in:${bracket}`;
+                const resp = await fetch(url, { headers: getHeaders() });
+                if (!resp.ok) return [];
+                const data = await resp.json().catch(() => ({}));
+                return data.users || data || [];
+            };
+
+            try {
+                const byId = await fetchUsers('id', uidLike);
+                collected.push(...byId);
+            } catch (_) {}
+            try {
+                const byUsername = await fetchUsers('username', usernames);
+                collected.push(...byUsername);
+            } catch (_) {}
+
+            collected.forEach(u => {
+                const entry = { id: u.id, username: u.username, displayName: u.displayName || u.username || u.id };
+                if (u.id) { cache[u.id] = entry; result[u.id] = entry; }
+                if (u.username) { cache[u.username] = entry; result[u.username] = entry; }
+            });
+
+            return result;
+        } catch (e) {
+            console.warn('resolveUserDisplayNames failed (non-fatal)', e);
+            return {};
+        }
+    },
+
+  // List events by program with optional filters
+  listEventsByProgram: async ({ programId, orgUnitId, startDate, endDate }) => {
+    if (!programId) throw new Error('programId is required');
+    let url = `${BASE_URL}/api/events.json?skipPaging=true&fields=event&program=${encodeURIComponent(programId)}`;
+    if (orgUnitId) url += `&orgUnit=${encodeURIComponent(orgUnitId)}&ouMode=DESCENDANTS`;
+    if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
+    if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
+    const resp = await fetch(url, { headers: getHeaders() });
+    if (!resp.ok) throw new Error(`Failed to list events (${resp.status})`);
+    const json = await resp.json().catch(() => ({}));
+    const events = json?.events || json?.instances || [];
+    return events.map(e => e.event).filter(Boolean);
+  },
+
+  // List events by program across multiple org units (merged unique IDs)
+  listEventsByProgramMultiOrgUnits: async ({ programId, orgUnitIds = [], startDate, endDate }) => {
+    const ids = new Set();
+    const arr = Array.isArray(orgUnitIds) ? orgUnitIds.filter(Boolean) : [];
+    if (arr.length === 0) {
+      // Fallback to no OU filter (entire program)
+      const all = await api.listEventsByProgram({ programId, startDate, endDate });
+      all.forEach(id => ids.add(id));
+      return Array.from(ids);
+    }
+    // Fetch in parallel (cap concurrency if needed later)
+    await Promise.all(arr.map(async (ou) => {
+      try {
+        const subset = await api.listEventsByProgram({ programId, orgUnitId: ou, startDate, endDate });
+        subset.forEach(id => ids.add(id));
+      } catch (_) { /* ignore one OU failure */ }
+    }));
+    return Array.from(ids);
+  },
+
+  // Delete many events by IDs in batches
+  deleteEventsByIds: async (ids, { batchSize = 100 } = {}) => {
+    const arr = Array.isArray(ids) ? ids : [];
+    let deleted = 0;
+    for (let i = 0; i < arr.length; i += batchSize) {
+      const slice = arr.slice(i, i + batchSize);
+      await Promise.all(slice.map(async (id) => {
+        try {
+          const resp = await fetch(`${BASE_URL}/api/events/${encodeURIComponent(id)}`, { method: 'DELETE', headers: getHeaders() });
+          if (resp.ok) deleted += 1;
+        } catch (_) { /* ignore a single failure and continue */ }
+      }));
+    }
+    return { total: arr.length, deleted };
+  },
+
+  // DataStore helpers -------------------------------------------------------
+  upsertDataStoreItem: async (namespace, key, valueObj) => {
+    if (!namespace || !key) throw new Error('DataStore upsert requires namespace and key');
+    const url = `${BASE_URL}/api/dataStore/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
+    const headers = getHeaders();
+    // Try PUT (works as upsert on newer DHIS2). If fails 404, try POST.
+    let resp = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(valueObj) });
+    if (resp.ok) return 'OK';
+    if (resp.status === 404) {
+      resp = await fetch(url, { method: 'POST', headers, body: JSON.stringify(valueObj) });
+      if (resp.ok) return 'OK';
+    }
+    const text = await resp.text().catch(() => '');
+    throw new Error(`DataStore upsert failed: ${resp.status} ${text}`);
+  },
+
+  getDataStoreItem: async (namespace, key) => {
+    const url = `${BASE_URL}/api/dataStore/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
+    const resp = await fetch(url, { headers: getHeaders() });
+    if (!resp.ok) return null;
+    return await resp.json().catch(() => null);
+  },
+
+  // Search organisation units by display name (case-insensitive LIKE)
+  searchOrganisationUnits: async (query, { max = 20 } = {}) => {
+    const q = String(query || '').trim();
+    if (!q) return [];
+    const url = `${BASE_URL}/api/organisationUnits.json?paging=false&fields=id,displayName,level,parent[id,displayName]&filter=displayName:ilike:${encodeURIComponent(q)}&pageSize=${max}`;
+    const resp = await fetch(url, { headers: getHeaders() });
+    if (!resp.ok) return [];
+    const json = await resp.json().catch(() => ({}));
+    return json?.organisationUnits || json?.rows || [];
+  },
+
+  // Get a single OU by id
+  getOrganisationUnit: async (id) => {
+    if (!id) return null;
+    const resp = await fetch(`${BASE_URL}/api/organisationUnits/${encodeURIComponent(id)}.json?fields=id,displayName,level,parent[id,displayName]`, { headers: getHeaders() });
+    if (!resp.ok) return null;
+    return await resp.json().catch(() => null);
+  },
 
     getCurrentUser: async () => {
         const response = await fetch(`${BASE_URL}/api/me?fields=id,displayName,username,organisationUnits[id,name]`, {
@@ -178,7 +344,7 @@ export const api = {
                 // Fetch details for all encountered org units in one request
                 // Standard filter syntax: filter=id:in:id1,id2,id3
                 const ouResponse = await fetch(
-                    `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:${ouIds.join(',')}&fields=id,displayName,name,parent[id,displayName,name]`,
+                    `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:${ouIds.join(',')}&fields=id,displayName,name,level,parent[id,displayName,name,level,parent[id,displayName,name,level]]`,
                     { headers: getHeaders() }
                 );
                 if (ouResponse.ok) {
@@ -207,7 +373,11 @@ export const api = {
             const resolvedFacilityId = facilityIdAttr?.value || fullOu?.id || ouId || 'N/A';
 
             // Calculate parent name with multiple fallbacks
-            const parentName = fullOu?.parent?.displayName || fullOu?.parent?.name || fullOu?.parent?.shortName || null;
+            // District name = one level above the immediate parent (if present),
+            // otherwise fall back to the immediate parent name
+            const parent = fullOu?.parent;
+            const grand = parent?.parent;
+            const parentName = grand?.displayName || grand?.name || parent?.displayName || parent?.name || null;
 
             return {
                 ...enrollment,
@@ -348,7 +518,7 @@ export const api = {
 		            return [];
 		        }
 
-	        // Group team events by enrollment and collect enrollment IDs
+        // Group team events by enrollment and collect enrollment IDs
 	        const teamByEnrollment = {};
 	        const enrollmentIds = new Set();
 	        for (const ev of teamEvents) {
@@ -368,6 +538,35 @@ export const api = {
 		            };
 		            return [];
 		        }
+
+        // Phase 2: Enrich teamByEnrollment with ALL team members for each
+        // enrollment (remove the Assigned User ID filter). This ensures the UI
+        // can display the full team, not just the current user's row.
+        try {
+            for (const enrId of enrollmentIds) {
+                const allTeamUrl = `${BASE_URL}/api/tracker/events.json?paging=false&program=${PROGRAM_ID}` +
+                    `&programStage=${TEAM_STAGE_ID}&fields=${teamFields}&enrollment=${encodeURIComponent(enrId)}`;
+                const resp = await fetch(allTeamUrl, { headers: getHeaders() });
+                if (!resp.ok) {
+                    debugRequests.push({ kind: 'teamEventsAll', path: allTeamUrl.replace(BASE_URL, ''), status: resp.status, ok: false, enrollment: enrId });
+                    continue;
+                }
+                const json = await resp.json();
+                const events = (json?.instances || json?.events || []);
+                debugRequests.push({ kind: 'teamEventsAll', path: allTeamUrl.replace(BASE_URL, ''), status: resp.status, ok: true, count: events.length, enrollment: enrId });
+                for (const ev of events) {
+                    if (!ev || !ev.event) continue;
+                    if (seenEventIds.has(ev.event)) continue; // skip duplicates we already pulled for current user
+                    seenEventIds.add(ev.event);
+                    const enr = ev.enrollment || enrId;
+                    if (!teamByEnrollment[enr]) teamByEnrollment[enr] = [];
+                    teamByEnrollment[enr].push(ev);
+                }
+            }
+        } catch (err) {
+            console.warn('⚠️ api.js: Failed to enrich full team membership for enrollments', err);
+            debugRequests.push({ kind: 'teamEventsAll', status: 'ERR', ok: false });
+        }
 
 	        // 2) Fetch enrollments with events so we can check programme setup
 	        // 2) Build lightweight "enrollment-like" objects directly from the
@@ -612,8 +811,8 @@ export const api = {
 		        let ouMap = {};
 		        if (ouIds.length > 0) {
 		            try {
-		                const ouUrl = `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:[${ouIds.join(',')}]` +
-		                    `&fields=id,displayName,name,parent[id,displayName,name]`;
+                const ouUrl = `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:[${ouIds.join(',')}]` +
+                    `&fields=id,displayName,name,level,parent[id,displayName,name,level,parent[id,displayName,name,level]]`;
 		                const ouResponse = await fetch(
 		                    ouUrl,
 		                    { headers: getHeaders() }
@@ -687,7 +886,9 @@ export const api = {
 	            const ouId = typeof rawOu === 'string' ? rawOu : (rawOu?.id || null);
 	            const fullOu = ouMap[ouId];
 
-	            const parentName = fullOu?.parent?.displayName || fullOu?.parent?.name || fullOu?.parent?.shortName || null;
+            const parent = fullOu?.parent;
+            const grand = parent?.parent;
+            const parentName = grand?.displayName || grand?.name || parent?.displayName || parent?.name || null;
 
 	            const setupEvent = pickLatestSetupEvent(enrId);
 	            const setupDv = setupEvent?.dataValues?.find(d => d.dataElement === DE_PROGRAM_STATUS) || null;
@@ -957,6 +1158,87 @@ export const api = {
 
         return data || { status: 'OK' };
     },
+
+  /**
+   * submitEventPutBatched
+   * Same as submitEventPut, but splits dataValues into multiple smaller PUTs
+   * to avoid gateway/proxy timeouts when sending very large payloads.
+   * Options: { batchSize?: number, interChunkDelayMs?: number }
+   */
+  submitEventPutBatched: async (formData, configuration, orgUnitId, opts = {}) => {
+    const PROGRAM_ID = configuration?.program?.id || 'G2gULe4jsfs';
+    const STAGE_ID = configuration?.programStage?.id || 'HpHD6u6MV37';
+    const DE_FACILITY_TEI_ID = 'BKs2OwTxyYa';
+    const batchSize = Math.max(50, Math.min(400, Number(opts.batchSize || 150))); // sane bounds
+    const interDelay = Math.max(0, Number(opts.interChunkDelayMs || 50));
+
+    const eventId = formData.eventId_internal || formData.event || formData.eventId;
+    if (!eventId) throw new Error('Missing DHIS2 event ID (eventId_internal) required for PUT batching');
+    const teiId = formData.teiId_internal || null;
+
+    // Notes: convert SE summaries to DHIS2 notes once (attach on last chunk)
+    const seSummaryNotes = Object.entries(formData || {})
+      .filter(([k, v]) => k.startsWith('se_summary_') && v !== undefined && v !== null && String(v).trim() !== '')
+      .map(([k, v]) => ({ value: `SE summary (${k.replace('se_summary_', '') || 'unknown-section'}): ${String(v).trim()}` }));
+
+    // Build all DVs once
+    const baseDvs = api.formatDataValues(formData).map(dv => ({ ...dv, providedElsewhere: false }));
+    // Ensure TEI mapping DE is present (first chunk)
+    if (teiId) {
+      const idx = baseDvs.findIndex(d => d.dataElement === DE_FACILITY_TEI_ID);
+      const teiDv = { dataElement: DE_FACILITY_TEI_ID, value: String(teiId), providedElsewhere: false };
+      if (idx >= 0) baseDvs[idx] = teiDv; else baseDvs.unshift(teiDv);
+    }
+
+    // Align Assessment Group from baseline (add/replace once)
+    try {
+      if (teiId) {
+        const baselineGroup = await api.getBaselineAssessmentGroup({ teiId, orgUnitId, programId: PROGRAM_ID, stageId: STAGE_ID });
+        if (baselineGroup && String(baselineGroup).trim() !== '') {
+          const AG_DE = 'pzenrgsSny3';
+          const idxAg = baseDvs.findIndex(d => d.dataElement === AG_DE);
+          const agDv = { dataElement: AG_DE, value: String(baselineGroup), providedElsewhere: false };
+          if (idxAg >= 0) baseDvs[idxAg] = agDv; else baseDvs.push(agDv);
+        }
+      }
+    } catch (e) {
+      console.warn('submitEventPutBatched: could not align Assessment Group (non-fatal)', e);
+    }
+
+    // Chunk dataValues
+    const chunks = [];
+    for (let i = 0; i < baseDvs.length; i += batchSize) {
+      chunks.push(baseDvs.slice(i, i + batchSize));
+    }
+
+    const baseBody = {
+      event: eventId,
+      orgUnit: orgUnitId,
+      program: PROGRAM_ID,
+      programStage: STAGE_ID,
+      status: 'COMPLETED',
+      ...(teiId ? { trackedEntityInstance: teiId } : {}),
+    };
+
+    const url = `${BASE_URL}/api/events/${encodeURIComponent(eventId)}/${DE_FACILITY_TEI_ID}`;
+    let successCount = 0;
+    for (let ci = 0; ci < chunks.length; ci++) {
+      const body = {
+        ...baseBody,
+        dataValues: chunks[ci],
+        ...(ci === chunks.length - 1 && seSummaryNotes.length > 0 ? { notes: seSummaryNotes } : {}),
+      };
+      const resp = await fetch(url, { method: 'PUT', headers: getHeaders({ json: true }), body: JSON.stringify(body) });
+      if (!resp.ok) {
+        const txt = await resp.text().catch(() => '');
+        throw new Error(`Chunk ${ci + 1}/${chunks.length} failed: HTTP ${resp.status} ${txt?.slice(0,200)}`);
+      }
+      successCount += 1;
+      if (interDelay > 0 && ci < chunks.length - 1) await new Promise(r => setTimeout(r, interDelay));
+    }
+
+    return { ok: true, chunks: chunks.length, updated: baseDvs.length };
+  },
 
     /**
      * Create a new survey Event in the target program/stage for a TEI/orgUnit.

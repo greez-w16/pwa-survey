@@ -114,7 +114,7 @@ class AssessmentTeamAssignmentService {
 	                count: enrollments?.length || 0
 	            });
 
-	            return enrollments.map(item => {
+            return enrollments.map(item => {
 	                // Try to infer a stored status code from team events (preferred),
 	                // falling back to any explicit STATUS_DATA_ELEMENT_UID, and
 	                // finally to enrollment.status via mapStatus.
@@ -139,7 +139,7 @@ class AssessmentTeamAssignmentService {
 	                    }
 	                }
 
-	                return {
+                return {
 	                    eventId: item.enrollment || item.trackedEntityInstance,
 			            // Keep explicit reference to the TEI so other parts of the
 			            // app (e.g. App.jsx auto-population of Assessment Details)
@@ -164,7 +164,21 @@ class AssessmentTeamAssignmentService {
 		                    // troubleshooting or future features.
 		                    scheduledAt: item.scheduledAt || null,
 		                    updatedAt: item.updatedAt || null,
-	                    attributes: item.attributes || [],
+                    attributes: item.attributes || [],
+                    // Surface the team from api.getSchedulingAssignments so the
+                    // Dashboard can display members/roles next to each assignment.
+                    // Shape: [{ assignedUserId, assignmentStatus, teamRole, eventDate, orgUnit, orgUnitName }]
+                    team: Array.isArray(item.team) ? item.team : [],
+                    teamSize: Array.isArray(item.team) ? item.team.length : 0,
+                    // Convenience fields for current user’s membership when available
+                    myTeamRole: (() => {
+                        const mine = (Array.isArray(item.team) ? item.team : []).find(t => String(t.assignedUserId || '') === String(userId) || String(t.assignedUserId || '').toLowerCase().includes(String(username || '').toLowerCase()));
+                        return mine?.teamRole || null;
+                    })(),
+                    myAssignmentStatus: (() => {
+                        const mine = (Array.isArray(item.team) ? item.team : []).find(t => String(t.assignedUserId || '') === String(userId) || String(t.assignedUserId || '').toLowerCase().includes(String(username || '').toLowerCase()));
+                        return mine?.assignmentStatus || null;
+                    })(),
 	                };
 	            });
 	        } catch (error) {
