@@ -35,6 +35,7 @@ export default function Report() {
   const [error, setError] = useState(null);
   const [facilityOptions, setFacilityOptions] = useState([]); // [{id, name}]
   const [selectedFacilityId, setSelectedFacilityId] = useState('');
+  const [facilityLocked, setFacilityLocked] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
   const [reportLoading, setReportLoading] = useState(false);
@@ -92,7 +93,18 @@ export default function Report() {
               (standard.criteria || []).forEach(crit => {
                 if (!crit || !crit.id) return;
                 severityLookup[crit.id] = crit.severity || 1;
-                criticalLookup[crit.id] = Boolean(crit.is_critical);
+                // Support multiple flag names and normalized IDs
+                const isCrit = (
+                  crit.is_critical === true ||
+                  crit.isCritical === true ||
+                  crit.critical === true
+                );
+                const rawId = String(crit.id);
+                const normId = normalizeCriterionCode(rawId);
+                if (isCrit) {
+                  criticalLookup[rawId] = true;
+                  if (normId && normId !== rawId) criticalLookup[normId] = true;
+                }
               });
             });
           });
@@ -444,6 +456,7 @@ export default function Report() {
       const start = sp.get('start');
       const end = sp.get('end');
       if (facilityId) setSelectedFacilityId(facilityId);
+      if (facilityId) setFacilityLocked(true);
       if (start) setStartDate(start.split('T')[0] || start);
       if (end) setEndDate(end.split('T')[0] || end);
       if (facilityId) {
@@ -510,7 +523,11 @@ export default function Report() {
       // Try to detect programme type from reportInfo.groupId
       const programmeType = (reportInfo.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo.groupId === 'CLINICS') ? 'clinics' : (reportInfo.groupId === 'SE') ? 'ems' : 'mortuary';
       const criticalLookup = (programmeScoringMeta[programmeType] && programmeScoringMeta[programmeType].criticalLookup) || {};
-      const getCritical = (list) => list.filter(c => criticalLookup[c.code] === true);
+      const getCritical = (list) => list.filter(c => {
+        const code = String(c.code || '').trim();
+        const n = normalizeCriterionCode(code);
+        return criticalLookup[code] === true || criticalLookup[n] === true;
+      });
       const baseCritCritical = getCritical(baseCrit);
       const lateCritCritical = getCritical(lateCrit);
       const baseCriticalCounts = getCounts(baseCritCritical);
@@ -573,6 +590,7 @@ export default function Report() {
             label="Facility (authorised)"
             value={selectedFacilityId}
             onChange={e => setSelectedFacilityId(e.target.value)}
+            disabled={facilityLocked}
           >
             {facilityOptions.map(opt => (
               <MenuItem key={opt.id} value={opt.id}>{opt.name} ({opt.id})</MenuItem>

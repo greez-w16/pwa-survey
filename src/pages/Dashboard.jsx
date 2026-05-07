@@ -76,6 +76,7 @@ export function Dashboard() {
     const [initAssignments, setInitAssignments] = useState({}); // { [seId]: [userIds] }
     const [initPlanLoading, setInitPlanLoading] = useState(false);
     const [initMode, setInitMode] = useState('BASELINE'); // BASELINE | FOLLOWUP
+    const [forceSelfOnly, setForceSelfOnly] = useState(false);
     const [lockType, setLockType] = useState(false);
     const [lockGroup, setLockGroup] = useState(false);
 
@@ -471,7 +472,7 @@ export function Dashboard() {
     // New explicit initiate handler: opens the Initiate dialog even if a
     // baseline already exists. In follow-up mode, Type is locked to Self
     // Assessment and Facility Group is locked to the baseline's group.
-    const handleInitiateSurvey = async (assessment) => {
+    const handleInitiateSurvey = async (assessment, { selfOnly = false } = {}) => {
         const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
         const isLead = /LEAD|LEADER/.test(roleNorm);
         if (!isLead) {
@@ -487,7 +488,7 @@ export function Dashboard() {
             try { latestEventId = await api.getLatestSurveyEventId({ programId, stageId, teiId, orgUnitId }); } catch (_) {}
             if (latestEventId) {
                 // A baseline (or previous) event exists → open dialog in FOLLOWUP mode
-                await openInitiateSurveyFollowUp(assessment);
+                await openInitiateSurveyFollowUp(assessment, { selfOnly });
                 return;
             }
             // Else, use the baseline initiation path from handleOpenAssessment
@@ -498,11 +499,10 @@ export function Dashboard() {
     };
 
     // Allow initiating a new survey even if a baseline already exists (Lead only).
-    // In this follow-up mode, we lock Facility Group to the baseline's group but
-    // keep Type of Survey open (user can choose any type). If the user selects
-    // Self Assessment, we will use the TEI of the latest authorised assignment
-    // for the new event.
-    const openInitiateSurveyFollowUp = async (assessment) => {
+    // In this follow-up mode, we lock Facility Group to the baseline's group. Type of
+    // Survey is left open unless selfOnly=true, in which case we lock to Self Assessment
+    // and only allow Self in the dialog.
+    const openInitiateSurveyFollowUp = async (assessment, { selfOnly = false } = {}) => {
         try {
             // Build team options (same as in handleOpenAssessment)
             try {
@@ -544,9 +544,17 @@ export function Dashboard() {
                 setLockGroup(true);
             }
 
-            // Leave Type of Survey open in follow-up mode
-            setInitSurveyType('');
-            setLockType(false);
+            if (selfOnly) {
+                const selfOpt = (surveyTypeOptions || []).find(o => /self/i.test(String(o.label || o.value)) ) || (surveyTypeOptions || [])[0];
+                if (selfOpt) setInitSurveyType(selfOpt.value);
+                setLockType(true);
+                setForceSelfOnly(true);
+            } else {
+                // Leave Type of Survey open in follow-up mode
+                setInitSurveyType('');
+                setLockType(false);
+                setForceSelfOnly(false);
+            }
 
             setInitAssignments({});
             setPendingOpenAssessment(assessment);
@@ -1219,7 +1227,7 @@ export function Dashboard() {
                                         <div className="form-actions">
                                             <button
                                                 className={`btn ${isSynced ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-                                                onClick={() => handleInitiateSurvey(assessment)}
+                                                onClick={() => handleInitiateSurvey(assessment, { selfOnly: false })}
                                             >
                                                 Initiate Survey
                                             </button>
@@ -1320,11 +1328,23 @@ export function Dashboard() {
                                                     </div>
                                                 </div>
                                             {(() => {
-                                                // Hide details when the Associated Events table is open and has rows
+                                                // Hide details only when the Associated Events table is open AND
+                                                // the scheduled assessment (this card) is represented in that
+                                                // table (by TEI or orgUnit match).
                                                 const assocKey = getAssocKey(assessment);
                                                 const assocState = associatedByEnrollment?.[assocKey];
-                                                const hasAssocRows = Array.isArray(assocState?.rows) && assocState.rows.length > 0;
-                                                if (expandedAssignments[assocKey] && hasAssocRows) return null;
+                                                // Use the same source the table uses (survey list), not a non-existent 'rows' prop
+                                                const list = Array.isArray(assocState?.survey) ? assocState.survey : [];
+                                                const hasAssocRows = list.length > 0;
+                                                const cardTei = assessment?.scheduleTeiId || assessment?.trackedEntityInstance || null;
+                                                const cardOu = assessment?.orgUnitId || (typeof assessment?.orgUnit === 'string' ? assessment.orgUnit : assessment?.orgUnit?.id) || assessment?.orgUnit || null;
+                                                const isThisAssessmentRepresented = list.some(ev => {
+                                                    const evTei = ev?.trackedEntityInstance || ev?.teiId || null;
+                                                    const evOu = ev?.orgUnit || null;
+                                                    return (cardTei && evTei && String(evTei).trim() === String(cardTei).trim()) ||
+                                                           (cardOu && evOu && String(evOu).trim() === String(cardOu).trim());
+                                                });
+                                                if (expandedAssignments[assocKey] && hasAssocRows && isThisAssessmentRepresented) return null;
 
                                                 // Compute latest authorised window from team events (per OU)
                                                 const evs = Array.isArray(assessment.team) ? assessment.team : [];
@@ -1339,7 +1359,7 @@ export function Dashboard() {
                                                 return (
                                                     <p>
                                                         Date: {latestAuth}
-                                                        {' '}| Authorised: {authStart} 	to {authEnd}
+                                                        {' '}| Authorised: {authStart} to {authEnd}
                                                         {' '}| OU: {assessment.orgUnit}
                                                         {' '}| Enr: {assessment.eventId}
                                                         {' '}| TEI: {assessment.scheduleTeiId || assessment.trackedEntityInstance}
@@ -1348,7 +1368,7 @@ export function Dashboard() {
                                             })()}
                                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                 <button className="btn btn-secondary btn-sm" onClick={() => toggleExpandAssessment(assessment)}>
-                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide associated events' : 'Show associated events'}
+                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
                 </button>
             </div>
             {expandedAssignments[getAssocKey(assessment)] && (
@@ -1391,13 +1411,25 @@ export function Dashboard() {
                             const dv = (ev.dataValues||[]).find(d => d.dataElement === surveyGroupDeId);
                             return dv?.value || '-';
                         };
+                        // Authorised window for this OU (from team events)
+                        const authDates = (() => {
+                            const evsAuth = Array.isArray(assessment.team) ? assessment.team : [];
+                            const parseD = (d) => (d ? new Date(d) : null);
+                            const ds = evsAuth.map(e => parseD(e.eventDate || e.occurredAt || e.completedDate || e.scheduledAt || e.updatedAt)).filter(Boolean).sort((a,b)=>a-b);
+                            const start = ds[0] ? ds[0].toISOString().slice(0,10) : '';
+                            const end = ds.length ? ds[ds.length-1].toISOString().slice(0,10) : '';
+                            return { start, end };
+                        })();
                         return (
                             <div style={{ overflowX: 'auto' }}>
                                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9em' }}>
                                     <thead>
                                         <tr style={{ textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
                                             <th style={{ padding: '6px 8px' }}>Assessment_ID</th>
+                                            <th style={{ padding: '6px 8px' }}>TEI</th>
                                             <th style={{ padding: '6px 8px' }}>Assessment date</th>
+                                            <th style={{ padding: '6px 8px' }}>Authorised start</th>
+                                            <th style={{ padding: '6px 8px' }}>Authorised end</th>
                                             <th style={{ padding: '6px 8px' }}>Type of assessment</th>
                                             <th style={{ padding: '6px 8px' }}>Assessment group</th>
                                             <th style={{ padding: '6px 8px' }}>Status</th>
@@ -1413,7 +1445,10 @@ export function Dashboard() {
                                                                                 title="Open this survey for editing"
                                                                             >
                                                                                 <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.event || '-'}</td>
-                                                                                <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{ev.eventDate ? new Date(ev.eventDate).toLocaleDateString() : 'N/A'}</td>
+                                                                                <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.trackedEntityInstance || '-'}</td>
+                                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{ev.eventDate ? new Date(ev.eventDate).toLocaleDateString() : 'N/A'}</td>
+                                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.start || 'N/A'}</td>
+                                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.end || 'N/A'}</td>
                                                                                 <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
                                                                                 <td style={{ padding: '6px 8px', color: '#334155' }}>{getGroupValue(ev)}</td>
                                                                                 <td style={{ padding: '6px 8px' }}>{ev.status || '-'}</td>
@@ -1459,7 +1494,7 @@ export function Dashboard() {
                                                     const isLead = /LEAD|LEADER/.test(roleNorm);
                                                     const label = isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey');
                                                     if (label === 'Initiate Survey' && !isLead) return null;
-                                                    const onClick = () => (label === 'Initiate Survey' ? handleInitiateSurvey(assessment) : handleOpenAssessment(assessment));
+                                                    const onClick = () => (label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly: false }) : handleOpenAssessment(assessment));
                                                     return (
                                                         <button
                                                             className={`btn ${isSynced ? 'btn-secondary' : 'btn-primary'} btn-sm`}

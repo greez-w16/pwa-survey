@@ -51,6 +51,79 @@ export const api = {
     },
 
     /**
+     * Check whether a given TEI has an authorised assessment in the Scheduling program (K9O5fdoBmKf).
+     * Definition used here:
+     *  - Has at least one Team Assignment & Acceptance event (UQmvnyPZLk2)
+     *    with Assignment Status (yVVbhT02L6G) == FAC_ASS_ASSIGN_ACCEPTED
+     *  - AND has at least one Programme Setup event (M2RdEI7Tbqr)
+     *    with Assessment Program Status (xFQOt5o6DSz) == FAC_ASS_PROGRAM_FINAL_CONFIRMED
+     * Returns a compact summary with counts and latest dates.
+     */
+    checkTeiAuthorisation: async (teiId) => {
+        if (!teiId) throw new Error('checkTeiAuthorisation requires teiId');
+        const PROGRAM_ID = 'K9O5fdoBmKf';
+        const TEAM_STAGE_ID = 'UQmvnyPZLk2';
+        const SETUP_STAGE_ID = 'M2RdEI7Tbqr';
+        const DE_ASSIGN_STATUS = 'yVVbhT02L6G'; // Assignment Status
+        const DE_PROGRAM_STATUS = 'xFQOt5o6DSz'; // Assessment Program Status
+        const ASSIGN_STATUS_ACCEPTED = 'FAC_ASS_ASSIGN_ACCEPTED';
+        const PROGRAM_STATUS_APPROVED = 'FAC_ASS_PROGRAM_FINAL_CONFIRMED';
+
+        const fields = [
+            'event', 'eventDate', 'status', 'orgUnit', 'programStage', 'enrollment',
+            'dataValues[dataElement,value]'
+        ].join(',');
+
+        const makeUrl = (stageId) => (
+            `${BASE_URL}/api/events?paging=false&program=${PROGRAM_ID}` +
+            `&programStage=${stageId}&trackedEntityInstance=${encodeURIComponent(teiId)}` +
+            `&ouMode=ALL&fields=${fields}&order=eventDate:desc`
+        );
+
+        const [teamResp, setupResp] = await Promise.all([
+            fetch(makeUrl(TEAM_STAGE_ID), { headers: getHeaders() }),
+            fetch(makeUrl(SETUP_STAGE_ID), { headers: getHeaders() })
+        ]);
+        if (!teamResp.ok) throw new Error(`Failed to fetch team events: ${teamResp.status}`);
+        if (!setupResp.ok) throw new Error(`Failed to fetch setup events: ${setupResp.status}`);
+        const teamJson = await teamResp.json();
+        const setupJson = await setupResp.json();
+        const teamEvents = teamJson.events || [];
+        const setupEvents = setupJson.events || [];
+
+        const hasDv = (ev, deId, valEquals) => {
+            const dvs = ev?.dataValues || [];
+            return dvs.some(d => d.dataElement === deId && String(d.value || '').trim() === valEquals);
+        };
+
+        const acceptedEvents = teamEvents.filter(ev => hasDv(ev, DE_ASSIGN_STATUS, ASSIGN_STATUS_ACCEPTED));
+        const approvedEvents = setupEvents.filter(ev =>
+            hasDv(ev, DE_PROGRAM_STATUS, PROGRAM_STATUS_APPROVED) ||
+            hasDv(ev, DE_PROGRAM_STATUS, 'Approved') // fallback if server stores label
+        );
+
+        const latestDate = (list) => (list[0]?.eventDate ? list[0].eventDate.slice(0,10) : null);
+
+        const summary = {
+            teiId,
+            teamEventsCount: teamEvents.length,
+            acceptedCount: acceptedEvents.length,
+            setupEventsCount: setupEvents.length,
+            approvedCount: approvedEvents.length,
+            latestAcceptedDate: latestDate(acceptedEvents),
+            latestApprovedDate: latestDate(approvedEvents),
+            hasAuthorised: (acceptedEvents.length > 0) && (approvedEvents.length > 0),
+            sample: {
+                acceptedEventId: acceptedEvents[0]?.event || null,
+                approvedEventId: approvedEvents[0]?.event || null,
+                enrollmentAccepted: acceptedEvents[0]?.enrollment || null,
+                enrollmentApproved: approvedEvents[0]?.enrollment || null,
+            }
+        };
+        return summary;
+    },
+
+    /**
      * Resolve DHIS2 user display names for a list of identifiers. The identifiers
      * can be either user IDs (UIDs) or usernames. Returns a map of
      * { key -> { id, username, displayName } } and caches results in-memory.

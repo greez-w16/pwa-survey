@@ -23,6 +23,11 @@ export default function Admin() {
   const norm = (s) => String(s || '').toUpperCase().replace(/\s+/g, ' ').trim();
   const canDelete = norm(confirmText) === norm(confirmPhrase) || norm(confirmText) === 'DELETE';
 
+  // TEI Authorisation Checker state
+  const [teiIdInput, setTeiIdInput] = useState('');
+  const [teiChecking, setTeiChecking] = useState(false);
+  const [teiResult, setTeiResult] = useState(null);
+
   const runDryRun = async () => {
     try {
       setLoading(true);
@@ -150,6 +155,59 @@ export default function Admin() {
               <div style={{ marginTop: 6 }}>
                 Sample IDs:
                 <pre style={{ background: '#f9fafb', padding: 8, borderRadius: 4, maxHeight: 160, overflow: 'auto' }}>{result.sampleIds.join('\n')}</pre>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* TEI Authorisation Checker */}
+      <div style={{ marginTop: 16, padding: 12, border: '1px solid #e5e7eb', borderRadius: 6 }}>
+        <h3>TEI Authorisation Checker</h3>
+        <p style={{ color: '#6b7280', marginTop: 4 }}>
+          Check if a Tracked Entity Instance (TEI) has an authorised assessment in the Scheduling program.
+        </p>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <TextField
+            label="TEI UID"
+            size="small"
+            value={teiIdInput}
+            onChange={e => setTeiIdInput(e.target.value.trim())}
+            placeholder="e.g. UtpXiIcqvHW"
+            style={{ flex: 1 }}
+          />
+          <Button
+            variant="outlined"
+            disabled={teiChecking || !teiIdInput}
+            onClick={async () => {
+              try {
+                setTeiChecking(true);
+                setTeiResult(null);
+                const res = await api.checkTeiAuthorisation(teiIdInput);
+                setTeiResult(res);
+                const status = res.hasAuthorised ? 'YES' : 'NO';
+                showToast?.(`Authorised: ${status} (accepted=${res.acceptedCount}, approved=${res.approvedCount})`, res.hasAuthorised ? 'success' : 'info');
+              } catch (e) {
+                console.error('TEI check failed', e);
+                showToast?.(`TEI check failed: ${e.message || e}`, 'error');
+              } finally {
+                setTeiChecking(false);
+              }
+            }}
+          >
+            {teiChecking ? 'Checking…' : 'Check'}
+          </Button>
+        </div>
+        {teiResult && (
+          <div style={{ marginTop: 10, fontSize: 14, color: '#374151' }}>
+            <div>TEI: <strong>{teiResult.teiId}</strong></div>
+            <div>Authorised: <strong>{teiResult.hasAuthorised ? 'YES' : 'NO'}</strong></div>
+            <div>Accepted team events: <strong>{teiResult.acceptedCount}</strong> (latest: {teiResult.latestAcceptedDate || 'n/a'})</div>
+            <div>Approved setup events: <strong>{teiResult.approvedCount}</strong> (latest: {teiResult.latestApprovedDate || 'n/a'})</div>
+            {teiResult.sample && (
+              <div style={{ marginTop: 6 }}>
+                <div>Sample accepted event: {teiResult.sample.acceptedEventId || 'n/a'} (enrollment: {teiResult.sample.enrollmentAccepted || 'n/a'})</div>
+                <div>Sample approved event: {teiResult.sample.approvedEventId || 'n/a'} (enrollment: {teiResult.sample.enrollmentApproved || 'n/a'})</div>
               </div>
             )}
           </div>
