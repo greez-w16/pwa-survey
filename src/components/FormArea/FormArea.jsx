@@ -509,6 +509,38 @@ const FormArea = ({
     }, []);
 
 	    const activeGroup = groups.find(g => g.sections?.some(s => s.id === activeSection?.id));
+	    const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
+
+	    const resolveAssessmentGroupId = React.useCallback((text) => {
+	        const t = String(text || '').toLowerCase();
+	        if (t.includes('hosp')) return 'HOSPITAL';
+	        if (t.includes('clinic')) return 'CLINICS';
+	        if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
+	        if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
+	        return null;
+	    }, []);
+
+	    const resolveAssessmentNamespace = React.useCallback((text) => {
+	        const t = String(text || '').toLowerCase();
+	        if (t.includes('hosp')) return 'HOSPITAL';
+	        if (t.includes('clinic')) return 'CLINICS';
+	        if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
+	        if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
+	        return String(text || '').toUpperCase().trim() || null;
+	    }, []);
+
+	    const assessmentGroupText = React.useMemo(
+	        () => String(formData?.[FACILITY_GROUP_DE_ID] || '').trim(),
+	        [formData?.[FACILITY_GROUP_DE_ID]]
+	    );
+
+	    const assessmentScopedGroup = React.useMemo(() => {
+	        const targetId = resolveAssessmentGroupId(assessmentGroupText);
+	        const matched = targetId && Array.isArray(groups)
+	            ? groups.find(g => g.id === targetId)
+	            : null;
+	        return matched || activeGroup || null;
+	    }, [groups, activeGroup, assessmentGroupText, resolveAssessmentGroupId]);
 
 	    const programmeType = (() => {
 	        if (activeGroup?.id === 'SURV-MORTUARY' || activeGroup?.id === 'GENERAL' || activeGroup?.name === 'Mortuary') {
@@ -741,9 +773,8 @@ const FormArea = ({
     const [eventMapResolving, setEventMapResolving] = useState(false);
 
     const loadAssignmentPlanForAssessment = React.useCallback(async () => {
-        const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
-        const groupText = (formData?.[FACILITY_GROUP_DE_ID] || '').toUpperCase().trim();
-        const preferredNs = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].find(k => groupText.includes(k)) || groupText || null;
+        const groupText = String(formData?.[FACILITY_GROUP_DE_ID] || '').trim();
+        const preferredNs = resolveAssessmentNamespace(groupText);
         const candidateNamespaces = Array.from(new Set([
             preferredNs,
             'HOSPITAL',
@@ -770,7 +801,7 @@ const FormArea = ({
             }
         }
         return { plan: null, nsKey: preferredNs, teiId: candidateTeis[0] || null };
-    }, [formData?.teiId_internal, formData?.pzenrgsSny3, selectedFacility]);
+    }, [formData?.teiId_internal, formData?.pzenrgsSny3, selectedFacility, resolveAssessmentNamespace]);
 
     React.useEffect(() => {
         let cancelled = false;
@@ -860,6 +891,26 @@ const FormArea = ({
         const name = String(sec?.name || '').toLowerCase();
         return name === 'assessment details' || name === 'assessment_details';
     }, []);
+
+    const assessmentScopedSections = React.useMemo(
+        () => (Array.isArray(assessmentScopedGroup?.sections) ? assessmentScopedGroup.sections : []),
+        [assessmentScopedGroup]
+    );
+
+    const assessmentScopedSeSections = React.useMemo(
+        () => assessmentScopedSections.filter(sec => !isAssessmentDetailsSection(sec)),
+        [assessmentScopedSections, isAssessmentDetailsSection]
+    );
+
+    const assessmentNamespaceKey = React.useMemo(
+        () => resolveAssessmentNamespace(assessmentGroupText || assessmentScopedGroup?.name || assessmentScopedGroup?.id || ''),
+        [assessmentGroupText, assessmentScopedGroup, resolveAssessmentNamespace]
+    );
+
+    const latestFormDataRef = React.useRef(formData);
+    React.useEffect(() => {
+        latestFormDataRef.current = formData;
+    }, [formData]);
 
     const extractSeNum = React.useCallback((sec) => {
         const direct = sec?.se_id ?? sec?.seId ?? sec?.sectionNumber ?? null;
@@ -972,14 +1023,7 @@ const FormArea = ({
         let cancelled = false;
         (async () => {
             try {
-                const currentGroup = Array.isArray(groups)
-                    ? groups.find(g => Array.isArray(g.sections) && g.sections.some(s => s.id === activeSection?.id))
-                    : null;
-                const targetSections = currentGroup?.sections || [];
-                const expectedSeNums = (targetSections || [])
-                    .filter(sec => !isAssessmentDetailsSection(sec))
-                    .map(sec => extractSeNum(sec))
-                    .filter(Boolean);
+                const targetSections = assessmentScopedSections || [];
                 const teiId = formData?.teiId_internal || selectedFacility?.trackedEntityInstance || selectedFacility?.scheduleTeiId || null;
                 const orgUnitId = selectedFacility?.orgUnitId
                     || (typeof selectedFacility?.orgUnit === 'string' ? selectedFacility.orgUnit : selectedFacility?.orgUnit?.id)
@@ -1011,6 +1055,20 @@ const FormArea = ({
                     ...(inferredMap || {}),
                 };
 
+                const targetFieldIds = new Set(
+                    targetSections.flatMap(sec => (sec?.fields || []).map(f => f?.id).filter(Boolean))
+                );
+                const serverFieldValues = new Map();
+                (surveyEvents || []).forEach(ev => {
+                    (ev?.dataValues || []).forEach(dv => {
+                        if (!dv?.dataElement || !targetFieldIds.has(dv.dataElement)) return;
+                        if (dv.value === undefined || dv.value === null) return;
+                        const text = String(dv.value).trim();
+                        if (!text || serverFieldValues.has(dv.dataElement)) return;
+                        serverFieldValues.set(dv.dataElement, dv.value);
+                    });
+                });
+
                 if (!cancelled) {
                     setResolvedEventIdMap(mergedMap);
                     setEventMapResolving(false);
@@ -1018,6 +1076,16 @@ const FormArea = ({
 
                 if (Object.keys(mergedMap || {}).length > 0 && JSON.stringify(mergedMap) !== JSON.stringify(draftEventIdMap || {})) {
                     saveField('eventIdMap_internal', JSON.stringify(mergedMap));
+                }
+
+                if (selectedFacility?.hydrateAll) {
+                    serverFieldValues.forEach((value, fieldId) => {
+                        const currentValue = latestFormDataRef.current?.[fieldId];
+                        const currentText = currentValue === undefined || currentValue === null ? '' : String(currentValue).trim();
+                        if (currentText === '') {
+                            saveField(fieldId, value);
+                        }
+                    });
                 }
             } catch (e) {
                 console.warn('FormArea: Could not resolve SE event mapping automatically', e);
@@ -1028,7 +1096,7 @@ const FormArea = ({
             }
         })();
         return () => { cancelled = true; };
-    }, [draftEventIdMap, groups, activeSection, formData?.teiId_internal, formData?.eventIdMap_internal, selectedFacility, configuration, inferEventIdMapFromSurveyEvents, saveField, isAssessmentDetailsSection, extractSeNum]);
+    }, [draftEventIdMap, assessmentScopedSections, formData?.teiId_internal, formData?.eventIdMap_internal, selectedFacility, configuration, inferEventIdMapFromSurveyEvents, saveField]);
 
     // Determine if the current section is locked for this user
     const isSectionLocked = React.useMemo(() => {
@@ -1040,15 +1108,9 @@ const FormArea = ({
     }, [isADSection, seLockInfo, activeSeNum]);
 
     const randomizeStatus = React.useMemo(() => {
-        const currentGroup = Array.isArray(groups)
-            ? groups.find(g => Array.isArray(g.sections) && g.sections.some(s => s.id === activeSection?.id))
-            : null;
-        const targetSections = currentGroup?.sections || [];
-        const seSections = targetSections.filter(s => !isAssessmentDetailsSection(s));
-        const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
-        const assessmentGroupText = (formData?.[FACILITY_GROUP_DE_ID] || '').toUpperCase().trim();
-        const groupName = assessmentGroupText || (currentGroup?.name || currentGroup?.id || '').toUpperCase();
-        const nsKey = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].find(k => groupName.includes(k)) || groupName;
+        const targetSections = assessmentScopedSections;
+        const seSections = assessmentScopedSeSections;
+        const nsKey = assessmentNamespaceKey;
         const teiId = formData?.teiId_internal || selectedFacility?.trackedEntityInstance || selectedFacility?.scheduleTeiId || null;
         const orgUnitId = selectedFacility?.orgUnitId
             || (typeof selectedFacility?.orgUnit === 'string' ? selectedFacility.orgUnit : selectedFacility?.orgUnit?.id)
@@ -1084,8 +1146,8 @@ const FormArea = ({
             if (!assigneeUsername) return { enabled: false, reason: `SE ${seNum} assigned username could not be resolved` };
         }
 
-        return { enabled: true, reason: 'Randomize all criterion answers and comments across all sections in this group (testing only)' };
-    }, [groups, activeSection, formData, selectedFacility, assignmentLoaded, assignmentPlan, randomizeUsersLoaded, randomizeUserMap, isSectionLocked, isAssessmentDetailsSection, extractSeNum, effectiveEventIdMap, eventMapResolving]);
+        return { enabled: true, reason: 'Randomize all criterion answers and comments across this assessment group (testing only)' };
+    }, [assessmentScopedSections, assessmentScopedSeSections, assessmentNamespaceKey, formData, selectedFacility, assignmentLoaded, assignmentPlan, randomizeUsersLoaded, randomizeUserMap, isSectionLocked, extractSeNum, effectiveEventIdMap, eventMapResolving]);
 
     // Resolve the owner's name for the lock banner
     const sectionOwnerName = React.useMemo(() => {
@@ -2263,22 +2325,18 @@ const FormArea = ({
         });
     };
 
-    // Testing helper: randomize answers and comments across all SEs in the active group.
+    // Testing helper: randomize answers and comments across all SEs in the assessment group.
     // When SE assignments exist (from the initiation plan), each SE's randomized data
     // is PUT to DHIS2 under the assigned assessor's credentials so the audit trail
     // (lastUpdatedBy) shows which user entered which SE data in the report.
     const randomizeAllAnswers = React.useCallback(async () => {
         try {
-            // Find current group from activeSection
-            const currentGroup = Array.isArray(groups)
-                ? groups.find(g => Array.isArray(g.sections) && g.sections.some(s => s.id === activeSection?.id))
-                : null;
-            const targetSections = currentGroup?.sections || [];
+            const targetSections = assessmentScopedSections;
             if (!targetSections.length) {
                 if (typeof showToast === 'function') showToast('No sections available to randomize.', 'warning');
                 return;
             }
-            if (!window.confirm('Randomize all criterion responses and comments across all sections in this group?\nThis will overwrite existing values AND push data to DHIS2 under each assigned assessor.')) {
+            if (!window.confirm('Randomize all criterion responses and comments across all sections in this assessment group?\nThis will overwrite existing values AND push data to DHIS2 under each assigned assessor.')) {
                 return;
             }
 
@@ -2287,10 +2345,7 @@ const FormArea = ({
 
             // Determine facility group key from the Assessment Group field value
             // (pzenrgsSny3) — NOT from the active group which may default to Mortuary.
-            const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
-            const assessmentGroupText = (formData?.[FACILITY_GROUP_DE_ID] || '').toUpperCase().trim();
-            const groupName = assessmentGroupText || (currentGroup?.name || currentGroup?.id || '').toUpperCase();
-            const nsKey = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].find(k => groupName.includes(k)) || groupName;
+            const nsKey = assessmentNamespaceKey;
 
             // TEI used as the DataStore key
             const teiId = formData?.teiId_internal
@@ -2366,7 +2421,7 @@ const FormArea = ({
             };
 
             // ── Main loop: iterate SE sections ────────────────────────────
-            const seSections = targetSections.filter(s => !isAssessmentDetailsSection(s));
+            const seSections = assessmentScopedSeSections;
 
             // Strict preflight: refuse to randomize unless we can push every SE to DHIS2
             const preflightIssues = [];
@@ -2482,7 +2537,7 @@ const FormArea = ({
             console.warn('Randomize answers failed', e);
             if (typeof showToast === 'function') showToast('Randomize failed (see console).', 'error');
         }
-    }, [groups, activeSection, saveField, showToast, formData, selectedFacility, configuration]);
+    }, [assessmentScopedSections, assessmentScopedSeSections, assessmentNamespaceKey, effectiveEventIdMap, assignmentPlanSource?.teiId, assignmentPlan, loadAssignmentPlanForAssessment, randomizeUserMap, saveField, showToast, formData, selectedFacility, configuration, eventMapResolving, extractSeNum, isAssessmentDetailsSection]);
     if (!activeSection) {
         if (!selectedFacility) {
             return <div className="form-area-empty">Please select a facility and a section</div>;
