@@ -165,6 +165,8 @@ class AssessmentTeamAssignmentService {
 		                    scheduledAt: item.scheduledAt || null,
 		                    updatedAt: item.updatedAt || null,
                     attributes: item.attributes || [],
+	                    setupEventId: item.setupEventId || null,
+	                    setupEventDataValues: Array.isArray(item.setupEventDataValues) ? item.setupEventDataValues : [],
                     // Surface the team from api.getSchedulingAssignments so the
                     // Dashboard can display members/roles next to each assignment.
                     // Shape: [{ assignedUserId, assignmentStatus, teamRole, eventDate, orgUnit, orgUnitName }]

@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
 import { Button, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
@@ -25,7 +25,8 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip,
-  Legend
+  Legend,
+  LabelList
 } from 'recharts';
 
 export default function Report() {
@@ -45,6 +46,8 @@ export default function Report() {
   const [baselineProvisioned, setBaselineProvisioned] = useState(false);
   const [sectionLabels, setSectionLabels] = useState({});
   const [sectionChartLabels, setSectionChartLabels] = useState({});
+  const [assessorSummary, setAssessorSummary] = useState([]);
+  const [isAssessorSummaryCollapsed, setIsAssessorSummaryCollapsed] = useState(true);
   // Helper: identify the non-SE metadata section often named "Assessment Details"
   const isAssessmentDetailsSection = (section) => {
     if (!section) return false;
@@ -232,133 +235,142 @@ export default function Report() {
         // Fetch all events for this facility OU, then filter by date range client-side
         const events = await api.getEventsList({
           programId, stageId, orgUnitId: selectedFacilityId, ouMode: 'SELECTED', order: 'eventDate:asc',
-          fields: 'event,eventDate,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value]'
+          fields: 'event,eventDate,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value],notes[note,value]'
         });
         const all = Array.isArray(events) ? events : [];
 
-        // If there are no assessments at all for this facility, provision a baseline event
         if (all.length === 0) {
-          try {
-            const match = (Array.isArray(userAssignments) ? userAssignments : []).find(a => {
-              const ouId = a.orgUnitId || (typeof a.orgUnit === 'string' ? a.orgUnit : a.orgUnit?.id);
-              return ouId === selectedFacilityId;
-            });
-            const teiId = match?.trackedEntityInstance;
-            if (teiId) {
-              await api.createSurveyEvent({ programId, stageId, orgUnitId: selectedFacilityId, teiId, status: 'ACTIVE' });
-              setBaselineProvisioned(true);
-              showToast?.('Baseline provisioned for this facility.', 'success');
-            } else {
-              showToast?.('No TEI found for this facility to create a baseline.', 'warning');
-            }
-          } catch (e) {
-            console.warn('Report: baseline provisioning failed (non-fatal)', e);
-          }
+          showToast?.('No assessments found for this facility.', 'info');
+          setReportLoading(false);
+          return;
         }
-        const inPeriod = all.filter(ev => {
-          const d = ev.eventDate ? new Date(ev.eventDate) : null;
+
+        const SYS_TAG_DE_ID = 'r8pqjX6Jtr0';
+        const getSysTag = (ev) => {
+          const tagDv = (ev?.dataValues || []).find(d => d?.dataElement === SYS_TAG_DE_ID && d?.value !== undefined && String(d.value).trim() !== '');
+          if (tagDv) return String(tagDv.value).trim();
+          const notes = Array.isArray(ev?.notes) ? ev.notes : [];
+          const sysTagNote = notes.find(n => n?.value && String(n.value).includes('SYS_TAG:'));
+          return sysTagNote ? String(sysTagNote.value).replace('SYS_TAG:', '').trim() : null;
+        };
+        const getNumericSysTag = (ev) => {
+          const tag = getSysTag(ev);
+          return tag && /^\d+$/.test(tag) ? tag : null;
+        };
+        const getTypeValue = (ev) => {
+          if (!TYPE_OF_ASSESSMENT_DE_ID) return '';
+          return ((ev?.dataValues || []).find(d => d.dataElement === TYPE_OF_ASSESSMENT_DE_ID)?.value) || '';
+        };
+        const getGroupValue = (ev) => {
+          return ((ev?.dataValues || []).find(d => d.dataElement === FACILITY_GROUP_DE_ID)?.value) || '';
+        };
+        const pickEarliest = (list) => (list || []).reduce((earliest, ev) => (
+          !earliest || new Date(ev.eventDate) < new Date(earliest.eventDate) ? ev : earliest
+        ), null);
+        const pickLatest = (list) => (list || []).reduce((latestEv, ev) => (
+          !latestEv || new Date(ev.eventDate) > new Date(latestEv.eventDate) ? ev : latestEv
+        ), null);
+        const resolveSectionTag = (section, idx = 0) => {
+          if (section?.se_id !== undefined && section?.se_id !== null && String(section.se_id).trim() !== '') {
+            const n = parseInt(String(section.se_id), 10);
+            if (!Number.isNaN(n)) return String(n);
+          }
+          const codeStr = String(section?.code || section?.name || section?.id || '');
+          const seMatch = codeStr.match(/se\s*[_-]*\s*(\d+)/i) || codeStr.match(/(\d+)/);
+          if (seMatch) {
+            const n = parseInt(seMatch[1] || seMatch[0], 10);
+            if (!Number.isNaN(n)) return String(n);
+          }
+          return String(idx + 1);
+        };
+
+        // New model: one TEI = one assessment; events under that TEI are the SE rows + one meta/final event
+        const bundlesByTei = {};
+        all.forEach(ev => {
+          const teiId = ev?.trackedEntityInstance;
+          if (!teiId) return;
+          if (!bundlesByTei[teiId]) bundlesByTei[teiId] = { teiId, events: [], byTag: {}, metaEvents: [] };
+          bundlesByTei[teiId].events.push(ev);
+          const tag = getNumericSysTag(ev);
+          if (tag) {
+            if (!bundlesByTei[teiId].byTag[tag]) bundlesByTei[teiId].byTag[tag] = [];
+            bundlesByTei[teiId].byTag[tag].push(ev);
+          } else {
+            bundlesByTei[teiId].metaEvents.push(ev);
+          }
+        });
+
+        const bundles = Object.values(bundlesByTei).map(bundle => {
+          const typeEvents = bundle.events.filter(ev => getTypeValue(ev));
+          const groupEvents = bundle.events.filter(ev => getGroupValue(ev));
+          const latestTypeEvent = pickLatest(typeEvents) || pickLatest(bundle.metaEvents) || pickLatest(bundle.events);
+          const latestGroupEvent = pickLatest(groupEvents) || pickLatest(bundle.metaEvents) || pickLatest(bundle.events);
+          const assessmentDate = latestTypeEvent?.eventDate || pickLatest(bundle.metaEvents)?.eventDate || pickLatest(bundle.events)?.eventDate || null;
+          return {
+            ...bundle,
+            assessmentDate,
+            latestType: getTypeValue(latestTypeEvent),
+            groupText: getGroupValue(latestGroupEvent),
+            isBaseline: typeEvents.some(ev => isBaselineType(getTypeValue(ev))),
+            metaEvent: latestTypeEvent || pickLatest(bundle.metaEvents) || pickLatest(bundle.events)
+          };
+        }).filter(b => b.assessmentDate);
+
+        const inPeriodBundles = bundles.filter(b => {
+          const d = b.assessmentDate ? new Date(b.assessmentDate) : null;
           if (!d) return false;
           if (startDate && d < new Date(startDate)) return false;
           if (endDate && d > new Date(endDate)) return false;
           return true;
         });
-        if (inPeriod.length === 0) { showToast?.('No assessments found for the selected filters.', 'info'); setReportLoading(false); return; }
+        if (inPeriodBundles.length === 0) { showToast?.('No assessments found for the selected filters.', 'info'); setReportLoading(false); return; }
 
-        // Determine facility group from a Baseline event (prefer Type of assessment == Baseline).
-        let baseline = null;
-        if (TYPE_OF_ASSESSMENT_DE_ID) {
-          const baselineCandidates = all.filter(ev => {
-            const dv = (ev.dataValues || []).find(d => d.dataElement === TYPE_OF_ASSESSMENT_DE_ID);
-            return dv && isBaselineType(dv.value);
-          });
-          if (baselineCandidates.length > 0) {
-            baseline = baselineCandidates.reduce((earliest, ev) => (
-              !earliest || new Date(ev.eventDate) < new Date(earliest.eventDate) ? ev : earliest
-            ), null);
-          }
-        }
-        // Fallback to earliest event if no explicit Baseline type found
-        if (!baseline && all.length > 0) {
-          baseline = all.reduce((earliest, ev) => (
-            !earliest || new Date(ev.eventDate) < new Date(earliest.eventDate) ? ev : earliest
-          ), null);
+        let baselineBundle = bundles.filter(b => b.isBaseline).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
+        if (!baselineBundle) baselineBundle = bundles.sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
+        const latestBundle = inPeriodBundles.sort((a, b) => new Date(b.assessmentDate) - new Date(a.assessmentDate))[0] || null;
+        if (!baselineBundle || !latestBundle) {
+          showToast?.('Could not resolve baseline/latest assessments for this facility.', 'warning');
+          setReportLoading(false);
+          return;
         }
 
-        // If still no explicit Baseline event (by type), consider provisioning one
-        if (!baseline) {
-          try {
-            // Prefer TEI from any existing assessment; otherwise from authorised assignment
-            const teiFromEvents = (all.find(ev => ev.trackedEntityInstance)?.trackedEntityInstance) || null;
-            let teiForBaseline = teiFromEvents;
-            if (!teiForBaseline) {
-              const match = (Array.isArray(userAssignments) ? userAssignments : []).find(a => {
-                const ouId = a.orgUnitId || (typeof a.orgUnit === 'string' ? a.orgUnit : a.orgUnit?.id);
-                return ouId === selectedFacilityId;
-              });
-              teiForBaseline = match?.trackedEntityInstance || null;
-            }
-            if (teiForBaseline) {
-              await api.createSurveyEvent({ programId, stageId, orgUnitId: selectedFacilityId, teiId: teiForBaseline, status: 'ACTIVE' });
-              setBaselineProvisioned(true);
-              showToast?.('Baseline provisioned for this facility.', 'success');
-            }
-          } catch (e) {
-            console.warn('Report: baseline provisioning (no explicit baseline type) failed', e);
-          }
-        }
-        const baseDv = Object.fromEntries((baseline.dataValues || []).map(dv => [dv.dataElement, dv.value]));
-        const groupText = baseDv[FACILITY_GROUP_DE_ID] || '';
+        const groupText = baselineBundle.groupText || latestBundle.groupText || '';
         const groupId = resolveGroupIdFromText(groupText) || 'GENERAL';
         const groupObj = groups.find(g => g.id === groupId) || null;
-
-        // Prepare formData from latest event in the selected period
-        let latest = inPeriod[inPeriod.length - 1];
-        for (const ev of inPeriod) { if (new Date(ev.eventDate) > new Date(latest.eventDate)) latest = ev; }
-        const latestFormData = Object.fromEntries((latest.dataValues || []).map(dv => [dv.dataElement, dv.value]));
-        const latestType = TYPE_OF_ASSESSMENT_DE_ID ? (latestFormData[TYPE_OF_ASSESSMENT_DE_ID] || 'Latest assessment') : 'Latest assessment';
 
         // Build assessment structure for scoring based on facility group
         const programmeType = (groupId === 'HOSPITAL') ? 'hospital' : (groupId === 'CLINICS') ? 'clinics' : (groupId === 'SE') ? 'ems' : 'mortuary';
         const { linksDataLookup, severityLookup } = programmeScoringMeta[programmeType] || programmeScoringMeta.ems;
         const targetSections = groupObj ? groupObj.sections || [] : [];
-        const assessment = {
-          sections: targetSections.map(section => ({
-            id: section.id,
-            standards: [{
-              id: section.code || section.id,
-              criteria: (section.fields || [])
-                .filter(f => f.type === 'select')
-                .map(f => {
-                  const code = f.code || f.id;
-                  const normalizedCode = normalizeCriterionCode(code);
-                  const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
-                  const isRoot = linksData.linked_criteria.length > 0;
-                  const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
-                  return {
-                    id: f.id,
-                    code,
-                    response: latestFormData[f.id] || 'NA',
-                    isCritical: false,
-                    isRoot,
-                    links: linksData.linked_criteria,
-                    roots: linksData.roots,
-                    severity
-                  };
-                })
-            }]
-          }))
-        };
 
-        // Build baseline assessment (earliest event overall for facility)
-        const baselineFormData = Object.fromEntries(((baseline?.dataValues) || []).map(dv => [dv.dataElement, dv.value]));
-        const baselineAssess = {
-          sections: targetSections.map(section => ({
+        // Under the new model, each SE lives in its own event tagged as SYS_TAG:<seNum>
+        const sectionTagMap = Object.fromEntries(
+          targetSections
+            .filter(s => !isAssessmentDetailsSection(s))
+            .map((s, idx) => [s.id, resolveSectionTag(s, idx)])
+        );
+        const latestType = latestBundle.latestType || 'Latest assessment';
+
+        const baselineEventBySection = {};
+        const latestEventBySection = {};
+        targetSections.filter(s => !isAssessmentDetailsSection(s)).forEach((section, idx) => {
+          const tag = sectionTagMap[section.id] || resolveSectionTag(section, idx);
+          baselineEventBySection[section.id] = pickLatest(baselineBundle.byTag?.[tag] || []);
+          latestEventBySection[section.id] = pickLatest(latestBundle.byTag?.[tag] || []);
+        });
+
+        const buildAssessmentFromBundle = (bundle) => ({
+          sections: targetSections.map((section, idx) => ({
             id: section.id,
             standards: [{
               id: section.code || section.id,
               criteria: (section.fields || [])
                 .filter(f => f.type === 'select')
                 .map(f => {
+                  const sectionEvent = isAssessmentDetailsSection(section)
+                    ? bundle.metaEvent
+                    : pickLatest(bundle.byTag?.[sectionTagMap[section.id] || resolveSectionTag(section, idx)] || []);
+                  const formDataForSection = Object.fromEntries((((sectionEvent || {}).dataValues) || []).map(dv => [dv.dataElement, dv.value]));
                   const code = f.code || f.id;
                   const normalizedCode = normalizeCriterionCode(code);
                   const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
@@ -367,7 +379,7 @@ export default function Report() {
                   return {
                     id: f.id,
                     code,
-                    response: baselineFormData[f.id] || 'NA',
+                    response: formDataForSection[f.id] || 'NA',
                     isCritical: false,
                     isRoot,
                     links: linksData.linked_criteria,
@@ -377,7 +389,10 @@ export default function Report() {
                 })
             }]
           }))
-        };
+        });
+
+        const assessment = buildAssessmentFromBundle(latestBundle);
+        const baselineAssess = buildAssessmentFromBundle(baselineBundle);
 
         setReportAssessment(assessment);
         setBaselineAssessment(baselineAssess);
@@ -434,11 +449,111 @@ export default function Report() {
         setReportInfo({
           groupId,
           groupLabel: groupObj?.name || groupId,
-          count: inPeriod.length,
-          baselineDate: baseline?.eventDate || null,
-          latestDate: latest?.eventDate || null,
+          count: inPeriodBundles.length,
+          baselineDate: baselineBundle.assessmentDate || null,
+          latestDate: latestBundle.assessmentDate || null,
           latestType,
+          sectionLatestDates: Object.fromEntries(
+            targetSections.filter(s => !isAssessmentDetailsSection(s)).map(s => [s.id, latestEventBySection[s.id]?.eventDate || null])
+          ),
         });
+
+        // ── Assessor Activity Summary ───────────────────────────────────
+        (async () => {
+          try {
+            const teiId = latestBundle?.teiId || baselineBundle?.teiId || null;
+            if (!teiId || !groupId) return;
+
+            const nsKey = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].find(k => groupId.includes(k)) || groupId;
+            const plan = await api.getDataStoreItem(nsKey, teiId);
+            if (!plan) return;
+
+            const seAssignments = plan.seAssignments || {};
+            const teamMembers = plan.team || [];
+            const allUserIds = [...new Set(teamMembers.map(t => t.userId).filter(Boolean))];
+            let userMap = {};
+            if (allUserIds.length > 0) {
+              userMap = await api.resolveUserDisplayNames(allUserIds);
+            }
+
+            // Group all data values from the selected latest assessment by SE (using SYS_TAG notes)
+            const seDataMap = {}; // { [seNum]: { [deId]: value, lastUpdated: date } }
+            (latestBundle?.events || []).forEach(ev => {
+              const seNum = getSysTag(ev);
+              if (seNum) {
+                if (!seDataMap[seNum]) seDataMap[seNum] = { values: {}, lastUpdated: ev.eventDate };
+                (ev.dataValues || []).forEach(dv => {
+                  seDataMap[seNum].values[dv.dataElement] = dv.value;
+                });
+                if (new Date(ev.eventDate) > new Date(seDataMap[seNum].lastUpdated)) {
+                  seDataMap[seNum].lastUpdated = ev.eventDate;
+                }
+              }
+            });
+
+            const summary = [];
+            teamMembers.forEach(member => {
+              const uId = member.userId;
+              const resolved = userMap[uId] || { displayName: uId, username: uId };
+              
+              // Find SEs assigned to this member
+              const assignedSeNums = Object.entries(seAssignments)
+                .filter(([_, ids]) => Array.isArray(ids) && ids.includes(uId))
+                .map(([num, _]) => num);
+
+              if (assignedSeNums.length === 0) return;
+
+              let stats = { C: 0, PC: 0, NC: 0, NA: 0, total: 0, criteriaCount: 0 };
+              let lastUpdated = null;
+
+              assignedSeNums.forEach(num => {
+                const data = seDataMap[num];
+                if (!data) return;
+                if (!lastUpdated || new Date(data.lastUpdated) > new Date(lastUpdated)) {
+                  lastUpdated = data.lastUpdated;
+                }
+
+                // Match against fields in the section
+                const section = targetSections.find(s => {
+                   const m = (s.name || s.code || '').match(/se\s*(\d+)/i);
+                   return m && m[1] === num;
+                });
+
+                if (section) {
+                  (section.fields || []).forEach(f => {
+                    if (f.type === 'select') {
+                      const val = data.values[f.id];
+                      if (val) {
+                        const s = String(val).trim().toLowerCase();
+                        if (s === 'c' || s === 'compliant') stats.C++;
+                        else if (s === 'pc' || s === 'partial' || s === 'partially compliant') stats.PC++;
+                        else if (s === 'nc' || s === 'non compliant' || s === 'non-compliant') stats.NC++;
+                        else if (s === 'na') stats.NA++;
+                        stats.criteriaCount++;
+                      }
+                    }
+                  });
+                }
+              });
+
+              stats.total = stats.C + stats.PC + stats.NC;
+              const compliance = stats.total > 0 ? ((stats.C / stats.total) * 100).toFixed(1) : '0.0';
+
+              summary.push({
+                displayName: resolved.displayName || resolved.username || uId,
+                role: (member.role || '').replace(/^FAC_ASS_ROLE_/i, '').replace(/_/g, ' '),
+                seNums: assignedSeNums.join(', '),
+                stats,
+                compliance,
+                lastUpdated: lastUpdated ? new Date(lastUpdated).toLocaleDateString() : '—'
+              });
+            });
+
+            setAssessorSummary(summary);
+          } catch (err) {
+            console.warn('Report: failed to process assessor summary', err);
+          }
+        })();
       } catch (e) {
         console.error('Report: generation failed', e);
         showToast?.('Failed to generate report', 'error');
@@ -475,6 +590,12 @@ export default function Report() {
   const [isFacilityOverviewCollapsed, setIsFacilityOverviewCollapsed] = useState(true);
   // Collapsible state for Baseline vs Latest (per SE)
   const [isBaselineVsLatestCollapsed, setIsBaselineVsLatestCollapsed] = useState(true);
+  // Drilldown state for Baseline vs Latest chart
+  const [drillOpen, setDrillOpen] = useState(false);
+  const [drillSectionId, setDrillSectionId] = useState(null);
+  const [drillLevel, setDrillLevel] = useState('roots'); // roots | criteria
+  const [drillRootCode, setDrillRootCode] = useState(null);
+  const drillChartRef = useRef(null);
 
   // Build Facility Overview rows (per SE)
   const facilityOverview = useMemo(() => {
@@ -543,12 +664,229 @@ export default function Report() {
         remaining: { total: lateCounts.NC + lateCounts.PC, NC: lateCounts.NC, PC: lateCounts.PC },
         critical: { total: baseCritCritical.length, NC: baseCriticalCounts.NC, PC: baseCriticalCounts.PC },
         criticalRemaining: { total: lateCritCritical.length, NC: lateCriticalCounts.NC, PC: lateCriticalCounts.PC },
-        latestDate: reportInfo.latestDate ? new Date(reportInfo.latestDate).toLocaleDateString() : '—',
+        latestDate: (reportInfo.sectionLatestDates?.[id] || reportInfo.latestDate)
+          ? new Date(reportInfo.sectionLatestDates?.[id] || reportInfo.latestDate).toLocaleDateString()
+          : '—',
         policies: { NC: 0, PC: 0, C: 0, total: 0 },
         qiCompliance: 'N/A',
       };
     });
   }, [reportAssessment, baselineAssessment, baselineScoring, scoring, sectionLabels, reportInfo, programmeScoringMeta]);
+
+  const openDrillForSection = (sectionId) => {
+    setDrillSectionId(sectionId);
+    setDrillRootCode(null);
+    setDrillLevel('roots');
+    setDrillOpen(true);
+  };
+
+  const closeDrill = () => {
+    setDrillOpen(false);
+    setDrillSectionId(null);
+    setDrillRootCode(null);
+    setDrillLevel('roots');
+  };
+
+  const backDrill = () => {
+    if (drillLevel === 'criteria') {
+      setDrillRootCode(null);
+      setDrillLevel('roots');
+      return;
+    }
+    closeDrill();
+  };
+
+  const getSectionCriteria = (assessment, sectionId) => {
+    const sec = (assessment?.sections || []).find(s => s.id === sectionId);
+    return (sec?.standards || []).flatMap(std => std?.criteria || []);
+  };
+
+  const normalizeResponseLabel = (value) => {
+    const s = String(value || '').trim().toUpperCase();
+    if (!s || s === 'NA') return 'NA';
+    if (s === 'PENDING') return 'Pending';
+    if (/^(C|FC|FULL|COMPLIANT)$/.test(s) && !s.includes('NON')) return 'C';
+    if (/^(PC|PARTIAL|SUBSTANTIAL)$/.test(s) || s.includes('PARTIAL')) return 'PC';
+    if (/^(NC|NON|NON_COMPLIANT|NON-COMPLIANT|NOT_MET|FAIL)$/.test(s) || s.includes('NON') || s.includes('FAIL')) return 'NC';
+    return s;
+  };
+
+  const getSectionStatusLabel = (assessment, sectionId) => {
+    const criteria = getSectionCriteria(assessment, sectionId);
+    const labels = criteria.map(c => normalizeResponseLabel(c?.response)).filter(Boolean);
+    if (labels.length === 0) return 'NA';
+    if (labels.includes('NC')) return 'NC';
+    if (labels.includes('PC')) return 'PC';
+    if (labels.includes('C')) return 'C';
+    if (labels.includes('Pending')) return 'Pending';
+    return 'NA';
+  };
+
+  const buildRootChartData = (sectionId) => {
+    const latestCriteria = getSectionCriteria(reportAssessment, sectionId);
+    const baselineCriteria = getSectionCriteria(baselineAssessment, sectionId);
+    const latestRoots = latestCriteria.filter(c => c?.isRoot);
+    const baselineRoots = baselineCriteria.filter(c => c?.isRoot);
+    const codes = Array.from(new Set([
+      ...latestRoots.map(c => normalizeCriterionCode(c.code || c.id)),
+      ...baselineRoots.map(c => normalizeCriterionCode(c.code || c.id))
+    ].filter(Boolean)));
+    return codes.map(code => ({
+      code,
+      name: code,
+      Baseline: Number(baselineScoring?.globalScores?.[code]?.points ?? 0),
+      Latest: Number(scoring?.globalScores?.[code]?.points ?? 0),
+    }));
+  };
+
+  const buildCriteriaChartData = (sectionId, rootCode) => {
+    const stripTag = (raw) => {
+      const m = String(raw || '').match(/^(.*?)-([GB])$/i);
+      return m ? m[1] : String(raw || '');
+    };
+    const latestCriteria = getSectionCriteria(reportAssessment, sectionId);
+    const baselineCriteria = getSectionCriteria(baselineAssessment, sectionId);
+    const allCriteria = [...latestCriteria, ...baselineCriteria];
+    const findRoot = (list) => list.find(c => c?.isRoot && normalizeCriterionCode(c.code || c.id) === rootCode);
+    const latestRoot = findRoot(latestCriteria);
+    const baselineRoot = findRoot(baselineCriteria);
+    const linkedCodes = [
+      ...((latestRoot?.links || []).map(v => normalizeCriterionCode(stripTag(v))) || []),
+      ...((baselineRoot?.links || []).map(v => normalizeCriterionCode(stripTag(v))) || [])
+    ];
+    const inferredCodes = allCriteria
+      .filter(c => !c?.isRoot)
+      .map(c => normalizeCriterionCode(c.code || c.id))
+      .filter(code => code && (code.startsWith(`${rootCode}.`) || code.startsWith(`${rootCode}-`)));
+    const codes = Array.from(new Set([...linkedCodes, ...inferredCodes].filter(Boolean)));
+    return codes.map(code => ({
+      code,
+      name: code,
+      Baseline: Number(baselineScoring?.globalScores?.[code]?.points ?? 0),
+      Latest: Number(scoring?.globalScores?.[code]?.points ?? 0),
+    }));
+  };
+
+  const ValueLabel = ({ x, y, width, value }) => {
+    if (value === undefined || value === null) return null;
+    const cx = (x || 0) + (width || 0) / 2;
+    const cy = (y || 0) - 6;
+    return (
+      <text x={cx} y={cy} textAnchor="middle" fill="#0f172a" fontSize={11} fontWeight={600}>
+        {`${Number(value).toFixed(0)}%`}
+      </text>
+    );
+  };
+
+  const getStatusBadgeStyle = (label) => {
+    const v = normalizeResponseLabel(label);
+    if (v === 'C') return { color: '#065f46', background: '#d1fae5', border: '1px solid #6ee7b7' };
+    if (v === 'PC') return { color: '#92400e', background: '#fef3c7', border: '1px solid #fbbf24' };
+    if (v === 'NC') return { color: '#991b1b', background: '#fee2e2', border: '1px solid #fca5a5' };
+    if (v === 'Pending') return { color: '#1d4ed8', background: '#dbeafe', border: '1px solid #93c5fd' };
+    return { color: '#475569', background: '#e2e8f0', border: '1px solid #cbd5e1' };
+  };
+
+  const StatusBadge = ({ label }) => (
+    <span
+      style={{
+        ...getStatusBadgeStyle(label),
+        opacity: 1,
+        display: 'inline-block',
+        marginLeft: 6,
+        padding: '1px 6px',
+        borderRadius: 999,
+        fontSize: 11,
+        fontWeight: 700,
+        lineHeight: 1.4,
+        verticalAlign: 'middle'
+      }}
+    >
+      {label || '—'}
+    </span>
+  );
+
+  const DrillTooltip = ({ active, payload }) => {
+    if (!active || !payload || payload.length === 0) return null;
+    const item = payload[0]?.payload || {};
+    const code = item.code;
+    const baselineRes = baselineScoring?.globalScores?.[code];
+    const latestRes = scoring?.globalScores?.[code];
+    return (
+      <div style={{ background: '#111827', color: '#e5e7eb', padding: '8px 10px', borderRadius: 8, boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }}>
+        <div style={{ fontWeight: 700, marginBottom: 4 }}>{item.name || code}</div>
+        <div>
+          Baseline: {Number(item.Baseline || 0).toFixed(1)}%
+          <StatusBadge label={baselineRes?.response || '—'} />
+        </div>
+        <div>
+          Latest: {Number(item.Latest || 0).toFixed(1)}%
+          <StatusBadge label={latestRes?.response || '—'} />
+        </div>
+      </div>
+    );
+  };
+
+  const MainChartTooltip = ({ active, payload }) => {
+    if (!active || !payload || payload.length === 0) return null;
+    const item = payload[0]?.payload || {};
+    const sectionId = item.id;
+    const baselineLabel = getSectionStatusLabel(baselineAssessment, sectionId);
+    const latestLabel = getSectionStatusLabel(reportAssessment, sectionId);
+    return (
+      <div style={{ background: '#111827', color: '#e5e7eb', padding: '8px 10px', borderRadius: 8, boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }}>
+        <div style={{ fontWeight: 700, marginBottom: 4 }}>{item.name || sectionId}</div>
+        <div>
+          Baseline: {Number(item.Baseline || 0).toFixed(1)}%
+          <StatusBadge label={baselineLabel} />
+        </div>
+        <div>
+          Latest: {Number(item.Latest || 0).toFixed(1)}%
+          <StatusBadge label={latestLabel} />
+        </div>
+      </div>
+    );
+  };
+
+  const exportDrillAsPng = async () => {
+    try {
+      const container = drillChartRef.current;
+      if (!container) throw new Error('Chart not ready');
+      const svg = container.querySelector('svg');
+      if (!svg) throw new Error('Chart SVG not found');
+
+      const width = Number(svg.getAttribute('width')) || container.clientWidth || 900;
+      const height = Number(svg.getAttribute('height')) || 360;
+      const xml = new XMLSerializer().serializeToString(svg);
+      const blob = new Blob([xml], { type: 'image/svg+xml;charset=utf-8' });
+      const blobUrl = URL.createObjectURL(blob);
+      const img = new Image();
+
+      await new Promise((resolve, reject) => {
+        img.onload = resolve;
+        img.onerror = reject;
+        img.src = blobUrl;
+      });
+
+      const canvas = document.createElement('canvas');
+      const scale = 2;
+      canvas.width = Math.max(1, Math.floor(width * scale));
+      canvas.height = Math.max(1, Math.floor(height * scale));
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      URL.revokeObjectURL(blobUrl);
+
+      const a = document.createElement('a');
+      const seLabel = sectionChartLabels[drillSectionId] || sectionLabels[drillSectionId] || drillSectionId || 'SE';
+      a.download = `drilldown-${String(seLabel).replace(/\s+/g, '_')}${drillRootCode ? `-${drillRootCode}` : ''}.png`;
+      a.href = canvas.toDataURL('image/png');
+      a.click();
+    } catch (e) {
+      showToast?.(`Export failed: ${e.message}`, 'error');
+    }
+  };
 
   return (
     <div className="dashboard-container" style={{ padding: '16px' }}>
@@ -738,6 +1076,62 @@ export default function Report() {
               )}
             </div>
 
+            {/* Assessor Activity Summary (collapsible) */}
+            {assessorSummary.length > 0 && (
+              <div style={{ marginTop: 18 }}>
+                <div
+                  className="section-header"
+                  onClick={() => setIsAssessorSummaryCollapsed(!isAssessorSummaryCollapsed)}
+                  style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+                >
+                  <span
+                    style={{
+                      transform: isAssessorSummaryCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+                      transition: 'transform 0.2s ease',
+                      display: 'inline-block',
+                    }}
+                  >
+                    ▼
+                  </span>
+                  <h3 style={{ margin: 0 }}>Assessor Activity & Contribution</h3>
+                </div>
+                {!isAssessorSummaryCollapsed && (
+                  <div style={{ overflowX: 'auto', marginTop: 8 }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>
+                      <thead>
+                        <tr style={{ background: '#f1f5f9', textAlign: 'left' }}>
+                          <th style={{ border: '1px solid #e2e8f0', padding: '8px 10px' }}>Assessor</th>
+                          <th style={{ border: '1px solid #e2e8f0', padding: '8px 10px' }}>Role</th>
+                          <th style={{ border: '1px solid #e2e8f0', padding: '8px 10px' }}>Assigned SEs</th>
+                          <th style={{ border: '1px solid #e2e8f0', padding: '8px 10px' }}>C</th>
+                          <th style={{ border: '1px solid #e2e8f0', padding: '8px 10px' }}>PC</th>
+                          <th style={{ border: '1px solid #e2e8f0', padding: '8px 10px' }}>NC</th>
+                          <th style={{ border: '1px solid #e2e8f0', padding: '8px 10px' }}>NA</th>
+                          <th style={{ border: '1px solid #e2e8f0', padding: '8px 10px' }}>Compliance %</th>
+                          <th style={{ border: '1px solid #e2e8f0', padding: '8px 10px' }}>Last Entry</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {assessorSummary.map((row, idx) => (
+                          <tr key={`ass-${idx}`}>
+                            <td style={{ border: '1px solid #e2e8f0', padding: '8px 10px', fontWeight: 600 }}>{row.displayName}</td>
+                            <td style={{ border: '1px solid #e2e8f0', padding: '8px 10px', textTransform: 'capitalize' }}>{row.role}</td>
+                            <td style={{ border: '1px solid #e2e8f0', padding: '8px 10px' }}>{row.seNums}</td>
+                            <td style={{ border: '1px solid #e2e8f0', padding: '8px 10px', textAlign: 'center', background: '#ecfdf5', color: '#065f46' }}>{row.stats.C}</td>
+                            <td style={{ border: '1px solid #e2e8f0', padding: '8px 10px', textAlign: 'center', background: '#fffbeb', color: '#92400e' }}>{row.stats.PC}</td>
+                            <td style={{ border: '1px solid #e2e8f0', padding: '8px 10px', textAlign: 'center', background: '#fef2f2', color: '#991b1b' }}>{row.stats.NC}</td>
+                            <td style={{ border: '1px solid #e2e8f0', padding: '8px 10px', textAlign: 'center', color: '#64748b' }}>{row.stats.NA}</td>
+                            <td style={{ border: '1px solid #e2e8f0', padding: '8px 10px', textAlign: 'right', fontWeight: 700 }}>{row.compliance}%</td>
+                            <td style={{ border: '1px solid #e2e8f0', padding: '8px 10px', color: '#64748b' }}>{row.lastUpdated}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Baseline vs Latest (per SE) */}
             <div style={{ marginTop: 18 }}>
               <div
@@ -785,6 +1179,7 @@ export default function Report() {
                     });
                     if (ids.length === 0) return (<div style={{ color: '#64748b' }}>No section breakdown available.</div>);
                     const chartData = ids.map(id => ({
+                      id,
                       name: sectionChartLabels[id] || sectionLabels[id] || id,
                       Baseline: Number.isFinite(blMap[id]) ? Number(blMap[id]) : 0,
                       Latest: Number.isFinite(ltMap[id]) ? Number(ltMap[id]) : 0,
@@ -793,25 +1188,121 @@ export default function Report() {
                     return (
                       <>
                         <div style={{ width: '100%', overflowX: 'auto', marginBottom: 12 }}>
-                          <div style={{ width: chartWidth, height: 320 }}>
-                            <BarChart width={chartWidth} height={320} data={chartData} margin={{ top: 8, right: 16, bottom: 24, left: 0 }}>
+                          <div style={{ width: chartWidth, height: 340 }}>
+                            <BarChart width={chartWidth} height={340} data={chartData} margin={{ top: 16, right: 16, bottom: 24, left: 0 }}>
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={60} />
                               <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
-                              <Tooltip formatter={(v) => `${Number(v).toFixed(1)}%`} />
+                              <Tooltip content={<MainChartTooltip />} />
                               <Legend />
-                              <Bar dataKey="Baseline" fill="#60a5fa" />
-                              <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#ef4444" />
+                              <Bar dataKey="Baseline" fill="#60a5fa" cursor="pointer" onClick={(d) => openDrillForSection(d?.id || d?.payload?.id)}>
+                                <LabelList content={<ValueLabel />} />
+                              </Bar>
+                              <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#ef4444" cursor="pointer" onClick={(d) => openDrillForSection(d?.id || d?.payload?.id)}>
+                                <LabelList content={<ValueLabel />} />
+                              </Bar>
                             </BarChart>
                           </div>
                         </div>
-                        
+
                       </>
                     );
                   })()}
                 </>
               )}
             </div>
+            {drillOpen && (
+              <div
+                onClick={closeDrill}
+                style={{
+                  position: 'fixed',
+                  inset: 0,
+                  background: 'rgba(15, 23, 42, 0.55)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  zIndex: 1600,
+                  padding: 16,
+                }}
+              >
+                <div
+                  onClick={(e) => e.stopPropagation()}
+                  style={{
+                    width: 'min(96vw, 1100px)',
+                    maxHeight: '88vh',
+                    overflow: 'auto',
+                    background: '#fff',
+                    borderRadius: 12,
+                    boxShadow: '0 20px 50px rgba(0,0,0,0.25)',
+                    padding: 16,
+                  }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
+                    <div>
+                      <h3 style={{ margin: 0 }}>SE Drilldown</h3>
+                      <div style={{ color: '#64748b', fontSize: 13, marginTop: 4 }}>
+                        {sectionChartLabels[drillSectionId] || sectionLabels[drillSectionId] || drillSectionId}
+                        {drillLevel === 'criteria' && drillRootCode ? ` / ${drillRootCode}` : ''}
+                      </div>
+                    </div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+                      <Button size="small" variant="outlined" onClick={backDrill}>{drillLevel === 'criteria' ? 'Back to standards' : 'Close'}</Button>
+                      <Button size="small" variant="outlined" onClick={exportDrillAsPng}>Export as PNG</Button>
+                    </div>
+                  </div>
+
+                  {drillLevel === 'roots' && (() => {
+                    const data = buildRootChartData(drillSectionId);
+                    const chartWidth = Math.max(700, data.length * 120);
+                    if (data.length === 0) return <div style={{ color: '#64748b' }}>No standards available for this SE.</div>;
+                    return (
+                      <div style={{ width: '100%', overflowX: 'auto' }}>
+                        <div ref={drillChartRef} style={{ width: chartWidth, height: 380 }}>
+                          <BarChart width={chartWidth} height={380} data={data} margin={{ top: 16, right: 16, bottom: 24, left: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={70} />
+                            <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
+                            <Tooltip content={<DrillTooltip />} />
+                            <Legend />
+                            <Bar dataKey="Baseline" fill="#60a5fa" cursor="pointer" onClick={(d) => { setDrillRootCode(d?.code || d?.payload?.code || null); setDrillLevel('criteria'); }}>
+                              <LabelList content={<ValueLabel />} />
+                            </Bar>
+                            <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#ef4444" cursor="pointer" onClick={(d) => { setDrillRootCode(d?.code || d?.payload?.code || null); setDrillLevel('criteria'); }}>
+                              <LabelList content={<ValueLabel />} />
+                            </Bar>
+                          </BarChart>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {drillLevel === 'criteria' && (() => {
+                    const data = buildCriteriaChartData(drillSectionId, drillRootCode);
+                    const chartWidth = Math.max(700, data.length * 120);
+                    if (data.length === 0) return <div style={{ color: '#64748b' }}>No linked criteria found for {drillRootCode}.</div>;
+                    return (
+                      <div style={{ width: '100%', overflowX: 'auto' }}>
+                        <div ref={drillChartRef} style={{ width: chartWidth, height: 380 }}>
+                          <BarChart width={chartWidth} height={380} data={data} margin={{ top: 16, right: 16, bottom: 24, left: 0 }}>
+                            <CartesianGrid strokeDasharray="3 3" />
+                            <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={70} />
+                            <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
+                            <Tooltip content={<DrillTooltip />} />
+                            <Legend />
+                            <Bar dataKey="Baseline" fill="#60a5fa">
+                              <LabelList content={<ValueLabel />} />
+                            </Bar>
+                            <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#ef4444">
+                              <LabelList content={<ValueLabel />} />
+                            </Bar>
+                          </BarChart>
+                        </div>
+                      </div>
+                    );
+                  })()}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>

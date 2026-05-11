@@ -122,9 +122,10 @@ const PrivateRoute = ({ children }) => {
 	  // so each (assessment, group) gets its own draft/event.
 	  const activeEventId = React.useMemo(() => {
 	    const assessmentId = searchParams.get('assessmentId');
+	    const draftKey = searchParams.get('draftKey');
 	    const groupKey = activeGroup?.id || 'no-group';
 	
-	    if (assessmentId) return `draft-assessment-${assessmentId}-group-${groupKey}`;
+	    if (draftKey || assessmentId) return `draft-assessment-${draftKey || assessmentId}-group-${groupKey}`;
 	
 	    if (!selectedFacility || (!selectedFacility.trackedEntityInstance && !selectedFacility.orgUnit)) return null;
 	    const identifier = selectedFacility.trackedEntityInstance || selectedFacility.orgUnit;
@@ -196,16 +197,26 @@ const PrivateRoute = ({ children }) => {
 	    saveField('facilityName_internal', targetName);
 	  }, [selectedFacility, facilityNameInternal, saveField]);
 
+  const [hasLoadedDraft, setHasLoadedDraft] = useState(false);
+
   // Load data when activeEventId changes, and show loader during hydration
   useEffect(() => {
     if (!activeEventId) return;
     let cancelled = false;
+    setHasLoadedDraft(false);
+    // The draft key is group-specific. When activeEventId changes (for example,
+    // after we switch from the default group to the actual assessment group),
+    // allow navigation preloads to be applied again for the new draft bucket.
+    preloadAppliedRef.current = null;
     (async () => {
       try {
         setIsFormLoading(true);
         await loadFormData();
       } finally {
-        if (!cancelled) setIsFormLoading(false);
+        if (!cancelled) {
+            setIsFormLoading(false);
+            setHasLoadedDraft(true);
+        }
       }
     })();
     return () => { cancelled = true; };
@@ -333,12 +344,27 @@ const PrivateRoute = ({ children }) => {
 	    }
 
 	    const assessmentId = searchParams.get('assessmentId');
+        const baselineIdParam = searchParams.get('baselineId');
+	    const assessmentTeiIdParam = searchParams.get('assessmentTeiId');
+
 	    if (assessmentId && assignments.length > 0) {
 	      // Fallback: match against locally loaded assignments (older workflow)
 	      const matched = assignments.find(a => (a.eventId || a.enrollment) === assessmentId);
 	      if (matched) {
+	        const restored = { ...matched };
+            // Restore baselineId if provided in URL (handles F5 reloads)
+	        if (baselineIdParam && !restored.baselineEventId) {
+	            restored.baselineEventId = baselineIdParam;
+	        }
+	        // Preserve a newly created assessment TEI across refreshes. This is
+	        // required for Self Assessment, where the new assessment lives on a
+	        // different TEI than the scheduling/selected assignment.
+	        if (assessmentTeiIdParam) {
+	            restored.trackedEntityInstance = assessmentTeiIdParam;
+	            restored.scheduleTeiId = assessmentTeiIdParam;
+            }
 	        console.log(`🎯 App: Auto-selecting facility for assessment ${assessmentId}:`, matched.orgUnitName);
-	        setSelectedFacility(matched);
+	        setSelectedFacility(restored);
 	      }
 	    }
 	  }, [location.state, searchParams, assignments]);
@@ -367,12 +393,14 @@ const PrivateRoute = ({ children }) => {
     // clicked event row), persist them early so dependent forms render correctly.
     const preload = selectedFacility?.preloadDataValues || null;
     const preloadKey = JSON.stringify({
+      draft: activeEventId || null,
       a: assessmentIdParam || null,
       tei: selectedFacility?.trackedEntityInstance || selectedFacility?.scheduleTeiId || null,
       ev: selectedFacility?.baselineEventId || selectedFacility?.eventId || null,
       pre: preload || {}
     });
-    if (preload && typeof preload === 'object' && preloadAppliedRef.current !== preloadKey) {
+
+    if (hasLoadedDraft && preload && typeof preload === 'object' && preloadAppliedRef.current !== preloadKey) {
       const preloadMode = selectedFacility?.preloadMode || 'MERGE'; // REPLACE | MERGE
       Object.entries(preload).forEach(([deId, value]) => {
         const existing = formData?.[deId];
@@ -434,7 +462,7 @@ const PrivateRoute = ({ children }) => {
           f.id === FACILITY_GROUP_DE_ID ||
           (f.label || '')
             .toLowerCase()
-            .includes('facility assessment group')
+	            .match(/facility assessment (group|type)/)
       );
       const assessorField = adFields.find(f => {
         const label = (f.label || '').toUpperCase();
@@ -512,7 +540,7 @@ const PrivateRoute = ({ children }) => {
         saveField(assessorField.id, user.id);
       }
     }
-  }, [selectedFacility, activeSection, activeGroup, saveField, formData, user?.id, assessmentIdParam, groups]);
+  }, [selectedFacility, activeSection, activeGroup, saveField, formData, user?.id, assessmentIdParam, groups, hasLoadedDraft, activeEventId]);
 
   // Keep activeGroup in sync with the Facility Assessment Group field value so
   // that when opening an existing event (e.g., Hospital), the Hospital forms
@@ -553,7 +581,7 @@ const PrivateRoute = ({ children }) => {
 	    );
 	    const groupField = fields.find(f =>
 	      f.id === FACILITY_GROUP_DE_ID ||
-	      (f.label || '').toLowerCase().includes('facility assessment group')
+	      /facility assessment (group|type)/.test((f.label || '').toLowerCase())
 	    );
 	    const assessorField = fields.find(f => {
 	      const label = (f.label || '').toUpperCase();

@@ -729,6 +729,373 @@ const FormArea = ({
 
 		    const isADSection = activeSection?.name === "Assessment Details";
 
+    // ── SE-level editing restrictions ─────────────────────────────────
+    // Fetch the assignment plan once and determine which SEs the current
+    // user is assigned to. Non-assigned sections become read-only.
+    const [assignmentPlan, setAssignmentPlan] = useState(null);
+    const [assignmentLoaded, setAssignmentLoaded] = useState(false);
+    const [assignmentPlanSource, setAssignmentPlanSource] = useState({ nsKey: null, teiId: null });
+    const [randomizeUserMap, setRandomizeUserMap] = useState({});
+    const [randomizeUsersLoaded, setRandomizeUsersLoaded] = useState(false);
+    const [resolvedEventIdMap, setResolvedEventIdMap] = useState({});
+    const [eventMapResolving, setEventMapResolving] = useState(false);
+
+    const loadAssignmentPlanForAssessment = React.useCallback(async () => {
+        const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
+        const groupText = (formData?.[FACILITY_GROUP_DE_ID] || '').toUpperCase().trim();
+        const preferredNs = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].find(k => groupText.includes(k)) || groupText || null;
+        const candidateNamespaces = Array.from(new Set([
+            preferredNs,
+            'HOSPITAL',
+            'CLINICS',
+            'EMS',
+            'MORTUARY',
+        ].filter(Boolean)));
+        const candidateTeis = Array.from(new Set([
+            formData?.teiId_internal,
+            selectedFacility?.trackedEntityInstance,
+            selectedFacility?.scheduleTeiId,
+        ].filter(Boolean)));
+
+        for (const teiId of candidateTeis) {
+            for (const nsKey of candidateNamespaces) {
+                try {
+                    const plan = await api.getDataStoreItem(nsKey, teiId);
+                    if (plan && typeof plan === 'object' && Object.keys(plan).length > 0) {
+                        return { plan, nsKey, teiId };
+                    }
+                } catch (_) {
+                    // keep probing
+                }
+            }
+        }
+        return { plan: null, nsKey: preferredNs, teiId: candidateTeis[0] || null };
+    }, [formData?.teiId_internal, formData?.pzenrgsSny3, selectedFacility]);
+
+    React.useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const { plan, nsKey, teiId } = await loadAssignmentPlanForAssessment();
+                if (!cancelled) {
+                    setAssignmentPlan(plan || null);
+                    setAssignmentPlanSource({ nsKey: nsKey || null, teiId: teiId || null });
+                    setAssignmentLoaded(true);
+                }
+            } catch (e) {
+                console.warn('FormArea: Could not load assignment plan (non-fatal)', e);
+                if (!cancelled) {
+                    setAssignmentPlan(null);
+                    setAssignmentPlanSource({ nsKey: null, teiId: null });
+                    setAssignmentLoaded(true);
+                }
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [loadAssignmentPlanForAssessment]);
+
+    React.useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                if (!assignmentLoaded) {
+                    if (!cancelled) setRandomizeUsersLoaded(false);
+                    return;
+                }
+                const teamMembers = assignmentPlan?.team || [];
+                const allUserIds = [...new Set(teamMembers.map(t => t.userId).filter(Boolean))];
+                if (allUserIds.length === 0) {
+                    if (!cancelled) {
+                        setRandomizeUserMap({});
+                        setRandomizeUsersLoaded(true);
+                    }
+                    return;
+                }
+                const resolved = await api.resolveUserDisplayNames(allUserIds).catch(() => ({}));
+                if (!cancelled) {
+                    setRandomizeUserMap(resolved || {});
+                    setRandomizeUsersLoaded(true);
+                }
+            } catch (e) {
+                console.warn('FormArea: Could not resolve randomizer usernames (non-fatal)', e);
+                if (!cancelled) {
+                    setRandomizeUserMap({});
+                    setRandomizeUsersLoaded(true);
+                }
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [assignmentLoaded, assignmentPlan]);
+
+    // Determine the current user's role and assigned SEs
+    const seLockInfo = React.useMemo(() => {
+        if (!assignmentLoaded || !assignmentPlan) {
+            return { hasAssignments: false, isLead: false, mySeNums: [], lockedOwnerName: null };
+        }
+        const seAssignments = assignmentPlan.seAssignments || {};
+        const teamMembers = assignmentPlan.team || [];
+        const userId = user?.id || null;
+        const username = user?.username || null;
+
+        // Check if the current user is a Lead
+        const myTeamEntry = teamMembers.find(t =>
+            t.userId === userId || t.userId === username
+        );
+        const isLead = myTeamEntry
+            ? /lead|leader/i.test(String(myTeamEntry.role || '').replace(/^FAC_ASS_ROLE_/i, ''))
+            : false;
+
+        // Build list of SE numbers assigned to the current user
+        const mySeNums = [];
+        Object.entries(seAssignments).forEach(([seNum, userIds]) => {
+            if (Array.isArray(userIds) && userIds.some(id => id === userId || id === username)) {
+                mySeNums.push(seNum);
+            }
+        });
+
+        return { hasAssignments: Object.keys(seAssignments).length > 0, isLead, mySeNums, seAssignments, teamMembers };
+    }, [assignmentPlan, assignmentLoaded, user]);
+
+    const isAssessmentDetailsSection = React.useCallback((sec) => {
+        const name = String(sec?.name || '').toLowerCase();
+        return name === 'assessment details' || name === 'assessment_details';
+    }, []);
+
+    const extractSeNum = React.useCallback((sec) => {
+        const direct = sec?.se_id ?? sec?.seId ?? sec?.sectionNumber ?? null;
+        if (direct !== null && direct !== undefined && String(direct).trim() !== '') {
+            return String(direct).trim();
+        }
+
+        const candidates = [
+            sec?._originalName,
+            sec?.name,
+            sec?.code,
+            sec?.id,
+        ].filter(Boolean).map(v => String(v));
+
+        for (const candidate of candidates) {
+            let m = candidate.match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)(?=$|[_\s:-])/i);
+            if (m) return m[2];
+        }
+
+        // Final fallback: infer the section number from the section's field
+        // codes/labels, e.g. SURV_HOSP_SE2_2.1.1.1 or 2.1.1.1 ...
+        const fieldCandidates = (sec?.fields || []).flatMap(f => [f?.code, f?.label]).filter(Boolean).map(v => String(v));
+        for (const candidate of fieldCandidates) {
+            let m = candidate.match(/(?:SE|SEC|SECTION|EMS)\s*([0-9]+)/i);
+            if (m) return m[1];
+
+            m = candidate.match(/(?:^|[^0-9])([0-9]+)\.[0-9]+\.[0-9]+\.[0-9]+/);
+            if (m) return m[1];
+        }
+
+        return null;
+    }, []);
+
+    // Extract SE number from the active section
+    const activeSeNum = React.useMemo(() => extractSeNum(activeSection), [activeSection, extractSeNum]);
+    const SYS_TAG_DE_ID = 'r8pqjX6Jtr0';
+    const getEventSysTag = React.useCallback((ev) => {
+        const tagDv = (ev?.dataValues || []).find(d => d?.dataElement === SYS_TAG_DE_ID && d?.value !== undefined && String(d.value).trim() !== '');
+        if (tagDv) return String(tagDv.value).trim();
+        const notes = Array.isArray(ev?.notes) ? ev.notes : [];
+        const sysTagNote = notes.find(n => n?.value && String(n.value).includes('SYS_TAG:'));
+        return sysTagNote ? String(sysTagNote.value).replace('SYS_TAG:', '').trim() : null;
+    }, []);
+
+    const draftEventIdMap = React.useMemo(() => {
+        try {
+            return formData?.eventIdMap_internal ? (JSON.parse(formData.eventIdMap_internal) || {}) : {};
+        } catch (_) {
+            return {};
+        }
+    }, [formData?.eventIdMap_internal]);
+
+    const effectiveEventIdMap = React.useMemo(() => {
+        // Prefer the fresh server-derived mapping and only fall back to draft
+        // entries that the server fetch could not resolve yet.
+        return {
+            ...(draftEventIdMap || {}),
+            ...(resolvedEventIdMap || {}),
+        };
+    }, [draftEventIdMap, resolvedEventIdMap]);
+
+    const inferEventIdMapFromSurveyEvents = React.useCallback((events, sections) => {
+        const map = {};
+        const nonAdSections = (sections || []).filter(sec => !isAssessmentDetailsSection(sec));
+        const sectionDefs = nonAdSections.map(sec => ({
+            seNum: extractSeNum(sec),
+            fieldIds: new Set((sec?.fields || []).map(f => f?.id).filter(Boolean))
+        })).filter(s => s.seNum);
+
+        const unresolved = [];
+        (events || []).forEach(ev => {
+            const tag = getEventSysTag(ev);
+            if (tag) {
+                if (tag) map[tag] = ev.event;
+            } else {
+                unresolved.push(ev);
+            }
+        });
+
+        unresolved.forEach(ev => {
+            const dvIds = new Set((ev?.dataValues || []).map(d => d?.dataElement).filter(Boolean));
+            if (!map.FINAL) {
+                const hasMeta = Array.from(dvIds).some(id => id === typeOfAssessmentDeId || id === 'pzenrgsSny3');
+                if (hasMeta) {
+                    map.FINAL = ev.event;
+                    return;
+                }
+            }
+
+            let bestSeNum = null;
+            let bestScore = 0;
+            sectionDefs.forEach(sectionDef => {
+                if (!sectionDef?.seNum || map[sectionDef.seNum]) return;
+                let overlap = 0;
+                dvIds.forEach(id => { if (sectionDef.fieldIds.has(id)) overlap += 1; });
+                if (overlap > bestScore) {
+                    bestScore = overlap;
+                    bestSeNum = sectionDef.seNum;
+                }
+            });
+            if (bestSeNum && bestScore > 0) {
+                map[bestSeNum] = ev.event;
+            }
+        });
+
+	        return map;
+    }, [extractSeNum, isAssessmentDetailsSection, typeOfAssessmentDeId, getEventSysTag]);
+
+    React.useEffect(() => {
+        let cancelled = false;
+        (async () => {
+            try {
+                const currentGroup = Array.isArray(groups)
+                    ? groups.find(g => Array.isArray(g.sections) && g.sections.some(s => s.id === activeSection?.id))
+                    : null;
+                const targetSections = currentGroup?.sections || [];
+                const expectedSeNums = (targetSections || [])
+                    .filter(sec => !isAssessmentDetailsSection(sec))
+                    .map(sec => extractSeNum(sec))
+                    .filter(Boolean);
+                const teiId = formData?.teiId_internal || selectedFacility?.trackedEntityInstance || selectedFacility?.scheduleTeiId || null;
+                const orgUnitId = selectedFacility?.orgUnitId
+                    || (typeof selectedFacility?.orgUnit === 'string' ? selectedFacility.orgUnit : selectedFacility?.orgUnit?.id)
+                    || selectedFacility?.facilityId
+                    || null;
+                const programId = configuration?.program?.id || 'G2gULe4jsfs';
+                const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+
+                if (!teiId || !orgUnitId || targetSections.length === 0) {
+                    if (!cancelled) {
+                        setResolvedEventIdMap({});
+                        setEventMapResolving(false);
+                    }
+                    return;
+                }
+
+                if (!cancelled) setEventMapResolving(true);
+                const surveyEvents = await api.getSurveyEventsForTei({
+                    teiId,
+                    orgUnitId,
+                    programId,
+                    stageId,
+                    fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
+                }).catch(() => []);
+                const inferredMap = inferEventIdMapFromSurveyEvents(surveyEvents, targetSections);
+
+                const mergedMap = {
+                    ...(draftEventIdMap || {}),
+                    ...(inferredMap || {}),
+                };
+
+                if (!cancelled) {
+                    setResolvedEventIdMap(mergedMap);
+                    setEventMapResolving(false);
+                }
+
+                if (Object.keys(mergedMap || {}).length > 0 && JSON.stringify(mergedMap) !== JSON.stringify(draftEventIdMap || {})) {
+                    saveField('eventIdMap_internal', JSON.stringify(mergedMap));
+                }
+            } catch (e) {
+                console.warn('FormArea: Could not resolve SE event mapping automatically', e);
+                if (!cancelled) {
+                    setResolvedEventIdMap({});
+                    setEventMapResolving(false);
+                }
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [draftEventIdMap, groups, activeSection, formData?.teiId_internal, formData?.eventIdMap_internal, selectedFacility, configuration, inferEventIdMapFromSurveyEvents, saveField, isAssessmentDetailsSection, extractSeNum]);
+
+    // Determine if the current section is locked for this user
+    const isSectionLocked = React.useMemo(() => {
+        if (isADSection) return false; // Assessment Details always editable
+        if (!seLockInfo.hasAssignments) return false; // No plan → everything editable
+        if (seLockInfo.isLead) return false; // Lead → full access
+        if (!activeSeNum) return false; // Can't determine SE → don't lock
+        return !seLockInfo.mySeNums.includes(activeSeNum);
+    }, [isADSection, seLockInfo, activeSeNum]);
+
+    const randomizeStatus = React.useMemo(() => {
+        const currentGroup = Array.isArray(groups)
+            ? groups.find(g => Array.isArray(g.sections) && g.sections.some(s => s.id === activeSection?.id))
+            : null;
+        const targetSections = currentGroup?.sections || [];
+        const seSections = targetSections.filter(s => !isAssessmentDetailsSection(s));
+        const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
+        const assessmentGroupText = (formData?.[FACILITY_GROUP_DE_ID] || '').toUpperCase().trim();
+        const groupName = assessmentGroupText || (currentGroup?.name || currentGroup?.id || '').toUpperCase();
+        const nsKey = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].find(k => groupName.includes(k)) || groupName;
+        const teiId = formData?.teiId_internal || selectedFacility?.trackedEntityInstance || selectedFacility?.scheduleTeiId || null;
+        const orgUnitId = selectedFacility?.orgUnitId
+            || (typeof selectedFacility?.orgUnit === 'string' ? selectedFacility.orgUnit : selectedFacility?.orgUnit?.id)
+            || selectedFacility?.facilityId
+            || null;
+
+        const eventIdMap = effectiveEventIdMap || {};
+
+        if (isSectionLocked) return { enabled: false, reason: "You don't have permission to randomize this assessment group" };
+        if (!targetSections.length || seSections.length === 0) return { enabled: false, reason: 'No SE sections available to randomize' };
+        if (!teiId) return { enabled: false, reason: 'Assessment TEI is missing' };
+        if (!orgUnitId) return { enabled: false, reason: 'Assessment org unit is missing' };
+        if (!nsKey) return { enabled: false, reason: 'Assessment group is missing' };
+        if (!assignmentLoaded) return { enabled: false, reason: 'Loading assignment plan…' };
+        if (!assignmentPlan) return { enabled: false, reason: 'No assignment plan found for this assessment' };
+        if (!randomizeUsersLoaded) return { enabled: false, reason: 'Resolving assigned usernames…' };
+        if (eventMapResolving) return { enabled: false, reason: 'Resolving SE event mapping…' };
+        if (Object.keys(eventIdMap).length === 0) return { enabled: false, reason: 'SE event mapping is missing' };
+
+        const seAssignments = assignmentPlan?.seAssignments || {};
+        if (Object.keys(seAssignments).length === 0) return { enabled: false, reason: 'No SE assignments found in the plan' };
+
+        for (const section of seSections) {
+            const seNum = extractSeNum(section);
+            if (!seNum) return { enabled: false, reason: `Could not detect SE number for ${section?.name || section?.id || 'a section'}` };
+            if (!eventIdMap[seNum]) return { enabled: false, reason: `SE ${seNum} is missing an event mapping` };
+            const assignedUserIds = seAssignments[seNum] || [];
+            if (!Array.isArray(assignedUserIds) || assignedUserIds.length === 0) return { enabled: false, reason: `SE ${seNum} has no assigned user` };
+            const primaryUserId = assignedUserIds[0];
+            const resolvedUser = primaryUserId ? randomizeUserMap?.[primaryUserId] : null;
+            // Normalize to lowercase for testing environment authentication
+            const assigneeUsername = resolvedUser?.username ? String(resolvedUser.username).toLowerCase() : null;
+            if (!assigneeUsername) return { enabled: false, reason: `SE ${seNum} assigned username could not be resolved` };
+        }
+
+        return { enabled: true, reason: 'Randomize all criterion answers and comments across all sections in this group (testing only)' };
+    }, [groups, activeSection, formData, selectedFacility, assignmentLoaded, assignmentPlan, randomizeUsersLoaded, randomizeUserMap, isSectionLocked, isAssessmentDetailsSection, extractSeNum, effectiveEventIdMap, eventMapResolving]);
+
+    // Resolve the owner's name for the lock banner
+    const sectionOwnerName = React.useMemo(() => {
+        if (!isSectionLocked || !activeSeNum || !seLockInfo.seAssignments) return null;
+        const ownerIds = seLockInfo.seAssignments[activeSeNum] || [];
+        if (ownerIds.length === 0) return 'Unassigned';
+        const owner = (seLockInfo.teamMembers || []).find(t => ownerIds.includes(t.userId));
+        return owner?.displayName || ownerIds[0] || 'Another assessor';
+    }, [isSectionLocked, activeSeNum, seLockInfo]);
+
 	    	    // Group fields into subsections ("pages").
 	    	    //
 	    	    // Desired behaviour:
@@ -1400,7 +1767,7 @@ const FormArea = ({
 	                labelUpper.includes('ASSESSOR USER ID');
             const isFacilityGroupField =
                 field.id === 'pzenrgsSny3' ||
-                labelLower.includes('facility assessment group');
+	                /facility assessment (group|type)/.test(labelLower);
             // Do NOT treat Facility Assessment Group as a technical (read-only) field.
             // It must remain editable so that when loading an existing event from the
             // table the corresponding group value is shown and forms can react to it.
@@ -1750,7 +2117,7 @@ const FormArea = ({
                                     : (formData[field.id] || '')}
                                 onChange={(e) => handleInputChange(e, field.id)}
                                 id={`field-${field.id}`} // Helper for testing
-                                disabled={(isRoot && !overrideOn) || (!isParentAnswered && isCommentField) || isTechnicalField}
+                                disabled={isSectionLocked || (isRoot && !overrideOn) || (!isParentAnswered && isCommentField) || isTechnicalField}
                             >
                                 <option value="">
                                     {isRoot
@@ -1839,7 +2206,7 @@ const FormArea = ({
                                         const stripTags = (txt) => (txt || '').replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '').trim();
 
                                         const parts = splitCommentValue(formData[field.id] || '');
-                                        const disabled = (!isParentAnswered && isCommentField) || isTechnicalField;
+                                        const disabled = isSectionLocked || (!isParentAnswered && isCommentField) || isTechnicalField;
                                         const baseClass = `form-control ${formData[`is_critical_${field.id}`] && (!questionValue || questionValue === '') ? 'mandatory-warning' : ''}`;
 
                                         const handlePartChange = (which, newVal) => {
@@ -1887,7 +2254,7 @@ const FormArea = ({
                                         value={formData[field.id] || ''}
                                         onChange={(e) => handleInputChange(e, field.id)}
                                         id={`field-${field.id}`}
-                                        disabled={isTechnicalField}
+                                        disabled={isSectionLocked || isTechnicalField}
                                     />
                                 )
                             ))}
@@ -1896,8 +2263,11 @@ const FormArea = ({
         });
     };
 
-    // Testing helper: randomize answers and comments across all SEs in the active group
-    const randomizeAllAnswers = React.useCallback(() => {
+    // Testing helper: randomize answers and comments across all SEs in the active group.
+    // When SE assignments exist (from the initiation plan), each SE's randomized data
+    // is PUT to DHIS2 under the assigned assessor's credentials so the audit trail
+    // (lastUpdatedBy) shows which user entered which SE data in the report.
+    const randomizeAllAnswers = React.useCallback(async () => {
         try {
             // Find current group from activeSection
             const currentGroup = Array.isArray(groups)
@@ -1908,28 +2278,81 @@ const FormArea = ({
                 if (typeof showToast === 'function') showToast('No sections available to randomize.', 'warning');
                 return;
             }
-            if (!window.confirm('Randomize all criterion responses and comments across all sections in this group? This will overwrite existing values.')) {
+            if (!window.confirm('Randomize all criterion responses and comments across all sections in this group?\nThis will overwrite existing values AND push data to DHIS2 under each assigned assessor.')) {
                 return;
             }
 
-            // Helper: pick weighted random among available options (favor C)
+            // ── Resolve SE assignment plan & event ID map ──────────────────
+            let eventIdMap = effectiveEventIdMap || {};
+
+            // Determine facility group key from the Assessment Group field value
+            // (pzenrgsSny3) — NOT from the active group which may default to Mortuary.
+            const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
+            const assessmentGroupText = (formData?.[FACILITY_GROUP_DE_ID] || '').toUpperCase().trim();
+            const groupName = assessmentGroupText || (currentGroup?.name || currentGroup?.id || '').toUpperCase();
+            const nsKey = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].find(k => groupName.includes(k)) || groupName;
+
+            // TEI used as the DataStore key
+            const teiId = formData?.teiId_internal
+                || selectedFacility?.trackedEntityInstance
+                || selectedFacility?.scheduleTeiId
+                || null;
+
+            // Fetch the assignment plan from DataStore
+            let planToUse = null;
+            let seAssignments = {}; // { [seId]: [userIds] }
+            let teamMembers = [];   // [{ userId, displayName, role }]
+            if (assignmentPlanSource?.teiId === teiId && assignmentPlan) {
+                planToUse = assignmentPlan;
+                seAssignments = planToUse.seAssignments || {};
+                teamMembers = planToUse.team || [];
+            } else {
+                try {
+                    const found = await loadAssignmentPlanForAssessment();
+                    planToUse = found?.plan || null;
+                    if (planToUse) {
+                        seAssignments = planToUse.seAssignments || {};
+                        teamMembers = planToUse.team || [];
+                    }
+                } catch (e) {
+                    console.warn('Randomize: Could not fetch assignment plan from DataStore', e);
+                }
+            }
+
+            // Resolve usernames for all team member IDs so we can build Basic Auth
+            let userMap = randomizeUserMap || {};
+            const missingIds = teamMembers.map(t => t.userId).filter(id => id && !userMap[id]);
+            if (missingIds.length > 0) {
+                console.log('Randomize: Resolving missing team member usernames...', missingIds);
+                const newlyResolved = await api.resolveUserDisplayNames(missingIds).catch(() => ({}));
+                userMap = { ...userMap, ...newlyResolved };
+            }
+
+            const hasAssignments = Object.keys(seAssignments).length > 0 && Object.keys(userMap).length > 0;
+            const SHARED_PASSWORD = 'Nomisr123$';
+
+            const programId = configuration?.program?.id || 'G2gULe4jsfs';
+            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+            const orgUnitId = selectedFacility?.orgUnitId
+                || (typeof selectedFacility?.orgUnit === 'string' ? selectedFacility.orgUnit : selectedFacility?.orgUnit?.id)
+                || selectedFacility?.facilityId
+                || null;
+
+            // ── Helpers ───────────────────────────────────────────────────
             const pickFromOptions = (field) => {
                 const rawOpts = Array.isArray(field?.options) ? field.options : [];
                 const norm = (x) => String(x || '').toUpperCase().trim();
                 const values = rawOpts.map(o => (typeof o === 'object' ? (o.value || o.val || o.code || o.label || o.name) : o)).map(norm);
                 const pool = [];
                 const pushIf = (code, weight) => { if (values.some(v => v === code)) pool.push(...Array(weight).fill(code)); };
-                // Approximate distribution: C 55%, PC 30%, NC 12%, NA 3% (if NA exists)
                 pushIf('C', 55); pushIf('COMPLIANT', 55);
                 pushIf('PC', 30); pushIf('PARTIAL', 30); pushIf('SUBSTANTIAL', 10);
                 pushIf('NC', 12); pushIf('NON', 12); pushIf('NON-COMPLIANT', 12);
                 if (values.includes('NA')) pool.push(...Array(3).fill('NA'));
                 if (pool.length === 0) {
-                    // Fallback to first available
                     return rawOpts.length > 0 ? (typeof rawOpts[0] === 'object' ? (rawOpts[0].value || rawOpts[0].code || rawOpts[0].label || rawOpts[0].name) : rawOpts[0]) : '';
                 }
                 const choice = pool[Math.floor(Math.random() * pool.length)];
-                // Map back to the exact option token if needed
                 const match = rawOpts.find(o => {
                     const v = typeof o === 'object' ? (o.value || o.val || o.code || o.label || o.name) : o;
                     return norm(v) === choice;
@@ -1937,42 +2360,129 @@ const FormArea = ({
                 return typeof match === 'object' ? (match.value || match.val || match.code || match.label || match.name) : match;
             };
 
-            const isAssessmentDetails = (sec) => {
-                const name = String(sec?.name || '').toLowerCase();
-                return name === 'assessment details' || name === 'assessment_details';
-            };
-
-            // First pass: set all select values
-            targetSections.filter(s => !isAssessmentDetails(s)).forEach(section => {
-                (section.fields || []).forEach(f => {
-                    if (f && f.type === 'select' && f.id) {
-                        const val = pickFromOptions(f);
-                        try { saveField(f.id, val); } catch (_) {}
-                    }
-                });
-            });
-
-            // Second pass: set comments where present
             const randText = () => {
                 const words = ['good', 'fair', 'requires', 'attention', 'policy', 'procedure', 'training', 'evidence', 'documented', 'verified'];
                 return Array.from({ length: 6 }, () => words[Math.floor(Math.random() * words.length)]).join(' ');
             };
-            targetSections.filter(s => !isAssessmentDetails(s)).forEach(section => {
+
+            // ── Main loop: iterate SE sections ────────────────────────────
+            const seSections = targetSections.filter(s => !isAssessmentDetailsSection(s));
+
+            // Strict preflight: refuse to randomize unless we can push every SE to DHIS2
+            const preflightIssues = [];
+            if (!teiId) preflightIssues.push('assessment TEI is missing');
+            if (!orgUnitId) preflightIssues.push('org unit is missing');
+            if (!nsKey) preflightIssues.push('facility group / namespace is missing');
+            if (!planToUse) preflightIssues.push('assignment plan was not found in DataStore');
+            if (!hasAssignments) preflightIssues.push('assigned users or usernames could not be resolved');
+            if (eventMapResolving) preflightIssues.push('SE event mapping is still resolving');
+            if (Object.keys(eventIdMap).length === 0) preflightIssues.push('SE event mapping is missing');
+
+            const sectionIssues = [];
+            seSections.forEach(section => {
+                const seNum = extractSeNum(section);
+                const seEventId = seNum ? eventIdMap[seNum] : null;
+                const assignedUserIds = (seNum && seAssignments[seNum]) || [];
+                const assignedUserId = assignedUserIds[0] || null;
+                const resolvedUser = assignedUserId ? (userMap[assignedUserId] || null) : null;
+                // Normalize to lowercase for testing environment authentication
+                const assigneeUsername = resolvedUser?.username ? String(resolvedUser.username).toLowerCase() : null;
+
+                if (!seNum) sectionIssues.push(`${section?.name || section?.id || 'Unknown section'}: SE number not detected`);
+                else if (!seEventId) sectionIssues.push(`SE ${seNum}: event mapping missing`);
+                else if (!assignedUserId) sectionIssues.push(`SE ${seNum}: no assigned user`);
+                else if (!assigneeUsername) sectionIssues.push(`SE ${seNum}: assigned username could not be resolved`);
+            });
+
+            if (preflightIssues.length > 0 || sectionIssues.length > 0) {
+                const details = [...preflightIssues, ...sectionIssues].slice(0, 6).join('; ');
+                console.warn('Randomize: refusing to run because server-push prerequisites are missing', {
+                    preflightIssues,
+                    sectionIssues,
+                    nsKey,
+                    teiId,
+                    orgUnitId,
+                    eventIdMapKeys: Object.keys(eventIdMap || {}),
+                    seAssignmentsKeys: Object.keys(seAssignments || {}),
+                });
+                if (typeof showToast === 'function') {
+                    showToast(`Randomize blocked: server-push prerequisites are missing. ${details}`, 'error');
+                }
+                return;
+            }
+
+            let pushedCount = 0;
+            let failedCount = 0;
+
+            if (typeof showToast === 'function') showToast(`Randomizing ${seSections.length} sections...`, 'info');
+
+            for (const section of seSections) {
+                const seNum = extractSeNum(section);
+                const seEventId = seNum ? eventIdMap[seNum] : null;
+
+                // Find assigned user for this SE
+                const assignedUserIds = (seNum && seAssignments[seNum]) || [];
+                const assignedUserId = assignedUserIds[0]; // primary assignee
+                const resolvedUser = assignedUserId ? (userMap[assignedUserId] || null) : null;
+                // Normalize to lowercase for testing environment authentication
+                const assigneeUsername = resolvedUser?.username ? String(resolvedUser.username).toLowerCase() : null;
+                const assigneeDisplayName = resolvedUser?.displayName || assigneeUsername || 'Unassigned';
+
+                // Collect data values for this section
+                const sectionDvs = [];
+
+                // First pass: select fields (criterion responses)
                 (section.fields || []).forEach(f => {
-                    // Comment fields usually have questionFieldId set
+                    if (f && f.type === 'select' && f.id) {
+                        const val = pickFromOptions(f);
+                        try { saveField(f.id, val); } catch (_) {}
+                        if (val) sectionDvs.push({ dataElement: f.id, value: String(val) });
+                    }
+                });
+
+                // Second pass: comment/text fields
+                (section.fields || []).forEach(f => {
                     if (f && f.id && f.type !== 'select' && (f.questionFieldId || f.isCommentField)) {
                         const combined = `${randText()} | ${randText()}`;
                         try { saveField(f.id, combined); } catch (_) {}
+                        sectionDvs.push({ dataElement: f.id, value: combined });
                     }
                 });
-            });
 
-            if (typeof showToast === 'function') showToast('Randomized answers and comments across all sections.', 'success');
+                // PUT to DHIS2 under the assigned user's credentials
+                if (hasAssignments && seEventId && assigneeUsername && orgUnitId && sectionDvs.length > 0) {
+                    try {
+                        await api.putEventDataValuesAs({
+                            eventId: seEventId,
+                            username: assigneeUsername,
+                            password: SHARED_PASSWORD,
+                            programId,
+                            stageId,
+                            orgUnitId,
+                            teiId,
+                            dataValues: sectionDvs,
+                        });
+                        console.log(`✅ Randomize: SE ${seNum} → ${assigneeDisplayName} (${assigneeUsername}) → event ${seEventId} [${sectionDvs.length} DVs]`);
+                        pushedCount++;
+                    } catch (err) {
+                        console.warn(`❌ Randomize: SE ${seNum} → ${assigneeDisplayName} push failed:`, err);
+                        failedCount++;
+                    }
+                }
+            }
+
+            // Summary toast
+            if (hasAssignments) {
+                const msg = failedCount > 0
+                    ? `Randomized ${seSections.length} SEs. Pushed ${pushedCount} to DHIS2, ${failedCount} failed.`
+                    : `Randomized ${seSections.length} SEs. All ${pushedCount} pushed to DHIS2 under assigned users.`;
+                if (typeof showToast === 'function') showToast(msg, failedCount > 0 ? 'warning' : 'success');
+            }
         } catch (e) {
             console.warn('Randomize answers failed', e);
             if (typeof showToast === 'function') showToast('Randomize failed (see console).', 'error');
         }
-    }, [groups, activeSection, saveField, showToast]);
+    }, [groups, activeSection, saveField, showToast, formData, selectedFacility, configuration]);
     if (!activeSection) {
         if (!selectedFacility) {
             return <div className="form-area-empty">Please select a facility and a section</div>;
@@ -2382,6 +2892,30 @@ const FormArea = ({
                             </span>
                         )}
                     </h2>
+                    {/* SE assignment status banner */}
+                    {seLockInfo.hasAssignments && !isADSection && (
+                        <div style={{
+                            padding: '8px 14px',
+                            borderRadius: 6,
+                            fontSize: '0.85em',
+                            fontWeight: 600,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 8,
+                            marginBottom: 2,
+                            ...(isSectionLocked
+                                ? { background: '#fef3c7', color: '#92400e', border: '1px solid #fbbf24' }
+                                : seLockInfo.isLead
+                                    ? { background: '#ede9fe', color: '#5b21b6', border: '1px solid #c4b5fd' }
+                                    : { background: '#d1fae5', color: '#065f46', border: '1px solid #6ee7b7' })
+                        }}>
+                            {isSectionLocked
+                                ? <>{String.fromCodePoint(0x1F512)} This SE is assigned to {sectionOwnerName}. View-only.</>
+                                : seLockInfo.isLead
+                                    ? <>{String.fromCodePoint(0x1F451)} Lead assessor — full access</>
+                                    : <>{String.fromCodePoint(0x270F, 0xFE0F)} Assigned to you</>}
+                        </div>
+                    )}
                     {activeEventId && (
                         <div className="save-status-container">
                             {isSaving ? (
@@ -2411,8 +2945,9 @@ const FormArea = ({
                         <button
                             className="scoring-logic-btn"
                             onClick={randomizeAllAnswers}
-                            title="Randomize all criterion answers and comments across all sections in this group (testing only)"
-                            style={{ marginLeft: 8, background: '#374151', color: '#fff' }}
+                            disabled={!randomizeStatus.enabled}
+                            title={randomizeStatus.reason}
+                            style={{ marginLeft: 8, background: randomizeStatus.enabled ? '#374151' : '#9ca3af', color: '#fff', cursor: randomizeStatus.enabled ? 'pointer' : 'not-allowed' }}
                         >
                             🎲 Randomize Answers
                         </button>
@@ -2513,6 +3048,7 @@ const FormArea = ({
 		                                            saveField(key, e.target.value);
 		                                        }}
 		                                        placeholder="Type an overview or concise narrative for this SE..."
+		                                        disabled={isSectionLocked}
 		                                    />
 		                                </div>
 		                            )}
@@ -2713,8 +3249,9 @@ const FormArea = ({
                         <button
                             className="nav-btn"
                             onClick={randomizeAllAnswers}
-                            title="Randomize all criterion answers and comments across all sections in this group"
-                            style={{ marginLeft: '8px', background: '#374151', color: '#fff' }}
+                            disabled={!randomizeStatus.enabled}
+                            title={randomizeStatus.reason}
+                            style={{ marginLeft: '8px', background: randomizeStatus.enabled ? '#374151' : '#9ca3af', color: '#fff', cursor: randomizeStatus.enabled ? 'pointer' : 'not-allowed' }}
                         >
                             Randomize Answers (all SEs)
                         </button>
@@ -2724,7 +3261,7 @@ const FormArea = ({
 	                    <button
 	                        className="nav-btn submit-btn"
 	                        onClick={handleSubmit}
-	                        disabled={isSubmitting || isSaving || submitResult?.success}
+	                        disabled={isSubmitting || isSaving || submitResult?.success || isSectionLocked}
 	                        style={{
 	                            marginTop: '12px',
 	                            width: '100%',
@@ -2733,7 +3270,7 @@ const FormArea = ({
 	                            border: 'none',
 	                            padding: '10px',
 	                            borderRadius: '4px',
-	                            cursor: (isSubmitting || isSaving || submitResult?.success) ? 'not-allowed' : 'pointer',
+	                            cursor: (isSubmitting || isSaving || submitResult?.success || isSectionLocked) ? 'not-allowed' : 'pointer',
 	                            fontWeight: 600,
 	                            fontSize: '1em',
 	                            opacity: submitResult?.success ? 0.8 : 1

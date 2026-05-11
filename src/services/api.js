@@ -268,6 +268,44 @@ export const api = {
     return await resp.json().catch(() => null);
   },
 
+  /**
+   * PUT data values to a specific DHIS2 event using the supplied user credentials.
+   * This does NOT change the current user's session in localStorage – it creates
+   * an isolated Basic-Auth request so that DHIS2 records `lastUpdatedBy` as the
+   * given user, which is what powers the per-assessor audit trail in the report.
+   *
+   * @param {Object}  opts
+   * @param {string}  opts.eventId    – DHIS2 event UID
+   * @param {string}  opts.username   – DHIS2 username of the assessor
+   * @param {string}  opts.password   – assessor password
+   * @param {string}  opts.programId
+   * @param {string}  opts.stageId
+   * @param {string}  opts.orgUnitId
+   * @param {string}  [opts.teiId]
+   * @param {Array}   opts.dataValues – [{ dataElement, value }]
+   */
+  putEventDataValuesAs: async ({ eventId, username, password, programId, stageId, orgUnitId, teiId, dataValues }) => {
+    if (!eventId || !username || !password) throw new Error('putEventDataValuesAs: eventId, username and password are required');
+    const DE_FACILITY_TEI_ID = 'BKs2OwTxyYa';
+    const url = `${BASE_URL}/api/events/${encodeURIComponent(eventId)}/${DE_FACILITY_TEI_ID}`;
+    const body = {
+      event: eventId,
+      orgUnit: orgUnitId,
+      program: programId || 'G2gULe4jsfs',
+      programStage: stageId || 'HpHD6u6MV37',
+      status: 'ACTIVE',
+      ...(teiId ? { trackedEntityInstance: teiId } : {}),
+      dataValues: (dataValues || []).map(dv => ({ ...dv, providedElsewhere: false })),
+    };
+    const headers = getHeaders(username, password);
+    const resp = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(body) });
+    if (!resp.ok) {
+      const txt = await resp.text().catch(() => '');
+      throw new Error(`putEventDataValuesAs(${username}→${eventId}) failed: ${resp.status} ${txt?.slice(0, 300)}`);
+    }
+    return { ok: true, eventId, username };
+  },
+
   // Search organisation units by display name (case-insensitive LIKE)
   searchOrganisationUnits: async (query, { max = 20 } = {}) => {
     const q = String(query || '').trim();
@@ -980,6 +1018,8 @@ export const api = {
 	                programOrgUnitId: enrollment.programOrgUnitId || ouId,
 	                orgUnitName: fullOu?.displayName || fullOu?.name || firstTeam?.orgUnitName || enrollment.orgUnitName || 'Unknown Facility',
 	                parentOrgUnitName: parentName,
+		                setupEventId: setupEvent?.event || null,
+		                setupEventDataValues: Array.isArray(setupEvent?.dataValues) ? setupEvent.dataValues : [],
 	                programmeStatus,
 	                team: buildTeamForEnrollment(enrId)
 	            };
@@ -1148,88 +1188,8 @@ export const api = {
      *          }
      */
     submitEventPut: async (formData, configuration, orgUnitId) => {
-        const PROGRAM_ID = configuration?.program?.id || 'G2gULe4jsfs';
-        const STAGE_ID = configuration?.programStage?.id || 'HpHD6u6MV37';
-        const DE_FACILITY_TEI_ID = 'BKs2OwTxyYa';
-
-        // Event and TEI identifiers expected to be present in the draft
-        const eventId = formData.eventId_internal || formData.event || formData.eventId;
-        if (!eventId) {
-            throw new Error('Missing DHIS2 event ID (eventId_internal) required for PUT /api/events/{id}/...');
-        }
-
-        const teiId = formData.teiId_internal || null;
-
-        // Collect SE narrative summaries as DHIS2 event notes
-        const seSummaryNotes = Object.entries(formData || {})
-            .filter(([key, value]) =>
-                key.startsWith('se_summary_') &&
-                value !== undefined && value !== null && String(value).trim() !== ''
-            )
-            .map(([key, value]) => {
-                const sectionId = key.replace('se_summary_', '') || 'unknown-section';
-                return { value: `SE summary (${sectionId}): ${String(value).trim()}` };
-            });
-
-        // Build data values: include TEI mapping on DE_FACILITY_TEI_ID and all other form DEs
-        const baseDvs = api.formatDataValues(formData) // {dataElement, value}
-            .map(dv => ({ ...dv, providedElsewhere: false }));
-
-        if (teiId) {
-            const idx = baseDvs.findIndex(d => d.dataElement === DE_FACILITY_TEI_ID);
-            const teiDv = { dataElement: DE_FACILITY_TEI_ID, value: String(teiId), providedElsewhere: false };
-            if (idx >= 0) baseDvs[idx] = teiDv; else baseDvs.unshift(teiDv);
-        }
-
-        // Ensure Assessment Group (pzenrgsSny3) matches baseline group's value for this TEI
-        try {
-            if (teiId) {
-                const baselineGroup = await api.getBaselineAssessmentGroup({ teiId, orgUnitId, programId: PROGRAM_ID, stageId: STAGE_ID });
-                if (baselineGroup && String(baselineGroup).trim() !== '') {
-                    const AG_DE = 'pzenrgsSny3';
-                    const idxAg = baseDvs.findIndex(d => d.dataElement === AG_DE);
-                    const agDv = { dataElement: AG_DE, value: String(baselineGroup), providedElsewhere: false };
-                    if (idxAg >= 0) baseDvs[idxAg] = agDv; else baseDvs.push(agDv);
-                }
-            }
-        } catch (e) {
-            console.warn('submitEventPut: could not align Assessment Group to baseline (non-fatal)', e);
-        }
-
-        const body = {
-            event: eventId,
-            orgUnit: orgUnitId,
-            program: PROGRAM_ID,
-            programStage: STAGE_ID,
-            status: 'COMPLETED',
-            ...(teiId ? { trackedEntityInstance: teiId } : {}),
-            dataValues: baseDvs,
-            ...(seSummaryNotes.length > 0 ? { notes: seSummaryNotes } : {})
-        };
-
-        const url = `${BASE_URL}/api/events/${encodeURIComponent(eventId)}/${DE_FACILITY_TEI_ID}`;
-        console.log('📤 PUT Event to DHIS2:', { url: url.replace(BASE_URL, '/qims'), body });
-
-        const response = await fetch(url, {
-            method: 'PUT',
-            headers: getHeaders(),
-            body: JSON.stringify(body)
-        });
-
-        let data = null;
-        try {
-            data = await response.json();
-        } catch (_) {
-            // Some DHIS2 endpoints return empty body on success; keep null
-        }
-
-        if (!response.ok) {
-            const errMsg = (data && (data.message || data.response?.importSummaries?.[0]?.description)) || `Event PUT failed: ${response.status}`;
-            console.error('❌ Event PUT failed:', data || response.statusText);
-            throw new Error(errMsg);
-        }
-
-        return data || { status: 'OK' };
+        // Delegate to batched to ensure split-event routing works universally
+        return await api.submitEventPutBatched(formData, configuration, orgUnitId);
     },
 
   /**
@@ -1245,18 +1205,49 @@ export const api = {
     const batchSize = Math.max(50, Math.min(400, Number(opts.batchSize || 150))); // sane bounds
     const interDelay = Math.max(0, Number(opts.interChunkDelayMs || 50));
 
-    const eventId = formData.eventId_internal || formData.event || formData.eventId;
-    if (!eventId) throw new Error('Missing DHIS2 event ID (eventId_internal) required for PUT batching');
+    const baseEventId = formData.eventId_internal || formData.event || formData.eventId;
+    if (!baseEventId) throw new Error('Missing DHIS2 event ID (eventId_internal) required for PUT batching');
     const teiId = formData.teiId_internal || null;
 
-    // Notes: convert SE summaries to DHIS2 notes once (attach on last chunk)
+    let eventIdMap = {};
+    try {
+        if (formData.eventIdMap_internal) {
+            eventIdMap = JSON.parse(formData.eventIdMap_internal);
+        }
+    } catch(e) {}
+
+    // Build dataElement -> eventId mapping based on sections
+    const deToEventMap = {};
+    if (Object.keys(eventIdMap).length > 0 && configuration?.programStage?.programStageSections) {
+        configuration.programStage.programStageSections.forEach(sec => {
+            const secName = (sec.displayName || sec.name || '').toLowerCase();
+            let tag = '';
+            if (secName.includes('assessment details') || secName.includes('assessment_details')) {
+                tag = 'FINAL';
+            } else {
+                // Match "SE 1" or "SE1"
+                const match = secName.match(/se\s*(\d+)/i);
+                if (match) tag = match[1];
+            }
+            if (tag && eventIdMap[tag]) {
+                const elements = sec.dataElements || sec.programStageDataElements || [];
+                elements.forEach(rawDe => {
+                    const deId = rawDe.id || (rawDe.dataElement ? rawDe.dataElement.id : (typeof rawDe === 'string' ? rawDe : null));
+                    if (deId) deToEventMap[deId] = eventIdMap[tag];
+                });
+            }
+        });
+    }
+
+    // Notes: convert SE summaries to DHIS2 notes once (attach on last chunk of their respective events later, or fallback to base)
     const seSummaryNotes = Object.entries(formData || {})
       .filter(([k, v]) => k.startsWith('se_summary_') && v !== undefined && v !== null && String(v).trim() !== '')
       .map(([k, v]) => ({ value: `SE summary (${k.replace('se_summary_', '') || 'unknown-section'}): ${String(v).trim()}` }));
 
     // Build all DVs once
     const baseDvs = api.formatDataValues(formData).map(dv => ({ ...dv, providedElsewhere: false }));
-    // Ensure TEI mapping DE is present (first chunk)
+    
+    // Ensure TEI mapping DE is present
     if (teiId) {
       const idx = baseDvs.findIndex(d => d.dataElement === DE_FACILITY_TEI_ID);
       const teiDv = { dataElement: DE_FACILITY_TEI_ID, value: String(teiId), providedElsewhere: false };
@@ -1278,14 +1269,19 @@ export const api = {
       console.warn('submitEventPutBatched: could not align Assessment Group (non-fatal)', e);
     }
 
-    // Chunk dataValues
-    const chunks = [];
-    for (let i = 0; i < baseDvs.length; i += batchSize) {
-      chunks.push(baseDvs.slice(i, i + batchSize));
-    }
+    // Group DVs by target event
+    const eventsToUpdate = {}; // { [eventId]: [dv1, dv2] }
+    
+    baseDvs.forEach(dv => {
+        let targetEventId = baseEventId; // Fallback to main/final event
+        if (Object.keys(deToEventMap).length > 0) {
+            targetEventId = deToEventMap[dv.dataElement] || eventIdMap['FINAL'] || baseEventId;
+        }
+        if (!eventsToUpdate[targetEventId]) eventsToUpdate[targetEventId] = [];
+        eventsToUpdate[targetEventId].push(dv);
+    });
 
     const baseBody = {
-      event: eventId,
       orgUnit: orgUnitId,
       program: PROGRAM_ID,
       programStage: STAGE_ID,
@@ -1293,25 +1289,86 @@ export const api = {
       ...(teiId ? { trackedEntityInstance: teiId } : {}),
     };
 
-    const url = `${BASE_URL}/api/events/${encodeURIComponent(eventId)}/${DE_FACILITY_TEI_ID}`;
-    let successCount = 0;
-    for (let ci = 0; ci < chunks.length; ci++) {
-      const body = {
-        ...baseBody,
-        dataValues: chunks[ci],
-        ...(ci === chunks.length - 1 && seSummaryNotes.length > 0 ? { notes: seSummaryNotes } : {}),
-      };
-      const resp = await fetch(url, { method: 'PUT', headers: getHeaders({ json: true }), body: JSON.stringify(body) });
-      if (!resp.ok) {
-        const txt = await resp.text().catch(() => '');
-        throw new Error(`Chunk ${ci + 1}/${chunks.length} failed: HTTP ${resp.status} ${txt?.slice(0,200)}`);
-      }
-      successCount += 1;
-      if (interDelay > 0 && ci < chunks.length - 1) await new Promise(r => setTimeout(r, interDelay));
+    let totalSuccessCount = 0;
+    
+    for (const [targetEventId, eventDvs] of Object.entries(eventsToUpdate)) {
+        // Chunk dataValues for this specific event
+        const chunks = [];
+        for (let i = 0; i < eventDvs.length; i += batchSize) {
+          chunks.push(eventDvs.slice(i, i + batchSize));
+        }
+
+        const url = `${BASE_URL}/api/events/${encodeURIComponent(targetEventId)}/${DE_FACILITY_TEI_ID}`;
+        
+        for (let ci = 0; ci < chunks.length; ci++) {
+          const body = {
+            ...baseBody,
+            event: targetEventId,
+            dataValues: chunks[ci],
+            // Attach notes only to the FINAL event, on its last chunk
+            ...(ci === chunks.length - 1 && seSummaryNotes.length > 0 && (targetEventId === baseEventId || targetEventId === eventIdMap['FINAL']) ? { notes: seSummaryNotes } : {}),
+          };
+          const resp = await fetch(url, { method: 'PUT', headers: getHeaders({ json: true }), body: JSON.stringify(body) });
+          if (!resp.ok) {
+            const txt = await resp.text().catch(() => '');
+            throw new Error(`Event ${targetEventId} Chunk ${ci + 1}/${chunks.length} failed: HTTP ${resp.status} ${txt?.slice(0,200)}`);
+          }
+          totalSuccessCount += 1;
+          if (interDelay > 0 && ci < chunks.length - 1) await new Promise(r => setTimeout(r, interDelay));
+        }
     }
 
-    return { ok: true, chunks: chunks.length, updated: baseDvs.length };
+    return { ok: true, chunks: totalSuccessCount, updated: baseDvs.length };
   },
+
+    /**
+     * Create a fresh assessment TEI + ACTIVE enrollment in the survey program.
+     * Used when a new assessment must live on its own TEI (e.g. Self Assessment).
+     */
+    createAssessmentTei: async ({ programId = 'G2gULe4jsfs', orgUnitId, trackedEntityTypeId = 'uTTDt3fuXZK' }) => {
+        if (!orgUnitId) throw new Error('createAssessmentTei: orgUnitId is required');
+
+        const now = new Date().toISOString().slice(0, 10);
+        const ATTR_ID = 'Bw4PZ8NsYFd';
+        const ATTR_VALUE = 'FAC_ASS_TYPE_INTERNAL';
+        const ADMIN_USERNAME = 'admin';
+        const ADMIN_PASSWORD = '5Am53808053@';
+
+        const trackerPayload = {
+            trackedEntities: [{
+                trackedEntityType: trackedEntityTypeId,
+                orgUnit: orgUnitId,
+                attributes: [],
+                enrollments: [{
+                    program: programId,
+                    orgUnit: orgUnitId,
+                    status: 'ACTIVE',
+                    enrolledAt: now,
+                    occurredAt: now,
+                    attributes: [{ attribute: ATTR_ID, value: ATTR_VALUE }]
+                }]
+            }]
+        };
+
+        const response = await fetch(`${BASE_URL}/api/tracker?async=false&importStrategy=CREATE`, {
+            method: 'POST',
+            headers: getHeaders(ADMIN_USERNAME, ADMIN_PASSWORD),
+            body: JSON.stringify(trackerPayload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.status !== 'OK') {
+            const errorMsg = data.validationReport?.errorReports?.[0]?.message || data.message || 'Assessment TEI creation failed';
+            console.error('❌ createAssessmentTei failed:', data);
+            throw new Error(errorMsg);
+        }
+
+        const teiId = data.bundleReport?.typeReportMap?.TRACKED_ENTITY?.objectReports?.[0]?.uid || null;
+        const enrollmentId = data.bundleReport?.typeReportMap?.ENROLLMENT?.objectReports?.[0]?.uid || null;
+        if (!teiId) throw new Error('Assessment TEI creation succeeded but TEI UID was not returned.');
+
+        return { teiId, enrollmentId };
+    },
 
     /**
      * Create a new survey Event in the target program/stage for a TEI/orgUnit.
@@ -1534,7 +1591,23 @@ export const api = {
         const legacyUid = result?.response?.importSummaries?.[0]?.reference;
         if (legacyUid) return legacyUid;
 
-        return 'synced';
+        return null;
+    },
+
+    extractEventImportError: (result) => {
+        const summary = result?.response?.importSummaries?.[0] || null;
+        const status = summary?.status || result?.status || null;
+        const description = summary?.description || summary?.importConflicts?.[0]?.value || summary?.conflicts?.[0]?.value || null;
+        const rejection = summary?.rejectedIndexes?.length ? `Rejected indexes: ${summary.rejectedIndexes.join(', ')}` : null;
+        const typeReportErr = result?.bundleReport?.typeReportMap?.EVENT?.objectReports?.[0]?.errorReports?.[0]?.message || null;
+        const validationErr = result?.validationReport?.errorReports?.[0]?.message || null;
+        const topLevelMsg = result?.message || null;
+        const parts = [typeReportErr, validationErr, description, rejection, topLevelMsg].filter(Boolean);
+        if (parts.length > 0) return parts.join(' | ');
+        if (status && String(status).toUpperCase() !== 'SUCCESS' && String(status).toUpperCase() !== 'OK') {
+            return `DHIS2 import status: ${status}`;
+        }
+        return null;
     },
 
     /**
@@ -1553,6 +1626,14 @@ export const api = {
             throw new Error(data?.message || `Event submission failed: ${response.status}`);
         }
 
-        return await response.json();
+        const data = await response.json();
+        const createdId = api.extractEventId(data);
+        if (!createdId) {
+            const detail = api.extractEventImportError(data) || 'DHIS2 did not return an event UID.';
+            const err = new Error(`Event submission rejected by DHIS2: ${detail}`);
+            err.dhis2Response = data;
+            throw err;
+        }
+        return data;
     }
 };

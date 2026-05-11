@@ -175,6 +175,10 @@ export const transformMetadata = (metadata) => {
 	        //    repeated whitespace.
 	        label = label.replace(/_+/g, ' ');
 	        label = label.replace(/\s+/g, ' ').trim();
+	        // Present the Assessment field as "Type" in the UI, even though the
+	        // underlying DE/metadata may still use the legacy "Group" wording.
+	        label = label.replace(/facility assessment group/ig, 'Facility Assessment Type');
+	        label = label.replace(/surv-\s*facility assessment group/ig, 'SURV-Facility Assessment Type');
 	        return label;
 	    };
 
@@ -182,6 +186,13 @@ export const transformMetadata = (metadata) => {
         const fields = [];
         const sectionName = section.displayName || section.name || '';
         const sectionCode = section.code || '';
+        
+        // Only trust explicit SE/EMS/SEC markers here. Bare numeric section
+        // names/codes like "151" are internal metadata, not SE numbers.
+        const seMatch = String(sectionName).match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)/i)
+            || String(sectionCode).match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)/i);
+
+        let seId = seMatch ? seMatch[2] : null;
 
         let elements = section.dataElements || section.programStageDataElements || [];
         elements = [...elements].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
@@ -231,10 +242,23 @@ export const transformMetadata = (metadata) => {
         const finalName = stripPrefix(sectionName, false);
         const finalCode = stripPrefix(sectionCode, true).replace(/^EMS/, 'SE');
 
+        // Fallback: infer SE number from field codes/labels, e.g.
+        // SURV_HOSP_SE2_2.1.1.1 or 2.1.1.1 ...
+        if (!seId) {
+            const fieldTexts = fields.flatMap(f => [f?.code, f?.label]).filter(Boolean).map(v => String(v));
+            for (const txt of fieldTexts) {
+                let m = txt.match(/(?:SE|SEC|SECTION|EMS)\s*([0-9]+)/i);
+                if (m) { seId = m[1]; break; }
+                m = txt.match(/(?:^|[^0-9])([0-9]+)\.[0-9]+\.[0-9]+\.[0-9]+/);
+                if (m) { seId = m[1]; break; }
+            }
+        }
+
         return {
             id: section.id,
             name: finalName,
             code: finalCode,
+	            se_id: seId,
             fields: fields,
             _prefix: prefix,
             _originalName: sectionName
