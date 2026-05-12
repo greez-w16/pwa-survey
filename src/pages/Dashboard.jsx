@@ -147,11 +147,14 @@ export function Dashboard() {
 
     const SYS_TAG_DE_ID = 'r8pqjX6Jtr0';
     const getSysTag = (ev) => {
-        const tagDv = (ev?.dataValues || []).find(d => d?.dataElement === SYS_TAG_DE_ID && d?.value !== undefined && String(d.value).trim() !== '');
-        if (tagDv) return String(tagDv.value).trim();
-        const notes = Array.isArray(ev?.notes) ? ev.notes : [];
-        const sysTagNote = notes.find(n => n?.value && String(n.value).includes('SYS_TAG:'));
-        return sysTagNote ? String(sysTagNote.value).replace('SYS_TAG:', '').trim() : null;
+	        const dataValues = Array.isArray(ev?.dataValues) ? ev.dataValues : [];
+	        for (const dv of dataValues) {
+	            if (dv?.dataElement !== SYS_TAG_DE_ID) continue;
+	            const value = dv?.value === undefined || dv?.value === null ? '' : String(dv.value).trim();
+	            if (value) return value;
+	            break;
+	        }
+	        return null;
     };
 
     // Build SE options for the selected Facility Group
@@ -295,20 +298,24 @@ export function Dashboard() {
         return { plan: null, nsKey: null };
     }, [toFacilityGroupKey]);
 
-    const readSurveyTagMap = React.useCallback(async ({ teiId, orgUnitId, programId, stageId }) => {
+	    const readSurveyTagMap = React.useCallback(async ({ teiId, orgUnitId, programId, stageId }) => {
         if (!teiId || !orgUnitId) return {};
-        const surveyEvents = await api.getSurveyEventsForTei({
-            teiId,
-            orgUnitId,
-            programId,
-            stageId,
-            fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
-        }).catch(() => []);
         const tagMap = {};
-        (surveyEvents || []).forEach(ev => {
-            const tag = getSysTag(ev);
-            if (tag && !tagMap[tag]) tagMap[tag] = ev.event;
-        });
+	        const surveyEvents = await api.getSurveyEventsForTeiByEventIds({
+	            teiId,
+	            orgUnitId,
+	            programId,
+	            stageId,
+	            listPageSize: 50,
+	            detailBatchSize: 5,
+	            fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
+	        }).catch(() => []);
+
+	        (surveyEvents || []).forEach(ev => {
+	            const tag = getSysTag(ev);
+	            if (tag && !tagMap[tag]) tagMap[tag] = ev.event;
+	        });
+
         return tagMap;
     }, []);
 
@@ -319,7 +326,7 @@ export function Dashboard() {
             if (delayMs > 0) {
                 await new Promise(resolve => setTimeout(resolve, delayMs));
             }
-            latestTagMap = await readSurveyTagMap({ teiId, orgUnitId, programId, stageId });
+		            latestTagMap = await readSurveyTagMap({ teiId, orgUnitId, programId, stageId });
             const missingTags = expectedTags.filter(tag => !latestTagMap[tag]);
             await onAttempt?.({ attempt: attempt + 1, totalAttempts: pollDelaysMs.length, latestTagMap, missingTags });
             if (missingTags.length === 0) break;
@@ -353,7 +360,10 @@ export function Dashboard() {
             scheduleTeiId: teiId,
             baselineEventId: eventIdMap?.FINAL || null,
             preloadDataValues: preload,
-            preloadMode: 'MERGE'
+	            // The just-created event map is authoritative. Replace any stale
+	            // local draft map that may have been produced by an earlier failed
+	            // readback/repair attempt.
+	            preloadMode: 'REPLACE'
         };
         navigate(
             `/form?assessmentId=${assessment.eventId || eventIdMap?.FINAL || teiId}&baselineId=${eventIdMap?.FINAL || ''}`,
@@ -991,7 +1001,7 @@ export function Dashboard() {
             const teamIds = (initTeamOptions || []).map(t => t.id).filter(Boolean);
             const seList = initSeOptions || [];
             if (teamIds.length === 0 || seList.length === 0) {
-                showToast?.('Add team members and select a Facility Group (to load SEs) before randomizing.', 'warning');
+	                showToast?.('Add team members and select a Facility Type (to load SEs) before randomizing.', 'warning');
                 return;
             }
             // Shuffle team for fairness (Fisher–Yates)
@@ -1035,7 +1045,7 @@ export function Dashboard() {
                 });
             };
             if (!initSurveyType || !initFacilityGroup) {
-                showToast?.('Please select Type of Survey and Facility Group.', 'error');
+	                showToast?.('Please select Type of Survey and Facility Type.', 'error');
                 setIsBaselineCreating(false);
                 return;
             }
@@ -1158,41 +1168,51 @@ export function Dashboard() {
                     setCreateDetails(prev => [...prev, `DHIS2 visibility check ${attempt}/${totalAttempts}: ${visibleCount}/${expectedTags.length} tags visible${missingTags.length ? `; still missing ${missingTags.join(', ')}` : ''}.`]);
                 }
             });
-            let verifiedTagMap = { ...eventIdMap, ...(visibilityResult.tagMap || {}) };
-            let missingTags = expectedTags.filter(tag => !verifiedTagMap[tag]);
-            setCreateDetails(prev => [...prev, `Verified ${expectedTags.length - missingTags.length}/${expectedTags.length} expected DHIS2 event tags after provisioning.`]);
-            if (missingTags.length > 0) {
-                const failureInfo = {
-                    message: `Assessment provisioning incomplete. Missing DHIS2 events for: ${missingTags.join(', ')}`,
-                    missingTags,
-                    expectedCount: expectedTags.length,
-                    verifiedCount: expectedTags.length - missingTags.length,
-                    teiId,
-                    orgUnitId,
-                    programId,
-                    stageId,
-                    facilityGroup: ns,
-                    surveyType: initSurveyType,
-                };
-                setPendingProvisionedBundle({
-                    assessment: pendingOpenAssessment,
-                    teiId,
-                    orgUnitId,
-                    enrollmentId,
-                    eventIdMap: verifiedTagMap,
-                    surveyType: initSurveyType,
-                    facilityGroup: ns,
-                });
-                setCreateErrorInfo(failureInfo);
-                setCreateDetails(prev => [...prev, `DHIS2 readback is still missing tags: ${missingTags.join(', ')}.`]);
-                const error = new Error(failureInfo.message);
-                error.createErrorInfo = failureInfo;
-                throw error;
-            }
+	            const createdMapMissingTags = expectedTags.filter(tag => !eventIdMap[tag]);
+	            if (createdMapMissingTags.length > 0) {
+	                const failureInfo = {
+	                    message: `Assessment provisioning incomplete. DHIS2 did not return event IDs for: ${createdMapMissingTags.join(', ')}`,
+	                    missingTags: createdMapMissingTags,
+	                    expectedCount: expectedTags.length,
+	                    verifiedCount: expectedTags.length - createdMapMissingTags.length,
+	                    teiId,
+	                    orgUnitId,
+	                    programId,
+	                    stageId,
+	                    facilityGroup: ns,
+	                    surveyType: initSurveyType,
+	                };
+	                setCreateErrorInfo(failureInfo);
+	                const error = new Error(failureInfo.message);
+	                error.createErrorInfo = failureInfo;
+	                throw error;
+	            }
 
-            Object.keys(verifiedTagMap).forEach(tag => {
-                if (expectedTags.includes(tag) && verifiedTagMap[tag]) eventIdMap[tag] = verifiedTagMap[tag];
-            });
+	            const readbackTagMap = visibilityResult.tagMap || {};
+	            const readbackMissingTags = expectedTags.filter(tag => !readbackTagMap[tag]);
+	            setCreateDetails(prev => [
+	                ...prev,
+	                `Created ${expectedTags.length}/${expectedTags.length} event mappings from DHIS2 create responses.`,
+	                `Readback saw ${expectedTags.length - readbackMissingTags.length}/${expectedTags.length} SYS_TAGs${readbackMissingTags.length ? `; pending DHIS2 visibility for ${readbackMissingTags.join(', ')}` : ''}.`
+	            ]);
+
+	            Object.entries(readbackTagMap).forEach(([tag, readbackEventId]) => {
+	                if (!expectedTags.includes(tag) || !readbackEventId) return;
+	                if (eventIdMap[tag] && eventIdMap[tag] !== readbackEventId) {
+	                    setCreateDetails(prev => [...prev, `SYS_TAG ${tag} readback returned ${readbackEventId}, but create response returned ${eventIdMap[tag]}; keeping create-response ID.`]);
+	                }
+	            });
+
+	            try {
+	                await api.upsertDataStoreItem(ns, teiId, {
+	                    ...body,
+	                    eventIdMap,
+	                    eventIdMapSource: 'CREATE_RESPONSE',
+	                    eventIdMapUpdatedAt: new Date().toISOString(),
+	                });
+	            } catch (e) {
+	                console.warn('DataStore eventIdMap upsert failed (non-fatal)', e);
+	            }
             updateCreateProgress(step, totalSteps, 'Finalizing setup...');
 
             setPendingProvisionedBundle(null);
@@ -2071,7 +2091,7 @@ export function Dashboard() {
                                             <th style={{ padding: '6px 8px' }}>Authorised start</th>
                                             <th style={{ padding: '6px 8px' }}>Authorised end</th>
                                             <th style={{ padding: '6px 8px' }}>Type of assessment</th>
-                                            <th style={{ padding: '6px 8px' }}>Assessment group</th>
+	                                            <th style={{ padding: '6px 8px' }}>Facility type</th>
                                             <th style={{ padding: '6px 8px' }}>Status</th>
                                             <th style={{ padding: '6px 8px' }}>Actions</th>
                                         </tr>
@@ -2855,7 +2875,7 @@ export function Dashboard() {
                         </TextField>
                         <TextField
                             select
-                            label="Facility Group"
+	                            label="Facility Type"
                             value={initFacilityGroup}
                             onChange={e => { const v = e.target.value; setInitFacilityGroup(v); setInitSeOptions(buildSeOptions(v)); setInitAssignments({}); }}
                             size="small"

@@ -1072,6 +1072,40 @@ export const api = {
         return data.events || [];
     },
 
+	    // Fetch one page of events. Useful when events contain many dataValues and
+	    // the caller wants to process SYS_TAG/event mapping in small chunks.
+	    getEventsListPage: async ({
+	        programId,
+	        stageId,
+	        teiId,
+	        enrollmentId,
+	        orgUnitId,
+	        ouMode = 'SELECTED',
+	        order = 'eventDate:desc',
+	        fields = 'event,eventDate,status,program,programStage,orgUnit,trackedEntityInstance',
+	        page = 1,
+	        pageSize = 10
+	    }) => {
+	        const params = [
+	            'paging=true',
+	            `page=${Math.max(1, Number(page) || 1)}`,
+	            `pageSize=${Math.max(1, Number(pageSize) || 10)}`,
+	            programId ? `program=${programId}` : null,
+	            stageId ? `programStage=${stageId}` : null,
+	            teiId ? `trackedEntityInstance=${teiId}` : null,
+	            enrollmentId ? `enrollment=${enrollmentId}` : null,
+	            orgUnitId ? `orgUnit=${orgUnitId}` : null,
+	            orgUnitId ? `ouMode=${ouMode}` : null,
+	            order ? `order=${order}` : null,
+	            fields ? `fields=${fields}` : null
+	        ].filter(Boolean).join('&');
+	        const url = `${BASE_URL}/api/events?${params}`;
+	        const resp = await fetch(url, { headers: getHeaders() });
+	        if (!resp.ok) throw new Error(`Failed to fetch events page: ${resp.status}`);
+	        const data = await resp.json();
+	        return { events: data.events || [], pager: data.pager || null };
+	    },
+
     // Fetch Programme Setup events for a scheduling enrollment (K9O5fdoBmKf / M2RdEI7Tbqr)
     getSetupEventsForEnrollment: async (enrollmentId) => {
         if (!enrollmentId) return [];
@@ -1100,6 +1134,79 @@ export const api = {
             fields
         });
     },
+
+	    getSurveyEventsForTeiPage: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37',
+	        fields = 'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]', page = 1, pageSize = 10 }) => {
+	        if (!teiId) return { events: [], pager: null };
+	        return await api.getEventsListPage({
+	            programId,
+	            stageId,
+	            teiId,
+	            orgUnitId,
+	            ouMode: 'DESCENDANTS',
+	            order: 'eventDate:desc',
+	            fields,
+	            page,
+	            pageSize
+	        });
+	    },
+
+	    getEventById: async (eventId, fields = 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]') => {
+	        if (!eventId) return null;
+	        const url = `${BASE_URL}/api/events/${encodeURIComponent(eventId)}?fields=${fields}`;
+	        const resp = await fetch(url, { headers: getHeaders() });
+	        if (!resp.ok) throw new Error(`Failed to fetch event ${eventId}: ${resp.status}`);
+	        return await resp.json();
+	    },
+
+	    getSurveyEventIdsForTei: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37', pageSize = 50 }) => {
+	        if (!teiId) return [];
+	        const ids = [];
+	        let page = 1;
+	        let pageCount = 1;
+
+	        do {
+	            const result = await api.getSurveyEventsForTeiPage({
+	                teiId,
+	                orgUnitId,
+	                programId,
+	                stageId,
+	                fields: 'event',
+	                page,
+	                pageSize
+	            });
+	            const events = result.events || [];
+	            events.forEach(ev => {
+	                if (ev?.event) ids.push(ev.event);
+	            });
+	            pageCount = result.pager?.pageCount || (events.length < pageSize ? page : page + 1);
+	            page += 1;
+	        } while (page <= pageCount);
+
+	        return [...new Set(ids)];
+	    },
+
+	    getSurveyEventsForTeiByEventIds: async ({
+	        teiId,
+	        orgUnitId,
+	        programId = 'G2gULe4jsfs',
+	        stageId = 'HpHD6u6MV37',
+	        fields = 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]',
+	        listPageSize = 50,
+	        detailBatchSize = 5
+	    }) => {
+	        const eventIds = await api.getSurveyEventIdsForTei({ teiId, orgUnitId, programId, stageId, pageSize: listPageSize });
+	        const events = [];
+	        const batchSize = Math.max(1, Number(detailBatchSize) || 5);
+
+	        for (let i = 0; i < eventIds.length; i += batchSize) {
+	            const batch = eventIds.slice(i, i + batchSize);
+	            const loaded = await Promise.all(batch.map(eventId => api.getEventById(eventId, fields).catch(() => null)));
+	            loaded.forEach(ev => { if (ev?.event) events.push(ev); });
+	        }
+
+	        return events;
+	    },
 
     // Resolve the baseline Assessment Group value (DE pzenrgsSny3) from the earliest
     // event for this TEI/program/stage (scoped to orgUnit when provided).

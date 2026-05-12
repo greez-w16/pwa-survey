@@ -100,6 +100,17 @@ const PrivateRoute = ({ children }) => {
 	
 	  // Data element ID for "SURV-Facility Assessment Group"
 		  const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
+		  const TYPE_OF_ASSESSMENT_DE_ID = 'LNszX9xHx8s';
+
+		  const typeOfAssessmentDeId = React.useMemo(() => {
+		    const ps = configuration?.programStage;
+		    const list = (ps?.programStageDataElements || []).map(psde => psde.dataElement || psde);
+		    const match = list.find(de => {
+		      const n = (de?.displayName || de?.formName || de?.name || '').toLowerCase();
+		      return n.includes('type of assessment') || (n.includes('assessment type') && !n.includes('facility assessment'));
+		    });
+		    return match?.id || TYPE_OF_ASSESSMENT_DE_ID;
+		  }, [configuration]);
 	
 	  const getGroupLabelForStorage = (group) => {
 	    if (!group) return '';
@@ -117,6 +128,15 @@ const PrivateRoute = ({ children }) => {
     if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
     return null;
   }, []);
+
+	  const resolveAssessmentNamespaceFromText = React.useCallback((text) => {
+	    const t = String(text || '').toLowerCase();
+	    if (t.includes('hosp')) return 'HOSPITAL';
+	    if (t.includes('clinic')) return 'CLINICS';
+	    if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
+	    if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
+	    return String(text || '').toUpperCase().trim() || null;
+	  }, []);
 	
 	  // Generate Event ID safely - unique per assessment *and group*
 	  // so each (assessment, group) gets its own draft/event.
@@ -166,13 +186,37 @@ const PrivateRoute = ({ children }) => {
 	    }
 	  });
 
-	  const handleCriterionChange = React.useCallback(() => {
-	    setIsScoringPending(true);
-	  }, []);
+		  const [localScoringOverrides, setLocalScoringOverrides] = React.useState({});
+		  const [serverAssessmentData, setServerAssessmentData] = React.useState({});
+		  const [dataStoreScoringEventIdMap, setDataStoreScoringEventIdMap] = React.useState({});
+		  const [serverScoringRefreshTick, setServerScoringRefreshTick] = React.useState(0);
+
+		  const handleCriterionChange = React.useCallback((fieldId, fieldValue) => {
+		    setIsScoringPending(true);
+		    if (fieldId) {
+		      setLocalScoringOverrides(prev => ({ ...prev, [fieldId]: fieldValue }));
+		    }
+		  }, []);
 
 	  const saveField = React.useCallback((fieldKey, fieldValue) => {
 	    baseSaveField(fieldKey, fieldValue);
 	  }, [baseSaveField]);
+
+		  useEffect(() => {
+		    setLocalScoringOverrides({});
+		    setServerAssessmentData({});
+		    setDataStoreScoringEventIdMap({});
+		  }, [activeEventId]);
+
+		  const parseEventIdMap = React.useCallback((raw) => {
+		    try {
+		      if (!raw) return {};
+		      if (typeof raw === 'string') return JSON.parse(raw) || {};
+		      return typeof raw === 'object' ? raw : {};
+		    } catch (_) {
+		      return {};
+		    }
+		  }, []);
 
 	  // Always store a friendly facility name in the draft so the
 	  // Dashboard and Survey Preview can display it instead of
@@ -356,6 +400,11 @@ const PrivateRoute = ({ children }) => {
 	        if (baselineIdParam && !restored.baselineEventId) {
 	            restored.baselineEventId = baselineIdParam;
 	        }
+		        // A URL-opened assessment has no navigation-state preload after refresh.
+		        // Tell FormArea to hydrate the local draft from the resolved DHIS2
+		        // event bundle instead of rendering an empty form against a mapped event.
+		        restored.hydrateAll = true;
+		        restored.preloadMode = 'REPLACE';
 	        // Preserve a newly created assessment TEI across refreshes. This is
 	        // required for Self Assessment, where the new assessment lives on a
 	        // different TEI than the scheduling/selected assignment.
@@ -558,6 +607,150 @@ const PrivateRoute = ({ children }) => {
     }
   }, [formData?.[FACILITY_GROUP_DE_ID], groups]);
 
+	  const draftScoringEventIdMap = React.useMemo(
+	    () => parseEventIdMap(formData?.eventIdMap_internal),
+	    [formData?.eventIdMap_internal, parseEventIdMap]
+	  );
+
+	  const preloadScoringEventIdMap = React.useMemo(() => {
+	    const preload = selectedFacility?.preloadDataValues || {};
+	    return {
+	      ...parseEventIdMap(selectedFacility?.eventIdMap),
+	      ...parseEventIdMap(preload?.eventIdMap),
+	      ...parseEventIdMap(preload?.eventIdMap_internal),
+	    };
+	  }, [selectedFacility, parseEventIdMap]);
+
+	  const scoringTeiId = React.useMemo(() => (
+	    formData?.teiId_internal ||
+	    selectedFacility?.trackedEntityInstance ||
+	    selectedFacility?.scheduleTeiId ||
+	    null
+	  ), [formData?.teiId_internal, selectedFacility]);
+
+	  const scoringNamespaceCandidates = React.useMemo(() => {
+	    const preferred = resolveAssessmentNamespaceFromText(
+	      formData?.[FACILITY_GROUP_DE_ID] || activeGroup?.name || activeGroup?.id || ''
+	    );
+	    return Array.from(new Set([preferred, 'HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].filter(Boolean)));
+	  }, [formData?.[FACILITY_GROUP_DE_ID], activeGroup, resolveAssessmentNamespaceFromText]);
+
+	  useEffect(() => {
+	    if (!scoringTeiId || scoringNamespaceCandidates.length === 0) {
+	      setDataStoreScoringEventIdMap({});
+	      return;
+	    }
+	    let cancelled = false;
+	    (async () => {
+	      for (const nsKey of scoringNamespaceCandidates) {
+	        try {
+	          const plan = await api.getDataStoreItem(nsKey, scoringTeiId);
+	          const map = parseEventIdMap(plan?.eventIdMap);
+	          if (Object.keys(map).length > 0) {
+	            if (!cancelled) setDataStoreScoringEventIdMap(map);
+	            return;
+	          }
+	        } catch (_) {
+	          // Keep probing candidate namespaces.
+	        }
+	      }
+	      if (!cancelled) setDataStoreScoringEventIdMap({});
+	    })();
+	    return () => { cancelled = true; };
+	  }, [scoringTeiId, scoringNamespaceCandidates, parseEventIdMap]);
+
+	  const scoringEventIdMap = React.useMemo(() => ({
+	    ...(dataStoreScoringEventIdMap || {}),
+	    ...(preloadScoringEventIdMap || {}),
+	    ...(draftScoringEventIdMap || {}),
+	  }), [dataStoreScoringEventIdMap, preloadScoringEventIdMap, draftScoringEventIdMap]);
+
+	  const scoringEventIds = React.useMemo(() => {
+	    const tagRank = (tag) => {
+	      if (tag === 'FINAL') return -1;
+	      const n = Number(tag);
+	      return Number.isFinite(n) ? n : 9999;
+	    };
+	    const ids = Object.entries(scoringEventIdMap || {})
+	      .filter(([, eventId]) => eventId)
+	      .sort(([a], [b]) => tagRank(a) - tagRank(b))
+	      .map(([, eventId]) => eventId);
+	    return Array.from(new Set(ids));
+	  }, [scoringEventIdMap]);
+
+	  const scoringEventIdsKey = React.useMemo(() => JSON.stringify(scoringEventIds), [scoringEventIds]);
+
+	  useEffect(() => {
+	    if (!scoringEventIds.length) {
+	      setServerAssessmentData({});
+	      return;
+	    }
+	    let cancelled = false;
+	    (async () => {
+	      try {
+	        setIsScoringPending(true);
+	        const loadedEvents = [];
+	        const batchSize = 5;
+	        for (let i = 0; i < scoringEventIds.length; i += batchSize) {
+	          const batch = scoringEventIds.slice(i, i + batchSize);
+	          const loaded = await Promise.all(batch.map(eventId => api.getEventById(
+	            eventId,
+	            'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]'
+	          ).catch(() => null)));
+	          loaded.forEach(ev => { if (ev?.event) loadedEvents.push(ev); });
+	        }
+
+	        if (cancelled) return;
+	        const nextServerData = {};
+	        loadedEvents.forEach(ev => {
+	          (ev?.dataValues || []).forEach(dv => {
+	            if (!dv?.dataElement || dv.value === undefined || dv.value === null) return;
+	            const text = String(dv.value).trim();
+	            if (text === '') return;
+	            nextServerData[dv.dataElement] = dv.value;
+	          });
+	        });
+	        setServerAssessmentData(nextServerData);
+	      } catch (e) {
+	        console.warn('App: Could not refresh server scoring data', e);
+	        if (!cancelled) setServerAssessmentData({});
+	      }
+	    })();
+	    return () => { cancelled = true; };
+	  }, [scoringEventIdsKey, serverScoringRefreshTick]);
+
+	  useEffect(() => {
+	    if (!scoringEventIds.length) return undefined;
+	    const refresh = () => setServerScoringRefreshTick(t => t + 1);
+	    const intervalId = window.setInterval(refresh, 120000);
+	    window.addEventListener('focus', refresh);
+	    const onVisibilityChange = () => {
+	      if (document.visibilityState === 'visible') refresh();
+	    };
+	    document.addEventListener('visibilitychange', onVisibilityChange);
+	    return () => {
+	      window.clearInterval(intervalId);
+	      window.removeEventListener('focus', refresh);
+	      document.removeEventListener('visibilitychange', onVisibilityChange);
+	    };
+	  }, [scoringEventIdsKey]);
+
+	  const nonEmptyLocalFormData = React.useMemo(() => {
+	    const result = {};
+	    Object.entries(formData || {}).forEach(([key, value]) => {
+	      if (value === undefined || value === null) return;
+	      if (typeof value === 'string' && value.trim() === '') return;
+	      result[key] = value;
+	    });
+	    return result;
+	  }, [formData]);
+
+	  const scoringFormData = React.useMemo(() => ({
+	    ...(serverAssessmentData || {}),
+	    ...(nonEmptyLocalFormData || {}),
+	    ...(localScoringOverrides || {}),
+	  }), [serverAssessmentData, nonEmptyLocalFormData, localScoringOverrides]);
+
   // Assessment Details Prerequisite Check
   const isADComplete = React.useMemo(() => {
     if (!groups || groups.length === 0 || !formData) return false;
@@ -602,9 +795,9 @@ const PrivateRoute = ({ children }) => {
 
 		  // Scoring Integration: Map flat formData to hierarchical structure for the scoring hook
   // Build a lightweight fingerprint of only the values that affect scoring
-  const scoringDeps = React.useMemo(() => {
+	  const scoringDeps = React.useMemo(() => {
     try {
-      if (!activeGroup || !formData) return '[]';
+	      if (!activeGroup || !scoringFormData) return '[]';
       const pairs = [];
       const groupsToScan = [activeGroup];
       groupsToScan.forEach(g => {
@@ -612,8 +805,8 @@ const PrivateRoute = ({ children }) => {
           (sec.fields || []).forEach(f => {
             if (f && f.type === 'select') {
               const critKey = f && (f.commentFieldId ? `is_critical_${f.commentFieldId}` : `is_critical_${f.id}`);
-              pairs.push([f.id, formData[f.id] ?? null]);
-              if (critKey) pairs.push([critKey, formData[critKey] ?? null]);
+	              pairs.push([f.id, scoringFormData[f.id] ?? null]);
+	              if (critKey) pairs.push([critKey, scoringFormData[critKey] ?? null]);
             }
           });
         });
@@ -622,10 +815,10 @@ const PrivateRoute = ({ children }) => {
     } catch (e) {
       return '[]';
     }
-  }, [activeGroup, formData]);
+	  }, [activeGroup, scoringFormData]);
 
   const assessmentDetailsForScoring = React.useMemo(() => {
-    if (!groups || groups.length === 0 || !formData) return { sections: [] };
+	    if (!groups || groups.length === 0 || !scoringFormData) return { sections: [] };
 
     // Determine which configuration to use based on the active group
     const isMortuary =
@@ -681,10 +874,10 @@ const PrivateRoute = ({ children }) => {
                   return {
 	                id: f.id,
 	                code: code,
-                    response: formData[f.id] || 'NA',
+	                    response: scoringFormData[f.id] || 'NA',
                     // Critical flag: prefer explicit UI toggle if present; otherwise fallback to config
                     isCritical: (function() {
-                      const uiToggle = (formData[`is_critical_${f.commentFieldId}`]);
+	                      const uiToggle = (scoringFormData[`is_critical_${f.commentFieldId}`]);
                       if (uiToggle !== undefined && uiToggle !== null) return Boolean(uiToggle);
                       return Boolean(criticalLookup[normalizedCode] || criticalLookup[code]);
                     })(),
@@ -697,16 +890,16 @@ const PrivateRoute = ({ children }) => {
                     severity,
                     // Manual override support for root criteria: enable and value
                     ...(function() {
-                      const raw = formData[`override_${f.id}`];
+	                      const raw = scoringFormData[`override_${f.id}`];
                       const enabled = (raw === true) || (raw === 1) || (String(raw).toLowerCase() === 'true') || (String(raw) === '1');
-                      return enabled ? { overrideEnabled: true, overrideResponse: formData[f.id] || 'NA' } : {};
+	                      return enabled ? { overrideEnabled: true, overrideResponse: scoringFormData[f.id] || 'NA' } : {};
                     })()
 	              };
 	            })
 	        }]
 	      }))
 	    };
-  }, [activeGroup, scoringDeps]);
+	  }, [activeGroup, scoringDeps, scoringFormData]);
 
 		  const scoringResults = useAssessmentScoring(assessmentDetailsForScoring);
 
