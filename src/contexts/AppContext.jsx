@@ -169,29 +169,29 @@ export const AppProvider = ({ children }) => {
             const loadRemoteConfig = useCallback(async () => {
                 setAuthInitializing(true);
                 try {
-                    console.log(`[AppContext] Loading remote config from DataStore (namespace: qims-config)`);
+                    console.log(`[AppContext] Loading remote config from DataStore (namespace: qims-config-assessment)`);
                     let remoteBundle = null;
 
-                    // Fetch from DataStore namespace 'qims-config'
-                    const keys = ['hospital', 'clinics', 'ems', 'mortuary', 'hospital_compute_criteria', 'links'];
-                    const results = await Promise.all(keys.map(k => api.getDataStoreItem('qims-config', k).catch(() => null)));
-                    const [hospital, clinics, ems, mortuary, compute, links] = results;
+                    // Fetch from DataStore namespace 'qims-config-assessment'
+                    const keys = ['hospital_bundle', 'clinics_bundle', 'ems_bundle', 'mortuary_bundle'];
+                    const results = await Promise.all(keys.map(k => api.getDataStoreItem('qims-config-assessment', k).catch(() => null)));
+                    const [hospitalBundle, clinicsBundle, emsBundle, mortuaryBundle] = results;
                     
-                    if (hospital || clinics || ems || mortuary) {
+                    if (hospitalBundle || clinicsBundle || emsBundle || mortuaryBundle) {
                         remoteBundle = {
                             config: { 
-                                ...(ems || emsConfig), 
-                                ...(mortuary || mortuaryConfig), 
-                                ...(clinics || clinicsConfig), 
-                                ...(hospital || hospitalConfig) 
+                                ...(emsBundle?.config || emsConfig), 
+                                ...(mortuaryBundle?.config || mortuaryConfig), 
+                                ...(clinicsBundle?.config || clinicsConfig), 
+                                ...(hospitalBundle?.config || hospitalConfig) 
                             },
-                            links: links || { 
-                                ems: emsLinks, 
-                                mortuary: mortuaryLinks, 
-                                clinics: clinicsLinks, 
-                                hospital: hospitalLinks 
+                            links: { 
+                                ems: emsBundle?.links || emsLinks, 
+                                mortuary: mortuaryBundle?.links || mortuaryLinks, 
+                                clinics: clinicsBundle?.links || clinicsLinks, 
+                                hospital: hospitalBundle?.links || hospitalLinks 
                             },
-                            compute: compute || hospitalComputeCriteria
+                            compute: hospitalBundle?.compute || hospitalComputeCriteria
                         };
                     }
 
@@ -210,6 +210,14 @@ export const AppProvider = ({ children }) => {
                     setAuthInitializing(false);
                 }
             }, [configBundles, activeConfigVersionId, showToast]);
+
+            // Automatically fetch latest DHIS2 config when the user logs in 
+            // and the DataStore strategy is selected
+            useEffect(() => {
+                if (user && configSource === 'datastore') {
+                    loadRemoteConfig();
+                }
+            }, [user, configSource, loadRemoteConfig]);
 
 	    // Load initial user session and their facility assignments.
 	    // To avoid unnecessary network traffic on the login page, we only
