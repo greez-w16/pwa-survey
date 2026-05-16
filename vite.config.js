@@ -33,6 +33,11 @@ export default defineConfig({
         target: 'https://qimsdev.5am.co.bw/qims',
         changeOrigin: true,
         secure: false,
+      },
+      '/email2': {
+        target: 'https://qimsdev.5am.co.bw',
+        changeOrigin: true,
+        secure: false,
       }
     }
   },
@@ -54,6 +59,11 @@ export default defineConfig({
       },
       '/api': {
         target: 'https://qimsdev.5am.co.bw/qims',
+        changeOrigin: true,
+        secure: false,
+      },
+      '/email2': {
+        target: 'https://qimsdev.5am.co.bw',
         changeOrigin: true,
         secure: false,
       }

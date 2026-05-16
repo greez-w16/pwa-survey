@@ -16,11 +16,15 @@ const AppContext = createContext();
 
 export const AppProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [configuration, setConfiguration] = useState(null);
     const [userAssignments, setUserAssignments] = useState([]);
     const [isOnline, setIsOnline] = useState(navigator.onLine);
 	    // Track whether we are still checking for an existing session on load.
 	    const [authInitializing, setAuthInitializing] = useState(true);
+
+    const showToast = useCallback((message, type = 'info') => {
+        console.log(`[TOAST] ${type.toUpperCase()}: ${message}`);
+        // Implement actual toast UI here if needed
+    }, []);
     const storage = useStorage();
 
     // Stats
@@ -38,6 +42,12 @@ export const AppProvider = ({ children }) => {
 	    const [configVersions, setConfigVersions] = useState([]);
 	    const [activeConfigVersionId, setActiveConfigVersionId] = useState(null);
 	    const [configBundles, setConfigBundles] = useState({});
+	    const [configSource, setConfigSource] = useState(() => localStorage.getItem('qims_config_source') || 'local'); // 'local' | 'datastore'
+        const [appMetadata, setAppMetadata] = useState(null);
+
+	    useEffect(() => {
+            localStorage.setItem('qims_config_source', configSource);
+        }, [configSource]);
 
 	    useEffect(() => {
 	        const handleOnline = () => setIsOnline(true);
@@ -156,6 +166,51 @@ export const AppProvider = ({ children }) => {
 		        }
 		    }, []);
 
+            const loadRemoteConfig = useCallback(async () => {
+                setAuthInitializing(true);
+                try {
+                    console.log(`[AppContext] Loading remote config from DataStore (namespace: qims-config)`);
+                    let remoteBundle = null;
+
+                    // Fetch from DataStore namespace 'qims-config'
+                    const keys = ['hospital', 'clinics', 'ems', 'mortuary', 'hospital_compute_criteria', 'links'];
+                    const results = await Promise.all(keys.map(k => api.getDataStoreItem('qims-config', k).catch(() => null)));
+                    const [hospital, clinics, ems, mortuary, compute, links] = results;
+                    
+                    if (hospital || clinics || ems || mortuary) {
+                        remoteBundle = {
+                            config: { 
+                                ...(ems || emsConfig), 
+                                ...(mortuary || mortuaryConfig), 
+                                ...(clinics || clinicsConfig), 
+                                ...(hospital || hospitalConfig) 
+                            },
+                            links: links || { 
+                                ems: emsLinks, 
+                                mortuary: mortuaryLinks, 
+                                clinics: clinicsLinks, 
+                                hospital: hospitalLinks 
+                            },
+                            compute: compute || hospitalComputeCriteria
+                        };
+                    }
+
+                    if (remoteBundle && remoteBundle.config) {
+                        const newBundles = { ...configBundles, [activeConfigVersionId]: remoteBundle };
+                        setConfigBundles(newBundles);
+                        localStorage.setItem('qims_config_bundles', JSON.stringify(newBundles));
+                        showToast(`Successfully loaded config from DHIS2 DataStore`, 'success');
+                    } else {
+                        showToast(`No remote config found in DataStore. Falling back to local/cached.`, 'warning');
+                    }
+                } catch (err) {
+                    console.error('Failed to load remote config from DataStore:', err);
+                    showToast('Remote config load failed', 'error');
+                } finally {
+                    setAuthInitializing(false);
+                }
+            }, [configBundles, activeConfigVersionId, showToast]);
+
 	    // Load initial user session and their facility assignments.
 	    // To avoid unnecessary network traffic on the login page, we only
 	    // call /api/me when a Basic auth header is already stored
@@ -265,10 +320,6 @@ export const AppProvider = ({ children }) => {
         setUserAssignments([]);
     };
 
-    const showToast = (message, type = 'info') => {
-        console.log(`[TOAST] ${type.toUpperCase()}: ${message}`);
-        // Implement actual toast UI here if needed
-    };
 
     const refreshStats = useCallback(async () => {
         try {
@@ -416,11 +467,29 @@ export const AppProvider = ({ children }) => {
     };
 
 	    
+	    // Derives the final active configuration object from the versioned bundles and DHIS2 metadata.
+        const configuration = useMemo(() => {
+            if (!activeConfigVersionId || !configBundles[activeConfigVersionId]) {
+                return appMetadata || null;
+            }
+            const bundle = configBundles[activeConfigVersionId];
+            return {
+                ...bundle.config,
+                links: bundle.links,
+                compute: bundle.compute,
+                ...(appMetadata || {})
+            };
+        }, [activeConfigVersionId, configBundles, appMetadata]);
+
+        const setConfiguration = useCallback((meta) => {
+            setAppMetadata(meta);
+        }, []);
+
 	    		    const value = useMemo(() => ({
 	        user,
 	        setUser,
 	        configuration,
-	        setConfiguration,
+	        setConfiguration, // Note: kept for compat, but usually managed via setConfigBundles
 	        userAssignments,
 	        setUserAssignments,
 	        isOnline,
@@ -438,6 +507,9 @@ export const AppProvider = ({ children }) => {
 		        setActiveConfigVersionId,
 		        configBundles,
 		        setConfigBundles,
+                configSource,
+                setConfigSource,
+                loadRemoteConfig,
 	        showToast,
 	        logout,
 	        authInitializing,
@@ -452,6 +524,8 @@ export const AppProvider = ({ children }) => {
 		        configVersions,
 		        activeConfigVersionId,
 		        configBundles,
+                configSource,
+                loadRemoteConfig
 		    ]);
 
     return (

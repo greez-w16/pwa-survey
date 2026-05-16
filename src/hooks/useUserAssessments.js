@@ -87,15 +87,68 @@ export const useUserAssessments = (options = {}) => {
             });
             eventBus.emit(EVENTS.LOADING_SHOW, { source: 'useUserAssessments' });
 
-            // 1. Get all assignments for the user
-	            const assignments = await AssessmentTeamAssignmentService.getUserAssignmentsDomain({
-	                userId: user.id,
-	                username: user.username,
-	                year: filters.year || year
-	            });
+            // 1. Get all assignments for the user from the Scheduling program
+            const assignments = await AssessmentTeamAssignmentService.getUserAssignmentsDomain({
+                userId: user.id,
+                username: user.username,
+                year: filters.year || year
+            });
+
+            // 1b. Fetch Self-Initiated Assessments (not in scheduling program)
+            let selfAssessments = [];
+            try {
+                const SURVEY_PROGRAM_ID = 'G2gULe4jsfs';
+                const ATTR_ID = 'Bw4PZ8NsYFd';
+                const ATTR_VALUE = 'FAC_ASS_TYPE_INTERNAL';
+                
+                // Broaden search: fetch for all OUs assigned to the user
+                const userOus = (user?.organisationUnits || []).map(ou => ou.id);
+                const ouFilter = userOus.length > 0 ? `&orgUnit=${userOus.join(';')}&ouMode=SELECTED` : '&ouMode=ALL';
+                
+                // Remove .json and ensure proper headers
+                const selfUrl = `/qims/api/tracker/trackedEntities?program=${SURVEY_PROGRAM_ID}${ouFilter}&fields=trackedEntity,orgUnit,trackedEntityType,attributes[attribute,value],enrollments[enrollment,program,status,orgUnit,orgUnitName,enrolledAt,occurredAt]&filter=${ATTR_ID}:EQ:${ATTR_VALUE}`;
+                
+                const selfResp = await fetch(selfUrl, { 
+                    headers: { 
+                        'Authorization': localStorage.getItem('dhis2_auth'),
+                        'Accept': 'application/json'
+                    } 
+                });
+                
+                if (selfResp.ok) {
+                    const selfData = await selfResp.json();
+                    const instances = selfData.instances || selfData.trackedEntities || [];
+                    console.log(`[useUserAssessments] Found ${instances.length} potential self-assessments`);
+                    
+                    selfAssessments = instances.map(tei => {
+                        const enrollment = tei.enrollments?.find(e => e.program === SURVEY_PROGRAM_ID && e.status === 'ACTIVE') || tei.enrollments?.[0];
+                        return {
+                            eventId: enrollment?.enrollment || tei.trackedEntity,
+                            trackedEntityInstance: tei.trackedEntity,
+                            scheduleTeiId: tei.trackedEntity,
+                            orgUnit: tei.orgUnit,
+                            orgUnitId: tei.orgUnit,
+                            orgUnitName: enrollment?.orgUnitName || 'Self Assessment',
+                            enrollment: enrollment?.enrollment,
+                            status: enrollment?.status || 'ACTIVE',
+                            statusCode: 'FAC_ASS_ASSIGN_ACCEPTED',
+                            isSelfAssessment: true,
+                            sortDate: enrollment?.enrolledAt || enrollment?.occurredAt || new Date().toISOString(),
+                            team: []
+                        };
+                    });
+                } else {
+                    console.warn(`[useUserAssessments] Self-assessment fetch failed with status ${selfResp.status}`);
+                }
+            } catch (selfErr) {
+                console.warn('[useUserAssessments] Failed to fetch self-initiated assessments', selfErr);
+            }
+
+            // 1c. Merge assignments
+            const allAssignments = [...assignments, ...selfAssessments];
 
             // 2. Get all schedules these assignments belong to
-            const scheduleIds = [...new Set(assignments.map(a => a.scheduleTeiId))];
+            const scheduleIds = [...new Set(allAssignments.filter(a => !a.isSelfAssessment).map(a => a.scheduleTeiId))];
 
             let schedules = [];
             if (scheduleIds.length > 0) {
@@ -112,9 +165,9 @@ export const useUserAssessments = (options = {}) => {
             });
 
             // 4. Enrich assignments with full schedule data
-            const enrichedAssignments = assignments.map(assignment => ({
+            const enrichedAssignments = allAssignments.map(assignment => ({
                 ...assignment,
-                schedule: scheduleMap[assignment.scheduleTeiId] || {},
+                schedule: scheduleMap[assignment.scheduleTeiId] || (assignment.isSelfAssessment ? { id: assignment.trackedEntityInstance } : {}),
                 // Add computed fields
                 requiresResponse: assignment.statusCode === 'FAC_ASS_ASSIGN_PENDING',
                 isConfirmed: assignment.statusCode === 'FAC_ASS_ASSIGN_ACCEPTED',

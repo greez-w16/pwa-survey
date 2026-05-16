@@ -353,8 +353,8 @@
                                 <span className="label">{isDraft ? 'Draft Average:' : 'Current Score:'}</span>
                                 <span className="value">
                                     {points !== null
-                                        ? (Number.isInteger(points) ? points : points.toFixed(1))
-                                        : (scoreResult.draftAvg !== null ? `${Number.isInteger(scoreResult.draftAvg) ? scoreResult.draftAvg : scoreResult.draftAvg.toFixed(1)} (Draft)` : '---')}
+                                        ? Math.round(points)
+                                        : (scoreResult.draftAvg !== null ? `${Math.round(scoreResult.draftAvg)} (Draft)` : '---')}
                                     {isDraft ? '' : ' pts'}
                                 </span>
                             </div>
@@ -392,7 +392,7 @@
                             <strong>Formula:</strong> {isDraft ? "Draft average of completed items" : "Average of all linked criteria"}
                             {scoreResult.countScoredLinks > 0 && (
                                 <div className="formula-work">
-                                    ({sources.filter(s => s.points !== null).map(s => Number.isInteger(s.points) ? s.points : s.points.toFixed(1)).join(' + ')}) / {scoreResult.countScoredLinks} = {(scoreResult.draftAvg || 0).toFixed(1)}
+                                    ({sources.filter(s => s.points !== null).map(s => Number.isInteger(s.points) ? s.points : s.points.toFixed(1)).join(' + ')}) / {scoreResult.countScoredLinks} = {Math.round(scoreResult.draftAvg || 0)}
                                 </div>
                             )}
                         </div>
@@ -555,130 +555,142 @@
                 return 'ems';
             })();
 
+            const { configuration, showToast, isOnline } = useApp();
+
             // Resolve configuration for the current programme (EMS, Mortuary, Clinics, Hospital)
-            const baseConfig = customConfig || { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig };
-            const configKeyMap = {
-                ems: 'ems_full_configuration',
-                mortuary: 'mortuary_full_configuration',
-                clinics: 'clinics_full_configuration',
-                hospital: 'hospital_full_configuration',
-            };
             const activeConfigArray = (() => {
+                const configKeyMap = {
+                    ems: 'ems_full_configuration',
+                    mortuary: 'mortuary_full_configuration',
+                    clinics: 'clinics_full_configuration',
+                    hospital: 'hospital_full_configuration',
+                };
                 const key = configKeyMap[programmeType];
-                if (baseConfig && key && Array.isArray(baseConfig[key])) {
-                    return baseConfig[key];
+                if (configuration && key && Array.isArray(configuration[key])) {
+                    return configuration[key];
                 }
-                return Array.isArray(baseConfig) ? baseConfig : [];
+                return [];
             })();
 
             // Resolve links for the current programme
-            const staticLinksMap = {
-                ems: emsLinks,
-                mortuary: mortuaryLinks,
-                clinics: clinicsLinks,
-                hospital: hospitalLinks,
-            };
             const activeLinks = (() => {
-                if (customLinks) {
-                    // New-style customLinks stored as { ems: [...], mortuary: [...], clinics: [...], hospital: [...] }
-                    if (!Array.isArray(customLinks) && typeof customLinks === 'object') {
-                        return customLinks[programmeType] || staticLinksMap[programmeType] || [];
-                    }
-                    // Backwards-compat: treat array value as override for all programmes
-                    if (Array.isArray(customLinks)) {
-                        return customLinks;
-                    }
-                }
-                return staticLinksMap[programmeType] || [];
+                const links = configuration?.links || {};
+                return links[programmeType] || [];
             })();
             
-                const criterionIndex = useMemo(() => buildCriterionIndex(activeConfigArray), [activeConfigArray]);
+            const criterionIndex = React.useMemo(() => buildCriterionIndex(activeConfigArray), [activeConfigArray]);
             
-                // Build an SE/Section overview object for the currently active section
-                // so we can render a narrative page similar to the source PDFs (SE
-                // title, Standard text, and Standard Intent paragraphs).
-                const seOverview = useMemo(() => {
-                    if (!activeSection || !Array.isArray(activeConfigArray) || activeConfigArray.length === 0) {
-                        return null;
-                    }
-            
-                    const rawName = (activeSection._originalName || activeSection.name || '').trim();
-                    const rawCode = (activeSection.code || '').trim();
-            
-                    // Try to pull out a numeric PI id like "9.1" from the metadata
-                    // name/code so we can match it to section_pi_id in the
-                    // *_full_configuration arrays. If that fails (e.g. section name is
-                    // just "SE 9 PREVENTION..."), fall back to inspecting the
-                    // section's fields and derive the PI from the first coded
-                    // Standard/Criterion id such as "9.1.1.1".
-                    let hintedPiId = null;
-                    const piMatch = rawName.match(/\b\d+\.\d+\b/) || rawCode.match(/\b\d+\.\d+\b/);
-                    if (piMatch) {
-                        hintedPiId = piMatch[0];
-                    } else if (Array.isArray(activeSection.fields)) {
-                        for (const f of activeSection.fields) {
-                            const codeSrc = (f && (f.code || f.id)) ? String(f.code || f.id) : '';
-                            if (!codeSrc) continue;
-                            // Look for something like 9.1.1 or 9.1.1.1 and reduce it
-                            // to the PI level (9.1).
-                            const codeMatch = codeSrc.match(/\b\d+\.\d+(?:\.\d+){1,2}\b/);
-                            if (!codeMatch) continue;
-                            const parts = codeMatch[0].split('.');
-                            if (parts.length >= 2) {
-                                hintedPiId = `${parts[0]}.${parts[1]}`;
-                                break;
+            // Resolve Hospital compute criteria from configuration
+            const HOSPITAL_SUBCRITERIA_MAP = React.useMemo(() => {
+                const map = {};
+                try {
+                    const computeConfig = configuration?.compute || {};
+                    const seList = computeConfig?.hospital_standards_config?.service_elements || [];
+                    seList.forEach(se => {
+                        (se.root_criteria || []).forEach(root => {
+                            if (!root || !root.id) return;
+                            const rootCode = normalizeCriterionCode(root.id);
+                            if (!rootCode) return;
+                            const subs = Array.isArray(root.sub_criteria)
+                                ? root.sub_criteria.map(code => normalizeCriterionCode(code)).filter(Boolean)
+                                : [];
+                            if (subs.length > 0) {
+                                map[rootCode] = subs;
                             }
+                        });
+                    });
+                } catch (e) {
+                    console.error('FormArea: Failed to build hospital sub-criteria map', e);
+                }
+                return map;
+            }, [configuration?.compute]);
+
+            // Build an SE/Section overview object for the currently active section
+            // so we can render a narrative page similar to the source PDFs (SE
+            // title, Standard text, and Standard Intent paragraphs).
+            const seOverview = React.useMemo(() => {
+                if (!activeSection || !Array.isArray(activeConfigArray) || activeConfigArray.length === 0) {
+                    return null;
+                }
+        
+                const rawName = (activeSection._originalName || activeSection.name || '').trim();
+                const rawCode = (activeSection.code || '').trim();
+        
+                // Try to pull out a numeric PI id like "9.1" from the metadata
+                // name/code so we can match it to section_pi_id in the
+                // *_full_configuration arrays. If that fails (e.g. section name is
+                // just "SE 9 PREVENTION..."), fall back to inspecting the
+                // section's fields and derive the PI from the first coded
+                // Standard/Criterion id such as "9.1.1.1".
+                let hintedPiId = null;
+                const piMatch = rawName.match(/\b\d+\.\d+\b/) || rawCode.match(/\b\d+\.\d+\b/);
+                if (piMatch) {
+                    hintedPiId = piMatch[0];
+                } else if (Array.isArray(activeSection.fields)) {
+                    for (const f of activeSection.fields) {
+                        const codeSrc = (f && (f.code || f.id)) ? String(f.code || f.id) : '';
+                        if (!codeSrc) continue;
+                        // Look for something like 9.1.1 or 9.1.1.1 and reduce it
+                        // to the PI level (9.1).
+                        const codeMatch = codeSrc.match(/\b\d+\.\d+(?:\.\d+){1,2}\b/);
+                        if (!codeMatch) continue;
+                        const parts = codeMatch[0].split('.');
+                        if (parts.length >= 2) {
+                            hintedPiId = `${parts[0]}.${parts[1]}`;
+                            break;
                         }
                     }
-            
-                    let matchedSe = null;
-                    let matchedSection = null;
-            
-                    outer: for (const se of activeConfigArray) {
-                        const seSections = se.sections || [];
-                        for (const sec of seSections) {
-                            const secPi = (sec.section_pi_id || '').trim();
-                            const secTitle = (sec.title || '').trim();
-            
-                            const numberMatches =
-                                !!secPi && (
-                                    secPi === hintedPiId ||
-                                    rawName.includes(secPi) ||
-                                    rawCode.includes(secPi)
-                                );
-            
-                            const titleLc = secTitle.toLowerCase();
-                            const nameLc = rawName.toLowerCase();
-                            const titleMatches = titleLc && (nameLc.includes(titleLc) || titleLc.includes(nameLc));
-            
-                            if (numberMatches || titleMatches) {
-                                matchedSe = se;
-                                matchedSection = sec;
-                                break outer;
-                            }
+                }
+        
+                let matchedSe = null;
+                let matchedSection = null;
+        
+                outer: for (const se of activeConfigArray) {
+                    const seSections = se.sections || [];
+                    for (const sec of seSections) {
+                        const secPi = (sec.section_pi_id || '').trim();
+                        const secTitle = (sec.title || '').trim();
+        
+                        const numberMatches =
+                            !!secPi && (
+                                secPi === hintedPiId ||
+                                rawName.includes(secPi) ||
+                                rawCode.includes(secPi)
+                            );
+        
+                        const titleLc = secTitle.toLowerCase();
+                        const nameLc = rawName.toLowerCase();
+                        const titleMatches = titleLc && (nameLc.includes(titleLc) || titleLc.includes(nameLc));
+        
+                        if (numberMatches || titleMatches) {
+                            matchedSe = se;
+                            matchedSection = sec;
+                            break outer;
                         }
                     }
+                }
+        
+                if (!matchedSe || !matchedSection) return null;
+        
+                const standards = matchedSection.standards || [];
+                if (!standards.length) return null;
+        
+                return {
+                    seId: matchedSe.se_id,
+                    seName: matchedSe.se_name,
+                    sectionPiId: matchedSection.section_pi_id,
+                    sectionTitle: matchedSection.title,
+                    standards,
+                };
+            }, [activeSection, activeConfigArray]);
             
-                    if (!matchedSe || !matchedSection) return null;
-            
-                    const standards = matchedSection.standards || [];
-                    if (!standards.length) return null;
-            
-                    return {
-                        seId: matchedSe.se_id,
-                        seName: matchedSe.se_name,
-                        sectionPiId: matchedSection.section_pi_id,
-                        sectionTitle: matchedSection.title,
-                        standards,
-                    };
-                }, [activeSection, activeConfigArray]);
         // DEBUG: Validate props on render
         React.useEffect(() => {
             if (!activeSection) console.warn("FormArea: No active section provided");
             if (activeSection) console.log(`FormArea Rendering Section: ${activeSection.name}`);
         }, [activeSection]);
 
-        const { configuration, showToast } = useApp();
+
 
         // Submit state
         const [isSubmitting, setIsSubmitting] = useState(false);
@@ -709,6 +721,11 @@
         if (v === 'fac_ass_baseline' || v === 'baseline_assessment' || v === 'baseline_survey') return true;
         if (v.includes('baseline')) return true;
         return false;
+    };
+
+    const isSupportiveType = (val) => {
+        const text = String(val || '').toLowerCase().replace(/[_-]+/g, ' ');
+        return text.includes('supportive') || (text.includes('support') && text.includes('visit'));
     };
 
     // Track if a baseline assessment (by Type of Assessment) already exists for this facility/TEI
@@ -2246,9 +2263,7 @@
                                 {isRoot && subCriteriaExpectedCount > 0 && (
                                             <div style={{ marginTop: '4px', fontSize: '0.8em', color: '#4a5568' }}>
                                                 Sub-criteria average (configured):{' '}
-                                                {Number.isInteger(subCriteriaAvgPoints)
-                                                    ? subCriteriaAvgPoints
-                                                    : subCriteriaAvgPoints.toFixed(1)}{' '}
+                                                {Math.round(subCriteriaAvgPoints)}{' '}
                                                 pts
                                         {' '}
                                         ({subCriteriaAvgCount}/{subCriteriaExpectedCount})
@@ -2257,11 +2272,7 @@
                                         {isRoot && linkedExpectedCount > 0 && (
                                             <div style={{ marginTop: '2px', fontSize: '0.8em', color: '#4a5568' }}>
                                                 Linked-criteria average (graph):{' '}
-                                                {linkedAvgPoints !== null
-                                                    ? (Number.isInteger(linkedAvgPoints)
-                                                        ? linkedAvgPoints
-                                                        : linkedAvgPoints.toFixed(1))
-                                                    : '---'}{' '}
+                                                {linkedAvgPoints !== null ? Math.round(linkedAvgPoints) : '---'}{' '}
                                                 pts
                                                 {' '}
                                                 ({linkedAvgCount}/{linkedExpectedCount})
@@ -2308,10 +2319,13 @@
                                     </option>
                                     {(() => {
                                         const options = (field.options || []).filter((opt) => {
+	                                            const val = typeof opt === 'object' ? opt.value : opt;
+	                                            const label = typeof opt === 'object' ? opt.label : opt;
+	                                            if (field.id === typeOfAssessmentDeId && (isSupportiveType(val) || isSupportiveType(label))) {
+	                                                return false;
+	                                            }
                                             // If a Baseline already exists for this facility, hide any Baseline-type option
                                             if (field.id === typeOfAssessmentDeId && hasExistingBaseline) {
-                                                const val = typeof opt === 'object' ? opt.value : opt;
-                                                const label = typeof opt === 'object' ? opt.label : opt;
                                                 return !(isBaselineType(val) || isBaselineType(label));
                                             }
                                             return true;
@@ -2667,6 +2681,12 @@
 
             // Guard: prevent setting Type of Assessment to Baseline if one already exists
             if (typeOfAssessmentDeId && fieldId === typeOfAssessmentDeId) {
+                if (isSupportiveType(value)) {
+                    if (typeof showToast === 'function') {
+                        showToast('Supportive is no longer available as a Type of Assessment. Please choose a different Type of Assessment.', 'error');
+                    }
+                    return;
+                }
                 if (isBaselineType(value) && hasExistingBaseline) {
                     if (typeof showToast === 'function') {
                         showToast('A Baseline assessment already exists for this facility. Please choose a different Type of Assessment.', 'error');
@@ -3528,4 +3548,3 @@
     };
 
     export default FormArea;
-

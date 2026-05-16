@@ -28,7 +28,10 @@ import {
     TextField,
     MenuItem,
     Autocomplete,
-    LinearProgress
+    LinearProgress,
+    FormControl,
+    InputLabel,
+    Select
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -58,6 +61,9 @@ export function Dashboard() {
 	        setActiveConfigVersionId,
 	        configBundles,
 	        setConfigBundles,
+            configSource,
+            setConfigSource,
+            loadRemoteConfig,
 	    } = useApp();
     const storage = useStorage();
     const [searchTerm, setSearchTerm] = useState('');
@@ -78,6 +84,8 @@ export function Dashboard() {
     const [initSurveyType, setInitSurveyType] = useState('');
     const [initFacilityGroup, setInitFacilityGroup] = useState(''); // HOSPITAL|CLINICS|EMS|MORTUARY
     const [initTeamOptions, setInitTeamOptions] = useState([]); // [{id, displayName, role}]
+    const [initTeamLoading, setInitTeamLoading] = useState(false);
+    const [initAssessorLookupInfo, setInitAssessorLookupInfo] = useState(null);
     const [initSeOptions, setInitSeOptions] = useState([]); // [{id, label}]
     const [initAssignments, setInitAssignments] = useState({}); // { [seId]: [userIds] }
     const [initPlanLoading, setInitPlanLoading] = useState(false);
@@ -85,6 +93,8 @@ export function Dashboard() {
     const [forceSelfOnly, setForceSelfOnly] = useState(false);
     const [lockType, setLockType] = useState(false);
     const [lockGroup, setLockGroup] = useState(false);
+    const [initHasExistingBaseline, setInitHasExistingBaseline] = useState(false);
+    const [initEditAssignmentsOnly, setInitEditAssignmentsOnly] = useState(false);
     const [initiatingAssessmentKey, setInitiatingAssessmentKey] = useState(null);
 
     const allSeAssigned = React.useMemo(() => {
@@ -101,6 +111,7 @@ export function Dashboard() {
     // Collapsible associated events (main survey stage only) per assignment row
     const [expandedAssignments, setExpandedAssignments] = useState({}); // { [assocKey]: true }
     const [associatedByEnrollment, setAssociatedByEnrollment] = useState({}); // { [assocKey]: { loading, survey:[] } }
+	    const [assessmentEventPresenceByKey, setAssessmentEventPresenceByKey] = useState({}); // { [assocKey]: { loading, hasAssessmentEvent } }
 
     // Stable key for each assignment row (works even if enrollment is missing)
     const getAssocKey = (a) => (
@@ -128,9 +139,40 @@ export function Dashboard() {
             const all = (ps?.programStageDataElements || []).map(psde => psde.dataElement || psde);
             const de = all.find(d => (d?.id || '') === surveyTypeDeId);
             const opts = de?.optionSet?.options || [];
-            return opts.map(o => ({ value: o.code || o.displayName || o.name, label: o.displayName || o.name || o.code }));
+            return opts
+                .map(o => ({ value: o.code || o.displayName || o.name, label: o.displayName || o.name || o.code }))
+                .filter(o => {
+                    const text = `${o.value || ''} ${o.label || ''}`.toLowerCase().replace(/[_-]+/g, ' ');
+                    return !(text.includes('supportive') || (text.includes('support') && text.includes('visit')));
+                });
         } catch (_) { return []; }
     }, [configuration, surveyTypeDeId]);
+
+    const isSupportiveSurveyType = React.useCallback((val) => {
+        const text = String(val || '').toLowerCase().replace(/[_-]+/g, ' ');
+        return text.includes('supportive') || (text.includes('support') && text.includes('visit'));
+    }, []);
+
+    const isSelfSurveyType = React.useCallback((val) => /self/i.test(String(val || '')), []);
+
+    const isBaselineSurveyType = React.useCallback((value) => {
+        if (value === undefined || value === null) return false;
+        const raw = String(value);
+        if (raw === 'Baseline Assessment ') return true;
+        const text = raw.trim().toLowerCase();
+        return text === 'baseline' ||
+            text === 'baseline assessment' ||
+            text === 'base-line' ||
+            text === 'fac_ass_baseline' ||
+            text === 'baseline_assessment' ||
+            text === 'baseline_survey' ||
+            text.includes('baseline');
+    }, []);
+
+    const baselineSurveyTypeOptions = useMemo(
+        () => (surveyTypeOptions || []).filter(opt => isBaselineSurveyType(opt.label || opt.value)),
+        [surveyTypeOptions, isBaselineSurveyType]
+    );
 
     // Resolve the DataElement ID for "Assessment Group" from loaded metadata
     const surveyGroupDeId = useMemo(() => {
@@ -473,6 +515,8 @@ export function Dashboard() {
 			        pending: hookPending = [],
 			        stats: hookStats = null,
 			        loading: hookLoading = false,
+				        error: hookError = null,
+				        debug: hookDebug = null,
 			        respondToAssignment,
 			    } = assessmentHook || {};
 
@@ -539,10 +583,11 @@ export function Dashboard() {
             // Prefer facility orgUnit id for event lookup; fall back to program OU
             const orgUnitId = assessment.orgUnitId || assessment.programOrgUnitId || null;
 
-            // fetch only main-survey events (same program/stage the form saves to), including notes
-            console.log('[AssocEvents] fetching', { assocKey, programId, stageId, teiId, orgUnitId });
+            // fetch all survey events for this Org Unit (regardless of TEI) to capture both 
+            // scheduled and self-initiated assessments in the history table.
+            console.log('[AssocEvents] fetching for OrgUnit', { assocKey, programId, stageId, orgUnitId });
             const survey = await api
-                .getSurveyEventsForTei({ teiId, orgUnitId, programId, stageId, fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]' })
+                .getSurveyEventsForOrgUnit({ orgUnitId, programId, stageId, fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]' })
                 .catch(() => []);
             console.log('[AssocEvents] fetched', { assocKey, count: Array.isArray(survey) ? survey.length : 0 });
 
@@ -568,6 +613,65 @@ export function Dashboard() {
             });
         }
     };
+
+	    const checkAssessmentEventPresence = React.useCallback(async (assessment) => {
+	        const assocKey = getAssocKey(assessment);
+	        const teiId = assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
+	        if (!teiId) {
+	            setAssessmentEventPresenceByKey(prev => ({
+	                ...prev,
+	                [assocKey]: { loading: false, hasAssessmentEvent: false }
+	            }));
+	            return;
+	        }
+
+	        setAssessmentEventPresenceByKey(prev => ({
+	            ...prev,
+	            [assocKey]: { ...(prev[assocKey] || {}), loading: true }
+	        }));
+
+	        try {
+	            const programId = configuration?.program?.id || 'G2gULe4jsfs';
+	            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+	            // Intentionally check by authorised TEI only. The purpose here is
+	            // not to hydrate the row, but to know whether an assessment event
+	            // already exists for this authorised assessment TEI.
+	            const survey = await api.getSurveyEventsForTei({
+	                teiId,
+	                orgUnitId: null,
+	                programId,
+	                stageId,
+	                fields: 'event,trackedEntityInstance'
+	            }).catch(() => []);
+	            const hasAssessmentEvent = (Array.isArray(survey) ? survey : []).some(ev =>
+	                ev?.event && String(ev?.trackedEntityInstance || '').trim() === String(teiId).trim()
+	            );
+	            setAssessmentEventPresenceByKey(prev => ({
+	                ...prev,
+	                [assocKey]: { loading: false, hasAssessmentEvent }
+	            }));
+	        } catch (e) {
+	            console.warn('Failed to check assessment event presence', { assocKey, teiId, error: e });
+	            setAssessmentEventPresenceByKey(prev => ({
+	                ...prev,
+	                [assocKey]: { loading: false, hasAssessmentEvent: false }
+	            }));
+	        }
+	    }, [configuration]);
+
+	    React.useEffect(() => {
+	        if (assessmentsLoading) return;
+	        const all = [...(pendingAssessments || []), ...(upcomingAssessments || [])];
+	        const seen = new Set();
+	        all.forEach(assessment => {
+	            const assocKey = getAssocKey(assessment);
+	            if (!assocKey || seen.has(assocKey)) return;
+	            seen.add(assocKey);
+	            const current = assessmentEventPresenceByKey?.[assocKey];
+	            if (current && (current.loading || typeof current.hasAssessmentEvent === 'boolean')) return;
+	            checkAssessmentEventPresence(assessment);
+	        });
+	    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, assessmentEventPresenceByKey, checkAssessmentEventPresence]);
 
     const toggleExpandAssessment = async (assessment) => {
         const k = getAssocKey(assessment);
@@ -710,6 +814,131 @@ export function Dashboard() {
         return assessment?.trackedEntityInstance || assessment?.scheduleTeiId || null;
     };
 
+    const assessmentHasBaselineSurvey = React.useCallback(async (assessment) => {
+        if (!assessment || !surveyTypeDeId) return false;
+        const programId = configuration?.program?.id || 'G2gULe4jsfs';
+        const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+        const facilityOrgUnitId =
+            assessment?.orgUnitId ||
+            (typeof assessment?.orgUnit === 'string' ? assessment.orgUnit : assessment?.orgUnit?.id) ||
+            assessment?.facilityId ||
+            null;
+        const teiId = resolveTeiForAssessment(assessment);
+        if (!facilityOrgUnitId && !teiId) return false;
+
+        const events = facilityOrgUnitId
+            ? await api.getEventsList({
+                programId,
+                stageId,
+                orgUnitId: facilityOrgUnitId,
+                ouMode: 'DESCENDANTS',
+                fields: 'event,orgUnit,trackedEntityInstance,dataValues[dataElement,value]'
+            }).catch(() => [])
+            : await api.getSurveyEventsForTeiByEventIds({
+                teiId,
+                orgUnitId: null,
+                programId,
+                stageId,
+                listPageSize: 50,
+                detailBatchSize: 5,
+                fields: 'event,dataValues[dataElement,value]'
+            }).catch(() => []);
+
+        return (Array.isArray(events) ? events : []).some(ev => {
+            const dv = (ev?.dataValues || []).find(d => d?.dataElement === surveyTypeDeId);
+            return dv && isBaselineSurveyType(dv.value);
+        });
+    }, [configuration, surveyTypeDeId, isBaselineSurveyType]);
+
+    const loadSelfAssessmentAssessors = React.useCallback(async (assessment) => {
+        const orgUnitId = assessment?.facilityId || assessment?.orgUnitId || resolveOrgUnitForAssessment(assessment);
+        setInitAssessorLookupInfo(null);
+        if (!orgUnitId) {
+            setInitTeamOptions([]);
+            setInitAssignments({});
+            setInitAssessorLookupInfo({ orgUnitId: null, userCount: 0, reason: 'No facility/orgUnit ID could be resolved.' });
+            showToast?.('Could not resolve the selected facility for Self Assessment assessor lookup.', 'error');
+            return [];
+        }
+        setInitTeamLoading(true);
+        try {
+            const userIds = await api.qimsTrackerEvents({ orgUnitId });
+            const isUsableUserIdentifier = (value) => {
+                const v = String(value || '').trim();
+                if (!v) return false;
+                const lower = v.toLowerCase();
+                if (['active', 'completed', 'scheduled', 'cancelled', 'skipped', 'true', 'false', 'null', 'undefined'].includes(lower)) return false;
+                return /^[A-Za-z][A-Za-z0-9]{10}$/.test(v) || /^[A-Za-z0-9._@-]{3,80}$/.test(v);
+            };
+            const uniqueIds = Array.from(new Set((userIds || []).map(v => String(v || '').trim()).filter(isUsableUserIdentifier)));
+            if (uniqueIds.length === 0) {
+                setInitTeamOptions([]);
+                setInitAssignments({});
+                setInitAssessorLookupInfo({ orgUnitId, userCount: 0, reason: 'No events matched WmnMQhFIaMu = active with uJCFQsE2Z4W user IDs.' });
+                showToast?.('No Self Assessment assessors were found for this facility.', 'warning');
+                return [];
+            }
+            let usersById = {};
+            try {
+                usersById = await api.resolveUsers(uniqueIds);
+            } catch (adminResolveError) {
+                console.warn('Admin resolver failed for Self Assessment assessors', adminResolveError);
+                setInitTeamOptions([]);
+                setInitAssignments({});
+                setInitAssessorLookupInfo({
+                    orgUnitId,
+                    userCount: 0,
+                    reason: `Could not call /email2/api/admin/resolve-users for: ${uniqueIds.join(', ')}`
+                });
+                showToast?.('Could not resolve Self Assessment assessor display names using the admin resolver.', 'error');
+                return [];
+            }
+            const unresolvedAfterLookup = uniqueIds.filter(id => !usersById?.[id]);
+            const resolved = uniqueIds.map(id => {
+                const userInfo = usersById?.[id] || {};
+                const displayName = userInfo.displayName || userInfo.username || '';
+                if (!displayName) return null;
+                return {
+                    id: userInfo.id || id,
+                    displayName,
+                    role: 'Self Assessment'
+                };
+            }).filter(Boolean).sort((a, b) => String(a.displayName || '').localeCompare(String(b.displayName || '')));
+            if (resolved.length === 0) {
+                setInitTeamOptions([]);
+                setInitAssignments({});
+                setInitAssessorLookupInfo({
+                    orgUnitId,
+                    userCount: 0,
+                    reason: `Found assessor identifier(s), but none resolved to DHIS2 users: ${uniqueIds.join(', ')}`
+                });
+                showToast?.('Self Assessment assessor IDs were found, but no display names could be resolved.', 'error');
+                return [];
+            }
+            setInitTeamOptions(resolved);
+            setInitAssignments({});
+            setInitAssessorLookupInfo({
+                orgUnitId,
+                userCount: resolved.length,
+                reason: unresolvedAfterLookup.length > 0 ? `Unresolved assessor ID(s): ${unresolvedAfterLookup.join(', ')}` : ''
+            });
+            if (unresolvedAfterLookup.length > 0) {
+                showToast?.(`${resolved.length} assessor(s) loaded. ${unresolvedAfterLookup.length} unresolved ID(s) were skipped.`, 'warning');
+            }
+            showToast?.(`Loaded ${resolved.length} Self Assessment assessor${resolved.length === 1 ? '' : 's'} for this facility.`, 'success');
+            return resolved;
+        } catch (e) {
+            console.warn('Self Assessment assessor lookup failed', e);
+            setInitTeamOptions([]);
+            setInitAssignments({});
+            setInitAssessorLookupInfo({ orgUnitId, userCount: 0, reason: e?.message || 'Lookup failed.' });
+            showToast?.('Failed to load Self Assessment assessors for this facility.', 'error');
+            return [];
+        } finally {
+            setInitTeamLoading(false);
+        }
+    }, [showToast]);
+
     const handleOpenAssessment = async (assessment) => {
         try {
             const programId = configuration?.program?.id || 'G2gULe4jsfs';
@@ -824,13 +1053,19 @@ export function Dashboard() {
                 });
                 setInitTeamOptions(resolved);
             } catch (_) { setInitTeamOptions([]); }
-            setInitSurveyType('');
+            const hasExistingBaseline = await assessmentHasBaselineSurvey(assessment);
+            const baselineOpt = (baselineSurveyTypeOptions || [])[0];
+            setInitHasExistingBaseline(hasExistingBaseline);
+            setInitSurveyType(!hasExistingBaseline && baselineOpt ? baselineOpt.value : '');
             setInitFacilityGroup('');
             setInitSeOptions([]);
             setInitAssignments({});
+            setInitTeamLoading(false);
+            setInitAssessorLookupInfo(null);
 
             setPendingOpenAssessment(assessment);
             setInitMode('BASELINE');
+            setInitEditAssignmentsOnly(false);
             setLockType(false); setLockGroup(false);
             setPendingProvisionedBundle(null);
             setCreateErrorInfo(null);
@@ -900,6 +1135,9 @@ export function Dashboard() {
                 setInitTeamOptions(resolved);
             } catch (_) { setInitTeamOptions([]); }
 
+            const hasExistingBaseline = await assessmentHasBaselineSurvey(assessment);
+            setInitHasExistingBaseline(hasExistingBaseline);
+
             // Determine baseline facility group and lock it
             const programId = configuration?.program?.id || 'G2gULe4jsfs';
             const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
@@ -923,8 +1161,9 @@ export function Dashboard() {
             }
 
             if (selfOnly) {
-                const selfOpt = (surveyTypeOptions || []).find(o => /self/i.test(String(o.label || o.value)) ) || (surveyTypeOptions || [])[0];
+                const selfOpt = (surveyTypeOptions || []).find(o => isSelfSurveyType(o.label || o.value) ) || (surveyTypeOptions || [])[0];
                 if (selfOpt) setInitSurveyType(selfOpt.value);
+                await loadSelfAssessmentAssessors(assessment);
                 setLockType(true);
                 setForceSelfOnly(true);
             } else {
@@ -935,8 +1174,11 @@ export function Dashboard() {
             }
 
             setInitAssignments({});
+            setInitTeamLoading(false);
+            if (!selfOnly) setInitAssessorLookupInfo(null);
             setPendingOpenAssessment(assessment);
             setInitMode('FOLLOWUP');
+            setInitEditAssignmentsOnly(false);
             setPendingProvisionedBundle(null);
             setCreateErrorInfo(null);
             setCreateDetails([]);
@@ -975,7 +1217,20 @@ export function Dashboard() {
                 const m = (surveyTypeOptions || []).find(o => o.value === val || o.label === val);
                 return m ? m.value : val;
             };
-            setInitSurveyType(toCode(found.typeOfAssessment || ''));
+            const previousType = toCode(found.typeOfAssessment || '');
+            if (initMode === 'BASELINE' && !initHasExistingBaseline && !isBaselineSurveyType(previousType)) {
+                const baselineOpt = (baselineSurveyTypeOptions || [])[0];
+                setInitSurveyType(baselineOpt?.value || '');
+                showToast?.('No Baseline exists yet, so only Baseline Assessment can be used for first-time initiation.', 'warning');
+            } else if (isSupportiveSurveyType(previousType)) {
+                setInitSurveyType('');
+                showToast?.('Previous plan used Supportive, but Supportive is no longer available. Please choose another Type of Survey.', 'warning');
+            } else if (initHasExistingBaseline && isBaselineSurveyType(previousType)) {
+                setInitSurveyType('');
+                showToast?.('Previous plan used Baseline, but this facility already has a Baseline. Please choose another Type of Survey.', 'warning');
+            } else {
+                setInitSurveyType(previousType);
+            }
             setInitAssignments(found.seAssignments || {});
             // Merge team from plan with current options
             const cur = Array.isArray(initTeamOptions) ? initTeamOptions : [];
@@ -1022,6 +1277,126 @@ export function Dashboard() {
         }
     };
 
+    const openEditSeAssignments = async (assessment, ev, facilityGroupValue = '', surveyTypeValue = '') => {
+        try {
+            setIsBaselineCreating(false);
+            setCreateProgress(null);
+            setCreateErrorInfo(null);
+            setCreateDetails([]);
+            setPendingProvisionedBundle(null);
+            setInitPlanLoading(true);
+
+            const teiId = ev?.trackedEntityInstance || resolveTeiForAssessment(assessment);
+            const orgUnitId = ev?.orgUnit || resolveOrgUnitForAssessment(assessment);
+            if (!teiId) {
+                showToast?.('Could not resolve the assessment TEI for assignment editing.', 'error');
+                return;
+            }
+
+            const preferredGroup = toFacilityGroupKey(facilityGroupValue || assessment?.parentGroupId || '');
+            const { plan, nsKey } = await findAssessmentPlanForTei({ teiId, preferredNs: preferredGroup });
+            const groupKey = toFacilityGroupKey(plan?.facilityGroup || nsKey || preferredGroup);
+            if (!groupKey) {
+                showToast?.('Could not determine the Facility Type for this assessment.', 'error');
+                return;
+            }
+
+            const team = Array.isArray(assessment.team) ? assessment.team : [];
+            const ids = [];
+            team.forEach(m => { const raw = String(m.assignedUserId || '').trim(); if (raw) raw.split('|').forEach(p => ids.push(p.trim())); });
+            const uniq = Array.from(new Set(ids));
+            const map = await api.resolveUserDisplayNames(uniq).catch(() => ({}));
+            const currentTeam = team.map(m => {
+                const raw = String(m.assignedUserId || '').trim();
+                const keys = raw ? raw.split('|').map(s => s.trim()) : [];
+                const hit = keys.map(k => map[k]).find(Boolean);
+                return { id: raw, displayName: hit?.displayName || raw, role: m.teamRole };
+            }).filter(t => t.id);
+            const planTeam = Array.isArray(plan?.team)
+                ? plan.team.map(t => ({ id: t.userId || t.id, displayName: t.displayName || t.userId || t.id, role: t.role }))
+                : [];
+            const byId = new Map();
+            [...currentTeam, ...planTeam].forEach(t => { if (t?.id && !byId.has(t.id)) byId.set(t.id, t); });
+            const mergedTeam = Array.from(byId.values());
+            const roleRank = (r) => (/lead|leader/i.test(String(r || '')) ? 0 : 1);
+            mergedTeam.sort((a, b) => { const ar = roleRank(a.role); const br = roleRank(b.role); if (ar !== br) return ar - br; return String(a.displayName||'').localeCompare(String(b.displayName||'')); });
+
+            setPendingOpenAssessment({ ...assessment, trackedEntityInstance: teiId, orgUnitId });
+            setInitMode('EDIT_ASSIGNMENTS');
+            setInitEditAssignmentsOnly(true);
+            setInitHasExistingBaseline(false);
+            const toSurveyTypeCode = (val) => {
+                if (!val || val === '-') return '';
+                const m = (surveyTypeOptions || []).find(o => o.value === val || o.label === val);
+                return m ? m.value : val;
+            };
+
+            setInitFacilityGroup(groupKey);
+            setInitSeOptions(buildSeOptions(groupKey));
+            setInitSurveyType(toSurveyTypeCode(plan?.typeOfAssessment || surveyTypeValue || ''));
+            setInitAssignments(plan?.seAssignments || {});
+            setInitTeamOptions(mergedTeam);
+            setLockType(true);
+            setLockGroup(true);
+            setForceSelfOnly(false);
+            setShowCreateBaselineDialog(true);
+        } catch (e) {
+            console.warn('openEditSeAssignments failed', e);
+            showToast?.('Failed to load SE assignments for editing.', 'error');
+        } finally {
+            setInitPlanLoading(false);
+        }
+    };
+
+    const saveEditedSeAssignments = async () => {
+        if (!pendingOpenAssessment) { setShowCreateBaselineDialog(false); return; }
+        try {
+            setIsBaselineCreating(true);
+            const programId = configuration?.program?.id || 'G2gULe4jsfs';
+            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+            const orgUnitId = resolveOrgUnitForAssessment(pendingOpenAssessment);
+            const teiId = resolveTeiForAssessment(pendingOpenAssessment);
+            const ns = toFacilityGroupKey(initFacilityGroup);
+
+            if (!teiId || !ns) {
+                showToast?.('Could not resolve this assessment for assignment saving.', 'error');
+                return;
+            }
+            if (!allSeAssigned) {
+                showToast?.('Please assign at least one team member to every SE before saving.', 'error');
+                return;
+            }
+
+            let existingPlan = null;
+            try { existingPlan = await api.getDataStoreItem(ns, teiId); } catch (_) {}
+            const body = {
+                ...(existingPlan && typeof existingPlan === 'object' ? existingPlan : {}),
+                teiId,
+                orgUnitId,
+                programId,
+                stageId,
+                facilityGroup: ns,
+                typeOfAssessment: initSurveyType || existingPlan?.typeOfAssessment || '',
+                team: initTeamOptions.map(t => ({ userId: t.id, displayName: t.displayName, role: t.role })),
+                seAssignments: initAssignments,
+                updatedBy: user?.id || null,
+                updatedByName: user?.displayName || user?.username || null,
+                updatedAt: new Date().toISOString(),
+                createdBy: existingPlan?.createdBy || user?.id || null,
+                createdByName: existingPlan?.createdByName || user?.displayName || user?.username || null,
+                createdAt: existingPlan?.createdAt || new Date().toISOString(),
+            };
+            await api.upsertDataStoreItem(ns, teiId, body);
+            showToast?.('SE assignments updated. Existing assessment events were not recreated.', 'success');
+            cancelCreateBaseline();
+        } catch (e) {
+            console.warn('saveEditedSeAssignments failed', e);
+            showToast?.('Failed to save SE assignments.', 'error');
+        } finally {
+            setIsBaselineCreating(false);
+        }
+    };
+
     const confirmCreateBaseline = async () => {
         if (!pendingOpenAssessment) { setShowCreateBaselineDialog(false); return; }
         try {
@@ -1056,20 +1431,55 @@ export function Dashboard() {
             }
 
             const selectedTypeMeta = (surveyTypeOptions || []).find(o => o.value === initSurveyType);
+            if (initMode === 'BASELINE' && !initHasExistingBaseline && !isBaselineSurveyType(selectedTypeMeta?.label || selectedTypeMeta?.value || initSurveyType)) {
+                showToast?.('First-time survey initiation must use Baseline Assessment.', 'error');
+                setIsBaselineCreating(false);
+                return;
+            }
+            if (isSupportiveSurveyType(selectedTypeMeta?.label || selectedTypeMeta?.value || initSurveyType)) {
+                showToast?.('Supportive is no longer available as a Type of Survey. Please choose another Type of Survey.', 'error');
+                setIsBaselineCreating(false);
+                return;
+            }
+            const isBaselineSelected = isBaselineSurveyType(selectedTypeMeta?.label || selectedTypeMeta?.value || initSurveyType);
+            const hasExistingBaselineNow = isBaselineSelected
+                ? (initHasExistingBaseline || await assessmentHasBaselineSurvey(pendingOpenAssessment))
+                : false;
+            if (isBaselineSelected && hasExistingBaselineNow) {
+                setInitHasExistingBaseline(true);
+                showToast?.('A Baseline survey already exists for this facility. Please choose a different Type of Survey.', 'error');
+                setIsBaselineCreating(false);
+                return;
+            }
             const isSelfSelected = /self/i.test(String(selectedTypeMeta?.label || selectedTypeMeta?.value || ''));
-            const totalSteps = initSeOptions.length + 1 + (isSelfSelected ? 1 : 0);
+            const totalSteps = initSeOptions.length + 2;
 
             // New model: every Self Assessment gets its own assessment TEI.
-            // All other assessment types continue to reuse the TEI from the selected assessment.
+            // Normal assessments reuse the selected authorised TEI, but receive a
+            // fresh survey-program enrollment for this assessment instance.
             if (isSelfSelected) {
-                updateCreateProgress(0, totalSteps, 'Creating assessment TEI...');
+                updateCreateProgress(0, totalSteps, 'Creating assessment TEI and enrollment...');
                 const created = await api.createAssessmentTei({ programId, orgUnitId, trackedEntityTypeId });
                 teiId = created?.teiId || null;
                 enrollmentId = created?.enrollmentId || null;
                 if (!teiId) throw new Error('Failed to create a TEI for the new Self Assessment.');
-                setCreateDetails(prev => [...prev, `New assessment TEI created: ${teiId}`]);
+                if (!enrollmentId) throw new Error('Failed to create an enrollment for the new Self Assessment.');
+                setCreateDetails(prev => [...prev, `New assessment TEI created: ${teiId}`, `New enrollment created: ${enrollmentId}`]);
             } else if (!teiId) {
                 throw new Error('Could not resolve the selected assessment TEI.');
+            } else {
+                updateCreateProgress(0, totalSteps, 'Creating assessment enrollment...');
+                try {
+                    const created = await api.createAssessmentEnrollment({ programId, orgUnitId, teiId, trackedEntityTypeId });
+                    enrollmentId = created?.enrollmentId || null;
+                    if (!enrollmentId) throw new Error('Failed to create a new enrollment for the selected assessment TEI.');
+                    setCreateDetails(prev => [...prev, `New enrollment created for TEI ${teiId}: ${enrollmentId}`]);
+                } catch (enrollErr) {
+                    if (enrollErr?.message && enrollErr.message.includes('already has an active enrollment')) {
+                        throw new Error('This facility already has an active assessment enrollment. You can only initiate a Self Assessment.');
+                    }
+                    throw enrollErr;
+                }
             }
 
             // Persist SE assignment plan in DataStore under namespace={facilityGroup} key={teiId}
@@ -1091,7 +1501,7 @@ export function Dashboard() {
                 }
             }
             const body = {
-                teiId, orgUnitId, programId, stageId,
+                teiId, enrollmentId, orgUnitId, programId, stageId,
                 facilityGroup: ns,
                 typeOfAssessment: initSurveyType,
                 team: initTeamOptions.map(t => ({ userId: t.id, displayName: t.displayName, role: t.role })),
@@ -1111,7 +1521,7 @@ export function Dashboard() {
                 assessorUserId: user?.id || null,
             });
 
-            const baseStep = isSelfSelected ? 1 : 0;
+            const baseStep = 1;
             updateCreateProgress(baseStep, totalSteps, 'Creating assessment events...');
 
             const provisionTaggedEvent = async (tag) => {
@@ -1330,9 +1740,13 @@ export function Dashboard() {
         setCreateDetails([]);
         setCreateErrorInfo(null);
         setPendingProvisionedBundle(null);
+        setInitHasExistingBaseline(false);
+        setInitEditAssignmentsOnly(false);
         setInitSurveyType('');
         setInitFacilityGroup('');
         setInitTeamOptions([]);
+        setInitTeamLoading(false);
+        setInitAssessorLookupInfo(null);
         setInitSeOptions([]);
         setInitAssignments({});
     };
@@ -1885,7 +2299,17 @@ export function Dashboard() {
 		                )}
                 {!isAssessmentsCollapsed && (
                     <div className="forms-list">
-                        {assessmentsLoading ? (
+	                        {hookError && (
+	                            <div style={{ margin: '0 1rem 0.75rem', padding: '8px 10px', borderRadius: 6, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: '0.85rem' }}>
+	                                Failed to load assigned assessments: {hookError.message || String(hookError)}
+	                            </div>
+	                        )}
+	                        {!hookError && hookDebug && hookDebug.teamEventsCount === 0 && (
+	                            <div style={{ margin: '0 1rem 0.75rem', padding: '8px 10px', borderRadius: 6, background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', fontSize: '0.85rem' }}>
+	                                No accepted team-assignment events were found for {user?.username || user?.id || 'this user'}.
+	                            </div>
+	                        )}
+	                        {assessmentsLoading ? (
                             <div className="loading">Loading Assessments...</div>
                         ) : (upcomingAssessments.length === 0 && pendingAssessments.length === 0) ? (
                             <div className="empty-state">No assessments assigned</div>
@@ -1934,6 +2358,21 @@ export function Dashboard() {
                                                                         <> {' \u2022 '} Role: {String(assessment.myTeamRole).replace(/^FAC_ASS_ROLE_/i,'').replace(/\s+/g,'_').replace(/_/g,' ').toUpperCase()}</>
                                                                     ) : null}
                                                                 </span>
+                                                                {assessment.isSelfAssessment && (
+                                                                    <div style={{ marginTop: '4px' }}>
+                                                                        <span style={{
+                                                                            fontSize: '0.7em',
+                                                                            fontWeight: 800,
+                                                                            color: '#1e40af',
+                                                                            background: '#dbeafe',
+                                                                            padding: '2px 8px',
+                                                                            borderRadius: '4px',
+                                                                            textTransform: 'uppercase'
+                                                                        }}>
+                                                                            Self Assessment
+                                                                        </span>
+                                                                    </div>
+                                                                )}
                                                                 <div style={{ marginTop: '6px' }}>
                                                                     <button
                                                                         className="btn btn-secondary btn-sm"
@@ -1954,23 +2393,13 @@ export function Dashboard() {
                                                         )}
                                                     </div>
                                                 </div>
-                                            {(() => {
-                                                // Hide details whenever this assessment is already represented
-                                                // in the Associated Assessments data (by TEI or orgUnit match).
-                                                const assocKey = getAssocKey(assessment);
-                                                const assocState = associatedByEnrollment?.[assocKey];
-                                                // Use the same source the table uses (survey list), not a non-existent 'rows' prop
-                                                const list = Array.isArray(assocState?.survey) ? assocState.survey : [];
-                                                const hasAssocRows = list.length > 0;
-                                                const cardTei = assessment?.scheduleTeiId || assessment?.trackedEntityInstance || null;
-                                                const cardOu = assessment?.orgUnitId || (typeof assessment?.orgUnit === 'string' ? assessment.orgUnit : assessment?.orgUnit?.id) || assessment?.orgUnit || null;
-                                                const isThisAssessmentRepresented = list.some(ev => {
-                                                    const evTei = ev?.trackedEntityInstance || ev?.teiId || null;
-                                                    const evOu = ev?.orgUnit || null;
-                                                    return (cardTei && evTei && String(evTei).trim() === String(cardTei).trim()) ||
-                                                           (cardOu && evOu && String(evOu).trim() === String(cardOu).trim());
-                                                });
-                                                if (hasAssocRows && isThisAssessmentRepresented) return null;
+	                                            {(() => {
+	                                                // Only show this initiation description when the authorised
+	                                                // TEI does not yet have a main survey assessment event.
+	                                                const assocKey = getAssocKey(assessment);
+	                                                const presence = assessmentEventPresenceByKey?.[assocKey];
+	                                                const needsInitiation = presence?.hasAssessmentEvent === false;
+	                                                if (!needsInitiation) return null;
 
                                                 // Compute latest authorised window from team events (per OU)
                                                 const evs = Array.isArray(assessment.team) ? assessment.team : [];
@@ -2137,11 +2566,10 @@ export function Dashboard() {
                                                                                             className="btn btn-secondary btn-xs"
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
-                                                                                                repairAssociatedAssessment(assessment, ev, getGroupValue(ev), getTypeValue(ev));
+                                                                                                openEditSeAssignments(assessment, ev, getGroupValue(ev), getTypeValue(ev));
                                                                                             }}
-                                                                                            disabled={!!repairingAssessments[ev.trackedEntityInstance || '']}
                                                                                         >
-                                                                                            {repairingAssessments[ev.trackedEntityInstance || ''] ? 'Repairing…' : 'Repair Events'}
+                                                                                            Edit SE Assignments
                                                                                         </button>
                                                                                     </div>
                                                                                 </td>
@@ -2158,18 +2586,30 @@ export function Dashboard() {
         </div>
                                             <div className="form-actions">
                                                 {(() => {
+	                                                    const assocKey = getAssocKey(assessment);
+	                                                    const presence = assessmentEventPresenceByKey?.[assocKey];
+	                                                    const presenceLoading = !presence || presence.loading;
+	                                                    if (presenceLoading) {
+	                                                        return (
+	                                                            <button className="btn btn-secondary btn-sm" disabled>
+	                                                                Checking assessment…
+	                                                            </button>
+	                                                        );
+	                                                    }
                                                     const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
                                                     const isLead = /LEAD|LEADER/.test(roleNorm);
-                                                    const label = isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey');
-                                                    if (label === 'Initiate Survey' && !isLead) return null;
-                                                    const onClick = () => (label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly: false }) : handleOpenAssessment(assessment));
+		                                                    const label = isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey');
+		                                                    if (label === 'Initiate Survey' && !isLead) return null;
+	                                                    const onClick = () => {
+	                                                        return label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly: false }) : handleOpenAssessment(assessment);
+	                                                    };
                                                     return (
                                                         <button
-                                                            className={`btn ${isSynced ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-                                                            disabled={label === 'Initiate Survey' && isInitiating}
+		                                                            className={`btn ${isSynced ? 'btn-secondary' : 'btn-primary'} btn-sm`}
+		                                                            disabled={label === 'Initiate Survey' && isInitiating}
                                                             onClick={onClick}
                                                         >
-                                                            {label === 'Initiate Survey' && isInitiating ? 'Opening…' : label}
+		                                                            {label === 'Initiate Survey' && isInitiating ? 'Opening…' : label}
                                                         </button>
                                                     );
                                                 })()}
@@ -2278,6 +2718,43 @@ export function Dashboard() {
                     <div className="settings-content">
 	                        {!selectedSE && !showLinksEditor ? (
 	                            <>
+                                    <div className="settings-section" style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
+                                        <h4 style={{ color: '#1e40af' }}>Configuration Strategy (Testing)</h4>
+                                        <p className="settings-subtitle">
+                                            Switch between using the <strong>In-App hardcoded assets</strong> and the <strong>Remote DHIS2 DataStore</strong>.
+                                            This allows you to verify that configurations pulled from DHIS2 match the expected application behavior.
+                                        </p>
+                                        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginTop: '10px' }}>
+                                            <FormControl size="small" style={{ minWidth: '200px' }}>
+                                                <InputLabel>Source Strategy</InputLabel>
+                                                <Select
+                                                    value={configSource}
+                                                    label="Source Strategy"
+                                                    onChange={(e) => setConfigSource(e.target.value)}
+                                                >
+                                                    <MenuItem value="local">Local Assets (In-App)</MenuItem>
+                                                    <MenuItem value="datastore">DHIS2 DataStore (Remote)</MenuItem>
+                                                </Select>
+                                            </FormControl>
+                                            
+                                            {configSource === 'datastore' && (
+                                                <Button 
+                                                    variant="contained" 
+                                                    size="small"
+                                                    onClick={() => loadRemoteConfig()}
+                                                    startIcon={<CloudSyncIcon />}
+                                                >
+                                                    Fetch from DataStore
+                                                </Button>
+                                            )}
+                                        </div>
+                                        {configSource === 'datastore' && (
+                                            <div style={{ marginTop: '8px', fontSize: '0.8em', color: '#666' }}>
+                                                <span>Namespace: <code>qims-config</code> | Keys: <code>hospital, clinics, ems, mortuary, links, compute</code></span>
+                                            </div>
+                                        )}
+                                    </div>
+
 		                                <div className="settings-section">
 		                                    <h4>Configuration Versions</h4>
 		                                    <p className="settings-subtitle">
@@ -2857,29 +3334,71 @@ export function Dashboard() {
 
             {/* Initiate Survey Dialog */}
             <Dialog open={showCreateBaselineDialog} onClose={cancelCreateBaseline} fullWidth maxWidth="md">
-                <DialogTitle>Initiate Survey</DialogTitle>
+                <DialogTitle>{initEditAssignmentsOnly ? 'Edit SE Assignments' : 'Initiate Survey'}</DialogTitle>
                 <DialogContent dividers>
+                    {initEditAssignmentsOnly && (
+                        <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 8, background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a' }}>
+                            Update the SE assignees for this assessment. Existing DHIS2 assessment events will not be recreated.
+                        </div>
+                    )}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                         <TextField
                             select
                             label="Type of Survey"
                             value={initSurveyType}
-                            onChange={e => setInitSurveyType(e.target.value)}
-                            size="small"
-                            disabled={lockType}
+	                            onChange={async e => {
+                                const next = e.target.value;
+                                const opt = (surveyTypeOptions || []).find(o => o.value === next);
+	                                if (isSupportiveSurveyType(opt?.label || opt?.value || next)) {
+	                                    showToast?.('Supportive is no longer available as a Type of Survey. Please choose another Type of Survey.', 'error');
+	                                    return;
+	                                }
+                                if (initHasExistingBaseline && isBaselineSurveyType(opt?.label || opt?.value || next)) {
+                                    showToast?.('A Baseline survey already exists for this facility. Please choose a different Type of Survey.', 'error');
+                                    return;
+                                }
+                                setInitSurveyType(next);
+	                                if (isSelfSurveyType(opt?.label || opt?.value || next)) {
+	                                    await loadSelfAssessmentAssessors(pendingOpenAssessment);
+	                                }
+                            }}
+	                            size="small"
+	                            disabled={isBaselineCreating || (lockType && !forceSelfOnly)}
                         >
-                            <MenuItem value="">Select...</MenuItem>
-                            {surveyTypeOptions.map(opt => (
-                                <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
-                            ))}
+	                            {(() => {
+	                                const baselineOnly = initMode === 'BASELINE' && !initHasExistingBaseline;
+	                                const optionsForType = forceSelfOnly
+	                                    ? surveyTypeOptions.filter(opt => isSelfSurveyType(opt.label || opt.value))
+	                                    : (baselineOnly ? baselineSurveyTypeOptions : surveyTypeOptions);
+	                                const menuItems = optionsForType.map(opt => {
+	                                    const blockedBaseline = initHasExistingBaseline && isBaselineSurveyType(opt.label || opt.value);
+	                                    return (
+	                                        <MenuItem key={opt.value} value={opt.value} disabled={blockedBaseline}>
+	                                            {opt.label}{blockedBaseline ? ' (already exists)' : ''}
+	                                        </MenuItem>
+	                                    );
+	                                });
+	                                if (!forceSelfOnly && !baselineOnly) {
+	                                    menuItems.unshift(<MenuItem key="__empty" value="">Select...</MenuItem>);
+	                                }
+	                                return menuItems;
+	                            })()}
                         </TextField>
                         <TextField
                             select
 	                            label="Facility Type"
                             value={initFacilityGroup}
-                            onChange={e => { const v = e.target.value; setInitFacilityGroup(v); setInitSeOptions(buildSeOptions(v)); setInitAssignments({}); }}
+                            onChange={e => { 
+                                const v = e.target.value; 
+                                setInitFacilityGroup(v); 
+                                setInitSeOptions(buildSeOptions(v)); 
+                                setInitAssignments({}); 
+                                if (configSource === 'datastore' && isOnline) {
+                                    loadRemoteConfig();
+                                }
+                            }}
                             size="small"
-                            disabled={lockGroup}
+	                            disabled={isBaselineCreating || lockGroup}
                         >
                             <MenuItem value="">Select...</MenuItem>
                             <MenuItem value={'HOSPITAL'}>Hospital</MenuItem>
@@ -2888,24 +3407,37 @@ export function Dashboard() {
                             <MenuItem value={'MORTUARY'}>Mortuary</MenuItem>
                         </TextField>
                     </div>
-                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (
-                        <div style={{ marginTop: 16, padding: '0 8px' }}>
-                            {createProgress && (
-                                <>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                        <span style={{ fontSize: '0.9rem', color: '#374151', fontWeight: 600 }}>
-                                            {createProgress.message}
-                                        </span>
-                                        <span style={{ fontSize: '0.85rem', color: '#6b7280' }}>
-                                            {createProgress.current} / {createProgress.total}
-                                        </span>
-                                    </div>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={createProgress.total > 0 ? (createProgress.current / createProgress.total) * 100 : 0}
-                                    />
-                                </>
-                            )}
+	                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (
+	                        <div style={{ marginTop: 16, padding: '0 8px' }}>
+	                            {createProgress && (() => {
+	                                const progressPercent = createProgress.total > 0
+	                                    ? Math.min(100, Math.max(0, Math.round((createProgress.current / createProgress.total) * 100)))
+	                                    : 0;
+	                                const displayStep = createProgress.total > 0
+	                                    ? Math.min(createProgress.total, Math.max(1, createProgress.current))
+	                                    : createProgress.current;
+	                                return (
+	                                    <div style={{ padding: '14px 16px', borderRadius: 10, background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+	                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', marginBottom: 10 }}>
+	                                            <div>
+	                                                <div style={{ fontSize: '0.95rem', color: '#1e3a8a', fontWeight: 800 }}>
+	                                                    {isBaselineCreating ? 'Creating assessment in DHIS2' : 'Assessment setup'}
+	                                                </div>
+	                                                <div style={{ fontSize: '0.9rem', color: '#1d4ed8', marginTop: 2 }}>
+	                                                    {createProgress.message}
+	                                                </div>
+	                                            </div>
+	                                            <div style={{ fontSize: '0.85rem', color: '#1e40af', fontWeight: 700, whiteSpace: 'nowrap' }}>
+	                                                {progressPercent}% · Step {displayStep} of {createProgress.total}
+	                                            </div>
+	                                        </div>
+	                                        <LinearProgress variant="determinate" value={progressPercent} />
+	                                        <div style={{ marginTop: 8, fontSize: '0.8rem', color: '#475569' }}>
+	                                            Please keep this window open. The app is creating the enrollment, assessment events, and event map.
+	                                        </div>
+	                                    </div>
+	                                );
+	                            })()}
 
                             {createErrorInfo && (
                                 <div style={{ marginTop: 12, padding: '12px 14px', borderRadius: 8, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b' }}>
@@ -2929,9 +3461,12 @@ export function Dashboard() {
                                 </div>
                             )}
 
-                            {createDetails.length > 0 && (
+	                            {createDetails.length > 0 && (
                                 <div style={{ marginTop: 12, padding: '12px 14px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-                                    <div style={{ fontWeight: 700, color: '#334155', marginBottom: 8 }}>Provisioning details</div>
+	                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+	                                        <div style={{ fontWeight: 700, color: '#334155' }}>Live activity</div>
+	                                        {isBaselineCreating && <div style={{ fontSize: '0.78rem', color: '#2563eb', fontWeight: 700 }}>Running…</div>}
+	                                    </div>
                                     <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#475569', maxHeight: 140, overflowY: 'auto' }}>
                                         {createDetails.map((line, idx) => (
                                             <li key={`create-detail-top-${idx}`}>{line}</li>
@@ -2943,7 +3478,15 @@ export function Dashboard() {
                     ) : null}
                     {initFacilityGroup && initSeOptions.length > 0 && (
                         <div style={{ marginTop: 16 }}>
-                            <div style={{ fontWeight: 600, color: '#374151', marginBottom: 8 }}>Assign Sections (SE) to Team Members</div>
+	                            <div style={{ fontWeight: 600, color: '#374151', marginBottom: 8 }}>
+	                                Assign Sections (SE) to Team Members{initTeamLoading ? ' — loading Self Assessment assessors…' : ''}
+	                            </div>
+	                            {initAssessorLookupInfo && initTeamOptions.length === 0 && (
+	                                <div style={{ marginBottom: 10, padding: '8px 10px', borderRadius: 6, background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', fontSize: '0.85rem' }}>
+	                                    No Self Assessment assessors loaded for OU {initAssessorLookupInfo.orgUnitId || 'unknown'}.
+	                                    {initAssessorLookupInfo.reason ? ` ${initAssessorLookupInfo.reason}` : ''}
+	                                </div>
+	                            )}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                                 {initSeOptions.map(se => {
                                     const assigned = Array.isArray(initAssignments[se.id]) && initAssignments[se.id].length > 0;
@@ -2958,6 +3501,7 @@ export function Dashboard() {
                                         <Autocomplete
                                             multiple
                                             options={initTeamOptions}
+	                                            disabled={isBaselineCreating || initTeamLoading}
                                             getOptionLabel={(o) => o.displayName || o.id}
                                             onChange={(e, newVal) => setInitAssignments(prev => ({ ...prev, [se.id]: newVal.map(v => v.id) }))}
                                             renderInput={(params) => <TextField {...params} size="small" label="Assignees" placeholder="Select" />}
@@ -2970,15 +3514,32 @@ export function Dashboard() {
                     )}
                 </DialogContent>
                 <DialogActions>
-                    <Button onClick={randomizeSeAssignments} disabled={isBaselineCreating || (initTeamOptions.length===0 || initSeOptions.length===0)}>
-                        Randomize assignments
-                    </Button>
-                    <Button onClick={loadPreviousPlan} disabled={isBaselineCreating || initPlanLoading}>
+	                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
+	                        <Button onClick={randomizeSeAssignments} disabled={isBaselineCreating || initTeamLoading || (initTeamOptions.length===0 || initSeOptions.length===0)}>
+	                            Randomize assignments
+	                        </Button>
+	                        {(initTeamOptions.length === 0 || initSeOptions.length === 0 || initTeamLoading) && (
+	                            <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+	                                {initTeamLoading
+	                                    ? 'Loading assessors…'
+	                                    : initTeamOptions.length === 0
+	                                        ? `No assessors loaded${initAssessorLookupInfo?.orgUnitId ? ` for OU ${initAssessorLookupInfo.orgUnitId}` : ''}.`
+	                                        : 'Select a Facility Type to load SEs.'}
+	                            </span>
+	                        )}
+	                    </div>
+                    {!initEditAssignmentsOnly && <Button onClick={loadPreviousPlan} disabled={isBaselineCreating || initPlanLoading}>
                         {initPlanLoading ? 'Loading…' : 'Load previous plan'}
-                    </Button>
+                    </Button>}
                     <Button onClick={cancelCreateBaseline} disabled={isBaselineCreating}>Cancel</Button>
-                    <Button onClick={pendingProvisionedBundle ? handleRepairProvisionedBundle : confirmCreateBaseline} color="primary" disabled={isBaselineCreating || (!pendingProvisionedBundle && (!initSurveyType || !initFacilityGroup || !allSeAssigned))}>
-                        {isBaselineCreating ? (pendingProvisionedBundle ? 'Repairing…' : 'Creating...') : (pendingProvisionedBundle ? 'Repair missing events & open' : 'Create & Open')}
+                    <Button
+                        onClick={initEditAssignmentsOnly ? saveEditedSeAssignments : (pendingProvisionedBundle ? handleRepairProvisionedBundle : confirmCreateBaseline)}
+                        color="primary"
+	                        disabled={isBaselineCreating || initTeamLoading || (!pendingProvisionedBundle && (!initFacilityGroup || !allSeAssigned || (!initEditAssignmentsOnly && !initSurveyType)))}
+                    >
+                        {initEditAssignmentsOnly
+                            ? (isBaselineCreating ? 'Saving…' : 'Save Assignments')
+                            : (isBaselineCreating ? (pendingProvisionedBundle ? 'Repairing…' : 'Creating...') : (pendingProvisionedBundle ? 'Repair missing events & open' : 'Create & Open'))}
                     </Button>
                 </DialogActions>
             </Dialog>

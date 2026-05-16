@@ -243,13 +243,17 @@ export const computeGraphScores = (criteriaMap) => {
                 }
             }
 
+                const normalizedCode = normalizeCriterionCode(code);
+                const configuredSubs = HOSPITAL_SUBCRITERIA_MAP[normalizedCode];
+                const usesHospitalAverageFormula = isRoot && configuredSubs && configuredSubs.length > 0 && effectiveLinkCount > 0;
+
                 // If any critical child is non-C, force this root's categorical
                 // result to the worst critical child's label and bypass numeric
-                // aggregation. Section-level critical fail remains governed by the
-                // child's own criticalFail flag.
+                // aggregation. Hospital roots with configured sub-criteria are an
+                // exception: they use the rounded linked/sub-criteria average formula.
                 let forcedByCriticalChild = false;
                 let forcedRootNa = false;
-                if (criticalChildStatuses.length > 0) {
+                if (!usesHospitalAverageFormula && criticalChildStatuses.length > 0) {
                     let forced = null;
                     if (criticalChildStatuses.includes('NC')) forced = 'NC';
                     else if (criticalChildStatuses.includes('PC')) forced = 'PC';
@@ -323,13 +327,11 @@ export const computeGraphScores = (criteriaMap) => {
 	                //   (b) average of configured sub-criteria (from
 	                //       hospital_compute_criteria.json), when both are
 	                //       available. If only one side has data, fall back to it.
-                const normalizedCode = normalizeCriterionCode(code);
-                const configuredSubs = HOSPITAL_SUBCRITERIA_MAP[normalizedCode];
                 // IMPORTANT: If this root has zero effective links (all links are
                 // visual-only -G/-B), do NOT compute a numeric draft from
                 // configured sub-criteria either. The requirement is that such
                 // roots are not auto-scored at all.
-                if (!forcedByCriticalChild && configuredSubs && configuredSubs.length > 0 && effectiveLinkCount > 0) {
+                if (!forcedByCriticalChild && usesHospitalAverageFormula) {
 	                    let cfgSum = 0;
 	                    let cfgCount = 0;
 	                    configuredSubs.forEach(subRaw => {
@@ -345,14 +347,15 @@ export const computeGraphScores = (criteriaMap) => {
                     const subAvg = cfgCount > 0 ? (cfgSum / cfgCount) : null;
                     const linkedAvg = linkedAvgForCombination;
 
-                    // Option B: Always treat the missing side as 0, and divide by 2
-                    // (only for configured Hospital roots). If both sides are
-                    // missing (null), leave rootDraftPoints unchanged so the
-                    // root can remain Pending with no provisional score.
+                    // Hospital configured root formula:
+                    //   1) round linked average to nearest whole number
+                    //   2) round sub-criteria average to nearest whole number
+                    //   3) root score = rounded average of those two rounded averages
+                    // Missing sides are treated as 0 only when the other side has data.
                     if (subAvg !== null || linkedAvg !== null) {
-                        const a = (subAvg !== null) ? subAvg : 0;
-                        const b = (linkedAvg !== null) ? linkedAvg : 0;
-                        rootDraftPoints = (a + b) / 2;
+	                        const roundedSubAvg = (subAvg !== null) ? Math.round(subAvg) : 0;
+	                        const roundedLinkedAvg = (linkedAvg !== null) ? Math.round(linkedAvg) : 0;
+	                        rootDraftPoints = Math.round((roundedSubAvg + roundedLinkedAvg) / 2);
                     }
 	                }
 	

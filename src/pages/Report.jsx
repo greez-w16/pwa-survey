@@ -232,10 +232,11 @@ export default function Report() {
       setReportInfo(null);
       setReportAssessment(null);
       try {
-        // Fetch all events for this facility OU, then filter by date range client-side
-        const events = await api.getEventsList({
-          programId, stageId, orgUnitId: selectedFacilityId, ouMode: 'SELECTED', order: 'eventDate:asc',
-          fields: 'event,eventDate,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value],notes[note,value]'
+        // Fetch all events for this facility OU, including descendants, to ensure we catch 
+        // both scheduled and self-initiated assessments.
+        const events = await api.getSurveyEventsForOrgUnit({ 
+            orgUnitId: selectedFacilityId, 
+            fields: 'event,eventDate,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value],notes[note,value]'
         });
         const all = Array.isArray(events) ? events : [];
 

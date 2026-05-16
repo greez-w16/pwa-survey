@@ -1,5 +1,14 @@
 // Consistent base URL for DHIS2 AP// Consistent base URL for DHIS2 API (points to the /qims context on the server)
 const BASE_URL = '/qims';
+const ADMIN_USER_RESOLVER_URL = '/email2/api/admin/resolve-users';
+
+const getAdminUserResolverUrls = () => {
+    const urls = [ADMIN_USER_RESOLVER_URL];
+    if (typeof window !== 'undefined' && /^localhost$|^127\.0\.0\.1$/.test(window.location.hostname)) {
+        urls.push('https://qimsdev.5am.co.bw/email2/api/admin/resolve-users');
+    }
+    return urls;
+};
 
 const getHeaders = (username, password) => {
     const headers = {
@@ -124,6 +133,64 @@ export const api = {
     },
 
     /**
+     * Resolve users through the secure admin-backed resolver endpoint.
+     * Returns a map keyed by both id and username where available.
+     */
+    resolveAdminUserDisplayNames: async (values) => {
+        if (!Array.isArray(values) || values.length === 0) return {};
+        const identifiers = Array.from(new Set(
+            values
+                .flatMap(v => String(v || '').split('|'))
+                .map(v => v.trim())
+                .filter(Boolean)
+        ));
+        if (identifiers.length === 0) return {};
+
+        let data = null;
+        let lastError = null;
+        for (const url of getAdminUserResolverUrls()) {
+            try {
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Accept': 'application/json', 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ identifiers }),
+                    cache: 'no-store'
+                });
+                if (!resp.ok) {
+                    lastError = new Error(`Admin user resolver failed at ${url}: ${resp.status}`);
+                    continue;
+                }
+                const parsed = await resp.json().catch(() => ({}));
+                const hasResolverShape = Array.isArray(parsed) || Array.isArray(parsed?.users) || Array.isArray(parsed?.results) || Array.isArray(parsed?.unresolved);
+                if (!hasResolverShape) {
+                    lastError = new Error(`Admin user resolver at ${url} did not return resolver JSON`);
+                    continue;
+                }
+                data = parsed;
+                break;
+            } catch (e) {
+                lastError = e;
+            }
+        }
+        if (!data) throw lastError || new Error('Admin user resolver failed');
+
+        const users = Array.isArray(data) ? data : (data.users || data.results || []);
+        const cache = api._userDisplayCache || (api._userDisplayCache = {});
+        const result = {};
+        users.forEach(u => {
+            if (!u || (!u.id && !u.username && !u.uid)) return;
+            const entry = {
+                id: u.id || u.uid || u.username,
+                username: u.username || u.id || u.uid,
+                displayName: u.displayName || u.name || u.username || u.id || u.uid
+            };
+            if (entry.id) { cache[entry.id] = entry; result[entry.id] = entry; }
+            if (entry.username) { cache[entry.username] = entry; result[entry.username] = entry; }
+        });
+        return result;
+    },
+
+    /**
      * Resolve DHIS2 user display names for a list of identifiers. The identifiers
      * can be either user IDs (UIDs) or usernames. Returns a map of
      * { key -> { id, username, displayName } } and caches results in-memory.
@@ -156,9 +223,33 @@ export const api = {
 
             if (unknown.length === 0) return result;
 
+            const addResolvedUser = (u) => {
+                if (!u || (!u.id && !u.username)) return;
+                const entry = {
+                    id: u.id || u.uid || u.username,
+                    username: u.username || u.id || u.uid,
+                    displayName: u.displayName || u.name || u.username || u.id || u.uid
+                };
+                if (entry.id) { cache[entry.id] = entry; result[entry.id] = entry; }
+                if (entry.username) { cache[entry.username] = entry; result[entry.username] = entry; }
+            };
+
+            // Preferred secure resolver. This endpoint should perform the DHIS2
+            // user lookup server-side using admin credentials and return only
+            // safe user metadata: id, username, displayName.
+            try {
+                const secureMap = await api.resolveAdminUserDisplayNames(unknown);
+                Object.values(secureMap || {}).forEach(addResolvedUser);
+            } catch (e) {
+                console.warn('secure resolve-users endpoint unavailable; falling back to DHIS2 user lookup', e);
+            }
+
+            const remainingUnknown = unknown.filter(k => !result[k]);
+            if (remainingUnknown.length === 0) return result;
+
             // Partition into likely IDs (11-char DHIS2 UID) and usernames (others)
-            const uidLike = unknown.filter(k => /^[A-Za-z0-9]{11}$/.test(k));
-            const usernames = unknown.filter(k => !/^[A-Za-z0-9]{11}$/.test(k));
+            const uidLike = remainingUnknown.filter(k => /^[A-Za-z0-9]{11}$/.test(k));
+            const usernames = remainingUnknown.filter(k => !/^[A-Za-z0-9]{11}$/.test(k));
 
             const collected = [];
 
@@ -166,11 +257,25 @@ export const api = {
             const fetchUsers = async (filterField, list) => {
                 if (list.length === 0) return [];
                 const bracket = `[${list.map(encodeURIComponent).join(',')}]`;
-                const url = `${BASE_URL}/api/users.json?paging=false&fields=id,username,displayName&filter=${filterField}:in:${bracket}`;
-                const resp = await fetch(url, { headers: getHeaders() });
+                const url = `${BASE_URL}/api/users.json?paging=false&fields=id,username,displayName&filter=${filterField}:in:${bracket}&_=${Date.now()}`;
+                const resp = await fetch(url, {
+                    headers: { ...getHeaders(), 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+                    cache: 'no-store'
+                });
                 if (!resp.ok) return [];
                 const data = await resp.json().catch(() => ({}));
                 return data.users || data || [];
+            };
+
+            const fetchUserById = async (id) => {
+                if (!id) return null;
+                const url = `${BASE_URL}/api/users/${encodeURIComponent(id)}.json?fields=id,username,displayName&_=${Date.now()}`;
+                const resp = await fetch(url, {
+                    headers: { ...getHeaders(), 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+                    cache: 'no-store'
+                });
+                if (!resp.ok) return null;
+                return await resp.json().catch(() => null);
             };
 
             try {
@@ -182,11 +287,20 @@ export const api = {
                 collected.push(...byUsername);
             } catch (_) {}
 
+            const collectedKeys = new Set();
             collected.forEach(u => {
-                const entry = { id: u.id, username: u.username, displayName: u.displayName || u.username || u.id };
-                if (u.id) { cache[u.id] = entry; result[u.id] = entry; }
-                if (u.username) { cache[u.username] = entry; result[u.username] = entry; }
+                if (u?.id) collectedKeys.add(u.id);
+                if (u?.username) collectedKeys.add(u.username);
             });
+            const missingUidLike = uidLike.filter(id => !collectedKeys.has(id));
+            if (missingUidLike.length > 0) {
+                try {
+                    const directUsers = await Promise.all(missingUidLike.map(fetchUserById));
+                    directUsers.filter(Boolean).forEach(u => collected.push(u));
+                } catch (_) {}
+            }
+
+            collected.forEach(addResolvedUser);
 
             return result;
         } catch (e) {
@@ -1072,6 +1186,82 @@ export const api = {
         return data.events || [];
     },
 
+    getSelfAssessmentAssessorUserIds: async ({
+        orgUnitId,
+        programId = 'b7wdiBqcml5',
+        stageId = 'hczvoscj8Ce',
+        statusDataElementId = 'WmnMQhFIaMu',
+        userDataElementId = 'uJCFQsE2Z4W'
+    }) => {
+        if (!orgUnitId) return [];
+        const fields = 'dataValues,occurredAt,event,status,orgUnit,program,programType,updatedAt,createdAt,assignedUser';
+        const params = [
+            'page=1',
+            'pageSize=200',
+            `program=${encodeURIComponent(programId)}`,
+            `programStage=${encodeURIComponent(stageId)}`,
+            `orgUnit=${encodeURIComponent(orgUnitId)}`,
+            'ouMode=SELECTED',
+            'status=ACTIVE',
+            `order=${encodeURIComponent('occurredAt:desc')}`,
+            `fields=${encodeURIComponent(fields)}`
+        ].join('&');
+        let resp = await fetch(`${BASE_URL}/api/40/tracker/events?${params}`, { headers: getHeaders() });
+        if (!resp.ok) {
+            const fallbackParams = [
+                'paging=false',
+                `program=${encodeURIComponent(programId)}`,
+                `programStage=${encodeURIComponent(stageId)}`,
+                `orgUnit=${encodeURIComponent(orgUnitId)}`,
+                'ouMode=SELECTED',
+                'status=ACTIVE',
+                `order=${encodeURIComponent('occurredAt:desc')}`,
+                `fields=${encodeURIComponent(fields)}`
+            ].join('&');
+            resp = await fetch(`${BASE_URL}/api/tracker/events.json?${fallbackParams}`, { headers: getHeaders() });
+        }
+        if (!resp.ok) throw new Error(`Failed to fetch self-assessment assessor events: ${resp.status}`);
+        const data = await resp.json().catch(() => ({}));
+        const events = data?.instances || data?.events || [];
+        const ids = new Set();
+        const isUsableUserIdentifier = (value) => {
+            const v = String(value || '').trim();
+            if (!v) return false;
+            const lower = v.toLowerCase();
+            if (['active', 'completed', 'scheduled', 'cancelled', 'skipped', 'true', 'false', 'null', 'undefined'].includes(lower)) return false;
+            return /^[A-Za-z][A-Za-z0-9]{10}$/.test(v) || /^[A-Za-z0-9._@-]{3,80}$/.test(v);
+        };
+        const addCandidate = (value) => {
+            String(value || '')
+                .split(/[|,;\s]+/)
+                .map(v => v.trim())
+                .filter(Boolean)
+                .forEach(v => { if (isUsableUserIdentifier(v)) ids.add(v); });
+        };
+        const getDataValue = (dataValues, targetDataElementId) => {
+            if (Array.isArray(dataValues)) {
+                const found = dataValues.find(dv => {
+                    const deId = typeof dv?.dataElement === 'object' ? dv.dataElement?.id : dv?.dataElement;
+                    return deId === targetDataElementId;
+                });
+                return found ? (found.value ?? found.dataValue ?? found.plainValue) : undefined;
+            }
+            if (dataValues && typeof dataValues === 'object') {
+                const raw = dataValues[targetDataElementId];
+                return raw && typeof raw === 'object' ? (raw.value ?? raw.dataValue ?? raw.plainValue) : raw;
+            }
+            return undefined;
+        };
+        (Array.isArray(events) ? events : []).forEach(ev => {
+            if (String(ev?.status || '').toUpperCase() !== 'ACTIVE') return;
+            const dataValues = ev?.dataValues;
+            const statusValue = String(getDataValue(dataValues, statusDataElementId) || '').trim().toLowerCase();
+            if (statusValue !== 'active') return;
+            addCandidate(getDataValue(dataValues, userDataElementId));
+        });
+        return Array.from(ids);
+    },
+
 	    // Fetch one page of events. Useful when events contain many dataValues and
 	    // the caller wants to process SYS_TAG/event mapping in small chunks.
 	    getEventsListPage: async ({
@@ -1135,6 +1325,58 @@ export const api = {
         });
     },
 
+    // Fetch all survey events for an Org Unit (all TEIs) in the target program/stage
+    getSurveyEventsForOrgUnit: async ({ orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37',
+        fields = 'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]' }) => {
+        if (!orgUnitId) return [];
+        
+        // 1. Fetch from legacy events API (handles most existing data)
+        let events = await api.getEventsList({
+            programId,
+            stageId,
+            orgUnitId,
+            ouMode: 'DESCENDANTS',
+            order: 'eventDate:desc',
+            fields
+        }).catch(() => []);
+        
+        // 2. Supplement with modern tracker events API (handles new 'detached' self-assessments)
+        try {
+            const trackerParams = [
+                'paging=false',
+                `program=${programId}`,
+                `programStage=${stageId}`,
+                `orgUnit=${orgUnitId}`,
+                'ouMode=DESCENDANTS',
+                'order=occurredAt:desc',
+                `fields=${fields.replace('eventDate', 'occurredAt').replace('trackedEntityInstance', 'trackedEntity')}`
+            ].join('&');
+            const trackerResp = await fetch(`${BASE_URL}/api/tracker/events?${trackerParams}`, { headers: getHeaders() });
+            if (trackerResp.ok) {
+                const trackerData = await trackerResp.json();
+                const trackerInstances = (trackerData.instances || trackerData.events || []).map(ev => ({
+                    ...ev,
+                    event: ev.event || ev.instance,
+                    eventDate: ev.occurredAt || ev.eventDate,
+                    trackedEntityInstance: ev.trackedEntity || ev.trackedEntityInstance
+                }));
+                
+                // Merge and deduplicate by event ID
+                const seenIds = new Set(events.map(e => e.event));
+                trackerInstances.forEach(ev => {
+                    if (!seenIds.has(ev.event)) {
+                        events.push(ev);
+                        seenIds.add(ev.event);
+                    }
+                });
+            }
+        } catch (err) {
+            console.warn('[getSurveyEventsForOrgUnit] Tracker supplement failed', err);
+        }
+
+        return events;
+    },
+
 	    getSurveyEventsForTeiPage: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37',
 	        fields = 'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]', page = 1, pageSize = 10 }) => {
 	        if (!teiId) return { events: [], pager: null };
@@ -1195,15 +1437,33 @@ export const api = {
 	        listPageSize = 50,
 	        detailBatchSize = 5
 	    }) => {
-	        const eventIds = await api.getSurveyEventIdsForTei({ teiId, orgUnitId, programId, stageId, pageSize: listPageSize });
+	        if (!teiId) return [];
 	        const events = [];
-	        const batchSize = Math.max(1, Number(detailBatchSize) || 5);
+	        const seen = new Set();
+	        let page = 1;
+	        let pageCount = 1;
+	        const pageSize = Math.max(1, Number(listPageSize) || 50);
 
-	        for (let i = 0; i < eventIds.length; i += batchSize) {
-	            const batch = eventIds.slice(i, i + batchSize);
-	            const loaded = await Promise.all(batch.map(eventId => api.getEventById(eventId, fields).catch(() => null)));
-	            loaded.forEach(ev => { if (ev?.event) events.push(ev); });
-	        }
+	        do {
+	            const result = await api.getSurveyEventsForTeiPage({
+	                teiId,
+	                orgUnitId,
+	                programId,
+	                stageId,
+	                fields,
+	                page,
+	                pageSize
+	            });
+	            const pageEvents = result.events || [];
+	            pageEvents.forEach(ev => {
+	                if (ev?.event && !seen.has(ev.event)) {
+	                    seen.add(ev.event);
+	                    events.push(ev);
+	                }
+	            });
+	            pageCount = result.pager?.pageCount || (pageEvents.length < pageSize ? page : page + 1);
+	            page += 1;
+	        } while (page <= pageCount);
 
 	        return events;
 	    },
@@ -1438,9 +1698,6 @@ export const api = {
         const now = new Date().toISOString().slice(0, 10);
         const ATTR_ID = 'Bw4PZ8NsYFd';
         const ATTR_VALUE = 'FAC_ASS_TYPE_INTERNAL';
-        const ADMIN_USERNAME = 'admin';
-        const ADMIN_PASSWORD = '5Am53808053@';
-
         const trackerPayload = {
             trackedEntities: [{
                 trackedEntityType: trackedEntityTypeId,
@@ -1459,7 +1716,7 @@ export const api = {
 
         const response = await fetch(`${BASE_URL}/api/tracker?async=false&importStrategy=CREATE`, {
             method: 'POST',
-            headers: getHeaders(ADMIN_USERNAME, ADMIN_PASSWORD),
+            headers: getHeaders(),
             body: JSON.stringify(trackerPayload)
         });
 
@@ -1474,6 +1731,52 @@ export const api = {
         const enrollmentId = data.bundleReport?.typeReportMap?.ENROLLMENT?.objectReports?.[0]?.uid || null;
         if (!teiId) throw new Error('Assessment TEI creation succeeded but TEI UID was not returned.');
 
+        return { teiId, enrollmentId };
+    },
+
+    /**
+     * Create a fresh ACTIVE enrollment in the survey program for an existing TEI.
+     * Used for new normal assessment instances that should reuse the authorised TEI
+     * but not reuse the previous survey-program enrollment.
+     */
+    createAssessmentEnrollment: async ({ programId = 'G2gULe4jsfs', orgUnitId, teiId, trackedEntityTypeId = 'uTTDt3fuXZK' }) => {
+        if (!orgUnitId) throw new Error('createAssessmentEnrollment: orgUnitId is required');
+        if (!teiId) throw new Error('createAssessmentEnrollment: teiId is required');
+
+        const now = new Date().toISOString().slice(0, 10);
+        const ATTR_ID = 'Bw4PZ8NsYFd';
+        const ATTR_VALUE = 'FAC_ASS_TYPE_INTERNAL';
+
+        const enrollmentPayload = {
+            trackedEntityInstance: teiId,
+            program: programId,
+            orgUnit: orgUnitId,
+            status: 'ACTIVE',
+            enrollmentDate: now,
+            incidentDate: now,
+            attributes: [{ attribute: ATTR_ID, value: ATTR_VALUE }]
+        };
+
+        const response = await fetch(`${BASE_URL}/api/enrollments`, {
+            method: 'POST',
+            headers: getHeaders(),
+            body: JSON.stringify(enrollmentPayload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+        const importStatus = data?.status || data?.response?.status;
+        if (!response.ok || (importStatus && !['OK', 'SUCCESS'].includes(String(importStatus).toUpperCase()))) {
+            const errorMsg = data?.response?.importSummaries?.[0]?.description || data?.message || 'Assessment enrollment creation failed';
+            console.error('❌ createAssessmentEnrollment failed:', data);
+            throw new Error(errorMsg);
+        }
+
+        const enrollmentId =
+            data?.response?.importSummaries?.[0]?.reference ||
+            data?.importSummaries?.[0]?.reference ||
+            data?.enrollment ||
+            null;
+        if (!enrollmentId) throw new Error('Assessment enrollment creation succeeded but enrollment UID was not returned.');
         return { teiId, enrollmentId };
     },
 
@@ -1742,5 +2045,8 @@ export const api = {
             throw err;
         }
         return data;
-    }
+    },
+    // Aliases for Survey Initiation Flow
+    qimsTrackerEvents: async (params) => api.getSelfAssessmentAssessorUserIds(params),
+    resolveUsers: async (identifiers) => api.resolveAdminUserDisplayNames(identifiers)
 };
