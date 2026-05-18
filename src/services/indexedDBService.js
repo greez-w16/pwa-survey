@@ -5,7 +5,7 @@
 class IndexedDBService {
     constructor() {
         this.dbName = 'InspectionFormDB';
-        this.version = 4; // BUMP TO 4 TO RE-TRIGGER UPGRADE
+        this.version = 6; // BUMP TO 6 TO RE-TRIGGER UPGRADE AND FIX VERSIONERROR
         this.storeName = 'formData';
         this.db = null;
     }

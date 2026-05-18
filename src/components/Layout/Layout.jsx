@@ -41,6 +41,7 @@ const Layout = ({
                     isADComplete={isADComplete}
                     collapsed={isSidebarCollapsed}
                     onToggleCollapsed={() => setIsSidebarCollapsed(prev => !prev)}
+                    scoringResults={scoringResults}
                 />
                 <main className="main-content">
                     {children}

@@ -359,6 +359,61 @@ export const api = {
     return { total: arr.length, deleted };
   },
 
+  deleteTrackedEntityInstance: async (teiId) => {
+    const resp = await fetch(`${BASE_URL}/api/trackedEntityInstances/${encodeURIComponent(teiId)}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '');
+      throw new Error(`Failed to delete TEI: ${resp.status} ${text}`);
+    }
+    return true;
+  },
+
+  getActiveEnrollments: async (programId, orgUnitId = null) => {
+    // Fetch active enrollments. If orgUnitId is provided, filter by it using DESCENDANTS
+    const params = [
+      `program=${encodeURIComponent(programId)}`,
+      `programStatus=ACTIVE`,
+      `ouMode=${orgUnitId ? 'DESCENDANTS' : 'ALL'}`,
+      `fields=trackedEntityInstance,orgUnit,enrollments[enrollment,status,program,deleted,orgUnit,orgUnitName,enrollmentDate]`
+    ];
+    if (orgUnitId) params.push(`ou=${encodeURIComponent(orgUnitId)}`);
+    
+    // We use trackedEntityInstances endpoint because we want to see the active enrollments per TEI easily
+    const url = `${BASE_URL}/api/trackedEntityInstances?${params.join('&')}`;
+    const resp = await fetch(url, { headers: getHeaders() });
+    if (!resp.ok) throw new Error(`Failed to fetch active enrollments: ${resp.status}`);
+    const data = await resp.json();
+    
+    // Flatten into a nice list
+    const activeList = [];
+    (data.trackedEntityInstances || []).forEach(tei => {
+        (tei.enrollments || []).forEach(enr => {
+            if (enr.program === programId && enr.status === 'ACTIVE' && !enr.deleted) {
+                activeList.push({
+                    teiId: tei.trackedEntityInstance,
+                    enrollmentId: enr.enrollment,
+                    programId: enr.program,
+                    orgUnit: enr.orgUnit,
+                    orgUnitName: enr.orgUnitName || tei.orgUnit,
+                    enrollmentDate: enr.enrollmentDate
+                });
+            }
+        });
+    });
+    return activeList;
+  },
+
+  getEnrollmentsForTei: async (teiId, programId) => {
+    const url = `${BASE_URL}/api/trackedEntityInstances/${encodeURIComponent(teiId)}?fields=enrollments[enrollment,status,program]`;
+    const resp = await fetch(url, { headers: getHeaders() });
+    if (!resp.ok) throw new Error(`Failed to fetch enrollments for TEI: ${resp.status}`);
+    const data = await resp.json();
+    return (data.enrollments || []).filter(e => e.program === programId);
+  },
+
   // DataStore helpers -------------------------------------------------------
   upsertDataStoreItem: async (namespace, key, valueObj) => {
     if (!namespace || !key) throw new Error('DataStore upsert requires namespace and key');
@@ -1688,28 +1743,30 @@ export const api = {
     return { ok: true, chunks: totalSuccessCount, updated: baseDvs.length };
   },
 
-    /**
-     * Create a fresh assessment TEI + ACTIVE enrollment in the survey program.
-     * Used when a new assessment must live on its own TEI (e.g. Self Assessment).
-     */
-    createAssessmentTei: async ({ programId = 'G2gULe4jsfs', orgUnitId, trackedEntityTypeId = 'uTTDt3fuXZK' }) => {
+    createAssessmentTei: async ({ programId = 'G2gULe4jsfs', orgUnitId, trackedEntityTypeId = 'uTTDt3fuXZK', extraAttributes = [] }) => {
         if (!orgUnitId) throw new Error('createAssessmentTei: orgUnitId is required');
 
         const now = new Date().toISOString().slice(0, 10);
         const ATTR_ID = 'Bw4PZ8NsYFd';
         const ATTR_VALUE = 'FAC_ASS_TYPE_INTERNAL';
+        
+        const rootAttributes = [
+            { attribute: ATTR_ID, value: ATTR_VALUE },
+            ...extraAttributes
+        ];
+
         const trackerPayload = {
             trackedEntities: [{
                 trackedEntityType: trackedEntityTypeId,
                 orgUnit: orgUnitId,
-                attributes: [],
+                attributes: rootAttributes,
                 enrollments: [{
                     program: programId,
                     orgUnit: orgUnitId,
                     status: 'ACTIVE',
                     enrolledAt: now,
                     occurredAt: now,
-                    attributes: [{ attribute: ATTR_ID, value: ATTR_VALUE }]
+                    attributes: rootAttributes
                 }]
             }]
         };
@@ -1739,7 +1796,7 @@ export const api = {
      * Used for new normal assessment instances that should reuse the authorised TEI
      * but not reuse the previous survey-program enrollment.
      */
-    createAssessmentEnrollment: async ({ programId = 'G2gULe4jsfs', orgUnitId, teiId, trackedEntityTypeId = 'uTTDt3fuXZK' }) => {
+    createAssessmentEnrollment: async ({ programId = 'G2gULe4jsfs', orgUnitId, teiId, trackedEntityTypeId = 'uTTDt3fuXZK', extraAttributes = [] }) => {
         if (!orgUnitId) throw new Error('createAssessmentEnrollment: orgUnitId is required');
         if (!teiId) throw new Error('createAssessmentEnrollment: teiId is required');
 
@@ -1754,7 +1811,10 @@ export const api = {
             status: 'ACTIVE',
             enrollmentDate: now,
             incidentDate: now,
-            attributes: [{ attribute: ATTR_ID, value: ATTR_VALUE }]
+            attributes: [
+                { attribute: ATTR_ID, value: ATTR_VALUE },
+                ...extraAttributes
+            ]
         };
 
         const response = await fetch(`${BASE_URL}/api/enrollments`, {
@@ -1778,6 +1838,84 @@ export const api = {
             null;
         if (!enrollmentId) throw new Error('Assessment enrollment creation succeeded but enrollment UID was not returned.');
         return { teiId, enrollmentId };
+    },
+
+    /**
+     * Create a complete assessment bundle (TEI, Enrollment, and all Events) in ONE request.
+     * Used for Self Assessments to ensure atomic creation.
+     */
+    createAssessmentBundle: async ({ programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37', orgUnitId, teiId = null, enrollmentId = null, trackedEntityTypeId = 'uTTDt3fuXZK', extraAttributes = [], events = [] }) => {
+        if (!orgUnitId) throw new Error('createAssessmentBundle: orgUnitId is required');
+
+        const now = new Date().toISOString().slice(0, 10);
+        const ATTR_ID = 'Bw4PZ8NsYFd';
+        const ATTR_VALUE = 'FAC_ASS_TYPE_INTERNAL';
+
+        const rootAttributes = [
+            { attribute: ATTR_ID, value: ATTR_VALUE },
+            ...extraAttributes
+        ];
+
+        const teiPayload = {
+            trackedEntityType: trackedEntityTypeId,
+            orgUnit: orgUnitId,
+            attributes: rootAttributes,
+            enrollments: [
+                {
+                    enrollment: enrollmentId,
+                    program: programId,
+                    orgUnit: orgUnitId,
+                    status: 'ACTIVE',
+                    enrolledAt: now,
+                    occurredAt: now,
+                    attributes: rootAttributes,
+                    events: events.map(ev => ({
+                        program: programId,
+                        programStage: stageId,
+                        orgUnit: orgUnitId,
+                        status: ev.status || 'ACTIVE',
+                        occurredAt: now,
+                        dataValues: ev.dataValues || [],
+                        notes: ev.notes || [],
+                        ...(ev.uid ? { uid: ev.uid } : {})
+                    }))
+                }
+            ]
+        };
+
+        if (teiId) {
+            teiPayload.trackedEntity = teiId;
+        }
+
+        const trackerPayload = {
+            trackedEntities: [teiPayload]
+        };
+
+        console.log('[API] createAssessmentBundle payload:', trackerPayload);
+
+        const response = await fetch(`${BASE_URL}/api/tracker?async=false`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                ...getHeaders()
+            },
+            body: JSON.stringify(trackerPayload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok || data.status !== 'OK') {
+            const errorMsg = data.validationReport?.errorReports?.[0]?.message || data.message || 'Assessment bundle creation failed';
+            console.error('❌ createAssessmentBundle failed:', data);
+            const err = new Error(errorMsg);
+            err.payload = trackerPayload;
+            err.data = data;
+            throw err;
+        }
+
+        const createdTeiId = data.bundleReport?.typeReportMap?.TRACKED_ENTITY?.objectReports?.[0]?.uid || teiId;
+        const createdEnrollmentId = data.bundleReport?.typeReportMap?.ENROLLMENT?.objectReports?.[0]?.uid || enrollmentId;
+        
+        return { teiId: createdTeiId, enrollmentId: createdEnrollmentId };
     },
 
     /**
@@ -1902,7 +2040,7 @@ export const api = {
 		    const teiObject = {
 		        trackedEntityType: TE_TYPE,
 		        orgUnit: orgUnitId,
-		        attributes: [], // Add TEI attributes here if needed
+		        attributes: [{ attribute: ATTR_ID, value: ATTR_VALUE }], // Add TEI attributes here if needed
 		            enrollments: [
 		                {
 		                    // If we discovered an existing ACTIVE enrollment in this

@@ -1452,33 +1452,52 @@ export function Dashboard() {
                 return;
             }
             const isSelfSelected = /self/i.test(String(selectedTypeMeta?.label || selectedTypeMeta?.value || ''));
-            const totalSteps = initSeOptions.length + 2;
+            const totalSteps = 2;
+
+            const extraAttributes = [
+                { attribute: 'qrTQdWKRYMB', value: initSurveyType || '' },
+                { attribute: 'ZAcSwTShzlN', value: initFacilityGroup || '' },
+                { attribute: 'SlXgujGsSqv', value: 'FAC_ASS_STATUS_IN_PROGRESS' }
+            ];
 
             // New model: every Self Assessment gets its own assessment TEI.
             // Normal assessments reuse the selected authorised TEI, but receive a
             // fresh survey-program enrollment for this assessment instance.
+            const generateDhis2Uid = () => {
+                const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+                let result = chars.charAt(Math.floor(Math.random() * 52)); // Start with letter
+                for (let i = 0; i < 10; i++) {
+                    result += chars.charAt(Math.floor(Math.random() * chars.length));
+                }
+                return result;
+            };
+
             if (isSelfSelected) {
-                updateCreateProgress(0, totalSteps, 'Creating assessment TEI and enrollment...');
-                const created = await api.createAssessmentTei({ programId, orgUnitId, trackedEntityTypeId });
-                teiId = created?.teiId || null;
-                enrollmentId = created?.enrollmentId || null;
-                if (!teiId) throw new Error('Failed to create a TEI for the new Self Assessment.');
-                if (!enrollmentId) throw new Error('Failed to create an enrollment for the new Self Assessment.');
-                setCreateDetails(prev => [...prev, `New assessment TEI created: ${teiId}`, `New enrollment created: ${enrollmentId}`]);
+                if (!teiId) teiId = generateDhis2Uid();
+                enrollmentId = generateDhis2Uid();
+                setCreateDetails(prev => [...prev, `Generated assessment TEI: ${teiId}`, `Generated enrollment: ${enrollmentId}`]);
             } else if (!teiId) {
                 throw new Error('Could not resolve the selected assessment TEI.');
             } else {
-                updateCreateProgress(0, totalSteps, 'Creating assessment enrollment...');
+                // Check if an active enrollment already exists for this TEI
+                let existingEnrollmentId = null;
                 try {
-                    const created = await api.createAssessmentEnrollment({ programId, orgUnitId, teiId, trackedEntityTypeId });
-                    enrollmentId = created?.enrollmentId || null;
-                    if (!enrollmentId) throw new Error('Failed to create a new enrollment for the selected assessment TEI.');
-                    setCreateDetails(prev => [...prev, `New enrollment created for TEI ${teiId}: ${enrollmentId}`]);
-                } catch (enrollErr) {
-                    if (enrollErr?.message && enrollErr.message.includes('already has an active enrollment')) {
-                        throw new Error('This facility already has an active assessment enrollment. You can only initiate a Self Assessment.');
+                    const enrollments = await api.getEnrollmentsForTei(teiId, programId);
+                    const myEnrollment = enrollments.find(e => e.status === 'ACTIVE');
+                    if (myEnrollment && myEnrollment.enrollment) {
+                        existingEnrollmentId = myEnrollment.enrollment;
+                        console.log('[API] Found existing active enrollment:', existingEnrollmentId);
                     }
-                    throw enrollErr;
+                } catch (e) {
+                    console.warn('Failed to check active enrollments (non-fatal)', e);
+                }
+
+                if (existingEnrollmentId) {
+                    enrollmentId = existingEnrollmentId;
+                    setCreateDetails(prev => [...prev, `Reusing existing active enrollment: ${enrollmentId}`]);
+                } else {
+                    enrollmentId = generateDhis2Uid();
+                    setCreateDetails(prev => [...prev, `Generated enrollment: ${enrollmentId}`]);
                 }
             }
 
@@ -1521,43 +1540,54 @@ export function Dashboard() {
                 assessorUserId: user?.id || null,
             });
 
-            const baseStep = 1;
-            updateCreateProgress(baseStep, totalSteps, 'Creating assessment events...');
+            const eventsPayload = [];
+            const eventIdMap = {};
 
-            const provisionTaggedEvent = async (tag) => {
-                try {
-                    return await api.createSurveyEvent({
-                        programId,
-                        stageId,
-                        orgUnitId,
-                        teiId,
-                        enrollmentId,
-                        status: 'ACTIVE',
-                        dataValues: [
-                            ...assessmentDetailsDataValues,
-                            { dataElement: SYS_TAG_DE_ID, value: String(tag) }
-                        ],
-                        notes: []
-                    });
-                } catch (e) {
-                    const msg = e?.message || 'Unknown DHIS2 event creation failure';
-                    setCreateDetails(prev => [...prev, `DHIS2 rejected ${tag}: ${msg}`]);
-                    throw new Error(`DHIS2 rejected ${tag}: ${msg}`);
-                }
-            };
+            // FINAL event
+            const finalEventId = generateDhis2Uid();
+            eventIdMap['FINAL'] = finalEventId;
+            eventsPayload.push({
+                uid: finalEventId,
+                status: 'ACTIVE',
+                dataValues: [
+                    ...assessmentDetailsDataValues,
+                    { dataElement: SYS_TAG_DE_ID, value: 'FINAL' }
+                ]
+            });
 
-            // Create FINAL event (acts as the primary baseline event)
-            const finalEventId = await provisionTaggedEvent('FINAL');
-
-            // Create an event for each SE and track their IDs
-            const eventIdMap = { 'FINAL': finalEventId };
-            let step = baseStep + 1;
+            // SE events
             for (const se of initSeOptions) {
-                updateCreateProgress(step, totalSteps, `Provisioning ${se.label}...`);
-                const seEventId = await provisionTaggedEvent(String(se.id));
+                const seEventId = generateDhis2Uid();
                 eventIdMap[se.id] = seEventId;
-                step++;
+                eventsPayload.push({
+                    uid: seEventId,
+                    status: 'ACTIVE',
+                    dataValues: [
+                        ...assessmentDetailsDataValues,
+                        { dataElement: SYS_TAG_DE_ID, value: String(se.id) }
+                    ]
+                });
             }
+
+            updateCreateProgress(1, 2, 'Sending assessment bundle to DHIS2...');
+
+            try {
+                await api.createAssessmentBundle({
+                    programId,
+                    stageId,
+                    orgUnitId,
+                    teiId,
+                    enrollmentId,
+                    trackedEntityTypeId,
+                    extraAttributes,
+                    events: eventsPayload
+                });
+            } catch (bundleErr) {
+                console.error('❌ createAssessmentBundle failed:', bundleErr);
+                throw bundleErr;
+            }
+
+            updateCreateProgress(2, 2, 'Finalizing setup...');
 
             // Verify that every expected SYS_TAG becomes visible in DHIS2.
             // Do NOT create duplicate repair events on a fast readback miss.
@@ -1570,9 +1600,9 @@ export function Dashboard() {
                 expectedTags,
                 onAttempt: ({ attempt, totalAttempts, missingTags }) => {
                     if (attempt > 1) {
-                        updateCreateProgress(step, totalSteps, `Waiting for DHIS2 to index assessment events (${attempt}/${totalAttempts})...`);
+                        updateCreateProgress(2, totalSteps, `Waiting for DHIS2 to index assessment events (${attempt}/${totalAttempts})...`);
                     } else {
-                        updateCreateProgress(step, totalSteps, 'Verifying assessment events in DHIS2...');
+                        updateCreateProgress(2, totalSteps, 'Verifying assessment events in DHIS2...');
                     }
                     const visibleCount = expectedTags.length - missingTags.length;
                     setCreateDetails(prev => [...prev, `DHIS2 visibility check ${attempt}/${totalAttempts}: ${visibleCount}/${expectedTags.length} tags visible${missingTags.length ? `; still missing ${missingTags.join(', ')}` : ''}.`]);
@@ -1623,7 +1653,7 @@ export function Dashboard() {
 	            } catch (e) {
 	                console.warn('DataStore eventIdMap upsert failed (non-fatal)', e);
 	            }
-            updateCreateProgress(step, totalSteps, 'Finalizing setup...');
+            updateCreateProgress(2, totalSteps, 'Finalizing setup...');
 
             setPendingProvisionedBundle(null);
             finalizeProvisionedAssessmentOpen({
@@ -1647,7 +1677,11 @@ export function Dashboard() {
                     verifiedCount: missingTags.length > 0 ? (initSeOptions.length + 1 - missingTags.length) : null,
                 };
             })();
-            setCreateErrorInfo(info);
+            setCreateErrorInfo({
+                ...info,
+                payload: err.payload,
+                data: err.data
+            });
             setCreateDetails(prev => [...prev, `Error: ${err?.message || 'Failed to initialize assessment.'}`]);
             showToast?.(err?.message || 'Failed to initialize assessment.', 'error');
         } finally {
@@ -2433,12 +2467,13 @@ export function Dashboard() {
                         if (!bundle || bundle.loading) return <div style={{ color: '#666' }}>Loading associated events...</div>;
                         const rawRows = [ ...(bundle.survey||[]) ];
                         const groupedByTei = rawRows.reduce((acc, ev) => {
-                            const tei = ev?.trackedEntityInstance || 'unknown-tei';
-                            if (!acc[tei]) acc[tei] = [];
-                            acc[tei].push(ev);
+                            const tei = ev?.trackedEntityInstance;
+                            const key = tei && tei !== 'unknown-tei' ? tei : `event-${ev.event}`;
+                            if (!acc[key]) acc[key] = [];
+                            acc[key].push(ev);
                             return acc;
                         }, {});
-                        let rows = Object.entries(groupedByTei).map(([tei, evs]) => {
+                        let rows = Object.entries(groupedByTei).map(([key, evs]) => {
                             const hasFinal = evs.some(ev => getSysTag(ev) === 'FINAL');
                             const finalEv = hasFinal
                                 ? evs.find(ev => getSysTag(ev) === 'FINAL')
@@ -2453,7 +2488,7 @@ export function Dashboard() {
                             }, null);
                             return {
                                 ...representative,
-                                trackedEntityInstance: tei,
+                                trackedEntityInstance: key.startsWith('event-') ? 'unknown-tei' : key,
                                 _bundleEvents: evs,
                                 _displayEventId: representative?.event || '-',
                                 _baselineDate: earliestDate,
@@ -3407,75 +3442,108 @@ export function Dashboard() {
                             <MenuItem value={'MORTUARY'}>Mortuary</MenuItem>
                         </TextField>
                     </div>
-	                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (
-	                        <div style={{ marginTop: 16, padding: '0 8px' }}>
-	                            {createProgress && (() => {
-	                                const progressPercent = createProgress.total > 0
-	                                    ? Math.min(100, Math.max(0, Math.round((createProgress.current / createProgress.total) * 100)))
-	                                    : 0;
-	                                const displayStep = createProgress.total > 0
-	                                    ? Math.min(createProgress.total, Math.max(1, createProgress.current))
-	                                    : createProgress.current;
-	                                return (
-	                                    <div style={{ padding: '14px 16px', borderRadius: 10, background: '#eff6ff', border: '1px solid #bfdbfe' }}>
-	                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', marginBottom: 10 }}>
-	                                            <div>
-	                                                <div style={{ fontSize: '0.95rem', color: '#1e3a8a', fontWeight: 800 }}>
-	                                                    {isBaselineCreating ? 'Creating assessment in DHIS2' : 'Assessment setup'}
+                  	                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (
+	                        <div style={{
+	                            position: 'fixed',
+	                            top: 0,
+	                            left: 0,
+	                            width: '100vw',
+	                            height: '100vh',
+	                            background: 'rgba(0, 0, 0, 0.6)',
+	                            backdropFilter: 'blur(4px)',
+	                            display: 'flex',
+	                            alignItems: 'center',
+	                            justifyContent: 'center',
+	                            zIndex: 9999
+	                        }}>
+	                            <div style={{ padding: '24px', borderRadius: 12, background: '#ffffff', border: '1px solid #e2e8f0', width: '90%', maxWidth: '500px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+	                                {createProgress && (() => {
+	                                    const progressPercent = createProgress.total > 0
+	                                        ? Math.min(100, Math.max(0, Math.round((createProgress.current / createProgress.total) * 100)))
+	                                        : 0;
+	                                    const displayStep = createProgress.total > 0
+	                                        ? Math.min(createProgress.total, Math.max(1, createProgress.current))
+	                                        : createProgress.current;
+	                                    return (
+	                                        <div>
+	                                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', marginBottom: 16 }}>
+	                                                <div>
+	                                                    <div style={{ fontSize: '1.1rem', color: '#0f172a', fontWeight: 800 }}>
+	                                                        {isBaselineCreating ? 'Creating assessment in DHIS2' : 'Assessment setup'}
+	                                                    </div>
+	                                                    <div style={{ fontSize: '0.95rem', color: '#2563eb', marginTop: 4, fontWeight: 500 }}>
+	                                                        {createProgress.message}
+	                                                    </div>
 	                                                </div>
-	                                                <div style={{ fontSize: '0.9rem', color: '#1d4ed8', marginTop: 2 }}>
-	                                                    {createProgress.message}
+	                                                <div style={{ fontSize: '0.9rem', color: '#1e40af', fontWeight: 700, whiteSpace: 'nowrap', background: '#eff6ff', padding: '4px 8px', borderRadius: '6px' }}>
+	                                                    {progressPercent}% · Step {displayStep} of {createProgress.total}
 	                                                </div>
 	                                            </div>
-	                                            <div style={{ fontSize: '0.85rem', color: '#1e40af', fontWeight: 700, whiteSpace: 'nowrap' }}>
-	                                                {progressPercent}% · Step {displayStep} of {createProgress.total}
+	                                            <LinearProgress variant="determinate" value={progressPercent} style={{ height: 8, borderRadius: 4 }} />
+	                                            <div style={{ marginTop: 12, fontSize: '0.85rem', color: '#64748b' }}>
+	                                                Please keep this window open. The app is creating the enrollment, assessment events, and event map.
 	                                            </div>
 	                                        </div>
-	                                        <LinearProgress variant="determinate" value={progressPercent} />
-	                                        <div style={{ marginTop: 8, fontSize: '0.8rem', color: '#475569' }}>
-	                                            Please keep this window open. The app is creating the enrollment, assessment events, and event map.
+	                                    );
+	                                })()}
+
+	                                {createErrorInfo && (
+	                                    <div style={{ marginTop: 16, padding: '12px 14px', borderRadius: 8, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b' }}>
+	                                        <div style={{ fontWeight: 700, marginBottom: 6 }}>Provisioning issue</div>
+	                                        <div style={{ marginBottom: 6 }}>{createErrorInfo.message}</div>
+	                                        {Array.isArray(createErrorInfo.missingTags) && createErrorInfo.missingTags.length > 0 && (
+	                                            <div style={{ fontSize: '0.9rem' }}>
+	                                                <div><strong>Missing DHIS2 event tags:</strong> {createErrorInfo.missingTags.join(', ')}</div>
+	                                                {Number.isFinite(createErrorInfo.verifiedCount) && Number.isFinite(createErrorInfo.expectedCount) && (
+	                                                    <div style={{ marginTop: 4 }}><strong>Verified:</strong> {createErrorInfo.verifiedCount} / {createErrorInfo.expectedCount}</div>
+	                                                )}
+	                                            </div>
+	                                        )}
+	                                        {createErrorInfo.payload && (
+	                                            <div style={{ marginTop: 10 }}>
+	                                                <div style={{ fontWeight: 700, marginBottom: 4, color: '#0f172a' }}>Payload:</div>
+	                                                <pre style={{ margin: 0, padding: 8, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 4, fontSize: '0.75rem', overflowX: 'auto', color: '#334155', maxHeight: '150px' }}>
+	                                                    {JSON.stringify(createErrorInfo.payload, null, 2)}
+	                                                </pre>
+	                                            </div>
+	                                        )}
+	                                        {createErrorInfo.data && (
+	                                            <div style={{ marginTop: 10 }}>
+	                                                <div style={{ fontWeight: 700, marginBottom: 4, color: '#0f172a' }}>Response Data:</div>
+	                                                <pre style={{ margin: 0, padding: 8, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 4, fontSize: '0.75rem', overflowX: 'auto', color: '#334155', maxHeight: '150px' }}>
+	                                                    {JSON.stringify(createErrorInfo.data, null, 2)}
+	                                                </pre>
+	                                            </div>
+	                                        )}
+	                                        <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+	                                            {pendingProvisionedBundle && (
+	                                                <Button size="small" variant="outlined" color="error" onClick={handleRepairProvisionedBundle} disabled={isBaselineCreating}>
+	                                                    {isBaselineCreating ? 'Repairing…' : 'Repair missing events & open'}
+	                                                </Button>
+	                                            )}
+	                                            <Button size="small" variant="outlined" style={{ color: '#64748b', borderColor: '#cbd5e1' }} onClick={() => { setIsBaselineCreating(false); setCreateErrorInfo(null); setCreateDetails([]); }}>
+	                                                Close
+	                                            </Button>
 	                                        </div>
 	                                    </div>
-	                                );
-	                            })()}
+	                                )}
 
-                            {createErrorInfo && (
-                                <div style={{ marginTop: 12, padding: '12px 14px', borderRadius: 8, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b' }}>
-                                    <div style={{ fontWeight: 700, marginBottom: 6 }}>Provisioning issue</div>
-                                    <div style={{ marginBottom: 6 }}>{createErrorInfo.message}</div>
-                                    {Array.isArray(createErrorInfo.missingTags) && createErrorInfo.missingTags.length > 0 && (
-                                        <div style={{ fontSize: '0.9rem' }}>
-                                            <div><strong>Missing DHIS2 event tags:</strong> {createErrorInfo.missingTags.join(', ')}</div>
-                                            {Number.isFinite(createErrorInfo.verifiedCount) && Number.isFinite(createErrorInfo.expectedCount) && (
-                                                <div style={{ marginTop: 4 }}><strong>Verified:</strong> {createErrorInfo.verifiedCount} / {createErrorInfo.expectedCount}</div>
-                                            )}
-                                        </div>
-                                    )}
-                                    {pendingProvisionedBundle && (
-                                        <div style={{ marginTop: 10 }}>
-                                            <Button size="small" variant="outlined" color="error" onClick={handleRepairProvisionedBundle} disabled={isBaselineCreating}>
-                                                {isBaselineCreating ? 'Repairing…' : 'Repair missing events & open'}
-                                            </Button>
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-	                            {createDetails.length > 0 && (
-                                <div style={{ marginTop: 12, padding: '12px 14px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-	                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-	                                        <div style={{ fontWeight: 700, color: '#334155' }}>Live activity</div>
-	                                        {isBaselineCreating && <div style={{ fontSize: '0.78rem', color: '#2563eb', fontWeight: 700 }}>Running…</div>}
+	                                {createDetails.length > 0 && (
+	                                    <div style={{ marginTop: 16, padding: '12px 14px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
+	                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+	                                            <div style={{ fontWeight: 700, color: '#334155' }}>Live activity</div>
+	                                            {isBaselineCreating && <div style={{ fontSize: '0.78rem', color: '#2563eb', fontWeight: 700 }}>Running…</div>}
+	                                        </div>
+	                                        <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#475569', maxHeight: 140, overflowY: 'auto' }}>
+	                                            {createDetails.map((line, idx) => (
+	                                                <li key={`create-detail-top-${idx}`}>{line}</li>
+	                                            ))}
+	                                        </ul>
 	                                    </div>
-                                    <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#475569', maxHeight: 140, overflowY: 'auto' }}>
-                                        {createDetails.map((line, idx) => (
-                                            <li key={`create-detail-top-${idx}`}>{line}</li>
-                                        ))}
-                                    </ul>
-                                </div>
-                            )}
-                        </div>
-                    ) : null}
+	                                )}
+	                            </div>
+	                        </div>
+	                    ) : null}
                     {initFacilityGroup && initSeOptions.length > 0 && (
                         <div style={{ marginTop: 16 }}>
 	                            <div style={{ fontWeight: 600, color: '#374151', marginBottom: 8 }}>

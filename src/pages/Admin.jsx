@@ -102,12 +102,95 @@ export default function Admin() {
     }
   };
 
+  // Active Assessments Manager State
+  const [activeList, setActiveList] = useState([]);
+  const [activeLoading, setActiveLoading] = useState(false);
+  const [activeDeleteTeiId, setActiveDeleteTeiId] = useState(null);
+
+  const fetchActiveAssessments = async () => {
+    try {
+      setActiveLoading(true);
+      setActiveList([]);
+      let orgUnits = [];
+      if (useAllAssignmentOus) {
+          orgUnits = Array.from(new Set((userAssignments || []).map(a => (typeof a.orgUnit === 'string' ? a.orgUnit : a.orgUnit?.id || a.orgUnitId)).filter(Boolean)));
+      } else if (orgUnitId) {
+          orgUnits = [orgUnitId];
+      }
+
+      if (orgUnits.length === 0) {
+          showToast?.('Please select an Org Unit or Use all assignment org units', 'warning');
+          return;
+      }
+
+      let allActive = [];
+      for (const ou of orgUnits) {
+          const list = await api.getActiveEnrollments(programId, ou);
+          allActive = [...allActive, ...list];
+      }
+      setActiveList(allActive);
+      showToast?.(`Found ${allActive.length} active assessments`, 'info');
+    } catch (e) {
+      console.error('Failed to fetch active assessments', e);
+      showToast?.('Failed to fetch active assessments', 'error');
+    } finally {
+      setActiveLoading(false);
+    }
+  };
+
+  const performTeiDelete = async (teiId) => {
+    if (!window.confirm(`Are you absolutely sure you want to completely delete this TEI (${teiId}) and all of its enrollments/events?`)) {
+      return;
+    }
+    try {
+      setActiveLoading(true);
+      await api.deleteTrackedEntityInstance(teiId);
+      showToast?.(`Successfully deleted TEI ${teiId}`, 'success');
+      // remove from list
+      setActiveList(prev => prev.filter(item => item.teiId !== teiId));
+    } catch (e) {
+      console.error('Failed to delete TEI', e);
+      showToast?.(`Delete failed: ${e.message}`, 'error');
+    } finally {
+      setActiveLoading(false);
+    }
+  };
+
+  const performDeleteAllTeis = async () => {
+    if (activeList.length === 0) return;
+    if (!window.confirm(`Are you absolutely sure you want to completely delete ALL ${activeList.length} tracked entities shown in this table? This cannot be undone!`)) {
+      return;
+    }
+    try {
+      setActiveLoading(true);
+      let successCount = 0;
+      let failCount = 0;
+      for (const item of activeList) {
+          try {
+              await api.deleteTrackedEntityInstance(item.teiId);
+              successCount++;
+          } catch (e) {
+              console.error(`Failed to delete TEI ${item.teiId}`, e);
+              failCount++;
+          }
+      }
+      showToast?.(`Successfully deleted ${successCount} TEIs. Failed to delete ${failCount} TEIs.`, failCount > 0 ? 'warning' : 'success');
+      await fetchActiveAssessments();
+    } catch (e) {
+      console.error('Bulk TEI deletion failed', e);
+      showToast?.('Bulk TEI deletion failed', 'error');
+    } finally {
+      setActiveLoading(false);
+    }
+  };
+
   return (
     <div style={{ maxWidth: 820, margin: '20px auto', padding: 16 }}>
       <h2>Admin Utilities</h2>
-      <div style={{ marginTop: 8, padding: 12, border: '1px solid #e5e7eb', borderRadius: 6 }}>
-        <h3>Delete Survey Events (Dangerous)</h3>
-        <p style={{ color: '#6b7280' }}>Delete events in the assessment program. Use filters to narrow scope. Always run a Dry Run first.</p>
+      
+      {/* Search Filters shared by utilities */}
+      <div style={{ marginTop: 8, padding: 12, border: '1px solid #e5e7eb', borderRadius: 6, marginBottom: 16 }}>
+        <h3>Target Filter</h3>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <TextField label="Program ID" value={programId} onChange={e => setProgramId(e.target.value)} size="small" />
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -119,7 +202,7 @@ export default function Admin() {
             loading={ouLoading}
             onInputChange={handleOuInputChange}
             onChange={handleOuChange}
-            filterOptions={(x) => x} // server-side filtering
+            filterOptions={(x) => x}
             value={orgUnitId ? { id: orgUnitId, label: orgUnitLabel } : null}
             getOptionLabel={(opt) => opt?.label || ''}
             renderInput={(params) => (
@@ -144,6 +227,61 @@ export default function Admin() {
           <TextField type="date" label="Start Date (optional)" value={startDate} onChange={e => setStartDate(e.target.value)} size="small" InputLabelProps={{ shrink: true }} />
           <TextField type="date" label="End Date (optional)" value={endDate} onChange={e => setEndDate(e.target.value)} size="small" InputLabelProps={{ shrink: true }} />
         </div>
+      </div>
+
+      {/* Active Assessments Manager */}
+      <div style={{ marginTop: 8, padding: 12, border: '1px solid #e5e7eb', borderRadius: 6, marginBottom: 16 }}>
+        <h3>Manage Active Assessments (Safe Deletion)</h3>
+        <p style={{ color: '#6b7280' }}>Fetch all currently active assessments. Deleting an assessment here deletes the entire TEI, safely freeing up the facility to start a new assessment.</p>
+        <div style={{ display: 'flex', gap: 8 }}>
+            <Button variant="contained" onClick={fetchActiveAssessments} disabled={activeLoading}>
+                {activeLoading ? 'Loading...' : 'Fetch Active Assessments'}
+            </Button>
+            {activeList.length > 0 && (
+                <Button variant="contained" color="error" onClick={performDeleteAllTeis} disabled={activeLoading}>
+                    {activeLoading ? 'Deleting...' : `Delete All (${activeList.length})`}
+                </Button>
+            )}
+        </div>
+        
+        {activeList.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
+                    <thead>
+                        <tr style={{ background: '#f9fafb', textAlign: 'left' }}>
+                            <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Facility</th>
+                            <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Program</th>
+                            <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>TEI UID</th>
+                            <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Enrolled At</th>
+                            <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {activeList.map(item => (
+                            <tr key={item.teiId}>
+                                <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>{item.orgUnitName || item.orgUnit}</td>
+                                <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>
+                                    {item.programId === configuration?.program?.id ? (configuration?.program?.name || item.programId) : item.programId}
+                                </td>
+                                <td style={{ padding: 8, borderBottom: '1px solid #eee' }}><code>{item.teiId}</code></td>
+                                <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>{new Date(item.enrollmentDate).toLocaleDateString()}</td>
+                                <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>
+                                    <Button size="small" color="error" variant="outlined" onClick={() => performTeiDelete(item.teiId)} disabled={activeLoading}>
+                                        Delete TEI
+                                    </Button>
+                                </td>
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        )}
+      </div>
+
+      {/* Bulk Delete Events */}
+      <div style={{ marginTop: 8, padding: 12, border: '1px solid #e5e7eb', borderRadius: 6 }}>
+        <h3>Bulk Delete Survey Events (Dangerous)</h3>
+        <p style={{ color: '#6b7280' }}>Bulk delete isolated events without deleting the TEI. Always run a Dry Run first.</p>
         <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
           <Button variant="outlined" onClick={runDryRun} disabled={loading}>Dry Run: Count</Button>
           <Button variant="contained" color="error" onClick={openDelete} disabled={loading}>Delete…</Button>

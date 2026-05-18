@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
 import { useStorage } from '../../hooks/useStorage';
+import { useApp } from '../../contexts/AppContext';
 import './Login.css';
 
 const Login = ({ onLogin }) => {
@@ -11,6 +12,7 @@ const Login = ({ onLogin }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
     const storage = useStorage();
+    const { configSource, setConfigSource } = useApp();
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -66,6 +68,17 @@ const Login = ({ onLogin }) => {
                             onChange={(e) => setPassword(e.target.value)}
                             placeholder="Enter password"
                         />
+                    </div>
+                    <div className="form-group">
+                        <label>Configuration Source</label>
+                        <select 
+                            value={configSource} 
+                            onChange={(e) => setConfigSource(e.target.value)}
+                            style={{ width: '100%', padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
+                        >
+                            <option value="datastore">Remote (DHIS2 DataStore)</option>
+                            <option value="local">Local (Offline Cache / Build)</option>
+                        </select>
                     </div>
                         <button type="submit" className="login-btn" disabled={isSubmitting}>
                             {isSubmitting ? 'Logging in…' : 'Login'}

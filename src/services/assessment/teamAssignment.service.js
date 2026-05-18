@@ -82,22 +82,12 @@ class AssessmentTeamAssignmentService {
 		                count: enrollments?.length || 0
 		            });
 
-		            // Fallback path: if no scheduling assignments are found (or the
-		            // call failed) but we have a userId, fall back to the legacy
-		            // enrollments-based approach used by the main survey program
-		            // (G2gULe4jsfs). We fetch all enrollments for that program and
-		            // then filter client-side using the "Inspection Final List"
-		            // attribute so that we can match on both userId and username.
-		            if ((!enrollments || enrollments.length === 0) && userId) {
-		                console.warn('[AssessmentTeamAssignmentService] No scheduling assignments found; falling back to api.getAssignments("G2gULe4jsfs") with client-side filter.');
+		            // Always fetch legacy enrollments-based assignments from the main survey 
+		            // program (G2gULe4jsfs) so that users see their historical or
+		            // manually assigned assessments alongside the new scheduled ones.
+		            if (userId) {
 		                const legacyEnrollments = await api.getAssignments('G2gULe4jsfs', null);
-		                console.log('[AssessmentTeamAssignmentService] Legacy enrollments (unfiltered) count', legacyEnrollments.length);
-		                const legacySample = legacyEnrollments.slice(0, 5).map(enr => ({
-		                    enrollment: enr.enrollment,
-		                    inspectorAttr: (enr.attributes || []).find(a => a.attribute === INSPECTOR_LIST_ATTR) || null
-		                }));
-		                console.log('[AssessmentTeamAssignmentService] Legacy enrollments sample Inspection Final List', legacySample);
-		                enrollments = legacyEnrollments.filter(enr => {
+		                const filteredLegacy = legacyEnrollments.filter(enr => {
 		                    const listAttr = (enr.attributes || []).find(a => a.attribute === INSPECTOR_LIST_ATTR);
 		                    if (!listAttr || !listAttr.value) return false;
 		                    const val = String(listAttr.value);
@@ -105,7 +95,8 @@ class AssessmentTeamAssignmentService {
 		                    const usernameMatch = username && val.toLowerCase().includes(String(username).toLowerCase());
 		                    return idMatch || usernameMatch;
 		                });
-		                console.log('[AssessmentTeamAssignmentService] Legacy fallback assignments for user', { userId, username, count: enrollments.length });
+		                console.log('[AssessmentTeamAssignmentService] Legacy assignments for user', { userId, username, count: filteredLegacy.length });
+		                enrollments = [...(enrollments || []), ...filteredLegacy];
 		            }
 
 	            console.log('[AssessmentTeamAssignmentService] Total enrollments to map into domain assignments', {

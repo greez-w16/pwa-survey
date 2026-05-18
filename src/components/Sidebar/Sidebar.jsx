@@ -1,7 +1,7 @@
 			import React from 'react';
 			import './Sidebar.css';
 			
-			const Sidebar = ({ groups, activeGroup, onSelectGroup, activeSection, onSelectSection, isADComplete, collapsed, onToggleCollapsed }) => {
+			const Sidebar = ({ groups, activeGroup, onSelectGroup, activeSection, onSelectSection, isADComplete, collapsed, onToggleCollapsed, scoringResults }) => {
 			  return (
 			    <div className={`sidebar ${collapsed ? 'sidebar-collapsed' : ''}`}>
 			      <div className="sidebar-header">
@@ -75,7 +75,18 @@
 		              <div className="section-info">
 			                <span>{label}</span>
 		              </div>
-		              <span className="status">{sec.fields.length}</span>
+		              <span className="status">
+                        {(() => {
+                          const sectionScoring = (scoringResults?.sections || []).find(s => s.id === sec.id);
+                          const nameLower = (sec.name || '').toLowerCase().trim();
+                          const isADSection = nameLower === "assessment details" || nameLower === "assessment_details";
+                          
+                          if (isADSection) {
+                            return scoringResults?.overall ? `${Math.round(scoringResults.overall.percent)}%` : '-';
+                          }
+                          return sectionScoring ? `${Math.round(sectionScoring.percent)}%` : '-';
+                        })()}
+                      </span>
 		            </li>
 		          );
         })}

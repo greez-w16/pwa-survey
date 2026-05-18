@@ -103,7 +103,7 @@ export const useUserAssessments = (options = {}) => {
                 
                 // Broaden search: fetch for all OUs assigned to the user
                 const userOus = (user?.organisationUnits || []).map(ou => ou.id);
-                const ouFilter = userOus.length > 0 ? `&orgUnit=${userOus.join(';')}&ouMode=SELECTED` : '&ouMode=ALL';
+                const ouFilter = userOus.length > 0 ? `&orgUnit=${userOus.join(';')}&ouMode=DESCENDANTS` : '&ouMode=ALL';
                 
                 // Remove .json and ensure proper headers
                 const selfUrl = `/qims/api/tracker/trackedEntities?program=${SURVEY_PROGRAM_ID}${ouFilter}&fields=trackedEntity,orgUnit,trackedEntityType,attributes[attribute,value],enrollments[enrollment,program,status,orgUnit,orgUnitName,enrolledAt,occurredAt]&filter=${ATTR_ID}:EQ:${ATTR_VALUE}`;
@@ -120,22 +120,39 @@ export const useUserAssessments = (options = {}) => {
                     const instances = selfData.instances || selfData.trackedEntities || [];
                     console.log(`[useUserAssessments] Found ${instances.length} potential self-assessments`);
                     
-                    selfAssessments = instances.map(tei => {
-                        const enrollment = tei.enrollments?.find(e => e.program === SURVEY_PROGRAM_ID && e.status === 'ACTIVE') || tei.enrollments?.[0];
-                        return {
-                            eventId: enrollment?.enrollment || tei.trackedEntity,
+                    selfAssessments = instances.flatMap(tei => {
+                        const validEnrollments = (tei.enrollments || []).filter(e => e.program === SURVEY_PROGRAM_ID);
+                        if (validEnrollments.length === 0) {
+                            return [{
+                                eventId: tei.trackedEntity,
+                                trackedEntityInstance: tei.trackedEntity,
+                                scheduleTeiId: tei.trackedEntity,
+                                orgUnit: tei.orgUnit,
+                                orgUnitId: tei.orgUnit,
+                                orgUnitName: 'Self Assessment',
+                                enrollment: null,
+                                status: 'ACTIVE',
+                                statusCode: 'FAC_ASS_ASSIGN_ACCEPTED',
+                                isSelfAssessment: true,
+                                sortDate: new Date().toISOString(),
+                                team: []
+                            }];
+                        }
+
+                        return validEnrollments.map(enrollment => ({
+                            eventId: enrollment.enrollment || tei.trackedEntity,
                             trackedEntityInstance: tei.trackedEntity,
                             scheduleTeiId: tei.trackedEntity,
                             orgUnit: tei.orgUnit,
                             orgUnitId: tei.orgUnit,
-                            orgUnitName: enrollment?.orgUnitName || 'Self Assessment',
-                            enrollment: enrollment?.enrollment,
-                            status: enrollment?.status || 'ACTIVE',
+                            orgUnitName: enrollment.orgUnitName || 'Self Assessment',
+                            enrollment: enrollment.enrollment,
+                            status: enrollment.status || 'ACTIVE',
                             statusCode: 'FAC_ASS_ASSIGN_ACCEPTED',
                             isSelfAssessment: true,
-                            sortDate: enrollment?.enrolledAt || enrollment?.occurredAt || new Date().toISOString(),
+                            sortDate: enrollment.enrolledAt || enrollment.occurredAt || new Date().toISOString(),
                             team: []
-                        };
+                        }));
                     });
                 } else {
                     console.warn(`[useUserAssessments] Self-assessment fetch failed with status ${selfResp.status}`);

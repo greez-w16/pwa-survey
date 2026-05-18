@@ -156,6 +156,7 @@ const PrivateRoute = ({ children }) => {
 	  const [isScoringPending, setIsScoringPending] = React.useState(false);
 		  const {
 	    formData,
+	    setFormData,
 	    saveField: baseSaveField,
 	    loadFormData,
 	    isSaving,
@@ -207,6 +208,17 @@ const PrivateRoute = ({ children }) => {
 		    setServerAssessmentData({});
 		    setDataStoreScoringEventIdMap({});
 		  }, [activeEventId]);
+
+		  useEffect(() => {
+		    if (user) return;
+		    setAssignments([]);
+		    setSelectedFacility(null);
+		    setFormData({});
+		    setLocalScoringOverrides({});
+		    setServerAssessmentData({});
+		    setDataStoreScoringEventIdMap({});
+		    setServerScoringRefreshTick(0);
+		  }, [user, setFormData]);
 
 		  const parseEventIdMap = React.useCallback((raw) => {
 		    try {
@@ -635,8 +647,8 @@ const PrivateRoute = ({ children }) => {
 	    return Array.from(new Set([preferred, 'HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].filter(Boolean)));
 	  }, [formData?.[FACILITY_GROUP_DE_ID], activeGroup, resolveAssessmentNamespaceFromText]);
 
-	  useEffect(() => {
-	    if (!scoringTeiId || scoringNamespaceCandidates.length === 0) {
+		  useEffect(() => {
+		    if (!user || !scoringTeiId || scoringNamespaceCandidates.length === 0) {
 	      setDataStoreScoringEventIdMap({});
 	      return;
 	    }
@@ -657,13 +669,16 @@ const PrivateRoute = ({ children }) => {
 	      if (!cancelled) setDataStoreScoringEventIdMap({});
 	    })();
 	    return () => { cancelled = true; };
-	  }, [scoringTeiId, scoringNamespaceCandidates, parseEventIdMap]);
+		  }, [user, scoringTeiId, scoringNamespaceCandidates, parseEventIdMap]);
 
-	  const scoringEventIdMap = React.useMemo(() => ({
-	    ...(dataStoreScoringEventIdMap || {}),
-	    ...(preloadScoringEventIdMap || {}),
-	    ...(draftScoringEventIdMap || {}),
-	  }), [dataStoreScoringEventIdMap, preloadScoringEventIdMap, draftScoringEventIdMap]);
+		  const scoringEventIdMap = React.useMemo(() => {
+		    if (!user) return {};
+		    return {
+		      ...(dataStoreScoringEventIdMap || {}),
+		      ...(preloadScoringEventIdMap || {}),
+		      ...(draftScoringEventIdMap || {}),
+		    };
+		  }, [user, dataStoreScoringEventIdMap, preloadScoringEventIdMap, draftScoringEventIdMap]);
 
 	  const scoringEventIds = React.useMemo(() => {
 	    const tagRank = (tag) => {
@@ -680,8 +695,8 @@ const PrivateRoute = ({ children }) => {
 
 	  const scoringEventIdsKey = React.useMemo(() => JSON.stringify(scoringEventIds), [scoringEventIds]);
 
-	  useEffect(() => {
-	    if (!scoringEventIds.length) {
+		  useEffect(() => {
+		    if (!user || !scoringEventIds.length) {
 	      setServerAssessmentData({});
 	      return;
 	    }
@@ -717,10 +732,10 @@ const PrivateRoute = ({ children }) => {
 	      }
 	    })();
 	    return () => { cancelled = true; };
-	  }, [scoringEventIdsKey, serverScoringRefreshTick]);
+		  }, [user, scoringEventIds, scoringEventIdsKey, serverScoringRefreshTick]);
 
 	  useEffect(() => {
-	    if (!scoringEventIds.length) return undefined;
+		    if (!user || !scoringEventIds.length) return undefined;
 	    const refresh = () => setServerScoringRefreshTick(t => t + 1);
 	    const intervalId = window.setInterval(refresh, 120000);
 	    window.addEventListener('focus', refresh);
@@ -733,7 +748,7 @@ const PrivateRoute = ({ children }) => {
 	      window.removeEventListener('focus', refresh);
 	      document.removeEventListener('visibilitychange', onVisibilityChange);
 	    };
-	  }, [scoringEventIdsKey]);
+		  }, [user, scoringEventIds.length, scoringEventIdsKey]);
 
 	  const nonEmptyLocalFormData = React.useMemo(() => {
 	    const result = {};
@@ -805,8 +820,10 @@ const PrivateRoute = ({ children }) => {
           (sec.fields || []).forEach(f => {
             if (f && f.type === 'select') {
               const critKey = f && (f.commentFieldId ? `is_critical_${f.commentFieldId}` : `is_critical_${f.id}`);
+              const overrideKey = `override_${f.id}`;
 	              pairs.push([f.id, scoringFormData[f.id] ?? null]);
 	              if (critKey) pairs.push([critKey, scoringFormData[critKey] ?? null]);
+              pairs.push([overrideKey, scoringFormData[overrideKey] ?? null]);
             }
           });
         });
@@ -818,6 +835,7 @@ const PrivateRoute = ({ children }) => {
 	  }, [activeGroup, scoringFormData]);
 
   const assessmentDetailsForScoring = React.useMemo(() => {
+    if (location.pathname !== '/form') return { sections: [] };
 	    if (!groups || groups.length === 0 || !scoringFormData) return { sections: [] };
 
     // Determine which configuration to use based on the active group
@@ -899,7 +917,7 @@ const PrivateRoute = ({ children }) => {
 	        }]
 	      }))
 	    };
-	  }, [activeGroup, scoringDeps, scoringFormData]);
+	  }, [activeGroup, groups, scoringDeps, location.pathname]);
 
 		  const scoringResults = useAssessmentScoring(assessmentDetailsForScoring);
 

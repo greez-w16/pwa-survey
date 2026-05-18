@@ -16,6 +16,7 @@ import emsLinks from '../assets/ems_links.json';
 import mortuaryLinks from '../assets/mortuary_links.json';
 import clinicsLinks from '../assets/clinics_links.json';
 import hospitalLinks from '../assets/hospital_links.json';
+import qimsLogo from '../assets/logo.png';
 import { setHospitalSubcriteriaConfig } from '../utils/scoring';
 import {
   ResponsiveContainer,
@@ -39,6 +40,7 @@ export default function Report() {
   const [facilityLocked, setFacilityLocked] = useState(false);
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
+  const [autoGenerateRequested, setAutoGenerateRequested] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
   const [reportInfo, setReportInfo] = useState(null); // { groupId, groupLabel, count, baselineDate, latestDate }
   const [reportAssessment, setReportAssessment] = useState(null);
@@ -48,6 +50,10 @@ export default function Report() {
   const [sectionChartLabels, setSectionChartLabels] = useState({});
   const [assessorSummary, setAssessorSummary] = useState([]);
   const [isAssessorSummaryCollapsed, setIsAssessorSummaryCollapsed] = useState(true);
+  const selectedFacilityName = useMemo(() => {
+    const selected = facilityOptions.find(opt => opt.id === selectedFacilityId);
+    return selected?.name || selectedFacilityId || 'Selected Facility';
+  }, [facilityOptions, selectedFacilityId]);
   // Helper: identify the non-SE metadata section often named "Assessment Details"
   const isAssessmentDetailsSection = (section) => {
     if (!section) return false;
@@ -159,6 +165,16 @@ export default function Report() {
     if (v.includes('baseline')) return true;
     return false;
   };
+  const parseDateStart = (value) => {
+    if (!value) return null;
+    const d = new Date(`${String(value).split('T')[0]}T00:00:00`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
+  const parseDateEnd = (value) => {
+    if (!value) return null;
+    const d = new Date(`${String(value).split('T')[0]}T23:59:59.999`);
+    return Number.isNaN(d.getTime()) ? null : d;
+  };
   const resolveGroupIdFromText = (text) => {
     if (!text) return null;
     const t = String(text).toLowerCase();
@@ -227,7 +243,9 @@ export default function Report() {
   const handleGenerate = () => {
     (async () => {
       if (!selectedFacilityId) { showToast?.('Please select a facility.', 'warning'); return; }
-      if (startDate && endDate && new Date(startDate) > new Date(endDate)) { showToast?.('Start date must be before end date.', 'warning'); return; }
+      const periodStart = parseDateStart(startDate);
+      const periodEnd = parseDateEnd(endDate);
+      if (periodStart && periodEnd && periodStart > periodEnd) { showToast?.('Start date must be before end date.', 'warning'); return; }
       setReportLoading(true);
       setReportInfo(null);
       setReportAssessment(null);
@@ -320,8 +338,8 @@ export default function Report() {
         const inPeriodBundles = bundles.filter(b => {
           const d = b.assessmentDate ? new Date(b.assessmentDate) : null;
           if (!d) return false;
-          if (startDate && d < new Date(startDate)) return false;
-          if (endDate && d > new Date(endDate)) return false;
+	          if (periodStart && d < periodStart) return false;
+	          if (periodEnd && d > periodEnd) return false;
           return true;
         });
         if (inPeriodBundles.length === 0) { showToast?.('No assessments found for the selected filters.', 'info'); setReportLoading(false); return; }
@@ -453,6 +471,8 @@ export default function Report() {
           count: inPeriodBundles.length,
           baselineDate: baselineBundle.assessmentDate || null,
           latestDate: latestBundle.assessmentDate || null,
+	          periodStart: startDate || null,
+	          periodEnd: endDate || null,
           latestType,
           sectionLatestDates: Object.fromEntries(
             targetSections.filter(s => !isAssessmentDetailsSection(s)).map(s => [s.id, latestEventBySection[s.id]?.eventDate || null])
@@ -575,14 +595,19 @@ export default function Report() {
       if (facilityId) setFacilityLocked(true);
       if (start) setStartDate(start.split('T')[0] || start);
       if (end) setEndDate(end.split('T')[0] || end);
-      if (facilityId) {
-        // Delay auto-generate slightly to allow facilityOptions to be ready
-        const t = setTimeout(() => handleGenerate(), 250);
-        return () => clearTimeout(t);
-      }
+	      if (facilityId) setAutoGenerateRequested(true);
     } catch {}
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+	  useEffect(() => {
+	    if (!autoGenerateRequested || !selectedFacilityId) return undefined;
+	    const t = setTimeout(() => {
+	      handleGenerate();
+	      setAutoGenerateRequested(false);
+	    }, 0);
+	    return () => clearTimeout(t);
+	  // eslint-disable-next-line react-hooks/exhaustive-deps
+	  }, [autoGenerateRequested, selectedFacilityId, startDate, endDate]);
 
   const scoring = useAssessmentScoring(reportAssessment || { sections: [] });
   const baselineScoring = useAssessmentScoring(baselineAssessment || { sections: [] });
@@ -889,6 +914,532 @@ export default function Report() {
     }
   };
 
+  const formatCoverDate = (value) => {
+    if (!value) return 'N/A';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value);
+    return d.toLocaleDateString('en-GB');
+  };
+
+  const handleDownloadCoverPdf = () => {
+    if (!reportInfo) {
+      showToast?.('Generate the report first.', 'warning');
+      return;
+    }
+
+    const escapeHtml = (value) => String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+
+    const surveyors = assessorSummary.length > 0
+      ? assessorSummary.map(a => a.displayName).filter(Boolean).join(', ')
+      : (user?.displayName || user?.username || 'N/A');
+    const score = Number.isFinite(scoring?.overall?.percent)
+      ? Math.round(scoring.overall.percent)
+      : 'N/A';
+	    const reportPeriodStart = reportInfo.periodStart || startDate || reportInfo.baselineDate;
+	    const reportPeriodEnd = reportInfo.periodEnd || endDate || reportInfo.latestDate;
+	    const dateRange = `${formatCoverDate(reportPeriodStart)} to ${formatCoverDate(reportPeriodEnd)}`;
+    const servicesSeen = facilityOverview.length || (reportAssessment?.sections || []).filter(s => !isAssessmentDetailsSection(s)).length || '';
+    const overviewRows = [
+      ['Facility:', selectedFacilityName],
+	      ['Visit From Date:', formatCoverDate(reportPeriodStart)],
+	      ['Visit To Date:', formatCoverDate(reportPeriodEnd)],
+      ['Visit Type:', reportInfo.latestType || reportInfo.groupLabel || ''],
+      ['Cohsasa Facilitators:', surveyors],
+      ['Facility Point of Contact:', ''],
+      ['Meeting Scheduled:', ''],
+      ['Meeting Started:', ''],
+      ['Reason for Delay (if applicable):', ''],
+      ['Total Number of Steering Committee Members:', ''],
+      ['Number of Steering Committee Present:', ''],
+      ['Non-Steering Committee Present:', ''],
+      ['Number of Services Seen:', servicesSeen],
+    ];
+    const overviewTableRows = overviewRows.map(([label, value]) => `
+      <tr>
+        <td class="overview-label">${escapeHtml(label)}</td>
+        <td class="overview-value">${escapeHtml(value)}</td>
+      </tr>
+    `).join('');
+    const getFacilitatorsForServiceElement = (seCode) => {
+      const code = String(seCode || '').trim();
+      if (!code) return '';
+      return assessorSummary
+        .filter(a => String(a.seNums || '').split(',').map(s => s.trim()).includes(code))
+        .map(a => a.displayName)
+        .filter(Boolean)
+        .join(', ');
+    };
+    const serviceElementRowsSource = Object.keys(sectionLabels || {}).length > 0
+      ? Object.entries(sectionLabels).map(([sectionId, label], idx) => {
+        const chartLabel = sectionChartLabels[sectionId] || '';
+        const match = chartLabel.match(/SE\s*([0-9]+)/i);
+        const seCode = match ? match[1] : String(idx + 1);
+        const serviceElement = chartLabel
+          ? chartLabel.replace(/^\s*SE\s*[0-9]+\s*/i, '').trim()
+          : String(label || '').replace(/^\s*SE\s*[0-9]+\s*/i, '').trim();
+        return { seCode, serviceElement, facilitator: getFacilitatorsForServiceElement(seCode) };
+      })
+      : facilityOverview.map(row => ({
+        seCode: row.seIndex,
+        serviceElement: row.seName,
+        facilitator: getFacilitatorsForServiceElement(row.seIndex),
+      }));
+    const serviceElementTableRows = serviceElementRowsSource.map(row => `
+      <tr>
+        <td class="se-code">${escapeHtml(row.seCode)}</td>
+        <td class="se-name">${escapeHtml(row.serviceElement)}</td>
+        <td class="se-small"></td>
+        <td class="se-small"></td>
+        <td class="se-reason"></td>
+        <td class="se-facilitator">${escapeHtml(row.facilitator)}</td>
+      </tr>
+    `).join('');
+
+    const toReportNumber = (value) => {
+      const num = Number(value);
+      return Number.isFinite(num) ? num : 0;
+    };
+    const formatReportCell = (value) => (value === undefined || value === null || value === '' ? '' : value);
+    const facilityOverviewTotals = facilityOverview.reduce((totals, row) => {
+      totals.blTotal += toReportNumber(row.blDefs?.total);
+      totals.blNC += toReportNumber(row.blDefs?.NC);
+      totals.blPC += toReportNumber(row.blDefs?.PC);
+      totals.completed += toReportNumber(row.completed);
+      totals.remTotal += toReportNumber(row.remaining?.total);
+      totals.remNC += toReportNumber(row.remaining?.NC);
+      totals.remPC += toReportNumber(row.remaining?.PC);
+      totals.critTotal += toReportNumber(row.critical?.total);
+      totals.critNC += toReportNumber(row.critical?.NC);
+      totals.critPC += toReportNumber(row.critical?.PC);
+      totals.critRemTotal += toReportNumber(row.criticalRemaining?.total);
+      totals.critRemNC += toReportNumber(row.criticalRemaining?.NC);
+      totals.critRemPC += toReportNumber(row.criticalRemaining?.PC);
+      totals.policyNC += toReportNumber(row.policies?.NC);
+      totals.policyPC += toReportNumber(row.policies?.PC);
+      totals.policyC += toReportNumber(row.policies?.C);
+      totals.policyTotal += toReportNumber(row.policies?.total);
+      return totals;
+    }, {
+      blTotal: 0, blNC: 0, blPC: 0, completed: 0,
+      remTotal: 0, remNC: 0, remPC: 0,
+      critTotal: 0, critNC: 0, critPC: 0,
+      critRemTotal: 0, critRemNC: 0, critRemPC: 0,
+      policyNC: 0, policyPC: 0, policyC: 0, policyTotal: 0,
+    });
+    const facilityOverviewTableRows = facilityOverview.map((row, idx) => {
+      const scheduleRow = serviceElementRowsSource[idx] || {};
+      return `
+        <tr>
+          <td>${escapeHtml(formatReportCell(scheduleRow.seCode || row.seIndex))}</td>
+          <td class="fo-service">${escapeHtml(formatReportCell(scheduleRow.serviceElement || row.seName))}</td>
+          <td>${escapeHtml(formatReportCell(row.baselinePercent))}</td>
+          <td>${escapeHtml(formatReportCell(row.latestPercent))}</td>
+          <td>${escapeHtml(row.blDefs?.total ?? 0)}</td>
+          <td>${escapeHtml(row.blDefs?.NC ?? 0)}</td>
+          <td>${escapeHtml(row.blDefs?.PC ?? 0)}</td>
+          <td>${escapeHtml(row.completed ?? 0)}</td>
+          <td>${escapeHtml(row.remaining?.total ?? 0)}</td>
+          <td>${escapeHtml(row.remaining?.NC ?? 0)}</td>
+          <td>${escapeHtml(row.remaining?.PC ?? 0)}</td>
+          <td>${escapeHtml(row.critical?.total ?? 0)}</td>
+          <td>${escapeHtml(row.critical?.NC ?? 0)}</td>
+          <td>${escapeHtml(row.critical?.PC ?? 0)}</td>
+          <td>${escapeHtml(row.criticalRemaining?.total ?? 0)}</td>
+          <td>${escapeHtml(row.criticalRemaining?.NC ?? 0)}</td>
+          <td>${escapeHtml(row.criticalRemaining?.PC ?? 0)}</td>
+          <td>${escapeHtml(formatReportCell(row.latestDate))}</td>
+          <td>${escapeHtml(row.policies?.NC ?? 0)}</td>
+          <td>${escapeHtml(row.policies?.PC ?? 0)}</td>
+          <td>${escapeHtml(row.policies?.C ?? 0)}</td>
+          <td>${escapeHtml(row.policies?.total ?? 0)}</td>
+          <td>${escapeHtml(formatReportCell(row.qiCompliance || 'N/A'))}</td>
+        </tr>
+      `;
+    }).join('');
+    const baselineOverall = Number.isFinite(baselineScoring?.overall?.percent) ? baselineScoring.overall.percent.toFixed(0) : '';
+    const latestOverall = Number.isFinite(scoring?.overall?.percent) ? scoring.overall.percent.toFixed(0) : '';
+
+    const firstSeSectionId = Object.keys(sectionLabels || {})[0] || reportAssessment?.sections?.[0]?.id || null;
+    const firstSeSchedule = serviceElementRowsSource[0] || {};
+    const firstSeOverview = facilityOverview[0] || {};
+    const firstSeCode = firstSeSchedule.seCode || firstSeOverview.seIndex || '1';
+    const firstSeName = firstSeSchedule.serviceElement || firstSeOverview.seName || sectionLabels[firstSeSectionId] || 'Service Element';
+    const firstSeTitle = `SE ${firstSeCode}: ${firstSeName}`;
+    const firstSeFacilitators = getFacilitatorsForServiceElement(firstSeCode) || surveyors;
+    const firstSeCriteria = getSectionCriteria(reportAssessment, firstSeSectionId);
+    const firstSeImmediateCriteria = firstSeCriteria.filter(c => ['NC', 'PC'].includes(normalizeResponseLabel(c?.response)));
+    const firstSeReviewCriteria = firstSeCriteria.filter(c => !['NC', 'PC'].includes(normalizeResponseLabel(c?.response))).slice(0, 12);
+    const buildCriterionRows = (criteriaList) => criteriaList.map((criterion) => {
+      const code = normalizeCriterionCode(criterion?.code || criterion?.id || '');
+      const response = normalizeResponseLabel(criterion?.response || 'NA');
+      const scoreInfo = scoring?.globalScores?.[code] || {};
+      const scoreText = Number.isFinite(scoreInfo.points) ? Number(scoreInfo.points).toFixed(0) : response;
+      return `
+        <tr>
+          <td><div>${escapeHtml(code)}</div><div>Score: ${escapeHtml(scoreText)}</div></td>
+          <td>${escapeHtml(response === 'C' ? 'Criterion reviewed as compliant.' : `Criterion requires follow-up. Current response: ${response}.`)}</td>
+          <td>${escapeHtml(response === 'C' ? 'Maintain compliance and supporting evidence.' : 'Develop and implement corrective action; update evidence for reassessment.')}</td>
+          <td></td>
+          <td></td>
+          <td>${escapeHtml(formatCoverDate(reportInfo.latestDate))}</td>
+          <td></td>
+          <td>${escapeHtml(response)}<br />New Deficiency</td>
+          <td></td>
+        </tr>
+      `;
+    }).join('');
+    const firstSeImmediateRows = buildCriterionRows(firstSeImmediateCriteria.slice(0, 10)) || `
+      <tr><td colspan="9">No immediate-response criteria identified for this service element.</td></tr>
+    `;
+    const firstSeReviewRows = buildCriterionRows(firstSeReviewCriteria) || `
+      <tr><td colspan="9">No review criteria available for this service element.</td></tr>
+    `;
+    const firstSeSummaryRow = `
+      <tr>
+        <td>${escapeHtml(formatReportCell(firstSeOverview.baselinePercent))}</td>
+        <td>${escapeHtml(formatReportCell(firstSeOverview.latestPercent))}</td>
+        <td>${escapeHtml(firstSeOverview.blDefs?.total ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.blDefs?.NC ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.blDefs?.PC ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.completed ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.remaining?.total ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.remaining?.NC ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.remaining?.PC ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.critical?.total ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.critical?.NC ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.critical?.PC ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.criticalRemaining?.total ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.criticalRemaining?.NC ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.criticalRemaining?.PC ?? 0)}</td>
+        <td>${escapeHtml(formatReportCell(firstSeOverview.latestDate || formatCoverDate(reportInfo.latestDate)))}</td>
+        <td>${escapeHtml(firstSeOverview.policies?.NC ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.policies?.PC ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.policies?.C ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.policies?.total ?? 0)}</td>
+        <td>${escapeHtml(firstSeOverview.qiCompliance || 'N/A')}</td>
+      </tr>
+    `;
+    const firstSeChartData = (() => {
+      const rootRows = firstSeSectionId ? buildRootChartData(firstSeSectionId) : [];
+      const source = rootRows.length > 0 ? rootRows : firstSeCriteria.slice(0, 6).map(c => {
+        const code = normalizeCriterionCode(c?.code || c?.id || '');
+        return {
+          code,
+          name: code,
+          Baseline: Number(baselineScoring?.globalScores?.[code]?.points ?? 0),
+          Latest: Number(scoring?.globalScores?.[code]?.points ?? 0),
+        };
+      });
+      return source.slice(0, 8);
+    })();
+    const firstSeChartBars = firstSeChartData.map(item => {
+      const baseline = Math.max(0, Math.min(100, Number(item.Baseline || 0)));
+      const latest = Math.max(0, Math.min(100, Number(item.Latest || 0)));
+      return `
+        <div class="se-chart-group">
+          <div class="se-chart-bars">
+            <div class="se-chart-bar baseline" style="height:${baseline}%;"><span>${baseline.toFixed(0)}</span></div>
+            <div class="se-chart-bar latest" style="height:${latest}%;"><span>${latest.toFixed(0)}</span></div>
+          </div>
+          <div class="se-chart-label">${escapeHtml(item.name || item.code)}</div>
+        </div>
+      `;
+    }).join('');
+
+    const html = `<!doctype html>
+      <html>
+        <head>
+          <title>${escapeHtml(selectedFacilityName)} Progress Report</title>
+          <style>
+            @page { size: A4 landscape; margin: 12mm; }
+            body { margin: 0; font-family: "Times New Roman", Times, serif; color: #000; }
+            .report-page { min-height: 180mm; position: relative; padding: 0 4mm; box-sizing: border-box; }
+            .cover { text-align: center; }
+            .crest { width: 74px; height: 74px; object-fit: contain; margin-top: 0; }
+            .top-rule { border: 0; border-top: 1px solid #000; margin: 4px 0 14px; }
+            .facility { font-size: 20px; letter-spacing: 0.5px; text-transform: uppercase; margin: 0 0 16px; font-weight: normal; }
+            .title { font-size: 16px; line-height: 1.1; margin: 0 0 16px; }
+            .line { font-size: 13px; margin: 12px 0; }
+            .surveyors { font-size: 12px; line-height: 1.35; max-width: 260mm; margin: 12px auto 20px; }
+            .confidential { font-size: 20px; letter-spacing: 0.4px; margin: 22px 0 14px; }
+            .contact { font-size: 12px; line-height: 1.45; }
+            .bottom-logos { position: absolute; left: 52mm; right: 52mm; bottom: 0; display: flex; justify-content: space-between; align-items: flex-end; }
+            .bottom-logo { width: 78px; height: 78px; object-fit: contain; }
+            .botswana-mark { font-family: Arial, sans-serif; font-size: 18px; font-weight: 700; color: #1d9bd7; letter-spacing: 0.5px; }
+            .botswana-tagline { display: block; font-size: 5px; color: #f59e0b; letter-spacing: 0; margin-top: -2px; }
+            .overview-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+            .vision-values { text-align: center; font-family: "Times New Roman", Times, serif; font-size: 14px; line-height: 1.35; margin: 2px 0 6px; }
+            .overview-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+            .overview-table td { border: 1px dotted #9ca3af; padding: 3px 4px; vertical-align: top; min-height: 16px; }
+            .overview-label { width: 31%; }
+            .overview-value { width: 69%; }
+            .non-attendance { margin-top: 26px; }
+            .overview-heading { font-size: 18px; font-weight: normal; margin: 4px 0 0; }
+            .attendance-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 14px; }
+            .attendance-title { margin-top: 0; }
+            .attendance-link-word { color: #0645ad; text-decoration: underline; }
+            .attendance-note { font-size: 9px; margin-left: 2px; }
+            .service-elements-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+            .service-elements-title { font-size: 20px; font-weight: normal; margin: 0 0 16px; }
+            .service-elements-table { width: 92%; margin: 0 auto; border-collapse: collapse; table-layout: fixed; }
+            .service-elements-table th { background: #f3f4f6; border: 1px solid #222; padding: 5px 3px; font-weight: normal; text-align: center; }
+            .service-elements-table td { border: 1px solid #222; padding: 2px 3px; line-height: 1.05; height: 14px; vertical-align: top; }
+            .se-code { width: 7%; text-align: left; }
+            .se-name { width: 33%; }
+            .se-small { width: 7%; text-align: center; }
+            .se-reason { width: 30%; }
+            .se-facilitator { width: 16%; }
+            .service-elements-footer-title { font-size: 20px; font-weight: normal; margin: 0; position: absolute; left: 4mm; bottom: 0; }
+            .facility-overview-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; padding: 0; }
+            .facility-overview-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7px; line-height: 1.05; }
+            .facility-overview-table th, .facility-overview-table td { border: 1px solid #000; padding: 2px 2px; text-align: center; vertical-align: middle; }
+            .facility-overview-table th { font-weight: normal; background: #f3f4f6; }
+            .facility-overview-table .fo-se { width: 3%; }
+            .facility-overview-table .fo-service { width: 14%; text-align: left; }
+            .facility-overview-table .fo-date { width: 7%; }
+            .facility-overview-table .fo-qi { width: 7%; }
+            .facility-overview-table tfoot td { font-weight: normal; }
+            .se-output-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; padding: 0; font-size: 7px; }
+            .se-summary-table, .se-criteria-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+            .se-summary-table th, .se-summary-table td, .se-criteria-table th, .se-criteria-table td { border: 1px solid #000; padding: 2px; vertical-align: top; }
+            .se-summary-table th, .se-criteria-table th { background: #f3f4f6; font-weight: normal; text-align: center; }
+            .se-output-heading { font-size: 10px; margin: 4px 0 2px; font-weight: bold; }
+            .se-output-subheading { font-size: 9px; margin: 2px 0; }
+            .se-criteria-table .criterion-col { width: 12%; }
+            .se-criteria-table .deficiency-col { width: 20%; }
+            .se-criteria-table .action-col { width: 20%; }
+            .se-criteria-table .small-col { width: 8%; }
+            .se-criteria-table .progress-col { width: 8%; }
+            .se-chart-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; text-align: center; }
+            .se-chart-title { font-size: 24px; font-weight: bold; margin: 0 0 4px; }
+            .se-chart-area { width: 230mm; height: 120mm; margin: 0 auto; border-left: 1px solid #666; border-bottom: 1px solid #666; background: repeating-linear-gradient(to top, transparent 0, transparent 13.5mm, #999 13.7mm); display: flex; align-items: flex-end; justify-content: center; gap: 18mm; padding: 0 10mm; box-sizing: border-box; }
+            .se-chart-y-title { position: absolute; left: 19mm; top: 58mm; transform: rotate(-90deg); font-size: 14px; font-weight: bold; }
+            .se-chart-wrapper { position: relative; }
+            .se-chart-group { width: 28mm; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+            .se-chart-bars { height: 100mm; display: flex; align-items: flex-end; gap: 2mm; }
+            .se-chart-bar { width: 10mm; border: 1px solid #000; color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; min-height: 3mm; }
+            .se-chart-bar.baseline { background: #0505ff; }
+            .se-chart-bar.latest { background: #ef5359; }
+            .se-chart-label { font-size: 8px; width: 34mm; transform: rotate(-45deg); transform-origin: top left; text-align: left; margin-top: 4mm; }
+            .se-chart-x-title { font-size: 14px; font-weight: bold; margin-top: 18mm; }
+            .se-chart-legend { display: inline-flex; gap: 8px; border: 1px solid #555; padding: 3px 8px; margin-top: 18px; font-size: 11px; }
+            .legend-box { width: 10px; height: 10px; border: 1px solid #000; display: inline-block; margin-right: 4px; }
+            .legend-blue { background: #0505ff; } .legend-red { background: #ef5359; }
+            .se-narrative-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
+            .se-narrative-title { font-size: 16px; margin: 0 0 12px; font-weight: normal; }
+            .se-narrative-line { margin: 8px 0; }
+            @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+          </style>
+        </head>
+        <body>
+          <main class="report-page cover">
+            <img class="crest" src="${qimsLogo}" alt="Republic of Botswana" />
+            <hr class="top-rule" />
+            <h1 class="facility">${escapeHtml(selectedFacilityName)}</h1>
+            <div class="title">National Health Quality Standards Progress<br />Report</div>
+            <div class="line">OVERALL FACILITY SCORE: ${escapeHtml(score)}</div>
+            <div class="line">DATE OF SURVEY: ${escapeHtml(dateRange)}</div>
+            <div class="surveyors">SURVEYORS: ${escapeHtml(surveyors)}</div>
+            <div class="confidential">CONFIDENTIAL</div>
+            <div class="contact">
+              Ministry of Health<br />
+              Private Bag 0038, Gaborone<br />
+              Plot 54609, Government Enclave, Gaborone<br />
+              Tel: 363 2500<br />
+              Toll free 0800600740
+            </div>
+            <div class="bottom-logos">
+              <img class="bottom-logo" src="${qimsLogo}" alt="Ministry of Health" />
+              <div class="botswana-mark">BOTSWANA<span class="botswana-tagline">our pride, your destination</span></div>
+            </div>
+          </main>
+          <section class="report-page overview-page">
+            <div class="vision-values">
+              <div><strong>Vision:</strong>A Model of Excellence in Quality Health Services.</div>
+              <div><strong>Values:</strong>Botho, Equity, Timeliness, Customer Focus, Teamwork.</div>
+            </div>
+            <table class="overview-table">
+              <tbody>${overviewTableRows}</tbody>
+            </table>
+            <div class="non-attendance">Reasons for Non-attendance of Steering Committee member:</div>
+            <h2 class="overview-heading">Overview</h2>
+          </section>
+          <section class="report-page attendance-page">
+            <div class="attendance-title">
+              Steering Committee <span class="attendance-link-word">Attendance</span><span class="attendance-note">(only project management meetings calculated)</span>
+            </div>
+          </section>
+          <section class="report-page service-elements-page">
+            <h2 class="service-elements-title">Service Elements Scheduled</h2>
+            <table class="service-elements-table">
+              <thead>
+                <tr>
+                  <th class="se-code">SE Code</th>
+                  <th class="se-name">Service Element</th>
+                  <th class="se-small">Scheduled</th>
+                  <th class="se-small">Seen</th>
+                  <th class="se-reason">Reason Not Seen</th>
+                  <th class="se-facilitator">Facilitator</th>
+                </tr>
+              </thead>
+              <tbody>${serviceElementTableRows}</tbody>
+            </table>
+            <h2 class="service-elements-footer-title">Facility Overview</h2>
+          </section>
+          <section class="report-page facility-overview-page">
+            <table class="facility-overview-table">
+              <thead>
+                <tr>
+                  <th class="fo-se" rowspan="2">SE</th>
+                  <th class="fo-service" rowspan="2">Service</th>
+                  <th rowspan="2">Overall<br />baseline<br />score</th>
+                  <th rowspan="2">Overall<br />progress<br />score</th>
+                  <th colspan="3">Deficiencies<br />identified at<br />baseline</th>
+                  <th rowspan="2">Deficiencies<br />completed<br />to date</th>
+                  <th colspan="3">Remaining<br />deficiencies to be<br />addressed</th>
+                  <th colspan="3">Critical Criteria</th>
+                  <th colspan="3">Critical Criteria<br />Remaining</th>
+                  <th class="fo-date" rowspan="2">Most recent<br />assessment<br />date</th>
+                  <th colspan="4">Policies &amp; Procedures</th>
+                  <th class="fo-qi" rowspan="2">Quality<br />improvement<br />standard<br />compliance</th>
+                </tr>
+                <tr>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>NC</th><th>PC</th><th>C</th><th>Total</th>
+                </tr>
+              </thead>
+              <tbody>${facilityOverviewTableRows}</tbody>
+              <tfoot>
+                <tr>
+                  <td>Totals:</td>
+                  <td class="fo-service">SE Count: ${escapeHtml(facilityOverview.length)}</td>
+                  <td>${escapeHtml(baselineOverall)}</td>
+                  <td>${escapeHtml(latestOverall)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.blTotal)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.blNC)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.blPC)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.completed)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.remTotal)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.remNC)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.remPC)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.critTotal)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.critNC)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.critPC)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.critRemTotal)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.critRemNC)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.critRemPC)}</td>
+                  <td></td>
+                  <td>${escapeHtml(facilityOverviewTotals.policyNC)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.policyPC)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.policyC)}</td>
+                  <td>${escapeHtml(facilityOverviewTotals.policyTotal)}</td>
+                  <td></td>
+                </tr>
+              </tfoot>
+            </table>
+          </section>
+          <section class="report-page se-output-page">
+            <table class="se-summary-table">
+              <thead>
+                <tr>
+                  <th rowspan="2">Overall<br />baseline<br />score</th>
+                  <th rowspan="2">Overall<br />progress<br />score</th>
+                  <th colspan="3">Deficiencies identified at<br />baseline</th>
+                  <th rowspan="2">Deficiencies<br />completed to<br />date</th>
+                  <th colspan="3">Remaining deficiencies<br />to be addressed</th>
+                  <th colspan="3">Critical Criteria</th>
+                  <th colspan="3">Critical Criteria<br />Remaining</th>
+                  <th rowspan="2">Most recent<br />assessment<br />date</th>
+                  <th colspan="4">Policies &amp; Procedures</th>
+                  <th rowspan="2">Quality<br />improvement<br />standard<br />compliance</th>
+                </tr>
+                <tr>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>NC</th><th>PC</th><th>C</th><th>Tot</th>
+                </tr>
+              </thead>
+              <tbody>${firstSeSummaryRow}</tbody>
+            </table>
+            <div class="se-output-heading">Critical criteria requiring immediate response</div>
+            <div class="se-output-subheading">${escapeHtml(firstSeTitle)}</div>
+            <table class="se-criteria-table">
+              <thead>
+                <tr>
+                  <th class="criterion-col">Criterion</th>
+                  <th class="deficiency-col">Criterion / Deficiency Identified</th>
+                  <th class="action-col">Action / Recommendation</th>
+                  <th class="small-col">Responsible</th>
+                  <th class="small-col">Date Due</th>
+                  <th class="small-col">Date<br />Reassessed</th>
+                  <th class="small-col">Date Completed</th>
+                  <th class="progress-col">Progress</th>
+                  <th class="small-col">Comment</th>
+                </tr>
+              </thead>
+              <tbody>${firstSeImmediateRows}</tbody>
+            </table>
+            <div class="se-output-heading">Overall criteria for review</div>
+            <table class="se-criteria-table">
+              <thead>
+                <tr>
+                  <th class="criterion-col">Criterion</th>
+                  <th class="deficiency-col">Criterion / Deficiency Identified</th>
+                  <th class="action-col">Action / Recommendation</th>
+                  <th class="small-col">Responsible</th>
+                  <th class="small-col">Date Due</th>
+                  <th class="small-col">Date<br />Reassessed</th>
+                  <th class="small-col">Date Completed</th>
+                  <th class="progress-col">Progress</th>
+                  <th class="small-col">Comment</th>
+                </tr>
+              </thead>
+              <tbody>${firstSeReviewRows}</tbody>
+            </table>
+          </section>
+          <section class="report-page se-chart-page">
+            <h1 class="se-chart-title">${escapeHtml(firstSeTitle)}</h1>
+            <div class="se-chart-wrapper">
+              <div class="se-chart-y-title">Scores</div>
+              <div class="se-chart-area">${firstSeChartBars || '<div>No chart data available</div>'}</div>
+            </div>
+            <div class="se-chart-x-title">Performance Indicators${escapeHtml(firstSeCode)}</div>
+            <div class="se-chart-legend">
+              <span><span class="legend-box legend-blue"></span>Baseline</span>
+              <span><span class="legend-box legend-red"></span>${escapeHtml(reportInfo.latestType || 'Latest')}</span>
+            </div>
+          </section>
+          <section class="report-page se-narrative-page">
+            <h1 class="se-narrative-title">Overview for ${escapeHtml(firstSeTitle.replace(':', ''))}</h1>
+            <div class="se-narrative-line">${escapeHtml(reportInfo.latestType || 'Latest assessment')} undertaken by: ${escapeHtml(firstSeFacilitators)}</div>
+            <div class="se-narrative-line">No overview is recorded for ${escapeHtml(firstSeTitle.replace(/^SE\s*[0-9]+:\s*/i, ''))}</div>
+            <div class="se-narrative-line">Baseline undertaken by: ${escapeHtml(surveyors)}</div>
+            <p>${escapeHtml(selectedFacilityName)} assessment findings for ${escapeHtml(firstSeName)} are summarised in the preceding tables and chart.</p>
+          </section>
+          <script>window.addEventListener('load', function(){ window.print(); });</script>
+        </body>
+      </html>`;
+
+    const printWindow = window.open('', '_blank');
+    if (!printWindow) {
+      showToast?.('Popup blocked. Please allow popups to download the PDF cover.', 'warning');
+      return;
+    }
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
+  };
+
   return (
     <div className="dashboard-container" style={{ padding: '16px' }}>
       <div className="program-header" style={{ marginBottom: '12px' }}>
@@ -947,6 +1498,15 @@ export default function Report() {
         >
           {reportLoading ? 'Generating…' : 'Generate'}
         </Button>
+        {reportInfo && (
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleDownloadCoverPdf}
+          >
+            Download PDF
+          </Button>
+        )}
         {loading && <span style={{ color: '#64748b' }}>Loading facilities…</span>}
         {!loading && error && <span style={{ color: '#dc2626' }}>{error}</span>}
         {!loading && !error && (
