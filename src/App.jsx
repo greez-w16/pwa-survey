@@ -395,6 +395,19 @@ const PrivateRoute = ({ children }) => {
 	    const stateAssignment = location.state && location.state.selectedAssignment;
 	    if (stateAssignment) {
 	      console.log('🎯 App: Auto-selecting facility from navigation state:', stateAssignment.orgUnitName);
+		      const preloadedGroupText =
+		        stateAssignment?.preloadDataValues?.[FACILITY_GROUP_DE_ID] ||
+		        stateAssignment?.parentGroupId ||
+		        '';
+		      const targetGroupId = resolveGroupIdFromText(preloadedGroupText);
+		      if (targetGroupId && Array.isArray(groups) && groups.length > 0 && activeGroup?.id !== targetGroupId) {
+		        const found = groups.find(g => g.id === targetGroupId);
+		        if (found) {
+		          console.log('🎯 App: Preselecting group from navigation state →', found.name || found.id);
+		          setActiveGroup(found);
+		          if (found.sections && found.sections.length > 0) setActiveSection(found.sections[0]);
+		        }
+		      }
 	      setSelectedFacility(stateAssignment);
 	      return;
 	    }
@@ -428,7 +441,7 @@ const PrivateRoute = ({ children }) => {
 	        setSelectedFacility(restored);
 	      }
 	    }
-	  }, [location.state, searchParams, assignments]);
+		  }, [location.state, searchParams, assignments, groups, activeGroup?.id, resolveGroupIdFromText]);
 
   // Track whether we've applied navigation preloads for the current selection
   const preloadAppliedRef = React.useRef(null);
@@ -983,6 +996,8 @@ const PrivateRoute = ({ children }) => {
                 assignments={assignments}
                 selectedFacility={selectedFacility}
 			                onSelectFacility={setSelectedFacility}
+			                formData={formData}
+		                scoringEventIdMap={scoringEventIdMap}
 				                scoringResults={scoringResults}
 				                isAssignedAssessment={Boolean(assessmentIdParam)}
 				                isScoringPending={isScoringPending}

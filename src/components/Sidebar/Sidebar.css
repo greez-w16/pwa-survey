@@ -83,6 +83,7 @@
 .section-item {
     padding: 1rem;
     border-bottom: 1px solid #dee2e6;
+    border-left: 4px solid transparent;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
@@ -99,6 +100,25 @@
     font-weight: bold;
 }
 
+.section-item.mapped {
+    background-color: #ecfdf5;
+    border-left-color: #22c55e;
+}
+
+.section-item.mapped:hover {
+    background-color: #dcfce7;
+}
+
+.section-item.mapped .section-label,
+.section-item.mapped .status {
+    color: #166534;
+    font-weight: 600;
+}
+
+.section-item.mapped.active {
+    background-color: #f0fdf4;
+}
+
 .section-item.locked {
     opacity: 0.5;
     cursor: not-allowed;
@@ -112,8 +132,30 @@
 
 .section-info {
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
     gap: 0.5rem;
+    min-width: 0;
+}
+
+.assessment-identity {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: #64748b;
+    line-height: 1.35;
+    word-break: break-all;
+}
+
+.assessment-identity code {
+    font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+    color: #334155;
+    background: #e2e8f0;
+    border-radius: 3px;
+    padding: 1px 3px;
+}
+
+.identity-separator {
+    color: #94a3b8;
 }
 
 .lock-badge {

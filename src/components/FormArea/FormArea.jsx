@@ -337,7 +337,10 @@
                     }
                     return 0;
                 });
-        const points = scoreResult.points;
+	        const points = (scoreResult.displayPoints !== null && scoreResult.displayPoints !== undefined)
+	            ? scoreResult.displayPoints
+	            : scoreResult.points;
+	        const displayResponse = scoreResult.displayResponse || scoreResult.response;
         const isDraft = scoreResult.isDraft;
 
         return (
@@ -352,15 +355,14 @@
                             <div className="calc-stat">
                                 <span className="label">{isDraft ? 'Draft Average:' : 'Current Score:'}</span>
                                 <span className="value">
-                                    {points !== null
-                                        ? Math.round(points)
-                                        : (scoreResult.draftAvg !== null ? `${Math.round(scoreResult.draftAvg)} (Draft)` : '---')}
-                                    {isDraft ? '' : ' pts'}
+	                                    {points !== null
+	                                        ? `${Math.round(points)} pts${isDraft ? ' (Draft)' : ''}`
+	                                        : (scoreResult.draftAvg !== null ? `${Math.round(scoreResult.draftAvg)} pts (Draft)` : '---')}
                                 </span>
                             </div>
                             <div className="calc-stat">
                                 <span className="label">Status:</span>
-                                <span className={`value status-${scoreResult.response.toLowerCase()}`}>{scoreResult.response}</span>
+	                                <span className={`value status-${String(displayResponse).toLowerCase()}`}>{displayResponse}</span>
                             </div>
                         </div>
 
@@ -482,11 +484,24 @@
         const [openPiGroups, setOpenPiGroups] = useState({}); // keyed by PI code (e.g. 7.1)
         // Persistent tooltip panel for criterion info (click-to-open)
         const [openCriterionTooltip, setOpenCriterionTooltip] = useState(null);
+        const [randomizeRunState, setRandomizeRunState] = useState(null); // { status, label, summary, completedAt }
 
         // Reset pagination when activeSection changes
         React.useEffect(() => {
             setCurrentSubsectionIndex(0);
         }, [activeSection?.id]);
+
+        React.useEffect(() => {
+            setRandomizeRunState(null);
+        }, [
+            formData?.teiId_internal,
+            formData?.enrollmentId_internal,
+            selectedFacility?.trackedEntityInstance,
+            selectedFacility?.scheduleTeiId,
+            selectedFacility?.enrollment,
+            selectedFacility?.enrollmentId,
+            activeEventId,
+        ]);
 
         React.useEffect(() => {
             const savedLinks = localStorage.getItem('custom_ems_links');
@@ -1005,11 +1020,12 @@
             }), [draftEventIdMap, dataStoreEventIdMap]);
 
         const effectiveEventIdMap = React.useMemo(() => {
-                // Keep locally-created/DataStore mappings authoritative. DHIS2 SYS_TAG
-                // readback can lag after provisioning, so it only fills missing keys.
+		        // Server-read SYS_TAG mappings must override local/DataStore mappings.
+		        // Otherwise a stale locally generated ID can survive after DHIS2 created
+		        // a different real event ID, causing later PUTs to fail as Invalid Event ID.
             return {
-                ...(resolvedEventIdMap || {}),
-                    ...(authoritativeEventIdMap || {}),
+		            ...(authoritativeEventIdMap || {}),
+		        ...(resolvedEventIdMap || {}),
             };
             }, [authoritativeEventIdMap, resolvedEventIdMap]);
 
@@ -1119,21 +1135,36 @@
                     }
 
                     if (!cancelled) setEventMapResolving(true);
-                        const surveyEvents = await api.getSurveyEventsForTeiByEventIds({
-                        teiId,
-                        orgUnitId,
-                        programId,
-                        stageId,
+                    const selectedEnrollmentId = formData?.enrollmentId_internal
+                        || selectedFacility?.enrollment
+                        || selectedFacility?.preloadDataValues?.enrollmentId_internal
+                        || null;
+                    let surveyEvents = selectedEnrollmentId
+                        ? await api.getEventsList({
+                            programId,
+                            stageId,
+                            enrollmentId: selectedEnrollmentId,
+                            fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
+                        }).catch(() => [])
+                        : await api.getSurveyEventsForTeiByEventIds({
+                            teiId,
+                            orgUnitId,
+                            programId,
+                            stageId,
                             listPageSize: 50,
                             detailBatchSize: 5,
-                        fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
-                    }).catch(() => []);
+                            fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
+                        }).catch(() => []);
+					const authoritativeEventIds = new Set(Object.values(authoritativeEventIdMap || {}).filter(Boolean));
+					if (!selectedEnrollmentId && authoritativeEventIds.size > 0) {
+						surveyEvents = (surveyEvents || []).filter(ev => authoritativeEventIds.has(ev?.event));
+					}
                         const inferredMap = inferEventIdMapFromSurveyEvents(surveyEvents);
 
-                        const mergedMap = {
-                            ...(inferredMap || {}),
-                            ...(authoritativeEventIdMap || {}),
-                        };
+						const mergedMap = {
+						    ...(authoritativeEventIdMap || {}),
+						    ...(inferredMap || {}),
+						};
 
                     const targetFieldIds = new Set(
                         targetSections.flatMap(sec => (sec?.fields || []).map(f => f?.id).filter(Boolean))
@@ -1192,7 +1223,7 @@
                 }
             })();
             return () => { cancelled = true; };
-            }, [draftEventIdMap, authoritativeEventIdMap, assessmentScopedSections, formData?.teiId_internal, formData?.eventId_internal, formData?.eventIdMap_internal, selectedFacility, configuration, inferEventIdMapFromSurveyEvents, saveField, activeEventId]);
+            }, [draftEventIdMap, authoritativeEventIdMap, assessmentScopedSections, formData?.teiId_internal, formData?.enrollmentId_internal, formData?.eventId_internal, formData?.eventIdMap_internal, selectedFacility, configuration, inferEventIdMapFromSurveyEvents, saveField, activeEventId]);
 
         // Determine if the current section is locked for this user
         const isSectionLocked = React.useMemo(() => {
@@ -1215,7 +1246,6 @@
 
             const eventIdMap = effectiveEventIdMap || {};
 
-	            if (isSectionLocked) return { enabled: false, reason: "You don't have permission to randomize this facility type" };
             if (!targetSections.length || seSections.length === 0) return { enabled: false, reason: 'No SE sections available to randomize' };
             if (!teiId) return { enabled: false, reason: 'Assessment TEI is missing' };
             if (!orgUnitId) return { enabled: false, reason: 'Assessment org unit is missing' };
@@ -1242,8 +1272,8 @@
                 if (!assigneeUsername) return { enabled: false, reason: `SE ${seNum} assigned username could not be resolved` };
             }
 
-	            return { enabled: true, reason: 'Randomize all criterion answers and comments across this facility type (testing only)' };
-        }, [assessmentScopedSections, assessmentScopedSeSections, assessmentNamespaceKey, formData, selectedFacility, assignmentLoaded, assignmentPlan, randomizeUsersLoaded, randomizeUserMap, isSectionLocked, extractSeNum, effectiveEventIdMap, eventMapResolving]);
+		            return { enabled: true, reason: 'Randomize all criterion answers and comments across this facility type (testing only)' };
+	        }, [assessmentScopedSections, assessmentScopedSeSections, assessmentNamespaceKey, formData, selectedFacility, assignmentLoaded, assignmentPlan, randomizeUsersLoaded, randomizeUserMap, extractSeNum, effectiveEventIdMap, eventMapResolving]);
 
         // Resolve the owner's name for the lock banner
         const sectionOwnerName = React.useMemo(() => {
@@ -1253,6 +1283,65 @@
             const owner = (seLockInfo.teamMembers || []).find(t => ownerIds.includes(t.userId));
             return owner?.displayName || ownerIds[0] || 'Another assessor';
         }, [isSectionLocked, activeSeNum, seLockInfo]);
+
+        const headerAssessorAssignments = React.useMemo(() => {
+            if (!assignmentLoaded) {
+                return {
+                    loading: true,
+                    rows: [],
+                    currentRow: null,
+                    totalAssignedSections: 0,
+                    totalAssessorCount: 0,
+                };
+            }
+
+            const seAssignments = assignmentPlan?.seAssignments || {};
+            const teamMembers = assignmentPlan?.team || [];
+            const uniqueAssessorKeys = new Set();
+
+            const resolveAssignee = (userId) => {
+                const normalizedId = String(userId || '').trim();
+                const teamMember = teamMembers.find(t => String(t?.userId || '').trim() === normalizedId);
+                const resolvedUser = normalizedId
+                    ? (randomizeUserMap?.[normalizedId] || (teamMember?.username ? randomizeUserMap?.[teamMember.username] : null))
+                    : null;
+                const displayName =
+                    resolvedUser?.displayName ||
+                    teamMember?.displayName ||
+                    resolvedUser?.username ||
+                    normalizedId ||
+                    'Unassigned';
+                const username = resolvedUser?.username || teamMember?.username || null;
+                const role = teamMember?.role
+                    ? String(teamMember.role).replace(/^FAC_ASS_ROLE_/i, '').replace(/_/g, ' ')
+                    : null;
+                const key = normalizedId || username || displayName;
+                if (key) uniqueAssessorKeys.add(key);
+                return { key, userId: normalizedId || null, displayName, username, role };
+            };
+
+            const rows = Object.entries(seAssignments)
+                .map(([seNum, userIds]) => ({
+                    seNum: String(seNum || '').trim(),
+                    assignees: (Array.isArray(userIds) ? userIds : [userIds])
+                        .filter(Boolean)
+                        .map(resolveAssignee),
+                }))
+                .filter(row => row.seNum)
+                .sort((a, b) => a.seNum.localeCompare(b.seNum, undefined, { numeric: true }));
+
+            const currentRow = activeSeNum
+                ? rows.find(row => row.seNum === String(activeSeNum)) || null
+                : null;
+
+            return {
+                loading: false,
+                rows,
+                currentRow,
+                totalAssignedSections: rows.length,
+                totalAssessorCount: uniqueAssessorKeys.size,
+            };
+        }, [assignmentLoaded, assignmentPlan, randomizeUserMap, activeSeNum]);
 
                     // Group fields into subsections ("pages").
                     //
@@ -1926,10 +2015,28 @@
                 const isFacilityGroupField =
                     field.id === 'pzenrgsSny3' ||
                         /facility assessment (group|type)/.test(labelLower);
+	                const isHospitalAssessmentTypeField = Boolean(
+	                    isADSection && /hospital assessment type/.test(labelLower)
+	                );
+	                const isSysTagField = Boolean(
+	                    isADSection && (
+	                        field.id === SYS_TAG_DE_ID ||
+	                        /^tag$/.test(labelLower) ||
+	                        /\bsys[ _-]?tag\b/i.test(rawLabel)
+	                    )
+	                );
 	                const isTypeOfAssessmentField = Boolean(
 	                    isADSection &&
 	                    typeOfAssessmentDeId &&
-	                    (field.id === typeOfAssessmentDeId || labelLower.includes('type of assessment') || labelLower.includes('assessment type'))
+	                    (
+	                        field.id === typeOfAssessmentDeId ||
+	                        (labelLower.includes('type of assessment') && !isHospitalAssessmentTypeField) ||
+	                        (
+	                            labelLower.includes('assessment type') &&
+	                            !labelLower.includes('facility assessment') &&
+	                            !isHospitalAssessmentTypeField
+	                        )
+	                    )
 	                );
 	                const typeOfAssessmentEventValue = isTypeOfAssessmentField
 	                    ? (activeMappedEventPayload?.dataValues || []).find(dv => dv?.dataElement === field.id)?.value
@@ -1937,14 +2044,17 @@
 	                const typeOfAssessmentDisplayValue = isTypeOfAssessmentField
 	                    ? (formData[field.id] || typeOfAssessmentEventValue || '')
 	                    : '';
-                // Do NOT treat Facility Assessment Group as a technical (read-only) field.
-                // It must remain editable so that when loading an existing event from the
-                // table the corresponding group value is shown and forms can react to it.
+	                // Treat Assessment Details routing/metadata fields as read-only.
+	                // This includes the legacy Facility Assessment Group field, which is
+	                // presented in the UI as "SURV-Facility Assessment Type".
                 const isTechnicalField =
                     isADSection &&
                     (isEnrollmentField ||
                         isTeiField ||
-                        isAssessorUserField);
+	                        isFacilityGroupField ||
+	                        isAssessorUserField ||
+	                        isHospitalAssessmentTypeField ||
+	                        isSysTagField);
 
                         // Look up EMS standard/intent tooltip for this data element code
                         const criterionTooltip = (!isCommentField && field.code) ? getCriterionTooltip(field.code, activeLinks, criterionIndex, calculatedFieldScore) : '';
@@ -2033,12 +2143,15 @@
                         const isRootScore = commentScoreForDisplay.isRoot || false;
                         const isDraftScore = commentScoreForDisplay.isDraft || false;
         
-                        const pts = (commentScoreForDisplay.points !== null && commentScoreForDisplay.points !== undefined)
-                            ? (Number.isInteger(commentScoreForDisplay.points)
-                                ? `${commentScoreForDisplay.points}`
-                                : commentScoreForDisplay.points.toFixed(1))
+	                        const displayPoints = (commentScoreForDisplay.displayPoints !== null && commentScoreForDisplay.displayPoints !== undefined)
+	                            ? commentScoreForDisplay.displayPoints
+	                            : commentScoreForDisplay.points;
+	                        const pts = (displayPoints !== null && displayPoints !== undefined)
+	                            ? (Number.isInteger(displayPoints)
+	                                ? `${displayPoints}`
+	                                : displayPoints.toFixed(1))
                             : null;
-                        const status = commentScoreForDisplay.normalizedValue || commentScoreForDisplay.response || '';
+	                        const status = commentScoreForDisplay.displayResponse || commentScoreForDisplay.normalizedValue || commentScoreForDisplay.response || '';
         
                         if (!pts && !status) return null;
         
@@ -2192,27 +2305,34 @@
                                         </span>
                                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                                 <span style={{ fontWeight: 'bold', fontSize: '1.05em', color: '#2b3a8e' }}>
-                                                    {(() => {
-                                                        const effectivePoints =
-                                                            (calculatedFieldScore.points !== null && calculatedFieldScore.points !== undefined)
-                                                                ? calculatedFieldScore.points
-                                                            : (isRoot && rootDraftPoints !== null
-                                                                    ? rootDraftPoints
-                                                                    : null);
-                                                        if (effectivePoints === null) return '--- pts';
-                                                        return `${Number.isInteger(effectivePoints) ? effectivePoints : effectivePoints.toFixed(1)} pts`;
-                                                    })()}
+	                                                    {(() => {
+	                                                        const effectivePoints =
+	                                                            (calculatedFieldScore.displayPoints !== null && calculatedFieldScore.displayPoints !== undefined)
+	                                                                ? calculatedFieldScore.displayPoints
+	                                                                : ((calculatedFieldScore.points !== null && calculatedFieldScore.points !== undefined)
+	                                                                    ? calculatedFieldScore.points
+	                                                                    : (isRoot && rootDraftPoints !== null
+	                                                                        ? rootDraftPoints
+	                                                                        : null));
+	                                                        if (effectivePoints === null) return '--- pts';
+	                                                        return `${Number.isInteger(effectivePoints) ? effectivePoints : effectivePoints.toFixed(1)} pts`;
+	                                                    })()}
                                                 </span>
+	                                            {(() => {
+	                                                const displayResponse = calculatedFieldScore.displayResponse || calculatedFieldScore.response;
+	                                                return (
                                             <span style={{
                                                 padding: '2px 8px',
                                                 borderRadius: '12px',
                                                 fontSize: '0.75em',
                                                 fontWeight: 'bold',
-                                                backgroundColor: (calculatedFieldScore.response === 'NC' || calculatedFieldScore.response === 'NON') ? '#fed7d7' : ((calculatedFieldScore.response === 'PC' || calculatedFieldScore.response === 'PARTIAL' || calculatedFieldScore.response === 'SUBSTANTIAL') ? '#fefcbf' : (calculatedFieldScore.response === 'Pending' ? '#edf2f7' : '#c6f6d5')),
-                                                color: (calculatedFieldScore.response === 'NC' || calculatedFieldScore.response === 'NON') ? '#c53030' : ((calculatedFieldScore.response === 'PC' || calculatedFieldScore.response === 'PARTIAL' || calculatedFieldScore.response === 'SUBSTANTIAL') ? '#b7791f' : (calculatedFieldScore.response === 'Pending' ? '#4a5568' : '#22543d'))
+	                                                backgroundColor: (displayResponse === 'NC' || displayResponse === 'NON') ? '#fed7d7' : ((displayResponse === 'PC' || displayResponse === 'PARTIAL' || displayResponse === 'SUBSTANTIAL') ? '#fefcbf' : (displayResponse === 'Pending' ? '#edf2f7' : '#c6f6d5')),
+	                                                color: (displayResponse === 'NC' || displayResponse === 'NON') ? '#c53030' : ((displayResponse === 'PC' || displayResponse === 'PARTIAL' || displayResponse === 'SUBSTANTIAL') ? '#b7791f' : (displayResponse === 'Pending' ? '#4a5568' : '#22543d'))
                                             }}>
-                                                {calculatedFieldScore.response}
+	                                                {displayResponse}
                                             </span>
+	                                                );
+	                                            })()}
                                             {isRoot && (
                                                 <button
                                                     type="button"
@@ -2244,8 +2364,9 @@
                                                             saveField(`override_${field.id}`, next ? true : false);
                                                             if (next) {
                                                                 // When enabling override, prefill with current auto status if it's a concrete value
-                                                                const autoVal = (calculatedFieldScore && ['C','PC','NC'].includes(String(calculatedFieldScore.response)))
-                                                                    ? calculatedFieldScore.response
+	                                                                const autoResponse = calculatedFieldScore?.displayResponse || calculatedFieldScore?.response;
+	                                                                const autoVal = (calculatedFieldScore && ['C','PC','NC'].includes(String(autoResponse)))
+	                                                                    ? autoResponse
                                                                     : '';
 		                                                                if (typeof onCriterionChange === 'function') onCriterionChange(field.id, autoVal);
                                                                 saveField(field.id, autoVal);
@@ -2470,6 +2591,7 @@
 	                if (!window.confirm('Randomize all criterion responses and comments across all sections in this facility type?\nThis will overwrite existing values AND push data to DHIS2 under each assigned assessor.')) {
                     return;
                 }
+                setRandomizeRunState({ status: 'running', label: 'Randomizing…', summary: null, completedAt: null });
 
                 // ── Resolve SE assignment plan & event ID map ──────────────────
                 let eventIdMap = effectiveEventIdMap || {};
@@ -2594,6 +2716,12 @@
                     if (typeof showToast === 'function') {
                         showToast(`Randomize blocked: server-push prerequisites are missing. ${details}`, 'error');
                     }
+                    setRandomizeRunState({
+                        status: 'error',
+                        label: 'Randomize failed',
+                        summary: details,
+                        completedAt: Date.now(),
+                    });
                     return;
                 }
 
@@ -2662,10 +2790,22 @@
                     const msg = failedCount > 0
                         ? `Randomized ${seSections.length} SEs. Pushed ${pushedCount} to DHIS2, ${failedCount} failed.`
                         : `Randomized ${seSections.length} SEs. All ${pushedCount} pushed to DHIS2 under assigned users.`;
+                    setRandomizeRunState({
+                        status: failedCount > 0 ? 'warning' : 'success',
+                        label: failedCount > 0 ? 'Randomization partial' : 'Randomization complete',
+                        summary: msg,
+                        completedAt: Date.now(),
+                    });
                     if (typeof showToast === 'function') showToast(msg, failedCount > 0 ? 'warning' : 'success');
                 }
             } catch (e) {
                 console.warn('Randomize answers failed', e);
+                setRandomizeRunState({
+                    status: 'error',
+                    label: 'Randomize failed',
+                    summary: e?.message || 'Randomization failed',
+                    completedAt: Date.now(),
+                });
                 if (typeof showToast === 'function') showToast('Randomize failed (see console).', 'error');
             }
         }, [assessmentScopedSections, assessmentScopedSeSections, assessmentNamespaceKey, effectiveEventIdMap, assignmentPlanSource?.teiId, assignmentPlan, loadAssignmentPlanForAssessment, randomizeUserMap, saveField, showToast, formData, selectedFacility, configuration, eventMapResolving, extractSeNum, isAssessmentDetailsSection]);
@@ -2675,6 +2815,8 @@
             }
             return <div className="form-area-empty">Please select a section</div>;
         }
+
+        const isRandomizing = randomizeRunState?.status === 'running';
 
         const handleInputChange = (e, fieldId) => {
             const value = e.target.value;
@@ -2759,9 +2901,13 @@
                     const isRoot = calculatedScore.isRoot || false;
                     const isDraft = calculatedScore.isDraft || false;
         
-                // Use normalized value if available for consistent tagging
-                const statusText = calculatedScore.normalizedValue || calculatedScore.response || 'NA';
-                const pointsText = calculatedScore.points !== null ? `${parseFloat(calculatedScore.points).toFixed(0)} pts` : '0 pts';
+	                // Use the live display score for roots so configured Hospital roots
+	                // tag the same real-time value shown in the form header panel.
+	                const displayScorePoints = (calculatedScore.displayPoints !== null && calculatedScore.displayPoints !== undefined)
+	                    ? calculatedScore.displayPoints
+	                    : calculatedScore.points;
+	                const statusText = calculatedScore.displayResponse || calculatedScore.normalizedValue || calculatedScore.response || 'NA';
+	                const pointsText = displayScorePoints !== null ? `${parseFloat(displayScorePoints).toFixed(0)} pts` : '0 pts';
 
                 // For roots, exclude -G/-B visual-only links when constructing suffix
                 const allRootCodes = (calculatedScore.rootSources || []).map(s => typeof s === 'string' ? s : s.code);
@@ -2850,7 +2996,12 @@
                         }
                     }
 
-                    if (calculatedScore && calculatedScore.points !== null) {
+	                    const displayScorePoints = calculatedScore
+	                        ? ((calculatedScore.displayPoints !== null && calculatedScore.displayPoints !== undefined)
+	                            ? calculatedScore.displayPoints
+	                            : calculatedScore.points)
+	                        : null;
+	                    if (calculatedScore && displayScorePoints !== null) {
                         const isRoot = calculatedScore.isRoot || false;
                         const hasParentResponse = isRoot || (formData[parentFieldId] && formData[parentFieldId] !== '');
 
@@ -2868,12 +3019,13 @@
 
                         if (!isPureVisualOnlyRoot) {
                             const rootSuffix = isRoot && effectiveCodes.length > 0 ? ` -root(${effectiveCodes.join(',')})` : '';
-                            let scoreTag = `[SCORE: ${parseFloat(calculatedScore.points).toFixed(0)} pts - ${calculatedScore.response}${rootSuffix}]`;
+	                            const displayResponse = calculatedScore.displayResponse || calculatedScore.response;
+	                            let scoreTag = `[SCORE: ${parseFloat(displayScorePoints).toFixed(0)} pts - ${displayResponse}${rootSuffix}]`;
                             if (isRoot) {
                                 if (isDraft) {
-                                    scoreTag = `[INCOMPLETE ROOT SCORE: ${parseFloat(calculatedScore.points).toFixed(0)} pts - ${calculatedScore.response}${rootSuffix}]`;
+	                                    scoreTag = `[INCOMPLETE ROOT SCORE: ${parseFloat(displayScorePoints).toFixed(0)} pts - ${displayResponse}${rootSuffix}]`;
                                 } else {
-                                    scoreTag = `[ROOT SCORE: ${parseFloat(calculatedScore.points).toFixed(0)} pts - ${calculatedScore.response}${rootSuffix}]`;
+	                                    scoreTag = `[ROOT SCORE: ${parseFloat(displayScorePoints).toFixed(0)} pts - ${displayResponse}${rootSuffix}]`;
                                 }
                             }
                             // Append the new one only when there are effective links
@@ -3110,18 +3262,36 @@
                                         : <>{String.fromCodePoint(0x270F, 0xFE0F)} Assigned to you</>}
                             </div>
                         )}
-                        {activeEventId && (
-                            <div className="save-status-container">
-                                {isSaving ? (
-                                    <span className="save-status saving">
-                                        <span className="spinner"></span> Saving...
-                                    </span>
-                                ) : lastSaved ? (
-                                    <span className="save-status saved">
-                                        Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                    </span>
-                                ) : (
-                                    <span className="save-status ready">Ready to save</span>
+                        {(activeEventId || randomizeRunState) && (
+                            <div className="header-status-group">
+                                {activeEventId && (
+                                    <div className="save-status-container">
+                                        {isSaving ? (
+                                            <span className="save-status saving">
+                                                <span className="spinner"></span> Saving...
+                                            </span>
+                                        ) : lastSaved ? (
+                                            <span className="save-status saved">
+                                                Saved {lastSaved.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        ) : (
+                                            <span className="save-status ready">Ready to save</span>
+                                        )}
+                                    </div>
+                                )}
+                                {randomizeRunState && (
+                                    <div
+                                        className={`randomize-status-badge ${randomizeRunState.status}`}
+                                        title={randomizeRunState.summary || randomizeRunState.label}
+                                    >
+                                        <span className="randomize-status-dot" />
+                                        <span>{randomizeRunState.label}</span>
+                                        {randomizeRunState.completedAt && !isRandomizing && (
+                                            <span className="randomize-status-time">
+                                                {new Date(randomizeRunState.completedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
+                                        )}
+                                    </div>
                                 )}
                             </div>
                         )}
@@ -3129,6 +3299,51 @@
                                 The standard-level draft score is now displayed inline
                                 next to the x.x.x standard row within the form body. */}
                         <div className="header-actions" style={{ marginLeft: 'auto' }}>
+                            <details className="header-assessors-dropdown">
+                                <summary className="header-assessors-summary">
+                                    <span>{String.fromCodePoint(0x1F465)}</span>
+                                    <span>
+                                        {headerAssessorAssignments.loading
+                                            ? 'Loading assigned assessors…'
+                                            : headerAssessorAssignments.currentRow && !isADSection
+                                                ? `SE ${headerAssessorAssignments.currentRow.seNum}: ${headerAssessorAssignments.currentRow.assignees.map(a => a.displayName).join(', ') || 'Unassigned'}`
+                                                : `Assigned assessors (${headerAssessorAssignments.totalAssessorCount || 0})`}
+                                    </span>
+                                </summary>
+                                <div className="header-assessors-menu">
+                                    {headerAssessorAssignments.loading ? (
+                                        <div className="header-assessors-empty">Loading assignment plan…</div>
+                                    ) : headerAssessorAssignments.rows.length === 0 ? (
+                                        <div className="header-assessors-empty">No assigned assessors were found for this assessment.</div>
+                                    ) : (
+                                        <>
+                                            {headerAssessorAssignments.currentRow && !isADSection && (
+                                                <div className="header-assessors-current">
+                                                    <strong>Current section:</strong> SE {headerAssessorAssignments.currentRow.seNum} — {headerAssessorAssignments.currentRow.assignees.map(a => a.displayName).join(', ') || 'Unassigned'}
+                                                </div>
+                                            )}
+                                            <div className="header-assessors-meta">
+                                                {headerAssessorAssignments.totalAssignedSections} SEs assigned · {headerAssessorAssignments.totalAssessorCount} assessor{headerAssessorAssignments.totalAssessorCount === 1 ? '' : 's'}
+                                            </div>
+                                            <div className="header-assessors-list">
+                                                {headerAssessorAssignments.rows.map((row) => (
+                                                    <div
+                                                        key={`header-assessor-${row.seNum}`}
+                                                        className={`header-assessors-item ${String(activeSeNum || '') === row.seNum ? 'active' : ''}`}
+                                                    >
+                                                        <div className="header-assessors-se">SE {row.seNum}</div>
+                                                        <div className="header-assessors-names">
+                                                            {row.assignees.length > 0
+                                                                ? row.assignees.map((assignee) => assignee.displayName).join(', ')
+                                                                : 'Unassigned'}
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </details>
                             <button
                                 className="scoring-logic-btn"
                                 onClick={() => setIsScoringModalOpen(true)}
@@ -3139,11 +3354,11 @@
                             <button
                                 className="scoring-logic-btn"
                                 onClick={randomizeAllAnswers}
-                                disabled={!randomizeStatus.enabled}
-                                title={randomizeStatus.reason}
-                                style={{ marginLeft: 8, background: randomizeStatus.enabled ? '#374151' : '#9ca3af', color: '#fff', cursor: randomizeStatus.enabled ? 'pointer' : 'not-allowed' }}
+                                disabled={!randomizeStatus.enabled || isRandomizing}
+                                title={isRandomizing ? 'Randomization in progress…' : randomizeStatus.reason}
+                                style={{ marginLeft: 8, background: (randomizeStatus.enabled && !isRandomizing) ? '#374151' : '#9ca3af', color: '#fff', cursor: (randomizeStatus.enabled && !isRandomizing) ? 'pointer' : 'not-allowed' }}
                             >
-                                🎲 Randomize Answers
+                                {isRandomizing ? '⏳ Randomizing…' : '🎲 Randomize Answers'}
                             </button>
                         </div>
                     </div>
@@ -3490,11 +3705,11 @@
                             <button
                                 className="nav-btn"
                                 onClick={randomizeAllAnswers}
-                                disabled={!randomizeStatus.enabled}
-                                title={randomizeStatus.reason}
-                                style={{ marginLeft: '8px', background: randomizeStatus.enabled ? '#374151' : '#9ca3af', color: '#fff', cursor: randomizeStatus.enabled ? 'pointer' : 'not-allowed' }}
+                                disabled={!randomizeStatus.enabled || isRandomizing}
+                                title={isRandomizing ? 'Randomization in progress…' : randomizeStatus.reason}
+                                style={{ marginLeft: '8px', background: (randomizeStatus.enabled && !isRandomizing) ? '#374151' : '#9ca3af', color: '#fff', cursor: (randomizeStatus.enabled && !isRandomizing) ? 'pointer' : 'not-allowed' }}
                             >
-                                Randomize Answers (all SEs)
+                                {isRandomizing ? 'Randomizing…' : 'Randomize Answers (all SEs)'}
                             </button>
                         </div>
                     )}

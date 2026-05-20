@@ -366,8 +366,11 @@ export const computeGraphScores = (criteriaMap) => {
 	                    points = rootDraftPoints;
 	                }
 
-            // Safety override
-            if (anyChildCriticalFail) {
+	            // Safety override. Do not apply this to configured Hospital roots:
+	            // they must use the live formula
+	            //   (sub-criteria average + linked-criteria average) / 2
+	            // even when one linked child is critical/NC.
+	            if (anyChildCriticalFail && !usesHospitalAverageFormula) {
                 criticalFail = true;
                 points = 0;
                 isScored = true;
@@ -421,11 +424,27 @@ export const computeGraphScores = (criteriaMap) => {
             else if (/^([A-Z]+_)?(NC|NON|NON_COMPLIANT|NON-COMPLIANT|NOT_MET|FAIL)$/.test(dispStr) || dispStr.includes('NON') || dispStr.includes('FAIL')) displayRes = 'NC';
         }
 
-            const res = {
+	            const liveDisplayPoints = isRoot && rootDraftPoints !== null
+	                ? rootDraftPoints
+	                : ((isScored && points !== null) ? points : null);
+	            const liveDisplayResponse = (() => {
+	                if (isRoot && liveDisplayPoints !== null && !criticalFail) {
+	                    const cThreshold = calculatePointsForLink('C', severity);
+	                    const pcThreshold = calculatePointsForLink('PC', severity);
+	                    if (liveDisplayPoints >= cThreshold) return 'C';
+	                    if (liveDisplayPoints >= pcThreshold) return 'PC';
+	                    return 'NC';
+	                }
+	                return displayRes;
+	            })();
+
+	            const res = {
 	                points: (isScored && points !== null) ? points : null,
 	                response: displayRes,
 	                rawResponse: response, // Keep original response for UI logic fallback
 	                normalizedValue: displayRes,
+		                displayPoints: liveDisplayPoints,
+		                displayResponse: liveDisplayResponse,
 	                isRoot,
 	                isDraft,
 	                criticalFail,

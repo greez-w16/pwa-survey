@@ -14,7 +14,9 @@ const Layout = ({
     assignments,
     selectedFacility,
     onSelectFacility,
+    scoringEventIdMap,
     scoringResults,
+    formData,
     isAssignedAssessment,
     isScoringPending
 		}) => {
@@ -42,6 +44,9 @@ const Layout = ({
                     collapsed={isSidebarCollapsed}
                     onToggleCollapsed={() => setIsSidebarCollapsed(prev => !prev)}
                     scoringResults={scoringResults}
+                    selectedFacility={selectedFacility}
+                    formData={formData}
+                    scoringEventIdMap={scoringEventIdMap}
                 />
                 <main className="main-content">
                     {children}

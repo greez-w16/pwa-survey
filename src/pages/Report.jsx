@@ -17,7 +17,7 @@ import mortuaryLinks from '../assets/mortuary_links.json';
 import clinicsLinks from '../assets/clinics_links.json';
 import hospitalLinks from '../assets/hospital_links.json';
 import qimsLogo from '../assets/logo.png';
-import { setHospitalSubcriteriaConfig } from '../utils/scoring';
+import { calculatePointsForLink, setHospitalSubcriteriaConfig } from '../utils/scoring';
 import {
   ResponsiveContainer,
   BarChart,
@@ -67,6 +67,20 @@ export default function Report() {
 
   const programId = configuration?.program?.id || 'G2gULe4jsfs';
   const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+	  const reportQueryParams = useMemo(() => {
+	    try {
+	      const sp = new URLSearchParams(window.location.search);
+	      return {
+	        facilityId: sp.get('facilityId') || '',
+	        teiId: sp.get('teiId') || '',
+	        eventId: sp.get('eventId') || '',
+	        start: sp.get('start') || '',
+	        end: sp.get('end') || '',
+	      };
+	    } catch {
+	      return { facilityId: '', teiId: '', eventId: '', start: '', end: '' };
+	    }
+	  }, []);
 
   // Compute a sensible default OU to search under (user's first org unit)
   const rootOrgUnitId = useMemo(() => {
@@ -225,10 +239,21 @@ export default function Report() {
           options = detailed;
         }
 
-        if (cancelled) return;
+	        const directFacilityId = reportQueryParams.facilityId;
+	        if (directFacilityId && !options.some(opt => opt.id === directFacilityId)) {
+	          try {
+	            const ou = await api.getFacilityDetails(directFacilityId);
+	            options.push({ id: directFacilityId, name: ou.displayName || ou.name || directFacilityId });
+	          } catch (_) {
+	            options.push({ id: directFacilityId, name: directFacilityId });
+	          }
+	        }
+
+	        if (cancelled) return;
         options.sort((a, b) => String(a.name).localeCompare(String(b.name)));
         setFacilityOptions(options);
-        if (options.length === 1) setSelectedFacilityId(options[0].id);
+	        if (directFacilityId) setSelectedFacilityId(directFacilityId);
+	        else if (options.length === 1) setSelectedFacilityId(options[0].id);
       } catch (e) {
         console.error('Report: failed to load facilities list', e);
         if (!cancelled) setError('Failed to load facilities');
@@ -238,7 +263,7 @@ export default function Report() {
     }
     loadFacilitiesAuthorised();
     return () => { cancelled = true; };
-  }, [userAssignments, programId, stageId, rootOrgUnitId]);
+	  }, [userAssignments, programId, stageId, rootOrgUnitId, reportQueryParams.facilityId]);
 
   const handleGenerate = () => {
     (async () => {
@@ -252,11 +277,26 @@ export default function Report() {
       try {
         // Fetch all events for this facility OU, including descendants, to ensure we catch 
         // both scheduled and self-initiated assessments.
-        const events = await api.getSurveyEventsForOrgUnit({ 
-            orgUnitId: selectedFacilityId, 
-            fields: 'event,eventDate,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value],notes[note,value]'
-        });
-        const all = Array.isArray(events) ? events : [];
+	        const eventFields = 'event,enrollment,eventDate,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value],notes[note,value]';
+	        const events = await api.getSurveyEventsForOrgUnit({ 
+	            orgUnitId: selectedFacilityId, 
+	            fields: eventFields
+	        });
+	        let all = Array.isArray(events) ? events : [];
+	        if (reportQueryParams.teiId) {
+	          const teiEvents = await api.getSurveyEventsForTei({
+	            teiId: reportQueryParams.teiId,
+	            orgUnitId: selectedFacilityId,
+	            programId,
+	            stageId,
+	            fields: eventFields,
+	          }).catch(() => []);
+	          const mergedByEvent = new Map();
+	          [...all, ...(Array.isArray(teiEvents) ? teiEvents : [])].forEach(ev => {
+	            if (ev?.event) mergedByEvent.set(ev.event, ev);
+	          });
+	          all = Array.from(mergedByEvent.values());
+	        }
 
         if (all.length === 0) {
           showToast?.('No assessments found for this facility.', 'info');
@@ -335,18 +375,32 @@ export default function Report() {
           };
         }).filter(b => b.assessmentDate);
 
-        const inPeriodBundles = bundles.filter(b => {
+	        const targetBundle = (() => {
+	          if (reportQueryParams.teiId) {
+	            const byTei = bundles.find(b => b.teiId === reportQueryParams.teiId);
+	            if (byTei) return byTei;
+	          }
+	          if (reportQueryParams.eventId) {
+	            return bundles.find(b => (b.events || []).some(ev =>
+	              ev?.event === reportQueryParams.eventId || ev?.enrollment === reportQueryParams.eventId
+	            )) || null;
+	          }
+	          return null;
+	        })();
+
+	        const inPeriodBundles = bundles.filter(b => {
           const d = b.assessmentDate ? new Date(b.assessmentDate) : null;
           if (!d) return false;
 	          if (periodStart && d < periodStart) return false;
 	          if (periodEnd && d > periodEnd) return false;
           return true;
         });
-        if (inPeriodBundles.length === 0) { showToast?.('No assessments found for the selected filters.', 'info'); setReportLoading(false); return; }
+	        const targetInPeriod = targetBundle && (!periodStart || new Date(targetBundle.assessmentDate) >= periodStart) && (!periodEnd || new Date(targetBundle.assessmentDate) <= periodEnd);
+	        if (inPeriodBundles.length === 0 && !targetInPeriod) { showToast?.('No assessments found for the selected filters.', 'info'); setReportLoading(false); return; }
 
         let baselineBundle = bundles.filter(b => b.isBaseline).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
         if (!baselineBundle) baselineBundle = bundles.sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
-        const latestBundle = inPeriodBundles.sort((a, b) => new Date(b.assessmentDate) - new Date(a.assessmentDate))[0] || null;
+	        const latestBundle = (targetInPeriod ? targetBundle : null) || inPeriodBundles.sort((a, b) => new Date(b.assessmentDate) - new Date(a.assessmentDate))[0] || null;
         if (!baselineBundle || !latestBundle) {
           showToast?.('Could not resolve baseline/latest assessments for this facility.', 'warning');
           setReportLoading(false);
@@ -398,6 +452,7 @@ export default function Report() {
                   return {
                     id: f.id,
                     code,
+	                    label: f.label || f.displayName || f.name || code,
                     response: formDataForSection[f.id] || 'NA',
                     isCritical: false,
                     isRoot,
@@ -584,20 +639,19 @@ export default function Report() {
     })();
   };
 
-  // If query params are provided (from Dashboard "View Report"), prefill and auto-generate
+	  // If query params are provided (from Dashboard "View Report"), prefill and auto-generate
   useEffect(() => {
     try {
-      const sp = new URLSearchParams(window.location.search);
-      const facilityId = sp.get('facilityId');
-      const start = sp.get('start');
-      const end = sp.get('end');
+	      const facilityId = reportQueryParams.facilityId;
+	      const start = reportQueryParams.start;
+	      const end = reportQueryParams.end;
       if (facilityId) setSelectedFacilityId(facilityId);
       if (facilityId) setFacilityLocked(true);
       if (start) setStartDate(start.split('T')[0] || start);
       if (end) setEndDate(end.split('T')[0] || end);
 	      if (facilityId) setAutoGenerateRequested(true);
     } catch {}
-  }, []);
+	  }, [reportQueryParams]);
 
 	  useEffect(() => {
 	    if (!autoGenerateRequested || !selectedFacilityId) return undefined;
@@ -699,6 +753,14 @@ export default function Report() {
     });
   }, [reportAssessment, baselineAssessment, baselineScoring, scoring, sectionLabels, reportInfo, programmeScoringMeta]);
 
+  const canDownloadPdf = useMemo(() => {
+    if (!reportInfo || !reportAssessment || !baselineAssessment) return false;
+    const printableSectionCount = Object.keys(sectionLabels || {}).length;
+    const reportSectionCount = (reportAssessment?.sections || []).filter(s => !isAssessmentDetailsSection(s)).length;
+    const baselineSectionCount = (baselineAssessment?.sections || []).filter(s => !isAssessmentDetailsSection(s)).length;
+    return printableSectionCount > 0 || facilityOverview.length > 0 || reportSectionCount > 0 || baselineSectionCount > 0;
+  }, [reportInfo, reportAssessment, baselineAssessment, sectionLabels, facilityOverview]);
+
   const openDrillForSection = (sectionId) => {
     setDrillSectionId(sectionId);
     setDrillRootCode(null);
@@ -737,6 +799,44 @@ export default function Report() {
     return s;
   };
 
+  const toChartScoreValue = (scoreBag, code, fallbackCriterion = null) => {
+    const normalized = normalizeCriterionCode(code || fallbackCriterion?.code || fallbackCriterion?.id || '');
+    const scoreInfo = scoreBag?.globalScores?.[normalized] || scoreBag?.globalScores?.[code] || null;
+    const candidates = [scoreInfo?.displayPoints, scoreInfo?.points, scoreInfo?.rootDraftPoints, scoreInfo?.draftAvg];
+    const numeric = candidates.find(value => value !== undefined && value !== null && value !== '' && Number.isFinite(Number(value)));
+    if (numeric !== undefined) return Math.max(0, Math.min(100, Number(numeric)));
+
+    const directPoints = fallbackCriterion
+      ? calculatePointsForLink(fallbackCriterion.response, fallbackCriterion.severity || 1)
+      : null;
+    return Number.isFinite(Number(directPoints)) ? Math.max(0, Math.min(100, Number(directPoints))) : 0;
+  };
+
+  const criteriaByCode = (criteriaList) => Object.fromEntries(
+    (criteriaList || []).map(c => [normalizeCriterionCode(c?.code || c?.id || ''), c]).filter(([code]) => Boolean(code))
+  );
+
+	  const cleanCriterionLabel = (code, rawLabel) => {
+	    const normalizedCode = normalizeCriterionCode(code || '');
+	    let label = String(rawLabel || '').replace(/_/g, ' ').replace(/\s+/g, ' ').trim();
+	    if (!label) return normalizedCode || String(code || '');
+	    if (normalizedCode && !label.startsWith(normalizedCode)) {
+	      label = `${normalizedCode} ${label}`;
+	    }
+	    return label;
+	  };
+
+	  const criterionLabelForCode = (code, ...criteria) => {
+	    const criterion = criteria.find(Boolean) || null;
+	    const raw = criterion?.label || criterion?.displayName || criterion?.name || criterion?.code || code;
+	    return cleanCriterionLabel(code, raw);
+	  };
+
+	  const shortCriterionLabel = (label, max = 64) => {
+	    const value = String(label || '').trim();
+	    return value.length > max ? `${value.slice(0, max - 1)}…` : value;
+	  };
+
   const getSectionStatusLabel = (assessment, sectionId) => {
     const criteria = getSectionCriteria(assessment, sectionId);
     const labels = criteria.map(c => normalizeResponseLabel(c?.response)).filter(Boolean);
@@ -751,6 +851,8 @@ export default function Report() {
   const buildRootChartData = (sectionId) => {
     const latestCriteria = getSectionCriteria(reportAssessment, sectionId);
     const baselineCriteria = getSectionCriteria(baselineAssessment, sectionId);
+    const latestByCode = criteriaByCode(latestCriteria);
+    const baselineByCode = criteriaByCode(baselineCriteria);
     const latestRoots = latestCriteria.filter(c => c?.isRoot);
     const baselineRoots = baselineCriteria.filter(c => c?.isRoot);
     const codes = Array.from(new Set([
@@ -759,9 +861,10 @@ export default function Report() {
     ].filter(Boolean)));
     return codes.map(code => ({
       code,
-      name: code,
-      Baseline: Number(baselineScoring?.globalScores?.[code]?.points ?? 0),
-      Latest: Number(scoring?.globalScores?.[code]?.points ?? 0),
+	      name: shortCriterionLabel(criterionLabelForCode(code, latestByCode[code], baselineByCode[code])),
+	      fullLabel: criterionLabelForCode(code, latestByCode[code], baselineByCode[code]),
+      Baseline: toChartScoreValue(baselineScoring, code, baselineByCode[code]),
+      Latest: toChartScoreValue(scoring, code, latestByCode[code]),
     }));
   };
 
@@ -772,6 +875,8 @@ export default function Report() {
     };
     const latestCriteria = getSectionCriteria(reportAssessment, sectionId);
     const baselineCriteria = getSectionCriteria(baselineAssessment, sectionId);
+    const latestByCode = criteriaByCode(latestCriteria);
+    const baselineByCode = criteriaByCode(baselineCriteria);
     const allCriteria = [...latestCriteria, ...baselineCriteria];
     const findRoot = (list) => list.find(c => c?.isRoot && normalizeCriterionCode(c.code || c.id) === rootCode);
     const latestRoot = findRoot(latestCriteria);
@@ -787,11 +892,19 @@ export default function Report() {
     const codes = Array.from(new Set([...linkedCodes, ...inferredCodes].filter(Boolean)));
     return codes.map(code => ({
       code,
-      name: code,
-      Baseline: Number(baselineScoring?.globalScores?.[code]?.points ?? 0),
-      Latest: Number(scoring?.globalScores?.[code]?.points ?? 0),
+	      name: shortCriterionLabel(criterionLabelForCode(code, latestByCode[code], baselineByCode[code])),
+	      fullLabel: criterionLabelForCode(code, latestByCode[code], baselineByCode[code]),
+      Baseline: toChartScoreValue(baselineScoring, code, baselineByCode[code]),
+      Latest: toChartScoreValue(scoring, code, latestByCode[code]),
     }));
   };
+
+	  const criterionLabelInSection = (sectionId, code) => {
+	    const normalized = normalizeCriterionCode(code || '');
+	    const latestByCode = criteriaByCode(getSectionCriteria(reportAssessment, sectionId));
+	    const baselineByCode = criteriaByCode(getSectionCriteria(baselineAssessment, sectionId));
+	    return criterionLabelForCode(normalized, latestByCode[normalized], baselineByCode[normalized]);
+	  };
 
   const ValueLabel = ({ x, y, width, value }) => {
     if (value === undefined || value === null) return null;
@@ -840,7 +953,10 @@ export default function Report() {
     const latestRes = scoring?.globalScores?.[code];
     return (
       <div style={{ background: '#111827', color: '#e5e7eb', padding: '8px 10px', borderRadius: 8, boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }}>
-        <div style={{ fontWeight: 700, marginBottom: 4 }}>{item.name || code}</div>
+	        <div style={{ fontWeight: 700, marginBottom: 4 }}>{item.fullLabel || item.name || code}</div>
+	        {item.fullLabel && item.fullLabel !== code && (
+	          <div style={{ fontSize: 11, color: '#94a3b8', marginBottom: 6 }}>Code: {code}</div>
+	        )}
         <div>
           Baseline: {Number(item.Baseline || 0).toFixed(1)}%
           <StatusBadge label={baselineRes?.response || '—'} />
@@ -924,6 +1040,10 @@ export default function Report() {
   const handleDownloadCoverPdf = () => {
     if (!reportInfo) {
       showToast?.('Generate the report first.', 'warning');
+      return;
+    }
+    if (!canDownloadPdf) {
+      showToast?.('Please wait for the report data to finish loading before downloading the PDF.', 'warning');
       return;
     }
 
@@ -1064,24 +1184,17 @@ export default function Report() {
     const baselineOverall = Number.isFinite(baselineScoring?.overall?.percent) ? baselineScoring.overall.percent.toFixed(0) : '';
     const latestOverall = Number.isFinite(scoring?.overall?.percent) ? scoring.overall.percent.toFixed(0) : '';
 
-    const firstSeSectionId = Object.keys(sectionLabels || {})[0] || reportAssessment?.sections?.[0]?.id || null;
-    const firstSeSchedule = serviceElementRowsSource[0] || {};
-    const firstSeOverview = facilityOverview[0] || {};
-    const firstSeCode = firstSeSchedule.seCode || firstSeOverview.seIndex || '1';
-    const firstSeName = firstSeSchedule.serviceElement || firstSeOverview.seName || sectionLabels[firstSeSectionId] || 'Service Element';
-    const firstSeTitle = `SE ${firstSeCode}: ${firstSeName}`;
-    const firstSeFacilitators = getFacilitatorsForServiceElement(firstSeCode) || surveyors;
-    const firstSeCriteria = getSectionCriteria(reportAssessment, firstSeSectionId);
-    const firstSeImmediateCriteria = firstSeCriteria.filter(c => ['NC', 'PC'].includes(normalizeResponseLabel(c?.response)));
-    const firstSeReviewCriteria = firstSeCriteria.filter(c => !['NC', 'PC'].includes(normalizeResponseLabel(c?.response))).slice(0, 12);
     const buildCriterionRows = (criteriaList) => criteriaList.map((criterion) => {
       const code = normalizeCriterionCode(criterion?.code || criterion?.id || '');
+	      const label = criterionLabelForCode(code, criterion);
       const response = normalizeResponseLabel(criterion?.response || 'NA');
       const scoreInfo = scoring?.globalScores?.[code] || {};
-      const scoreText = Number.isFinite(scoreInfo.points) ? Number(scoreInfo.points).toFixed(0) : response;
+	      const scoreValue = [scoreInfo.displayPoints, scoreInfo.points, scoreInfo.rootDraftPoints, scoreInfo.draftAvg]
+	        .find(value => value !== undefined && value !== null && value !== '' && Number.isFinite(Number(value)));
+	      const scoreText = scoreValue !== undefined ? Number(scoreValue).toFixed(0) : response;
       return `
         <tr>
-          <td><div>${escapeHtml(code)}</div><div>Score: ${escapeHtml(scoreText)}</div></td>
+	          <td><div>${escapeHtml(code)}</div><div class="criterion-human-label">${escapeHtml(label)}</div><div>Score: ${escapeHtml(scoreText)}</div></td>
           <td>${escapeHtml(response === 'C' ? 'Criterion reviewed as compliant.' : `Criterion requires follow-up. Current response: ${response}.`)}</td>
           <td>${escapeHtml(response === 'C' ? 'Maintain compliance and supporting evidence.' : 'Develop and implement corrective action; update evidence for reassessment.')}</td>
           <td></td>
@@ -1093,62 +1206,207 @@ export default function Report() {
         </tr>
       `;
     }).join('');
-    const firstSeImmediateRows = buildCriterionRows(firstSeImmediateCriteria.slice(0, 10)) || `
-      <tr><td colspan="9">No immediate-response criteria identified for this service element.</td></tr>
-    `;
-    const firstSeReviewRows = buildCriterionRows(firstSeReviewCriteria) || `
-      <tr><td colspan="9">No review criteria available for this service element.</td></tr>
-    `;
-    const firstSeSummaryRow = `
-      <tr>
-        <td>${escapeHtml(formatReportCell(firstSeOverview.baselinePercent))}</td>
-        <td>${escapeHtml(formatReportCell(firstSeOverview.latestPercent))}</td>
-        <td>${escapeHtml(firstSeOverview.blDefs?.total ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.blDefs?.NC ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.blDefs?.PC ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.completed ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.remaining?.total ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.remaining?.NC ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.remaining?.PC ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.critical?.total ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.critical?.NC ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.critical?.PC ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.criticalRemaining?.total ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.criticalRemaining?.NC ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.criticalRemaining?.PC ?? 0)}</td>
-        <td>${escapeHtml(formatReportCell(firstSeOverview.latestDate || formatCoverDate(reportInfo.latestDate)))}</td>
-        <td>${escapeHtml(firstSeOverview.policies?.NC ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.policies?.PC ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.policies?.C ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.policies?.total ?? 0)}</td>
-        <td>${escapeHtml(firstSeOverview.qiCompliance || 'N/A')}</td>
-      </tr>
-    `;
-    const firstSeChartData = (() => {
-      const rootRows = firstSeSectionId ? buildRootChartData(firstSeSectionId) : [];
-      const source = rootRows.length > 0 ? rootRows : firstSeCriteria.slice(0, 6).map(c => {
-        const code = normalizeCriterionCode(c?.code || c?.id || '');
-        return {
-          code,
-          name: code,
-          Baseline: Number(baselineScoring?.globalScores?.[code]?.points ?? 0),
-          Latest: Number(scoring?.globalScores?.[code]?.points ?? 0),
-        };
-      });
-      return source.slice(0, 8);
-    })();
-    const firstSeChartBars = firstSeChartData.map(item => {
-      const baseline = Math.max(0, Math.min(100, Number(item.Baseline || 0)));
-      const latest = Math.max(0, Math.min(100, Number(item.Latest || 0)));
+
+    const buildPdfBarChartSvg = (data, xTitle, latestLabel) => {
+      if (!Array.isArray(data) || data.length === 0) return '<div>No chart data available</div>';
+      const width = 980;
+      const height = 520;
+      const plot = { left: 78, top: 34, width: 850, height: 330 };
+      const bottom = plot.top + plot.height;
+      const gridValues = [0, 25, 50, 75, 100];
+      const groupWidth = plot.width / Math.max(1, data.length);
+      const barWidth = Math.max(12, Math.min(22, groupWidth * 0.18));
+      const safeValue = (value) => Math.max(0, Math.min(100, Number(value) || 0));
+      const yFor = (value) => bottom - ((safeValue(value) / 100) * plot.height);
+
+      const grid = gridValues.map(value => {
+        const y = yFor(value);
+        return `
+          <line x1="${plot.left}" y1="${y}" x2="${plot.left + plot.width}" y2="${y}" stroke="#cfd4dc" stroke-width="1" />
+          <text x="${plot.left - 12}" y="${y + 4}" text-anchor="end" font-size="11" fill="#111827">${value}</text>
+        `;
+      }).join('');
+
+      const bars = data.map((item, index) => {
+        const center = plot.left + (groupWidth * index) + (groupWidth / 2);
+        const baseline = safeValue(item.Baseline);
+        const latest = safeValue(item.Latest);
+        const baselineY = yFor(baseline);
+        const latestY = yFor(latest);
+        const labelX = center;
+        const labelY = bottom + 42;
+        const label = escapeHtml(item.name || item.code || '');
+        const baselineTextY = baseline > 12 ? baselineY + 16 : baselineY - 5;
+        const latestTextY = latest > 12 ? latestY + 16 : latestY - 5;
+        const baselineTextFill = baseline > 12 ? '#ffffff' : '#0505ff';
+        const latestTextFill = latest > 12 ? '#ffffff' : '#d7282f';
+        return `
+          <rect x="${center - barWidth - 3}" y="${baselineY}" width="${barWidth}" height="${Math.max(1, bottom - baselineY)}" fill="#0505ff" stroke="#000" />
+          <rect x="${center + 3}" y="${latestY}" width="${barWidth}" height="${Math.max(1, bottom - latestY)}" fill="#ef5359" stroke="#000" />
+          <text x="${center - barWidth / 2 - 3}" y="${baselineTextY}" text-anchor="middle" font-size="12" font-weight="700" fill="${baselineTextFill}">${baseline.toFixed(0)}</text>
+          <text x="${center + barWidth / 2 + 3}" y="${latestTextY}" text-anchor="middle" font-size="12" font-weight="700" fill="${latestTextFill}">${latest.toFixed(0)}</text>
+	          <title>${escapeHtml(item.fullLabel || item.name || item.code || '')}</title>
+          <text x="${labelX}" y="${labelY}" transform="rotate(-45 ${labelX} ${labelY})" text-anchor="end" font-size="9" fill="#111827">${label}</text>
+        `;
+      }).join('');
+
       return `
-        <div class="se-chart-group">
-          <div class="se-chart-bars">
-            <div class="se-chart-bar baseline" style="height:${baseline}%;"><span>${baseline.toFixed(0)}</span></div>
-            <div class="se-chart-bar latest" style="height:${latest}%;"><span>${latest.toFixed(0)}</span></div>
-          </div>
-          <div class="se-chart-label">${escapeHtml(item.name || item.code)}</div>
-        </div>
+        <svg class="se-chart-svg" viewBox="0 0 ${width} ${height}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+          <text x="${width / 2}" y="18" text-anchor="middle" font-size="12" font-weight="700">${escapeHtml(selectedFacilityName)} Progress Report</text>
+          ${grid}
+          <line x1="${plot.left}" y1="${plot.top}" x2="${plot.left}" y2="${bottom}" stroke="#111827" stroke-width="1.5" />
+          <line x1="${plot.left}" y1="${bottom}" x2="${plot.left + plot.width}" y2="${bottom}" stroke="#111827" stroke-width="1.5" />
+          <text x="18" y="${plot.top + plot.height / 2}" transform="rotate(-90 18 ${plot.top + plot.height / 2})" text-anchor="middle" font-size="13" font-weight="700">Scores</text>
+          ${bars}
+          <text x="${width / 2}" y="${height - 58}" text-anchor="middle" font-size="13" font-weight="700">${escapeHtml(xTitle)}</text>
+          <rect x="${width / 2 - 62}" y="${height - 42}" width="122" height="18" fill="none" stroke="#555" />
+          <rect x="${width / 2 - 52}" y="${height - 36}" width="10" height="10" fill="#0505ff" stroke="#000" />
+          <text x="${width / 2 - 38}" y="${height - 27}" font-size="10">Baseline</text>
+          <rect x="${width / 2 + 10}" y="${height - 36}" width="10" height="10" fill="#ef5359" stroke="#000" />
+          <text x="${width / 2 + 24}" y="${height - 27}" font-size="10">${escapeHtml(latestLabel)}</text>
+        </svg>
       `;
+    };
+
+    const printableSeSectionIds = Object.keys(sectionLabels || {});
+    const printableSePages = printableSeSectionIds.map((sectionId, idx) => {
+      const seSchedule = serviceElementRowsSource[idx] || {};
+      const seOverview = facilityOverview[idx] || {};
+      const seCode = seSchedule.seCode || seOverview.seIndex || String(idx + 1);
+      const seName = seSchedule.serviceElement || seOverview.seName || sectionLabels[sectionId] || 'Service Element';
+      const seTitle = `SE ${seCode}: ${seName}`;
+      const seFacilitators = getFacilitatorsForServiceElement(seCode) || surveyors;
+      const seCriteria = getSectionCriteria(reportAssessment, sectionId);
+      const seBaselineCriteria = getSectionCriteria(baselineAssessment, sectionId);
+      const seCriteriaByCode = criteriaByCode(seCriteria);
+      const seBaselineCriteriaByCode = criteriaByCode(seBaselineCriteria);
+      const seImmediateCriteria = seCriteria.filter(c => ['NC', 'PC'].includes(normalizeResponseLabel(c?.response)));
+      const seReviewCriteria = seCriteria.filter(c => !['NC', 'PC'].includes(normalizeResponseLabel(c?.response))).slice(0, 12);
+      const seImmediateRows = buildCriterionRows(seImmediateCriteria.slice(0, 10)) || `
+        <tr><td colspan="9">No immediate-response criteria identified for this service element.</td></tr>
+      `;
+      const seReviewRows = buildCriterionRows(seReviewCriteria) || `
+        <tr><td colspan="9">No review criteria available for this service element.</td></tr>
+      `;
+      const seSummaryRow = `
+        <tr>
+          <td>${escapeHtml(formatReportCell(seOverview.baselinePercent))}</td>
+          <td>${escapeHtml(formatReportCell(seOverview.latestPercent))}</td>
+          <td>${escapeHtml(seOverview.blDefs?.total ?? 0)}</td>
+          <td>${escapeHtml(seOverview.blDefs?.NC ?? 0)}</td>
+          <td>${escapeHtml(seOverview.blDefs?.PC ?? 0)}</td>
+          <td>${escapeHtml(seOverview.completed ?? 0)}</td>
+          <td>${escapeHtml(seOverview.remaining?.total ?? 0)}</td>
+          <td>${escapeHtml(seOverview.remaining?.NC ?? 0)}</td>
+          <td>${escapeHtml(seOverview.remaining?.PC ?? 0)}</td>
+          <td>${escapeHtml(seOverview.critical?.total ?? 0)}</td>
+          <td>${escapeHtml(seOverview.critical?.NC ?? 0)}</td>
+          <td>${escapeHtml(seOverview.critical?.PC ?? 0)}</td>
+          <td>${escapeHtml(seOverview.criticalRemaining?.total ?? 0)}</td>
+          <td>${escapeHtml(seOverview.criticalRemaining?.NC ?? 0)}</td>
+          <td>${escapeHtml(seOverview.criticalRemaining?.PC ?? 0)}</td>
+          <td>${escapeHtml(formatReportCell(seOverview.latestDate || formatCoverDate(reportInfo.latestDate)))}</td>
+          <td>${escapeHtml(seOverview.policies?.NC ?? 0)}</td>
+          <td>${escapeHtml(seOverview.policies?.PC ?? 0)}</td>
+          <td>${escapeHtml(seOverview.policies?.C ?? 0)}</td>
+          <td>${escapeHtml(seOverview.policies?.total ?? 0)}</td>
+          <td>${escapeHtml(seOverview.qiCompliance || 'N/A')}</td>
+        </tr>
+      `;
+      const seChartData = (() => {
+        const rootRows = sectionId ? buildRootChartData(sectionId) : [];
+        const source = rootRows.length > 0 ? rootRows : seCriteria.slice(0, 6).map(c => {
+          const code = normalizeCriterionCode(c?.code || c?.id || '');
+          return {
+            code,
+	            name: shortCriterionLabel(criterionLabelForCode(code, c), 58),
+	            fullLabel: criterionLabelForCode(code, c),
+            Baseline: toChartScoreValue(baselineScoring, code, seBaselineCriteriaByCode[code]),
+            Latest: toChartScoreValue(scoring, code, seCriteriaByCode[code]),
+          };
+        });
+        return source.slice(0, 8);
+      })();
+      const seChartSvg = buildPdfBarChartSvg(
+        seChartData,
+        `Performance Indicators ${seCode}`,
+        reportInfo.latestType || 'Latest'
+      );
+      return `
+          <section class="report-page se-narrative-page">
+            <h1 class="se-narrative-title">Overview for ${escapeHtml(seTitle.replace(':', ''))}</h1>
+            <div class="se-narrative-line">${escapeHtml(reportInfo.latestType || 'Latest assessment')} undertaken by: ${escapeHtml(seFacilitators)}</div>
+            <div class="se-narrative-line">No overview is recorded for ${escapeHtml(seTitle.replace(/^SE\s*[0-9]+:\s*/i, ''))}</div>
+            <div class="se-narrative-line">Baseline undertaken by: ${escapeHtml(surveyors)}</div>
+            <p>${escapeHtml(selectedFacilityName)} assessment findings for ${escapeHtml(seName)} are summarised in the preceding tables and chart.</p>
+          </section>
+          <section class="report-page se-chart-page">
+            <h1 class="se-chart-title">${escapeHtml(seTitle)}</h1>
+            <div class="se-chart-wrapper">
+              ${seChartSvg}
+            </div>
+          </section>
+          <section class="report-page se-output-page">
+            <table class="se-summary-table">
+              <thead>
+                <tr>
+                  <th rowspan="2">Overall<br />baseline<br />score</th>
+                  <th rowspan="2">Overall<br />progress<br />score</th>
+                  <th colspan="3">Deficiencies identified at<br />baseline</th>
+                  <th rowspan="2">Deficiencies<br />completed to<br />date</th>
+                  <th colspan="3">Remaining deficiencies<br />to be addressed</th>
+                  <th colspan="3">Critical Criteria</th>
+                  <th colspan="3">Critical Criteria<br />Remaining</th>
+                  <th rowspan="2">Most recent<br />assessment<br />date</th>
+                  <th colspan="4">Policies &amp; Procedures</th>
+                  <th rowspan="2">Quality<br />improvement<br />standard<br />compliance</th>
+                </tr>
+                <tr>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th>NC</th><th>PC</th><th>C</th><th>Tot</th>
+                </tr>
+              </thead>
+              <tbody>${seSummaryRow}</tbody>
+            </table>
+            <div class="se-output-heading">Critical criteria requiring immediate response</div>
+            <div class="se-output-subheading">${escapeHtml(seTitle)}</div>
+            <table class="se-criteria-table">
+              <thead>
+                <tr>
+                  <th class="criterion-col">Criterion</th>
+                  <th class="deficiency-col">Criterion / Deficiency Identified</th>
+                  <th class="action-col">Action / Recommendation</th>
+                  <th class="small-col">Responsible</th>
+                  <th class="small-col">Date Due</th>
+                  <th class="small-col">Date<br />Reassessed</th>
+                  <th class="small-col">Date Completed</th>
+                  <th class="progress-col">Progress</th>
+                  <th class="small-col">Comment</th>
+                </tr>
+              </thead>
+              <tbody>${seImmediateRows}</tbody>
+            </table>
+            <div class="se-output-heading">Overall criteria for review</div>
+            <table class="se-criteria-table">
+              <thead>
+                <tr>
+                  <th class="criterion-col">Criterion</th>
+                  <th class="deficiency-col">Criterion / Deficiency Identified</th>
+                  <th class="action-col">Action / Recommendation</th>
+                  <th class="small-col">Responsible</th>
+                  <th class="small-col">Date Due</th>
+                  <th class="small-col">Date<br />Reassessed</th>
+                  <th class="small-col">Date Completed</th>
+                  <th class="progress-col">Progress</th>
+                  <th class="small-col">Comment</th>
+                </tr>
+              </thead>
+              <tbody>${seReviewRows}</tbody>
+            </table>
+          </section>`;
     }).join('');
 
     const html = `<!doctype html>
@@ -1157,8 +1415,65 @@ export default function Report() {
           <title>${escapeHtml(selectedFacilityName)} Progress Report</title>
           <style>
             @page { size: A4 landscape; margin: 12mm; }
-            body { margin: 0; font-family: "Times New Roman", Times, serif; color: #000; }
-            .report-page { min-height: 180mm; position: relative; padding: 0 4mm; box-sizing: border-box; }
+            html, body { margin: 0; padding: 0; font-family: "Times New Roman", Times, serif; color: #000; }
+            .preview-toolbar {
+              position: sticky;
+              top: 0;
+              z-index: 9999;
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              gap: 12px;
+              padding: 10px 14px;
+              background: #0f172a;
+              color: #e5e7eb;
+              font-family: Arial, Helvetica, sans-serif;
+              box-shadow: 0 2px 10px rgba(15, 23, 42, 0.25);
+            }
+            .preview-toolbar-title { font-size: 13px; font-weight: 700; }
+            .preview-toolbar-actions { display: flex; gap: 8px; }
+            .preview-button {
+              border: 1px solid #93c5fd;
+              border-radius: 6px;
+              padding: 7px 12px;
+              background: #2563eb;
+              color: #fff;
+              font-size: 12px;
+              font-weight: 700;
+              cursor: pointer;
+            }
+            .preview-button.secondary { background: transparent; color: #e5e7eb; border-color: #475569; }
+            .report-page {
+              width: 273mm;
+              min-height: 186mm;
+              position: relative;
+              padding: 0 4mm 8mm;
+              box-sizing: border-box;
+              break-after: page;
+              page-break-after: always;
+              break-inside: avoid;
+              page-break-inside: avoid;
+            }
+            .report-page:last-child { break-after: auto; page-break-after: auto; }
+            .page-footer {
+              position: absolute;
+              right: 4mm;
+              bottom: 1.5mm;
+              font-family: Arial, Helvetica, sans-serif;
+              font-size: 9px;
+              color: #111827;
+            }
+            .page-header {
+              position: absolute;
+              left: 4mm;
+              right: 4mm;
+              top: -7mm;
+              display: flex;
+              justify-content: space-between;
+              font-family: Arial, Helvetica, sans-serif;
+              font-size: 9px;
+              color: #111827;
+            }
             .cover { text-align: center; }
             .crest { width: 74px; height: 74px; object-fit: contain; margin-top: 0; }
             .top-rule { border: 0; border-top: 1px solid #000; margin: 4px 0 14px; }
@@ -1172,7 +1487,7 @@ export default function Report() {
             .bottom-logo { width: 78px; height: 78px; object-fit: contain; }
             .botswana-mark { font-family: Arial, sans-serif; font-size: 18px; font-weight: 700; color: #1d9bd7; letter-spacing: 0.5px; }
             .botswana-tagline { display: block; font-size: 5px; color: #f59e0b; letter-spacing: 0; margin-top: -2px; }
-            .overview-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+            .overview-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
             .vision-values { text-align: center; font-family: "Times New Roman", Times, serif; font-size: 14px; line-height: 1.35; margin: 2px 0 6px; }
             .overview-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
             .overview-table td { border: 1px dotted #9ca3af; padding: 3px 4px; vertical-align: top; min-height: 16px; }
@@ -1180,11 +1495,11 @@ export default function Report() {
             .overview-value { width: 69%; }
             .non-attendance { margin-top: 26px; }
             .overview-heading { font-size: 18px; font-weight: normal; margin: 4px 0 0; }
-            .attendance-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 14px; }
+            .attendance-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 14px; }
             .attendance-title { margin-top: 0; }
             .attendance-link-word { color: #0645ad; text-decoration: underline; }
             .attendance-note { font-size: 9px; margin-left: 2px; }
-            .service-elements-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
+            .service-elements-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 12px; }
             .service-elements-title { font-size: 20px; font-weight: normal; margin: 0 0 16px; }
             .service-elements-table { width: 92%; margin: 0 auto; border-collapse: collapse; table-layout: fixed; }
             .service-elements-table th { background: #f3f4f6; border: 1px solid #222; padding: 5px 3px; font-weight: normal; text-align: center; }
@@ -1195,7 +1510,7 @@ export default function Report() {
             .se-reason { width: 30%; }
             .se-facilitator { width: 16%; }
             .service-elements-footer-title { font-size: 20px; font-weight: normal; margin: 0; position: absolute; left: 4mm; bottom: 0; }
-            .facility-overview-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; padding: 0; }
+            .facility-overview-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; padding: 0; }
             .facility-overview-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7px; line-height: 1.05; }
             .facility-overview-table th, .facility-overview-table td { border: 1px solid #000; padding: 2px 2px; text-align: center; vertical-align: middle; }
             .facility-overview-table th { font-weight: normal; background: #f3f4f6; }
@@ -1204,39 +1519,41 @@ export default function Report() {
             .facility-overview-table .fo-date { width: 7%; }
             .facility-overview-table .fo-qi { width: 7%; }
             .facility-overview-table tfoot td { font-weight: normal; }
-            .se-output-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; padding: 0; font-size: 7px; }
+            .se-output-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; padding: 0; font-size: 7px; }
             .se-summary-table, .se-criteria-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
             .se-summary-table th, .se-summary-table td, .se-criteria-table th, .se-criteria-table td { border: 1px solid #000; padding: 2px; vertical-align: top; }
             .se-summary-table th, .se-criteria-table th { background: #f3f4f6; font-weight: normal; text-align: center; }
             .se-output-heading { font-size: 10px; margin: 4px 0 2px; font-weight: bold; }
             .se-output-subheading { font-size: 9px; margin: 2px 0; }
+	            .criterion-human-label { font-size: 6px; line-height: 1.1; color: #374151; margin: 1px 0; }
             .se-criteria-table .criterion-col { width: 12%; }
             .se-criteria-table .deficiency-col { width: 20%; }
             .se-criteria-table .action-col { width: 20%; }
             .se-criteria-table .small-col { width: 8%; }
             .se-criteria-table .progress-col { width: 8%; }
-            .se-chart-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; text-align: center; }
+            .se-chart-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; text-align: center; }
             .se-chart-title { font-size: 24px; font-weight: bold; margin: 0 0 4px; }
-            .se-chart-area { width: 230mm; height: 120mm; margin: 0 auto; border-left: 1px solid #666; border-bottom: 1px solid #666; background: repeating-linear-gradient(to top, transparent 0, transparent 13.5mm, #999 13.7mm); display: flex; align-items: flex-end; justify-content: center; gap: 18mm; padding: 0 10mm; box-sizing: border-box; }
-            .se-chart-y-title { position: absolute; left: 19mm; top: 58mm; transform: rotate(-90deg); font-size: 14px; font-weight: bold; }
-            .se-chart-wrapper { position: relative; }
-            .se-chart-group { width: 28mm; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
-            .se-chart-bars { height: 100mm; display: flex; align-items: flex-end; gap: 2mm; }
-            .se-chart-bar { width: 10mm; border: 1px solid #000; color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; min-height: 3mm; }
-            .se-chart-bar.baseline { background: #0505ff; }
-            .se-chart-bar.latest { background: #ef5359; }
-            .se-chart-label { font-size: 8px; width: 34mm; transform: rotate(-45deg); transform-origin: top left; text-align: left; margin-top: 4mm; }
-            .se-chart-x-title { font-size: 14px; font-weight: bold; margin-top: 18mm; }
-            .se-chart-legend { display: inline-flex; gap: 8px; border: 1px solid #555; padding: 3px 8px; margin-top: 18px; font-size: 11px; }
-            .legend-box { width: 10px; height: 10px; border: 1px solid #000; display: inline-block; margin-right: 4px; }
-            .legend-blue { background: #0505ff; } .legend-red { background: #ef5359; }
-            .se-narrative-page { page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
+            .se-chart-wrapper { width: 260mm; height: 138mm; margin: 0 auto; }
+            .se-chart-svg { display: block; width: 100%; height: 100%; overflow: visible; }
+            .se-narrative-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
             .se-narrative-title { font-size: 16px; margin: 0 0 12px; font-weight: normal; }
             .se-narrative-line { margin: 8px 0; }
-            @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+            @media print {
+              .preview-toolbar { display: none !important; }
+              body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+              .report-page { break-after: page; page-break-after: always; }
+              .report-page:last-child { break-after: auto; page-break-after: auto; }
+            }
           </style>
         </head>
         <body>
+          <div class="preview-toolbar">
+            <div class="preview-toolbar-title">PDF Preview — ${escapeHtml(selectedFacilityName)} Progress Report</div>
+            <div class="preview-toolbar-actions">
+              <button class="preview-button" type="button" onclick="window.print()">Print / Save PDF</button>
+              <button class="preview-button secondary" type="button" onclick="window.close()">Close Preview</button>
+            </div>
+          </div>
           <main class="report-page cover">
             <img class="crest" src="${qimsLogo}" alt="Republic of Botswana" />
             <hr class="top-rule" />
@@ -1346,98 +1663,81 @@ export default function Report() {
               </tfoot>
             </table>
           </section>
-          <section class="report-page se-output-page">
-            <table class="se-summary-table">
-              <thead>
-                <tr>
-                  <th rowspan="2">Overall<br />baseline<br />score</th>
-                  <th rowspan="2">Overall<br />progress<br />score</th>
-                  <th colspan="3">Deficiencies identified at<br />baseline</th>
-                  <th rowspan="2">Deficiencies<br />completed to<br />date</th>
-                  <th colspan="3">Remaining deficiencies<br />to be addressed</th>
-                  <th colspan="3">Critical Criteria</th>
-                  <th colspan="3">Critical Criteria<br />Remaining</th>
-                  <th rowspan="2">Most recent<br />assessment<br />date</th>
-                  <th colspan="4">Policies &amp; Procedures</th>
-                  <th rowspan="2">Quality<br />improvement<br />standard<br />compliance</th>
-                </tr>
-                <tr>
-                  <th>Total</th><th>NC</th><th>PC</th>
-                  <th>Total</th><th>NC</th><th>PC</th>
-                  <th>Total</th><th>NC</th><th>PC</th>
-                  <th>Total</th><th>NC</th><th>PC</th>
-                  <th>NC</th><th>PC</th><th>C</th><th>Tot</th>
-                </tr>
-              </thead>
-              <tbody>${firstSeSummaryRow}</tbody>
-            </table>
-            <div class="se-output-heading">Critical criteria requiring immediate response</div>
-            <div class="se-output-subheading">${escapeHtml(firstSeTitle)}</div>
-            <table class="se-criteria-table">
-              <thead>
-                <tr>
-                  <th class="criterion-col">Criterion</th>
-                  <th class="deficiency-col">Criterion / Deficiency Identified</th>
-                  <th class="action-col">Action / Recommendation</th>
-                  <th class="small-col">Responsible</th>
-                  <th class="small-col">Date Due</th>
-                  <th class="small-col">Date<br />Reassessed</th>
-                  <th class="small-col">Date Completed</th>
-                  <th class="progress-col">Progress</th>
-                  <th class="small-col">Comment</th>
-                </tr>
-              </thead>
-              <tbody>${firstSeImmediateRows}</tbody>
-            </table>
-            <div class="se-output-heading">Overall criteria for review</div>
-            <table class="se-criteria-table">
-              <thead>
-                <tr>
-                  <th class="criterion-col">Criterion</th>
-                  <th class="deficiency-col">Criterion / Deficiency Identified</th>
-                  <th class="action-col">Action / Recommendation</th>
-                  <th class="small-col">Responsible</th>
-                  <th class="small-col">Date Due</th>
-                  <th class="small-col">Date<br />Reassessed</th>
-                  <th class="small-col">Date Completed</th>
-                  <th class="progress-col">Progress</th>
-                  <th class="small-col">Comment</th>
-                </tr>
-              </thead>
-              <tbody>${firstSeReviewRows}</tbody>
-            </table>
-          </section>
-          <section class="report-page se-chart-page">
-            <h1 class="se-chart-title">${escapeHtml(firstSeTitle)}</h1>
-            <div class="se-chart-wrapper">
-              <div class="se-chart-y-title">Scores</div>
-              <div class="se-chart-area">${firstSeChartBars || '<div>No chart data available</div>'}</div>
-            </div>
-            <div class="se-chart-x-title">Performance Indicators${escapeHtml(firstSeCode)}</div>
-            <div class="se-chart-legend">
-              <span><span class="legend-box legend-blue"></span>Baseline</span>
-              <span><span class="legend-box legend-red"></span>${escapeHtml(reportInfo.latestType || 'Latest')}</span>
-            </div>
-          </section>
-          <section class="report-page se-narrative-page">
-            <h1 class="se-narrative-title">Overview for ${escapeHtml(firstSeTitle.replace(':', ''))}</h1>
-            <div class="se-narrative-line">${escapeHtml(reportInfo.latestType || 'Latest assessment')} undertaken by: ${escapeHtml(firstSeFacilitators)}</div>
-            <div class="se-narrative-line">No overview is recorded for ${escapeHtml(firstSeTitle.replace(/^SE\s*[0-9]+:\s*/i, ''))}</div>
-            <div class="se-narrative-line">Baseline undertaken by: ${escapeHtml(surveyors)}</div>
-            <p>${escapeHtml(selectedFacilityName)} assessment findings for ${escapeHtml(firstSeName)} are summarised in the preceding tables and chart.</p>
-          </section>
-          <script>window.addEventListener('load', function(){ window.print(); });</script>
+          ${printableSePages}
         </body>
       </html>`;
 
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      showToast?.('Popup blocked. Please allow popups to download the PDF cover.', 'warning');
+      showToast?.('Popup blocked. Please allow popups to preview the PDF.', 'warning');
       return;
     }
+
+    let didStartPrintPreview = false;
+    const waitForPrintReady = () => {
+      if (didStartPrintPreview) return;
+      didStartPrintPreview = true;
+      const stampPagination = () => {
+        const doc = printWindow.document;
+        const pages = Array.from(doc.querySelectorAll('.report-page'));
+        const total = pages.length;
+        const generatedAt = new Date().toLocaleString();
+        pages.forEach((page, index) => {
+          page.querySelectorAll('.page-footer, .page-header').forEach(node => node.remove());
+          const header = doc.createElement('div');
+          header.className = 'page-header';
+          header.innerHTML = `<span>${generatedAt}</span><span>${escapeHtml(selectedFacilityName)} Progress Report</span>`;
+          const footer = doc.createElement('div');
+          footer.className = 'page-footer';
+          footer.textContent = `Page ${index + 1} of ${total}`;
+          page.appendChild(header);
+          page.appendChild(footer);
+        });
+      };
+      const nextFrame = () => new Promise(resolve => {
+        const raf = printWindow.requestAnimationFrame || window.requestAnimationFrame;
+        raf(() => raf(resolve));
+      });
+      const waitForImages = Promise.all(
+        Array.from(printWindow.document.images || []).map(img => {
+          if (img.complete) return Promise.resolve();
+          return new Promise(resolve => {
+            const done = () => resolve();
+            img.addEventListener('load', done, { once: true });
+            img.addEventListener('error', done, { once: true });
+          });
+        })
+      );
+      const waitForFonts = printWindow.document.fonts?.ready
+        ? printWindow.document.fonts.ready.catch(() => undefined)
+        : Promise.resolve();
+
+      Promise.all([waitForImages, waitForFonts])
+        .then(() => { stampPagination(); })
+        .then(nextFrame)
+        .then(() => {
+          if (printWindow.closed) return;
+          printWindow.focus();
+          printWindow.document.title = `${selectedFacilityName} Progress Report Preview`;
+          printWindow.print();
+        })
+        .catch(() => {
+          if (printWindow.closed) return;
+          printWindow.focus();
+          printWindow.document.title = `${selectedFacilityName} Progress Report Preview`;
+          printWindow.print();
+        });
+    };
+
+    printWindow.addEventListener('load', waitForPrintReady, { once: true });
     printWindow.document.open();
     printWindow.document.write(html);
     printWindow.document.close();
+    setTimeout(() => {
+      try {
+        if (!printWindow.closed && printWindow.document.readyState === 'complete') waitForPrintReady();
+      } catch (_) { /* noop */ }
+    }, 750);
   };
 
   return (
@@ -1493,7 +1793,7 @@ export default function Report() {
         <Button
           variant="contained"
           color="primary"
-          disabled={loading || reportLoading || facilityOptions.length === 0}
+	          disabled={loading || reportLoading || !selectedFacilityId}
           onClick={handleGenerate}
         >
           {reportLoading ? 'Generating…' : 'Generate'}
@@ -1502,9 +1802,10 @@ export default function Report() {
           <Button
             variant="outlined"
             color="primary"
+            disabled={!canDownloadPdf}
             onClick={handleDownloadCoverPdf}
           >
-            Download PDF
+            Preview PDF
           </Button>
         )}
         {loading && <span style={{ color: '#64748b' }}>Loading facilities…</span>}
@@ -1803,7 +2104,7 @@ export default function Report() {
                       <h3 style={{ margin: 0 }}>SE Drilldown</h3>
                       <div style={{ color: '#64748b', fontSize: 13, marginTop: 4 }}>
                         {sectionChartLabels[drillSectionId] || sectionLabels[drillSectionId] || drillSectionId}
-                        {drillLevel === 'criteria' && drillRootCode ? ` / ${drillRootCode}` : ''}
+	                        {drillLevel === 'criteria' && drillRootCode ? ` / ${criterionLabelInSection(drillSectionId, drillRootCode)}` : ''}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
@@ -1814,14 +2115,14 @@ export default function Report() {
 
                   {drillLevel === 'roots' && (() => {
                     const data = buildRootChartData(drillSectionId);
-                    const chartWidth = Math.max(700, data.length * 120);
+	                    const chartWidth = Math.max(800, data.length * 170);
                     if (data.length === 0) return <div style={{ color: '#64748b' }}>No standards available for this SE.</div>;
                     return (
                       <div style={{ width: '100%', overflowX: 'auto' }}>
-                        <div ref={drillChartRef} style={{ width: chartWidth, height: 380 }}>
-                          <BarChart width={chartWidth} height={380} data={data} margin={{ top: 16, right: 16, bottom: 24, left: 0 }}>
+	                        <div ref={drillChartRef} style={{ width: chartWidth, height: 430 }}>
+	                          <BarChart width={chartWidth} height={430} data={data} margin={{ top: 16, right: 16, bottom: 76, left: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={70} />
+	                            <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-35} textAnchor="end" height={110} />
                             <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
                             <Tooltip content={<DrillTooltip />} />
                             <Legend />
@@ -1839,14 +2140,14 @@ export default function Report() {
 
                   {drillLevel === 'criteria' && (() => {
                     const data = buildCriteriaChartData(drillSectionId, drillRootCode);
-                    const chartWidth = Math.max(700, data.length * 120);
+	                    const chartWidth = Math.max(800, data.length * 170);
                     if (data.length === 0) return <div style={{ color: '#64748b' }}>No linked criteria found for {drillRootCode}.</div>;
                     return (
                       <div style={{ width: '100%', overflowX: 'auto' }}>
-                        <div ref={drillChartRef} style={{ width: chartWidth, height: 380 }}>
-                          <BarChart width={chartWidth} height={380} data={data} margin={{ top: 16, right: 16, bottom: 24, left: 0 }}>
+	                        <div ref={drillChartRef} style={{ width: chartWidth, height: 430 }}>
+	                          <BarChart width={chartWidth} height={430} data={data} margin={{ top: 16, right: 16, bottom: 76, left: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-                            <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={70} />
+	                            <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-35} textAnchor="end" height={110} />
                             <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
                             <Tooltip content={<DrillTooltip />} />
                             <Legend />

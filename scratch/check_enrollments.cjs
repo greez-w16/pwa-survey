@@ -3,7 +3,7 @@ const https = require('https');
 const username = 'admin';
 const password = '5Am53808053@';
 const baseUrl = 'https://qimsdev.5am.co.bw/qims';
-const teiId = 'rFnLMiNE8GZ';
+const teiId = 'XzN6svVGGEb';
 
 const auth = Buffer.from(`${username}:${password}`).toString('base64');
 
@@ -13,7 +13,8 @@ const options = {
     }
 };
 
-const url = `${baseUrl}/api/trackedEntityInstances/${teiId}?fields=trackedEntityInstance,attributes[attribute,value]`;
+const programId = 'G2gULe4jsfs';
+const url = `${baseUrl}/api/programs/${programId}?fields=id,displayName,programTrackedEntityAttributes[trackedEntityAttribute[id,displayName]]`;
 
 https.get(url, options, (res) => {
     let data = '';
@@ -23,7 +24,7 @@ https.get(url, options, (res) => {
     res.on('end', () => {
         try {
             const json = JSON.parse(data);
-            console.log('TEI Details:', json);
+            console.log('Program Details:', JSON.stringify(json, null, 2));
         } catch (e) {
             console.error('Failed to parse JSON', e);
             console.log('Raw data:', data);

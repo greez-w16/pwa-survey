@@ -121,6 +121,28 @@ export function Dashboard() {
         'unknown'
     );
 
+    const SURVEY_PROGRAM_ATTRIBUTE_IDS = {
+        assessmentTypeSelected: 'qrTQdWKRYMB',
+        facilityType: 'ZAcSwTShzlN',
+        facilityAssessmentStatus: 'SlXgujGsSqv',
+        assessmentStartDate: 'ruhbCcyiOsP',
+        assessmentGuidelineVersion: 'BHm7pKBQGtf',
+        assessmentYear: 'SNxiLOr01tU',
+        linkedSchedulingEnrollmentUid: 'NGUDA6wHnM5',
+        assessmentType: 'Bw4PZ8NsYFd',
+    };
+
+    const getAttributeValue = (attributes, attributeId, displayNameIncludes = []) => {
+        const normalizedNames = displayNameIncludes.map(name => String(name).replace(/\s+/g, ' ').toLowerCase());
+        const attr = (attributes || []).find(a => {
+            if (a?.attribute === attributeId) return true;
+            const displayName = String(a?.displayName || '').replace(/\s+/g, ' ').toLowerCase();
+            return normalizedNames.some(name => displayName.includes(name));
+        });
+        const value = attr?.value;
+        return value === undefined || value === null || String(value).trim() === '' ? null : value;
+    };
+
     // Resolve the DataElement ID for "Type of Assessment" from loaded metadata
     const surveyTypeDeId = useMemo(() => {
         const ps = configuration?.programStage;
@@ -199,19 +221,72 @@ export function Dashboard() {
 	        return null;
     };
 
-    // Build SE options for the selected Facility Group
-    const buildSeOptions = (groupKey) => {
-        try {
-            const ns = String(groupKey || '').toUpperCase();
-            let arr = [];
-            if (ns === 'HOSPITAL') arr = hospitalConfig.hospital_full_configuration || [];
-            else if (ns === 'CLINICS') arr = clinicsConfig.clinics_full_configuration || [];
-            else if (ns === 'EMS') arr = emsConfig.ems_full_configuration || [];
-            else if (ns === 'MORTUARY') arr = mortuaryConfig.mortuary_full_configuration || [];
-            const seList = (arr || []).map(se => ({ id: String(se.se_id), label: `SE ${se.se_id} ${se.se_name || se.name || ''}`.trim() }));
-            return seList;
-        } catch (_) { return []; }
-    };
+	    const isAssessmentDetailsStageSection = (section) => {
+	        const text = `${section?.displayName || ''} ${section?.name || ''} ${section?.code || ''}`.toLowerCase();
+	        return text.includes('assessment details') || text.includes('assessment_details') || text.includes('facility details') || text.includes('facility_details');
+	    };
+
+	    const extractStageSectionSeId = (section) => {
+	        const candidates = [section?.displayName, section?.name, section?.code, section?.id]
+	            .filter(Boolean)
+	            .map(v => String(v));
+	        for (const candidate of candidates) {
+	            const match = candidate.match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)(?=$|[_\s:-])/i);
+	            if (match) return String(parseInt(match[2], 10));
+	            const prefixedNumberMatch = candidate.match(/(?:HOSP(?:ITAL)?|CLINICS?|MORTUARY|SURV)[_\s-]+(?:SE[_\s-]*)?([0-9]+)(?=$|[_\s:-])/i);
+	            if (prefixedNumberMatch) return String(parseInt(prefixedNumberMatch[1], 10));
+	        }
+	        return null;
+	    };
+
+	    const stageSectionMatchesFacilityGroup = (section, groupKey) => {
+	        const rawNs = String(groupKey || '').toUpperCase();
+	        const ns = rawNs === 'SE' ? 'EMS' : (rawNs === 'GENERAL' ? 'MORTUARY' : rawNs);
+	        const text = `${section?.displayName || ''} ${section?.name || ''} ${section?.code || ''}`.toUpperCase();
+	        if (isAssessmentDetailsStageSection(section)) return false;
+	        if (ns === 'HOSPITAL') return text.includes('HOSP') || text.includes('HOSPITAL');
+	        if (ns === 'CLINICS') return text.includes('CLINIC') || text.includes('CLINICS');
+	        if (ns === 'EMS') return text.includes('SURV_EMS') || text.includes('SURV-EMS') || /^\s*(EMS|SE)([_\s-]|$)/.test(text);
+	        if (ns === 'MORTUARY') return text.includes('MORTUARY') || text.includes('SURV_MORTUARY') || text.includes('SURV-MORTUARY');
+	        return false;
+	    };
+
+	    const buildMetadataSeOptions = (groupKey) => {
+	        const sections = configuration?.programStage?.programStageSections || [];
+	        const optionsById = new Map();
+	        sections.forEach(section => {
+	            if (!stageSectionMatchesFacilityGroup(section, groupKey)) return;
+	            const seId = extractStageSectionSeId(section);
+	            if (!seId || optionsById.has(seId)) return;
+	            const rawName = section?.displayName || section?.name || section?.code || '';
+	            const label = String(rawName)
+	                .replace(/^\s*(SURV[-_])?(HOSPITAL|HOSP|CLINICS?|EMS|MORTUARY)[-_\s]*/i, '')
+	                .replace(/^\s*SE\s*([0-9]+)[-_\s:]*/i, '')
+	                .trim();
+	            optionsById.set(seId, { id: seId, label: `SE ${seId} ${label || ''}`.trim() });
+	        });
+	        return Array.from(optionsById.values()).sort((a, b) => Number(a.id) - Number(b.id));
+	    };
+
+	    // Build SE options for the selected Facility Group. Prefer the live DHIS2
+	    // program-stage sections because those are the sections the form renders.
+	    // Static JSON config is only a fallback if metadata is not available yet.
+	    const buildSeOptions = (groupKey) => {
+	        try {
+	            const rawNs = String(groupKey || '').toUpperCase();
+	            const ns = rawNs === 'SE' ? 'EMS' : (rawNs === 'GENERAL' ? 'MORTUARY' : rawNs);
+	            const metadataSeList = buildMetadataSeOptions(ns);
+	            if (metadataSeList.length > 0) return metadataSeList;
+
+	            let arr = [];
+	            if (ns === 'HOSPITAL') arr = hospitalConfig.hospital_full_configuration || [];
+	            else if (ns === 'CLINICS') arr = clinicsConfig.clinics_full_configuration || [];
+	            else if (ns === 'EMS') arr = emsConfig.ems_full_configuration || [];
+	            else if (ns === 'MORTUARY') arr = mortuaryConfig.mortuary_full_configuration || [];
+	            const seList = (arr || []).map(se => ({ id: String(se.se_id), label: `SE ${se.se_id} ${se.se_name || se.name || ''}`.trim() }));
+	            return seList.sort((a, b) => Number(a.id) - Number(b.id));
+	        } catch (_) { return []; }
+	    };
 
     const toFacilityGroupKey = React.useCallback((txt) => {
         const t = String(txt || '').toLowerCase();
@@ -222,10 +297,10 @@ export function Dashboard() {
         return String(txt || '').toUpperCase().trim();
     }, []);
 
-    const getExpectedTagsForGroup = React.useCallback((groupKey) => {
-        const ns = toFacilityGroupKey(groupKey);
-        return ['FINAL', ...buildSeOptions(ns).map(se => String(se.id))];
-    }, [toFacilityGroupKey]);
+	    const getExpectedTagsForGroup = React.useCallback((groupKey) => {
+	        const ns = toFacilityGroupKey(groupKey);
+	        return ['FINAL', ...buildSeOptions(ns).map(se => String(se.id))];
+	    }, [configuration, toFacilityGroupKey]);
 
     const getFacilityGroupLabel = React.useCallback((facilityGroupKey) => {
         const labelMap = { HOSPITAL: 'Hospital', CLINICS: 'Clinics', EMS: 'EMS', MORTUARY: 'Mortuary' };
@@ -396,19 +471,26 @@ export function Dashboard() {
 
         setShowCreateBaselineDialog(false);
         setPendingOpenAssessment(null);
+        const finalEventId = eventIdMap?.FINAL || null;
+        const formIdentityId = finalEventId || enrollmentId || teiId;
         const withBaseline = {
             ...assessment,
+            eventId: finalEventId || assessment?.eventId,
+            enrollment: enrollmentId || assessment?.enrollment,
             trackedEntityInstance: teiId,
             scheduleTeiId: teiId,
-            baselineEventId: eventIdMap?.FINAL || null,
+            baselineEventId: finalEventId,
+	            eventIdMap: eventIdMap || {},
+	            parentGroupId: facilityGroup || assessment?.parentGroupId,
             preloadDataValues: preload,
+	            hydrateAll: true,
 	            // The just-created event map is authoritative. Replace any stale
 	            // local draft map that may have been produced by an earlier failed
 	            // readback/repair attempt.
 	            preloadMode: 'REPLACE'
         };
         navigate(
-            `/form?assessmentId=${assessment.eventId || eventIdMap?.FINAL || teiId}&baselineId=${eventIdMap?.FINAL || ''}`,
+            `/form?assessmentId=${encodeURIComponent(formIdentityId || '')}&baselineId=${encodeURIComponent(finalEventId || '')}&draftKey=${encodeURIComponent(formIdentityId || '')}&assessmentTeiId=${encodeURIComponent(teiId || '')}${enrollmentId ? `&enrollmentId=${encodeURIComponent(enrollmentId)}` : ''}`,
             { state: { selectedAssignment: withBaseline } }
         );
     }, [getFacilityGroupLabel, navigate, surveyGroupDeId, surveyTypeDeId]);
@@ -449,6 +531,7 @@ export function Dashboard() {
                 stageId,
                 orgUnitId,
                 teiId,
+	                enrollmentId: enrollmentId || planInfo?.plan?.enrollmentId || null,
                 status: 'ACTIVE',
                 dataValues,
                 notes: []
@@ -473,6 +556,22 @@ export function Dashboard() {
         if (missingTags.length > 0) {
             throw new Error(`Assessment repair incomplete. Missing DHIS2 events for: ${missingTags.join(', ')}`);
         }
+
+	        try {
+	            await api.upsertDataStoreItem(resolvedGroup, teiId, {
+	                ...(planInfo?.plan || {}),
+	                teiId,
+	                orgUnitId,
+	                enrollmentId: enrollmentId || planInfo?.plan?.enrollmentId || null,
+	                facilityGroup: resolvedGroup,
+	                typeOfAssessment: resolvedType,
+	                eventIdMap: mergedTagMap,
+	                eventIdMapSource: 'REPAIR_DHIS2_READBACK',
+	                eventIdMapUpdatedAt: new Date().toISOString(),
+	            });
+	        } catch (e) {
+	            console.warn('Repair: DataStore eventIdMap upsert failed (non-fatal)', e);
+	        }
 
         return { tagMap: mergedTagMap, missingTags: [], facilityGroup: resolvedGroup, surveyType: resolvedType };
     }, [buildAssessmentDetailsDataValues, configuration, findAssessmentPlanForTei, getExpectedTagsForGroup, pollForExpectedTags, readSurveyTagMap, toFacilityGroupKey, user?.id]);
@@ -586,18 +685,34 @@ export function Dashboard() {
             // fetch all survey events for this Org Unit (regardless of TEI) to capture both 
             // scheduled and self-initiated assessments in the history table.
             console.log('[AssocEvents] fetching for OrgUnit', { assocKey, programId, stageId, orgUnitId });
-            const survey = await api
-                .getSurveyEventsForOrgUnit({ orgUnitId, programId, stageId, fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]' })
-                .catch(() => []);
-            console.log('[AssocEvents] fetched', { assocKey, count: Array.isArray(survey) ? survey.length : 0 });
+            const enrollments = await (api.getProgramEnrollments
+                ? api.getProgramEnrollments(programId, orgUnitId, ['ACTIVE', 'COMPLETED'])
+                : api.getActiveEnrollments(programId, orgUnitId)
+            ).catch(() => []);
+            console.log('[AssocEvents] fetched enrollments', { assocKey, count: Array.isArray(enrollments) ? enrollments.length : 0 });
 
             setAssociatedByEnrollment(prev => ({
                 ...prev,
                 [assocKey]: {
                     loading: false,
-                    survey: (survey||[]).map(e => ({ ...e, _type: 'Survey' }))
+                    survey: (enrollments||[]).map(e => {
+	                        const assessmentStartDate = getAttributeValue(
+	                            e.attributes,
+	                            SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentStartDate,
+	                            ['assessment start date']
+	                        );
+                        return { 
+                            ...e, 
+                            _type: 'Enrollment',
+	                            event: e.enrollmentId,
+	                            enrollment: e.enrollmentId,
+                            trackedEntityInstance: e.teiId,
+		                            eventDate: assessmentStartDate || e.enrollmentDate
+                        };
+                    })
                 }
             }));
+
         } catch (e) {
             console.warn('Failed to load associated events for enrollment', assessment.enrollment, e);
             setAssociatedByEnrollment(prev => ({ ...prev, [getAssocKey(assessment)]: { loading: false, survey: [] }}));
@@ -725,20 +840,69 @@ export function Dashboard() {
     const openAssociatedSurvey = async (assessment, ev) => {
         if (!ev?.event) return;
         const withBaseline = { ...assessment, baselineEventId: ev.event };
-        
-        // New model: one TEI = one assessment. Prefer the bundled events if the
-        // clicked row already represents an assessment bundle.
+
         const assocKey = getAssocKey(assessment);
-        const allSurveyEvents = associatedByEnrollment[assocKey]?.survey || [];
-        const relatedEvents = Array.isArray(ev._bundleEvents) && ev._bundleEvents.length > 0
-            ? [...ev._bundleEvents]
-            : allSurveyEvents.filter(e => {
-                const sameTei = (e?.trackedEntityInstance || '') === (ev?.trackedEntityInstance || '');
-                const sameDate = e?.eventDate && ev?.eventDate && e.eventDate.substring(0, 10) === ev.eventDate.substring(0, 10);
-                return sameTei || sameDate;
-            });
-        if (relatedEvents.length === 0) relatedEvents.push(ev);
-        const primaryEvent = relatedEvents.find(e => getSysTag(e) === 'FINAL') || ev;
+        let relatedEvents = [];
+        const clickedEnrollmentId = ev.enrollmentId || ev.enrollment || (ev._type === 'Enrollment' ? ev.event : null);
+
+        // The table now loads enrollments, which lack dataValues. Treat the clicked
+        // enrollment as the pointer to the assessment bundle and fetch its actual
+        // survey events only when the row is opened.
+        const isEnrollmentRow = ev._type === 'Enrollment' || !Array.isArray(ev.dataValues);
+        if (isEnrollmentRow) {
+            const teiId = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
+            const orgUnitId = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || null;
+            const programId = configuration?.program?.id || 'G2gULe4jsfs';
+            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+
+            if (clickedEnrollmentId) {
+                try {
+                    const fetched = await api.getEventsList({
+                        programId,
+                        stageId,
+                        enrollmentId: clickedEnrollmentId,
+                        fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
+                    });
+                    relatedEvents = Array.isArray(fetched) ? fetched : [];
+                } catch (e) {
+                    console.warn('[openAssociatedSurvey] Failed to fetch events for clicked enrollment', clickedEnrollmentId, e);
+                }
+            }
+
+            if (relatedEvents.length === 0 && teiId) {
+                try {
+                    const fetched = await api.getSurveyEventsForTei({
+                        teiId,
+                        orgUnitId,
+                        programId,
+                        stageId,
+                        fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
+                    });
+                    relatedEvents = Array.isArray(fetched) ? fetched : [];
+                } catch (e) {
+                    console.warn('[openAssociatedSurvey] Fallback TEI event fetch failed for clicked enrollment', teiId, e);
+                }
+            }
+
+            if (relatedEvents.length === 0) {
+                showToast?.('No survey events found for this enrollment yet.', 'warning');
+                return;
+            }
+        }
+
+        if (relatedEvents.length === 0) {
+            // Fallback to old path when the row already contains actual event data.
+            const allSurveyEvents = associatedByEnrollment[assocKey]?.survey || [];
+            relatedEvents = Array.isArray(ev._bundleEvents) && ev._bundleEvents.length > 0
+                ? [...ev._bundleEvents]
+                : allSurveyEvents.filter(e => {
+                    const sameTei = (e?.trackedEntityInstance || '') === (ev?.trackedEntityInstance || '');
+                    const sameDate = e?.eventDate && ev?.eventDate && e.eventDate.substring(0, 10) === ev.eventDate.substring(0, 10);
+                    return sameTei || sameDate;
+                });
+            if (relatedEvents.length === 0) relatedEvents.push(ev);
+        }
+        const primaryEvent = relatedEvents.find(e => getSysTag(e) === 'FINAL') || relatedEvents[0] || ev;
 
         // Preload ALL DE values from ALL related events so the form can render and score with complete context
         const preload = {};
@@ -759,6 +923,7 @@ export function Dashboard() {
         
         // Save the eventIdMap into preload so App.jsx can use it
         preload['eventIdMap_internal'] = JSON.stringify(eventIdMap);
+        if (clickedEnrollmentId) preload['enrollmentId_internal'] = clickedEnrollmentId;
 
         // The baseline assessment group comes from the primary (FINAL) event usually
         const ag = (primaryEvent.dataValues || []).find(d => d.dataElement === 'pzenrgsSny3');
@@ -794,10 +959,12 @@ export function Dashboard() {
         // Carry TEI so PUT can include trackedEntityInstance if needed
         if (primaryEvent.trackedEntityInstance || ev.trackedEntityInstance) preload['teiId_internal'] = primaryEvent.trackedEntityInstance || ev.trackedEntityInstance;
 
-        const selected = { ...withBaseline, baselineEventId: primaryEvent.event, preloadDataValues: preload, hydrateAll: true, preloadMode: 'REPLACE' };
-        // Keep using the assignment's id in the URL for stable draft grouping
-        const urlId = assessment.eventId || assessment.enrollment || primaryEvent.event || ev.event;
-        navigate(`/form?assessmentId=${urlId}&baselineId=${primaryEvent.event || ev.event}`, { state: { selectedAssignment: selected } });
+        const selected = { ...withBaseline, enrollment: clickedEnrollmentId || withBaseline.enrollment, baselineEventId: primaryEvent.event, preloadDataValues: preload, hydrateAll: true, preloadMode: 'REPLACE' };
+        // Use the clicked enrollment/event as the form identity. Using the parent
+        // assignment id here can reopen an older local draft bucket.
+        const urlId = clickedEnrollmentId || primaryEvent.event || ev.event;
+        const teiForUrl = primaryEvent.trackedEntityInstance || ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
+        navigate(`/form?assessmentId=${encodeURIComponent(urlId || '')}&baselineId=${encodeURIComponent(primaryEvent.event || ev.event || '')}&draftKey=${encodeURIComponent(urlId || '')}&assessmentTeiId=${encodeURIComponent(teiForUrl)}${clickedEnrollmentId ? `&enrollmentId=${encodeURIComponent(clickedEnrollmentId)}` : ''}`, { state: { selectedAssignment: selected } });
     };
 
     const resolveOrgUnitForAssessment = (assessment) => {
@@ -1424,8 +1591,25 @@ export function Dashboard() {
                 setIsBaselineCreating(false);
                 return;
             }
-            if (!allSeAssigned) {
-                showToast?.('Please assign at least one team member to every SE before proceeding.', 'error');
+
+	            const provisioningSeOptions = buildSeOptions(initFacilityGroup);
+	            if (provisioningSeOptions.length === 0) {
+	                showToast?.('No SE sections were found for this Facility Type. Survey initialization was blocked.', 'error');
+	                setIsBaselineCreating(false);
+	                return;
+	            }
+	            const currentSeIds = (initSeOptions || []).map(se => String(se.id)).join('|');
+	            const provisioningSeIds = provisioningSeOptions.map(se => String(se.id)).join('|');
+	            if (currentSeIds !== provisioningSeIds) {
+	                setInitSeOptions(provisioningSeOptions);
+	                setCreateDetails(prev => [...prev, `SE list refreshed from live metadata: ${provisioningSeOptions.map(se => se.id).join(', ')}`]);
+	            }
+	            const unassignedSeOptions = provisioningSeOptions.filter(se => {
+	                const assignedUsers = initAssignments[se.id] || [];
+	                return !Array.isArray(assignedUsers) || assignedUsers.length === 0;
+	            });
+	            if (unassignedSeOptions.length > 0) {
+	                showToast?.(`Please assign at least one team member to every SE before proceeding. Missing: ${unassignedSeOptions.map(se => se.id).join(', ')}`, 'error');
                 setIsBaselineCreating(false);
                 return;
             }
@@ -1472,34 +1656,40 @@ export function Dashboard() {
                 return result;
             };
 
+            const existingResolvedTeiId = teiId;
+            let isNewTei = false;
             if (isSelfSelected) {
-                if (!teiId) teiId = generateDhis2Uid();
-                enrollmentId = generateDhis2Uid();
-                setCreateDetails(prev => [...prev, `Generated assessment TEI: ${teiId}`, `Generated enrollment: ${enrollmentId}`]);
+                teiId = generateDhis2Uid();
+                isNewTei = true;
+                if (existingResolvedTeiId) {
+                    setCreateDetails(prev => [...prev, `Self assessment will use a new TEI instead of existing TEI: ${existingResolvedTeiId}`]);
+                }
+                setCreateDetails(prev => [...prev, `Generated assessment TEI: ${teiId}`]);
             } else if (!teiId) {
                 throw new Error('Could not resolve the selected assessment TEI.');
-            } else {
-                // Check if an active enrollment already exists for this TEI
-                let existingEnrollmentId = null;
-                try {
-                    const enrollments = await api.getEnrollmentsForTei(teiId, programId);
-                    const myEnrollment = enrollments.find(e => e.status === 'ACTIVE');
-                    if (myEnrollment && myEnrollment.enrollment) {
-                        existingEnrollmentId = myEnrollment.enrollment;
-                        console.log('[API] Found existing active enrollment:', existingEnrollmentId);
-                    }
-                } catch (e) {
-                    console.warn('Failed to check active enrollments (non-fatal)', e);
-                }
+            }
 
-                if (existingEnrollmentId) {
-                    enrollmentId = existingEnrollmentId;
-                    setCreateDetails(prev => [...prev, `Reusing existing active enrollment: ${enrollmentId}`]);
-                } else {
-                    enrollmentId = generateDhis2Uid();
-                    setCreateDetails(prev => [...prev, `Generated enrollment: ${enrollmentId}`]);
+            // DHIS2 permits only one ACTIVE enrollment per TEI/program. Before
+            // creating a fresh assessment enrollment, close any existing active
+            // survey-program enrollment so each assessment can still map to its
+            // own enrollment/event bundle.
+            if (teiId && !isNewTei) {
+                const existingSurveyEnrollments = await api.getEnrollmentsForTei(teiId, programId).catch(() => []);
+                const activeSurveyEnrollments = (existingSurveyEnrollments || []).filter(enr =>
+                    enr?.enrollment &&
+                    !enr?.deleted &&
+                    String(enr.status || '').toUpperCase() === 'ACTIVE'
+                );
+                for (const activeEnrollment of activeSurveyEnrollments) {
+                    await api.completeEnrollment(activeEnrollment.enrollment);
+                    setCreateDetails(prev => [...prev, `Completed previous active enrollment: ${activeEnrollment.enrollment}`]);
                 }
             }
+
+            // Each newly initiated assessment must have its own survey-program
+            // enrollment so the associated table row maps to one event bundle.
+            enrollmentId = generateDhis2Uid();
+            setCreateDetails(prev => [...prev, `Generated enrollment: ${enrollmentId}`]);
 
             // Persist SE assignment plan in DataStore under namespace={facilityGroup} key={teiId}
             const ns = String(initFacilityGroup).toUpperCase();
@@ -1542,6 +1732,7 @@ export function Dashboard() {
 
             const eventsPayload = [];
             const eventIdMap = {};
+			const expectedTags = ['FINAL', ...provisioningSeOptions.map(se => String(se.id))];
 
             // FINAL event
             const finalEventId = generateDhis2Uid();
@@ -1555,8 +1746,9 @@ export function Dashboard() {
                 ]
             });
 
-            // SE events
-            for (const se of initSeOptions) {
+	            // SE events. This list comes from the live rendered metadata, so a
+	            // visible section like HOSP_SE28 must always receive a backing event.
+	            for (const se of provisioningSeOptions) {
                 const seEventId = generateDhis2Uid();
                 eventIdMap[se.id] = seEventId;
                 eventsPayload.push({
@@ -1571,8 +1763,9 @@ export function Dashboard() {
 
             updateCreateProgress(1, 2, 'Sending assessment bundle to DHIS2...');
 
-            try {
-                await api.createAssessmentBundle({
+			let createResult = null;
+			try {
+				createResult = await api.createAssessmentBundle({
                     programId,
                     stageId,
                     orgUnitId,
@@ -1587,11 +1780,17 @@ export function Dashboard() {
                 throw bundleErr;
             }
 
+			const responseEventIds = Array.isArray(createResult?.eventIds) ? createResult.eventIds : [];
+			const responseEventIdMap = {};
+			expectedTags.forEach((tag, idx) => {
+				if (responseEventIds[idx]) responseEventIdMap[tag] = responseEventIds[idx];
+			});
+
             updateCreateProgress(2, 2, 'Finalizing setup...');
 
             // Verify that every expected SYS_TAG becomes visible in DHIS2.
-            // Do NOT create duplicate repair events on a fast readback miss.
-            const expectedTags = ['FINAL', ...initSeOptions.map(se => String(se.id))];
+			// Do NOT open the form with only locally generated event IDs; they must
+			// be confirmed by DHIS2 readback so later PUTs do not hit Invalid Event ID.
             const visibilityResult = await pollForExpectedTags({
                 teiId,
                 orgUnitId,
@@ -1608,46 +1807,56 @@ export function Dashboard() {
                     setCreateDetails(prev => [...prev, `DHIS2 visibility check ${attempt}/${totalAttempts}: ${visibleCount}/${expectedTags.length} tags visible${missingTags.length ? `; still missing ${missingTags.join(', ')}` : ''}.`]);
                 }
             });
-	            const createdMapMissingTags = expectedTags.filter(tag => !eventIdMap[tag]);
-	            if (createdMapMissingTags.length > 0) {
-	                const failureInfo = {
-	                    message: `Assessment provisioning incomplete. DHIS2 did not return event IDs for: ${createdMapMissingTags.join(', ')}`,
-	                    missingTags: createdMapMissingTags,
-	                    expectedCount: expectedTags.length,
-	                    verifiedCount: expectedTags.length - createdMapMissingTags.length,
-	                    teiId,
-	                    orgUnitId,
-	                    programId,
-	                    stageId,
-	                    facilityGroup: ns,
-	                    surveyType: initSurveyType,
-	                };
-	                setCreateErrorInfo(failureInfo);
-	                const error = new Error(failureInfo.message);
-	                error.createErrorInfo = failureInfo;
-	                throw error;
-	            }
-
-	            const readbackTagMap = visibilityResult.tagMap || {};
-	            const readbackMissingTags = expectedTags.filter(tag => !readbackTagMap[tag]);
-	            setCreateDetails(prev => [
+			const readbackTagMap = visibilityResult.tagMap || {};
+			const readbackMissingTags = expectedTags.filter(tag => !readbackTagMap[tag]);
+			setCreateDetails(prev => [
 	                ...prev,
-	                `Created ${expectedTags.length}/${expectedTags.length} event mappings from DHIS2 create responses.`,
-	                `Readback saw ${expectedTags.length - readbackMissingTags.length}/${expectedTags.length} SYS_TAGs${readbackMissingTags.length ? `; pending DHIS2 visibility for ${readbackMissingTags.join(', ')}` : ''}.`
+				`DHIS2 create response returned ${Object.keys(responseEventIdMap).length}/${expectedTags.length} event IDs.`,
+				`Readback confirmed ${expectedTags.length - readbackMissingTags.length}/${expectedTags.length} SYS_TAGs${readbackMissingTags.length ? `; missing ${readbackMissingTags.join(', ')}` : ''}.`
 	            ]);
+
+			if (readbackMissingTags.length > 0) {
+				const failureInfo = {
+					message: `Assessment provisioning incomplete. Missing DHIS2 events for: ${readbackMissingTags.join(', ')}`,
+					missingTags: readbackMissingTags,
+					expectedCount: expectedTags.length,
+					verifiedCount: expectedTags.length - readbackMissingTags.length,
+					teiId,
+					orgUnitId,
+					programId,
+					stageId,
+					facilityGroup: ns,
+					surveyType: initSurveyType,
+				};
+				setPendingProvisionedBundle({
+					assessment: pendingOpenAssessment,
+					teiId,
+					orgUnitId,
+					enrollmentId,
+					facilityGroup: ns,
+					surveyType: initSurveyType,
+					eventIdMap: readbackTagMap,
+				});
+				setCreateErrorInfo(failureInfo);
+				const error = new Error(failureInfo.message);
+				error.createErrorInfo = failureInfo;
+				throw error;
+			}
+
+			const verifiedEventIdMap = { ...responseEventIdMap, ...readbackTagMap };
 
 	            Object.entries(readbackTagMap).forEach(([tag, readbackEventId]) => {
 	                if (!expectedTags.includes(tag) || !readbackEventId) return;
 	                if (eventIdMap[tag] && eventIdMap[tag] !== readbackEventId) {
-	                    setCreateDetails(prev => [...prev, `SYS_TAG ${tag} readback returned ${readbackEventId}, but create response returned ${eventIdMap[tag]}; keeping create-response ID.`]);
+					setCreateDetails(prev => [...prev, `SYS_TAG ${tag} readback returned ${readbackEventId}; using readback ID instead of local generated ID ${eventIdMap[tag]}.`]);
 	                }
 	            });
 
 	            try {
 	                await api.upsertDataStoreItem(ns, teiId, {
 	                    ...body,
-	                    eventIdMap,
-	                    eventIdMapSource: 'CREATE_RESPONSE',
+					eventIdMap: verifiedEventIdMap,
+					eventIdMapSource: 'DHIS2_READBACK',
 	                    eventIdMapUpdatedAt: new Date().toISOString(),
 	                });
 	            } catch (e) {
@@ -1660,7 +1869,7 @@ export function Dashboard() {
                 assessment: pendingOpenAssessment,
                 teiId,
                 enrollmentId,
-                eventIdMap,
+				eventIdMap: verifiedEventIdMap,
                 surveyType: initSurveyType,
                 facilityGroup: ns,
                 detailsDataValues: assessmentDetailsDataValues,
@@ -2350,11 +2559,18 @@ export function Dashboard() {
                         ) : (
                             (() => {
                                 const allUniqueAssessments = [];
-                                const seenIds = new Set();
+                                const seenFacilities = new Map();
                                 [...pendingAssessments, ...upcomingAssessments].forEach(assessment => {
-                                    if (!seenIds.has(assessment.eventId)) {
-                                        allUniqueAssessments.push(assessment);
-                                        seenIds.add(assessment.eventId);
+                                    const facilityId = assessment.orgUnit || assessment.facilityId || assessment.eventId;
+                                    if (!seenFacilities.has(facilityId)) {
+                                        const newItem = { ...assessment, _duplicates: [assessment] };
+                                        allUniqueAssessments.push(newItem);
+                                        seenFacilities.set(facilityId, newItem);
+                                    } else {
+                                        const existing = seenFacilities.get(facilityId);
+                                        if (existing) {
+                                            existing._duplicates.push(assessment);
+                                        }
                                     }
                                 });
 
@@ -2462,18 +2678,37 @@ export function Dashboard() {
             </div>
             {expandedAssignments[getAssocKey(assessment)] && (
                 <div style={{ marginTop: '10px', width: '100%', background: '#f8f9fa', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
+                    {assessment._duplicates && assessment._duplicates.length > 1 && (
+                        <div style={{ marginBottom: '10px', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
+                            <div style={{ fontWeight: 600, color: '#374151', marginBottom: '4px' }}>
+                                Grouped Assignments ({assessment._duplicates.length})
+                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                                {assessment._duplicates.map(d => (
+                                    <div key={d.eventId} style={{ fontSize: '13px', color: '#4b5563' }}>
+                                        • Status: <span style={{ fontWeight: 500 }}>{d.statusCode === 'FAC_ASS_ASSIGN_ACCEPTED' ? 'Accepted' : 'Pending'}</span> | Date: {d.sortDate} | ID: {d.eventId} | Enr: {d.enrollment || d.schedule?.enrollments?.[0]?.enrollment || 'N/A'} | Prog: {d.program || d.schedule?.enrollments?.[0]?.program || 'N/A'} | TEI: {d.trackedEntityInstance || d.scheduleTeiId || 'N/A'} | Start: {d.scheduledAt ? d.scheduledAt.slice(0,10) : 'N/A'} | End: {d.updatedAt ? d.updatedAt.slice(0,10) : 'N/A'}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
                     {(() => {
                         const bundle = associatedByEnrollment[getAssocKey(assessment)];
                         if (!bundle || bundle.loading) return <div style={{ color: '#666' }}>Loading associated events...</div>;
                         const rawRows = [ ...(bundle.survey||[]) ];
-                        const groupedByTei = rawRows.reduce((acc, ev) => {
-                            const tei = ev?.trackedEntityInstance;
-                            const key = tei && tei !== 'unknown-tei' ? tei : `event-${ev.event}`;
+	                        const groupedByAssessment = rawRows.reduce((acc, ev) => {
+	                            const enrollmentKey = ev?._type === 'Enrollment'
+	                                ? (ev.enrollmentId || ev.enrollment || ev.event)
+	                                : null;
+	                            const tei = ev?.trackedEntityInstance;
+	                            const key = enrollmentKey
+	                                ? `enrollment-${enrollmentKey}`
+	                                : (tei && tei !== 'unknown-tei' ? tei : `event-${ev.event}`);
                             if (!acc[key]) acc[key] = [];
                             acc[key].push(ev);
                             return acc;
                         }, {});
-                        let rows = Object.entries(groupedByTei).map(([key, evs]) => {
+	                        let rows = Object.entries(groupedByAssessment).map(([key, evs]) => {
                             const hasFinal = evs.some(ev => getSysTag(ev) === 'FINAL');
                             const finalEv = hasFinal
                                 ? evs.find(ev => getSysTag(ev) === 'FINAL')
@@ -2481,6 +2716,9 @@ export function Dashboard() {
                             const latestWithTypeOrGroup = evs.find(ev => (ev.dataValues || []).some(d => d.dataElement === surveyTypeDeId || d.dataElement === surveyGroupDeId)) || null;
                             const latestEv = [...evs].sort((a, b) => new Date(b?.eventDate || 0) - new Date(a?.eventDate || 0))[0] || evs[0];
                             const representative = finalEv || latestWithTypeOrGroup || latestEv;
+	                            const representativeTei = representative?.trackedEntityInstance
+	                                || evs.find(ev => ev?.trackedEntityInstance)?.trackedEntityInstance
+	                                || (key.startsWith('event-') ? 'unknown-tei' : key);
                             const earliestDate = evs.reduce((acc, cur) => {
                                 if (!cur?.eventDate) return acc;
                                 if (!acc) return cur.eventDate;
@@ -2488,9 +2726,9 @@ export function Dashboard() {
                             }, null);
                             return {
                                 ...representative,
-                                trackedEntityInstance: key.startsWith('event-') ? 'unknown-tei' : key,
+	                                trackedEntityInstance: representativeTei,
                                 _bundleEvents: evs,
-                                _displayEventId: representative?.event || '-',
+	                                _displayEventId: representative?.enrollmentId || representative?.event || '-',
                                 _baselineDate: earliestDate,
                                 _assessmentDate: representative?.eventDate || latestEv?.eventDate || earliestDate,
                             };
@@ -2520,6 +2758,13 @@ export function Dashboard() {
                             );
                         }
                         const getTypeValue = (ev) => {
+                            if (ev._type === 'Enrollment') {
+	                                return getAttributeValue(
+	                                    ev.attributes,
+	                                    SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected,
+	                                    ['assessment type of assessment selected']
+	                                ) || '-';
+                            }
                             if (!surveyTypeDeId) return '-';
                             const sourceEvents = Array.isArray(ev?._bundleEvents) ? ev._bundleEvents : [ev];
                             const dv = sourceEvents
@@ -2528,6 +2773,13 @@ export function Dashboard() {
                             return dv?.value || '-';
                         };
                         const getGroupValue = (ev) => {
+                            if (ev._type === 'Enrollment') {
+	                                return getAttributeValue(
+	                                    ev.attributes,
+	                                    SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType,
+	                                    ['assessment facility type']
+	                                ) || '-';
+                            }
                             if (!surveyGroupDeId) return '-';
                             const sourceEvents = Array.isArray(ev?._bundleEvents) ? ev._bundleEvents : [ev];
                             const dv = sourceEvents
@@ -2535,6 +2787,25 @@ export function Dashboard() {
                                 .find(d => d.dataElement === surveyGroupDeId && d.value !== undefined && String(d.value).trim() !== '');
                             return dv?.value || '-';
                         };
+                        const formatAssessmentStatusLabel = (value) => {
+                            const raw = String(value || '').trim();
+                            if (!raw) return '-';
+                            if (raw === 'FAC_ASS_STATUS_IN_PROGRESS') return 'In Progress';
+                            return raw;
+                        };
+                        const getStatusValue = (ev) => {
+                            if (ev._type === 'Enrollment') {
+	                                return formatAssessmentStatusLabel(
+	                                    getAttributeValue(
+	                                        ev.attributes,
+	                                        SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityAssessmentStatus,
+	                                        ['facility assessment status']
+	                                    ) || ev.status || '-'
+	                                );
+                            }
+                            return formatAssessmentStatusLabel(ev.status || '-');
+                        };
+
                         // Authorised window for this OU (from team events)
                         const authDates = (() => {
                             const evsAuth = Array.isArray(assessment.team) ? assessment.team : [];
@@ -2550,6 +2821,7 @@ export function Dashboard() {
                                     <thead>
                                         <tr style={{ textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
                                             <th style={{ padding: '6px 8px' }}>Assessment_ID</th>
+                                            <th style={{ padding: '6px 8px' }}>Program</th>
                                             <th style={{ padding: '6px 8px' }}>TEI</th>
                                             <th style={{ padding: '6px 8px' }}>Assessment date</th>
                                             <th style={{ padding: '6px 8px' }}>Authorised start</th>
@@ -2561,21 +2833,22 @@ export function Dashboard() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                                                        {rows.map(ev => (
+	                                                                        {rows.map(ev => (
                                                                             <tr
-                                                                                key={`survey-${ev.trackedEntityInstance || ev.event}`}
+	                                                                                key={`survey-${ev.enrollmentId || ev.enrollment || ev.event || ev.trackedEntityInstance}`}
                                                                                 onClick={() => openAssociatedSurvey(assessment, ev)}
                                                                                 style={{ borderTop: '1px dashed #eee', cursor: 'pointer' }}
                                                                                 title="Open this survey for editing"
                                                                             >
-                                                                                <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev._displayEventId || ev.event || '-'}</td>
-                                                                                <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.trackedEntityInstance || '-'}</td>
+	                                                                                <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev._displayEventId || ev.event || '-'}</td>
+	                                                                                <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.programId || '-'}</td>
+	                                                                                <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.trackedEntityInstance || '-'}</td>
                                             <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{ev._assessmentDate ? new Date(ev._assessmentDate).toLocaleDateString() : 'N/A'}</td>
                                             <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.start || 'N/A'}</td>
                                             <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.end || 'N/A'}</td>
                                                                                 <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
                                                                                 <td style={{ padding: '6px 8px', color: '#334155' }}>{getGroupValue(ev)}</td>
-                                                                                <td style={{ padding: '6px 8px' }}>{ev.status || '-'}</td>
+                                                                                <td style={{ padding: '6px 8px' }}>{getStatusValue(ev)}</td>
                                                                                 <td style={{ padding: '6px 8px' }}>
                                                                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                                                                         <button

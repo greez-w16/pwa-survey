@@ -26,6 +26,34 @@ const getHeaders = (username, password) => {
     return headers;
 };
 
+const appendEventScopeFields = (fields, requiredFields = []) => {
+    let result = String(fields || '').trim();
+    requiredFields.filter(Boolean).forEach((fieldName) => {
+        const pattern = new RegExp(`(^|,)${fieldName}(,|$)`);
+        if (!pattern.test(result)) {
+            result = result ? `${result},${fieldName}` : fieldName;
+        }
+    });
+    return result;
+};
+
+const filterEventsByExactScope = (events, {
+    programId,
+    stageId,
+    teiId,
+    enrollmentId,
+} = {}) => {
+    const list = Array.isArray(events) ? events : [];
+    return list.filter((ev) => {
+        if (!ev?.event) return false;
+        if (programId && ev.program !== programId) return false;
+        if (stageId && ev.programStage !== stageId) return false;
+        if (teiId && ev.trackedEntityInstance !== teiId) return false;
+        if (enrollmentId && ev.enrollment !== enrollmentId) return false;
+        return true;
+    });
+};
+
 export const api = {
     // Debug info for scheduling assignments; populated by getSchedulingAssignments
 	    _schedulingDebug: null,
@@ -312,7 +340,7 @@ export const api = {
   // List events by program with optional filters
   listEventsByProgram: async ({ programId, orgUnitId, startDate, endDate }) => {
     if (!programId) throw new Error('programId is required');
-    let url = `${BASE_URL}/api/events.json?skipPaging=true&fields=event&program=${encodeURIComponent(programId)}`;
+    let url = `${BASE_URL}/api/events.json?skipPaging=true&fields=event,program&program=${encodeURIComponent(programId)}`;
     if (orgUnitId) url += `&orgUnit=${encodeURIComponent(orgUnitId)}&ouMode=DESCENDANTS`;
     if (startDate) url += `&startDate=${encodeURIComponent(startDate)}`;
     if (endDate) url += `&endDate=${encodeURIComponent(endDate)}`;
@@ -320,7 +348,7 @@ export const api = {
     if (!resp.ok) throw new Error(`Failed to list events (${resp.status})`);
     const json = await resp.json().catch(() => ({}));
     const events = json?.events || json?.instances || [];
-    return events.map(e => e.event).filter(Boolean);
+    return events.filter(e => e?.event && e.program === programId).map(e => e.event);
   },
 
   // List events by program across multiple org units (merged unique IDs)
@@ -371,13 +399,98 @@ export const api = {
     return true;
   },
 
+  deleteEnrollment: async (enrollmentId) => {
+    const resp = await fetch(`${BASE_URL}/api/enrollments/${encodeURIComponent(enrollmentId)}`, {
+      method: 'DELETE',
+      headers: getHeaders()
+    });
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '');
+      throw new Error(`Failed to delete enrollment: ${resp.status} ${text}`);
+    }
+    return true;
+  },
+
+  completeEnrollment: async (enrollmentId) => {
+    if (!enrollmentId) throw new Error('completeEnrollment: enrollmentId is required');
+    const resp = await fetch(`${BASE_URL}/api/enrollments/${encodeURIComponent(enrollmentId)}/completed`, {
+      method: 'PUT',
+      headers: getHeaders()
+    });
+    if (!resp.ok) {
+      const text = await resp.text().catch(() => '');
+      throw new Error(`Failed to complete enrollment: ${resp.status} ${text}`);
+    }
+    return true;
+  },
+
+  getEnrollmentById: async (enrollmentId) => {
+    if (!enrollmentId) throw new Error('getEnrollmentById: enrollmentId is required');
+    const fields = 'enrollment,program,status,trackedEntityInstance,orgUnit';
+    const resp = await fetch(
+      `${BASE_URL}/api/enrollments/${encodeURIComponent(enrollmentId)}?fields=${encodeURIComponent(fields)}`,
+      { headers: getHeaders() }
+    );
+    if (!resp.ok) throw new Error(`Failed to fetch enrollment ${enrollmentId}: ${resp.status}`);
+    return await resp.json();
+  },
+
+  getEventsForEnrollment: async (enrollmentId, { programId = null, stageId = null } = {}) => {
+    if (!enrollmentId) throw new Error('getEventsForEnrollment: enrollmentId is required');
+    const fields = 'event,enrollment,program,programStage';
+    const url = `${BASE_URL}/api/events?paging=false&enrollment=${encodeURIComponent(enrollmentId)}&fields=${encodeURIComponent(fields)}`;
+    const resp = await fetch(url, { headers: getHeaders() });
+    if (!resp.ok) throw new Error(`Failed to fetch events for enrollment: ${resp.status}`);
+    const data = await resp.json();
+    const events = data.events || [];
+    return events.filter((ev) => (
+      ev?.event &&
+      ev.enrollment === enrollmentId &&
+      (!programId || ev.program === programId) &&
+      (!stageId || ev.programStage === stageId)
+    ));
+  },
+
+  deleteEnrollmentCascade: async (enrollmentId, { programId = null, stageId = null } = {}) => {
+    if (!enrollmentId) throw new Error('deleteEnrollmentCascade: enrollmentId is required');
+    let resolvedProgramId = programId;
+    if (!resolvedProgramId) {
+      try {
+        const enrollment = await api.getEnrollmentById(enrollmentId);
+        resolvedProgramId = enrollment?.program || null;
+      } catch (e) {
+        console.warn('[deleteEnrollmentCascade] Failed to resolve enrollment program, falling back to enrollment-only client filtering', e);
+      }
+    }
+    const events = await api.getEventsForEnrollment(enrollmentId, { programId: resolvedProgramId, stageId });
+    const eventIds = events.map(ev => ev.event).filter(Boolean);
+    if (eventIds.length > 0) {
+      await api.deleteEventsByIds(eventIds);
+    }
+    return await api.deleteEnrollment(enrollmentId);
+  },
+
+  deleteTeiCascade: async (teiId, programId) => {
+    // 1. Get enrollments for this TEI in this program
+    const enrollments = await api.getEnrollmentsForTei(teiId, programId);
+    
+    for (const enr of enrollments) {
+      const enrollmentId = enr.enrollment;
+      // 2. Delete this enrollment and its events
+      await api.deleteEnrollmentCascade(enrollmentId, { programId: enr.program });
+    }
+    
+    // 3. Finally delete the TEI
+    return api.deleteTrackedEntityInstance(teiId);
+  },
+
   getActiveEnrollments: async (programId, orgUnitId = null) => {
     // Fetch active enrollments. If orgUnitId is provided, filter by it using DESCENDANTS
     const params = [
       `program=${encodeURIComponent(programId)}`,
       `programStatus=ACTIVE`,
       `ouMode=${orgUnitId ? 'DESCENDANTS' : 'ALL'}`,
-      `fields=trackedEntityInstance,orgUnit,enrollments[enrollment,status,program,deleted,orgUnit,orgUnitName,enrollmentDate]`
+      `fields=trackedEntityInstance,orgUnit,attributes[attribute,displayName,value],enrollments[enrollment,status,program,deleted,orgUnit,orgUnitName,enrollmentDate]`
     ];
     if (orgUnitId) params.push(`ou=${encodeURIComponent(orgUnitId)}`);
     
@@ -398,7 +511,8 @@ export const api = {
                     programId: enr.program,
                     orgUnit: enr.orgUnit,
                     orgUnitName: enr.orgUnitName || tei.orgUnit,
-                    enrollmentDate: enr.enrollmentDate
+                    enrollmentDate: enr.enrollmentDate,
+                    attributes: tei.attributes || []
                 });
             }
         });
@@ -406,8 +520,44 @@ export const api = {
     return activeList;
   },
 
+  getProgramEnrollments: async (programId, orgUnitId = null, statuses = ['ACTIVE', 'COMPLETED']) => {
+    const allowedStatuses = new Set((statuses || []).map(s => String(s || '').toUpperCase()).filter(Boolean));
+    const params = [
+      `program=${encodeURIComponent(programId)}`,
+      `ouMode=${orgUnitId ? 'DESCENDANTS' : 'ALL'}`,
+      `fields=trackedEntityInstance,orgUnit,attributes[attribute,displayName,value],enrollments[enrollment,status,program,deleted,orgUnit,orgUnitName,enrollmentDate,incidentDate]`
+    ];
+    if (orgUnitId) params.push(`ou=${encodeURIComponent(orgUnitId)}`);
+
+    const url = `${BASE_URL}/api/trackedEntityInstances?${params.join('&')}`;
+    const resp = await fetch(url, { headers: getHeaders() });
+    if (!resp.ok) throw new Error(`Failed to fetch program enrollments: ${resp.status}`);
+    const data = await resp.json();
+
+    const list = [];
+    (data.trackedEntityInstances || []).forEach(tei => {
+      (tei.enrollments || []).forEach(enr => {
+        const status = String(enr.status || '').toUpperCase();
+        if (enr.program === programId && !enr.deleted && (!allowedStatuses.size || allowedStatuses.has(status))) {
+          list.push({
+            teiId: tei.trackedEntityInstance,
+            enrollmentId: enr.enrollment,
+            programId: enr.program,
+            status: enr.status,
+            orgUnit: enr.orgUnit,
+            orgUnitName: enr.orgUnitName || tei.orgUnit,
+            enrollmentDate: enr.enrollmentDate,
+            incidentDate: enr.incidentDate,
+            attributes: tei.attributes || []
+          });
+        }
+      });
+    });
+    return list;
+  },
+
   getEnrollmentsForTei: async (teiId, programId) => {
-    const url = `${BASE_URL}/api/trackedEntityInstances/${encodeURIComponent(teiId)}?fields=enrollments[enrollment,status,program]`;
+    const url = `${BASE_URL}/api/trackedEntityInstances/${encodeURIComponent(teiId)}?fields=enrollments[enrollment,status,program,deleted,orgUnit,enrollmentDate,incidentDate]`;
     const resp = await fetch(url, { headers: getHeaders() });
     if (!resp.ok) throw new Error(`Failed to fetch enrollments for TEI: ${resp.status}`);
     const data = await resp.json();
@@ -1223,22 +1373,29 @@ export const api = {
         order = 'eventDate:desc',
         fields = 'event,eventDate,status,program,programStage,orgUnit,trackedEntityInstance'
     }) => {
+        const scopedFields = appendEventScopeFields(fields, [
+            'event',
+            programId || stageId ? 'program' : null,
+            stageId ? 'programStage' : null,
+            teiId ? 'trackedEntityInstance' : null,
+            enrollmentId ? 'enrollment' : null,
+        ]);
         const params = [
             'paging=false',
-            programId ? `program=${programId}` : null,
-            stageId ? `programStage=${stageId}` : null,
-            teiId ? `trackedEntityInstance=${teiId}` : null,
+            enrollmentId ? null : (programId ? `program=${programId}` : null),
+            enrollmentId ? null : (stageId ? `programStage=${stageId}` : null),
+            enrollmentId ? null : (teiId ? `trackedEntityInstance=${teiId}` : null),
             enrollmentId ? `enrollment=${enrollmentId}` : null,
-            orgUnitId ? `orgUnit=${orgUnitId}` : null,
-            orgUnitId ? `ouMode=${ouMode}` : null,
+            enrollmentId ? null : (orgUnitId ? `orgUnit=${orgUnitId}` : null),
+            enrollmentId ? null : (orgUnitId ? `ouMode=${ouMode}` : null),
             order ? `order=${order}` : null,
-            fields ? `fields=${fields}` : null
+            scopedFields ? `fields=${scopedFields}` : null
         ].filter(Boolean).join('&');
         const url = `${BASE_URL}/api/events?${params}`;
         const resp = await fetch(url, { headers: getHeaders() });
         if (!resp.ok) throw new Error(`Failed to fetch events list: ${resp.status}`);
         const data = await resp.json();
-        return data.events || [];
+        return filterEventsByExactScope(data.events || [], { programId, stageId, teiId, enrollmentId });
     },
 
     getSelfAssessmentAssessorUserIds: async ({
@@ -1331,24 +1488,34 @@ export const api = {
 	        page = 1,
 	        pageSize = 10
 	    }) => {
+		        const scopedFields = appendEventScopeFields(fields, [
+		            'event',
+		            programId || stageId ? 'program' : null,
+		            stageId ? 'programStage' : null,
+		            teiId ? 'trackedEntityInstance' : null,
+		            enrollmentId ? 'enrollment' : null,
+		        ]);
 	        const params = [
 	            'paging=true',
 	            `page=${Math.max(1, Number(page) || 1)}`,
 	            `pageSize=${Math.max(1, Number(pageSize) || 10)}`,
-	            programId ? `program=${programId}` : null,
-	            stageId ? `programStage=${stageId}` : null,
-	            teiId ? `trackedEntityInstance=${teiId}` : null,
+		            enrollmentId ? null : (programId ? `program=${programId}` : null),
+		            enrollmentId ? null : (stageId ? `programStage=${stageId}` : null),
+		            enrollmentId ? null : (teiId ? `trackedEntityInstance=${teiId}` : null),
 	            enrollmentId ? `enrollment=${enrollmentId}` : null,
-	            orgUnitId ? `orgUnit=${orgUnitId}` : null,
-	            orgUnitId ? `ouMode=${ouMode}` : null,
+		            enrollmentId ? null : (orgUnitId ? `orgUnit=${orgUnitId}` : null),
+		            enrollmentId ? null : (orgUnitId ? `ouMode=${ouMode}` : null),
 	            order ? `order=${order}` : null,
-	            fields ? `fields=${fields}` : null
+		            scopedFields ? `fields=${scopedFields}` : null
 	        ].filter(Boolean).join('&');
 	        const url = `${BASE_URL}/api/events?${params}`;
 	        const resp = await fetch(url, { headers: getHeaders() });
 	        if (!resp.ok) throw new Error(`Failed to fetch events page: ${resp.status}`);
 	        const data = await resp.json();
-	        return { events: data.events || [], pager: data.pager || null };
+		        return {
+		            events: filterEventsByExactScope(data.events || [], { programId, stageId, teiId, enrollmentId }),
+		            pager: data.pager || null,
+		        };
 	    },
 
     // Fetch Programme Setup events for a scheduling enrollment (K9O5fdoBmKf / M2RdEI7Tbqr)
@@ -1869,7 +2036,7 @@ export const api = {
                     enrolledAt: now,
                     occurredAt: now,
                     attributes: rootAttributes,
-                    events: events.map(ev => ({
+					    events: events.map(ev => ({
                         program: programId,
                         programStage: stageId,
                         orgUnit: orgUnitId,
@@ -1877,7 +2044,7 @@ export const api = {
                         occurredAt: now,
                         dataValues: ev.dataValues || [],
                         notes: ev.notes || [],
-                        ...(ev.uid ? { uid: ev.uid } : {})
+					        ...(ev.event || ev.uid ? { event: ev.event || ev.uid } : {})
                     }))
                 }
             ]
@@ -1912,10 +2079,13 @@ export const api = {
             throw err;
         }
 
-        const createdTeiId = data.bundleReport?.typeReportMap?.TRACKED_ENTITY?.objectReports?.[0]?.uid || teiId;
-        const createdEnrollmentId = data.bundleReport?.typeReportMap?.ENROLLMENT?.objectReports?.[0]?.uid || enrollmentId;
+		const createdTeiId = data.bundleReport?.typeReportMap?.TRACKED_ENTITY?.objectReports?.[0]?.uid || teiId;
+		const createdEnrollmentId = data.bundleReport?.typeReportMap?.ENROLLMENT?.objectReports?.[0]?.uid || enrollmentId;
+		const createdEventIds = (data.bundleReport?.typeReportMap?.EVENT?.objectReports || [])
+			.map(report => report?.uid)
+			.filter(Boolean);
         
-        return { teiId: createdTeiId, enrollmentId: createdEnrollmentId };
+		return { teiId: createdTeiId, enrollmentId: createdEnrollmentId, eventIds: createdEventIds, trackerResponse: data };
     },
 
     /**

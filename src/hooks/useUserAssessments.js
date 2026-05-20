@@ -249,6 +249,7 @@ export const useUserAssessments = (options = {}) => {
 		            console.log('[useUserAssessments] Debug snapshot', debugSnapshot);
 		            setDebug(debugSnapshot);
 
+
 		            setData({
 	                assignments: filtered,
 	                schedules,

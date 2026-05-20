@@ -106,6 +106,8 @@ export default function Admin() {
   const [activeList, setActiveList] = useState([]);
   const [activeLoading, setActiveLoading] = useState(false);
   const [activeDeleteTeiId, setActiveDeleteTeiId] = useState(null);
+  const ENROLLMENT_DELETE_PROGRAM_ID = 'G2gULe4jsfs';
+  const deletableActiveList = activeList.filter(item => item.programId === ENROLLMENT_DELETE_PROGRAM_ID && item.enrollmentId);
 
   const fetchActiveAssessments = async () => {
     try {
@@ -118,15 +120,25 @@ export default function Admin() {
           orgUnits = [orgUnitId];
       }
 
-      if (orgUnits.length === 0) {
-          showToast?.('Please select an Org Unit or Use all assignment org units', 'warning');
-          return;
-      }
-
       let allActive = [];
-      for (const ou of orgUnits) {
-          const list = await api.getActiveEnrollments(programId, ou);
-          allActive = [...allActive, ...list];
+      const schedulingProgramId = 'K9O5fdoBmKf';
+      if (orgUnits.length === 0) {
+          // Fetch ALL across the whole system (no org unit limit)
+          const list1 = await api.getActiveEnrollments(programId, null);
+          let list2 = [];
+          if (programId !== schedulingProgramId) {
+              list2 = await api.getActiveEnrollments(schedulingProgramId, null);
+          }
+          allActive = [...list1, ...list2];
+      } else {
+          for (const ou of orgUnits) {
+              const list1 = await api.getActiveEnrollments(programId, ou);
+              let list2 = [];
+              if (programId !== schedulingProgramId) {
+                  list2 = await api.getActiveEnrollments(schedulingProgramId, ou);
+              }
+              allActive = [...allActive, ...list1, ...list2];
+          }
       }
       setActiveList(allActive);
       showToast?.(`Found ${allActive.length} active assessments`, 'info');
@@ -138,47 +150,50 @@ export default function Admin() {
     }
   };
 
-  const performTeiDelete = async (teiId) => {
-    if (!window.confirm(`Are you absolutely sure you want to completely delete this TEI (${teiId}) and all of its enrollments/events?`)) {
+  const performEnrollmentDelete = async ({ enrollmentId, teiId, programId }) => {
+    if (!enrollmentId) {
+      showToast?.('This row does not have an enrollment ID to delete.', 'error');
+      return;
+    }
+    if (!window.confirm(`Are you absolutely sure you want to delete enrollment ${enrollmentId}${teiId ? ` for TEI ${teiId}` : ''}? This will remove that enrollment and its events only.`)) {
       return;
     }
     try {
       setActiveLoading(true);
-      await api.deleteTrackedEntityInstance(teiId);
-      showToast?.(`Successfully deleted TEI ${teiId}`, 'success');
-      // remove from list
-      setActiveList(prev => prev.filter(item => item.teiId !== teiId));
+      await api.deleteEnrollmentCascade(enrollmentId, { programId });
+      showToast?.(`Successfully deleted enrollment ${enrollmentId}`, 'success');
+      setActiveList(prev => prev.filter(item => item.enrollmentId !== enrollmentId));
     } catch (e) {
-      console.error('Failed to delete TEI', e);
+      console.error('Failed to delete enrollment', e);
       showToast?.(`Delete failed: ${e.message}`, 'error');
     } finally {
       setActiveLoading(false);
     }
   };
 
-  const performDeleteAllTeis = async () => {
-    if (activeList.length === 0) return;
-    if (!window.confirm(`Are you absolutely sure you want to completely delete ALL ${activeList.length} tracked entities shown in this table? This cannot be undone!`)) {
+  const performDeleteAllEnrollments = async () => {
+    if (deletableActiveList.length === 0) return;
+    if (!window.confirm(`Are you absolutely sure you want to delete ALL ${deletableActiveList.length} deletable enrollments shown in this table? This cannot be undone!`)) {
       return;
     }
     try {
       setActiveLoading(true);
       let successCount = 0;
       let failCount = 0;
-      for (const item of activeList) {
+      for (const item of deletableActiveList) {
           try {
-              await api.deleteTrackedEntityInstance(item.teiId);
+              await api.deleteEnrollmentCascade(item.enrollmentId, { programId: item.programId });
               successCount++;
           } catch (e) {
-              console.error(`Failed to delete TEI ${item.teiId}`, e);
+              console.error(`Failed to delete enrollment ${item.enrollmentId}`, e);
               failCount++;
           }
       }
-      showToast?.(`Successfully deleted ${successCount} TEIs. Failed to delete ${failCount} TEIs.`, failCount > 0 ? 'warning' : 'success');
+      showToast?.(`Successfully deleted ${successCount} enrollments. Failed to delete ${failCount} enrollments.`, failCount > 0 ? 'warning' : 'success');
       await fetchActiveAssessments();
     } catch (e) {
-      console.error('Bulk TEI deletion failed', e);
-      showToast?.('Bulk TEI deletion failed', 'error');
+      console.error('Bulk enrollment deletion failed', e);
+      showToast?.('Bulk enrollment deletion failed', 'error');
     } finally {
       setActiveLoading(false);
     }
@@ -232,14 +247,14 @@ export default function Admin() {
       {/* Active Assessments Manager */}
       <div style={{ marginTop: 8, padding: 12, border: '1px solid #e5e7eb', borderRadius: 6, marginBottom: 16 }}>
         <h3>Manage Active Assessments (Safe Deletion)</h3>
-        <p style={{ color: '#6b7280' }}>Fetch all currently active assessments. Deleting an assessment here deletes the entire TEI, safely freeing up the facility to start a new assessment.</p>
+        <p style={{ color: '#6b7280' }}>Fetch all currently active assessments. Deleting an assessment here removes only the selected enrollment and its events, without deleting the whole TEI. Enrollment deletion is only allowed for program {ENROLLMENT_DELETE_PROGRAM_ID}.</p>
         <div style={{ display: 'flex', gap: 8 }}>
             <Button variant="contained" onClick={fetchActiveAssessments} disabled={activeLoading}>
                 {activeLoading ? 'Loading...' : 'Fetch Active Assessments'}
             </Button>
-            {activeList.length > 0 && (
-                <Button variant="contained" color="error" onClick={performDeleteAllTeis} disabled={activeLoading}>
-                    {activeLoading ? 'Deleting...' : `Delete All (${activeList.length})`}
+            {deletableActiveList.length > 0 && (
+                <Button variant="contained" color="error" onClick={performDeleteAllEnrollments} disabled={activeLoading}>
+                    {activeLoading ? 'Deleting...' : `Delete All Enrollments (${deletableActiveList.length})`}
                 </Button>
             )}
         </div>
@@ -252,26 +267,32 @@ export default function Admin() {
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Facility</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Program</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>TEI UID</th>
+                            <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Enrollment ID</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Enrolled At</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {activeList.map(item => (
-                            <tr key={item.teiId}>
+                        {activeList.map(item => {
+                            const canDeleteEnrollment = item.programId === ENROLLMENT_DELETE_PROGRAM_ID;
+                            return (
+                            <tr key={item.enrollmentId || `${item.programId}-${item.teiId}`}>
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>{item.orgUnitName || item.orgUnit}</td>
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>
                                     {item.programId === configuration?.program?.id ? (configuration?.program?.name || item.programId) : item.programId}
                                 </td>
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}><code>{item.teiId}</code></td>
+                                <td style={{ padding: 8, borderBottom: '1px solid #eee' }}><code>{item.enrollmentId || 'N/A'}</code></td>
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>{new Date(item.enrollmentDate).toLocaleDateString()}</td>
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>
-                                    <Button size="small" color="error" variant="outlined" onClick={() => performTeiDelete(item.teiId)} disabled={activeLoading}>
-                                        Delete TEI
-                                    </Button>
+                                    {canDeleteEnrollment ? (
+                                        <Button size="small" color="error" variant="outlined" onClick={() => performEnrollmentDelete({ enrollmentId: item.enrollmentId, teiId: item.teiId, programId: item.programId })} disabled={activeLoading || !item.enrollmentId}>
+                                            Delete Enrollment
+                                        </Button>
+                                    ) : null}
                                 </td>
                             </tr>
-                        ))}
+                        );})}
                     </tbody>
                 </table>
             </div>
