@@ -493,8 +493,7 @@ export default function Report() {
         targetSections
           .filter(s => !isAssessmentDetailsSection(s))
           .forEach((s, idx) => {
-            const baseName = s.se_name || s.name || s.title || s.code || s.id;
-            labels[s.id] = baseName;
+	            const baseName = s.se_name || s.name || s.title || s.code || s.id;
             // Determine SE number from se_id, then code/id (e.g., HOSP_SE7), else fallback to order index
             let seNum = null;
             if (s.se_id !== undefined && s.se_id !== null && String(s.se_id).trim() !== '') {
@@ -516,7 +515,9 @@ export default function Report() {
               .replace(/^\s*\d+\s*[-:\u2013\u2014]?\s*/i, '')
               .replace(/_/g, ' ')
               .trim();
-            chartLabels[s.id] = `SE ${seNum} ${cleanedName}`;
+	            const seLabel = cleanedName ? `SE ${seNum} ${cleanedName}` : `SE ${seNum}`;
+	            labels[s.id] = seLabel;
+	            chartLabels[s.id] = seLabel;
           });
         setSectionLabels(labels);
         setSectionChartLabels(chartLabels);
@@ -916,6 +917,41 @@ export default function Report() {
       </text>
     );
   };
+
+	  const wrapAxisLabel = (value, maxChars = 24, maxLines = 4) => {
+	    const text = String(value || '').trim();
+	    if (!text) return ['—'];
+	    const words = text.split(/\s+/).filter(Boolean);
+	    const lines = [];
+	    let current = '';
+	    words.forEach(word => {
+	      const next = current ? `${current} ${word}` : word;
+	      if (next.length > maxChars && current) {
+	        lines.push(current);
+	        current = word;
+	      } else {
+	        current = next;
+	      }
+	    });
+	    if (current) lines.push(current);
+	    if (lines.length <= maxLines) return lines;
+	    const trimmed = lines.slice(0, maxLines);
+	    trimmed[maxLines - 1] = `${trimmed[maxLines - 1].replace(/…$/, '')}…`;
+	    return trimmed;
+	  };
+
+	  const DrillAxisTick = ({ x, y, payload }) => {
+	    const lines = wrapAxisLabel(payload?.value, 22, 4);
+	    return (
+	      <g transform={`translate(${x},${y})`}>
+	        <text textAnchor="middle" fill="#334155" fontSize={10}>
+	          {lines.map((line, idx) => (
+	            <tspan key={`${line}-${idx}`} x={0} dy={idx === 0 ? 12 : 12}>{line}</tspan>
+	          ))}
+	        </text>
+	      </g>
+	    );
+	  };
 
   const getStatusBadgeStyle = (label) => {
     const v = normalizeResponseLabel(label);
@@ -2122,7 +2158,7 @@ export default function Report() {
 	                        <div ref={drillChartRef} style={{ width: chartWidth, height: 430 }}>
 	                          <BarChart width={chartWidth} height={430} data={data} margin={{ top: 16, right: 16, bottom: 76, left: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-	                            <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-35} textAnchor="end" height={110} />
+	                            <XAxis dataKey="name" tick={<DrillAxisTick />} interval={0} height={118} />
                             <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
                             <Tooltip content={<DrillTooltip />} />
                             <Legend />
@@ -2147,7 +2183,7 @@ export default function Report() {
 	                        <div ref={drillChartRef} style={{ width: chartWidth, height: 430 }}>
 	                          <BarChart width={chartWidth} height={430} data={data} margin={{ top: 16, right: 16, bottom: 76, left: 0 }}>
                             <CartesianGrid strokeDasharray="3 3" />
-	                            <XAxis dataKey="name" tick={{ fontSize: 10 }} interval={0} angle={-35} textAnchor="end" height={110} />
+	                            <XAxis dataKey="name" tick={<DrillAxisTick />} interval={0} height={118} />
                             <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
                             <Tooltip content={<DrillTooltip />} />
                             <Legend />
