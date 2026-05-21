@@ -678,6 +678,67 @@ export default function Report() {
   const [drillRootCode, setDrillRootCode] = useState(null);
   const drillChartRef = useRef(null);
 
+  const formatOverviewDate = (value) => {
+    if (!value) return '—';
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value);
+    return d.toLocaleDateString('en-GB');
+  };
+
+  const getDaysSinceDate = (value) => {
+    if (!value) return null;
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return null;
+    const today = new Date();
+    const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+    const valueUtc = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
+    return Math.max(0, Math.floor((todayUtc - valueUtc) / 86400000));
+  };
+
+  const buildOverviewDeltaMeta = (baselineValue, latestValue) => {
+    if (!Number.isFinite(baselineValue) || !Number.isFinite(latestValue)) {
+      return { value: null, display: '—', category: 'muted' };
+    }
+    const value = Math.round(latestValue - baselineValue);
+    return {
+      value,
+      display: `${value > 0 ? '+' : ''}${value} pts`,
+      category: value > 0 ? 'success' : value < 0 ? 'risk' : 'neutral',
+    };
+  };
+
+  const buildOverviewResolutionMeta = (completedCount, baselineTotal) => {
+    if (!Number.isFinite(baselineTotal) || baselineTotal <= 0) {
+      return { value: null, display: '—', category: 'muted' };
+    }
+    const value = Math.max(0, Math.min(100, Math.round((Number(completedCount || 0) / baselineTotal) * 100)));
+    return {
+      value,
+      display: `${value}%`,
+      category: value >= 80 ? 'success' : value >= 40 ? 'warning' : 'risk',
+    };
+  };
+
+  const buildOverviewAgeMeta = (dateValue) => {
+    const value = getDaysSinceDate(dateValue);
+    if (!Number.isFinite(value)) return { value: null, display: '—', category: 'muted' };
+    return {
+      value,
+      display: `${value} ${value === 1 ? 'day' : 'days'}`,
+      category: value <= 30 ? 'success' : value <= 90 ? 'warning' : 'risk',
+    };
+  };
+
+  const buildOverviewStatusMeta = ({ criticalRemainingNC = 0, criticalRemainingTotal = 0, remainingNC = 0, scoreDelta = null } = {}) => {
+    if (Number(criticalRemainingNC) > 0 || (Number.isFinite(scoreDelta) && scoreDelta <= -15)) {
+      return { display: 'Critical', category: 'risk' };
+    }
+    if (Number(criticalRemainingTotal) > 0 || Number(remainingNC) > 0 || (Number.isFinite(scoreDelta) && scoreDelta <= -5)) {
+      return { display: 'Warning', category: 'warning' };
+    }
+    return { display: 'On Track', category: 'success' };
+  };
+
   // Build Facility Overview rows (per SE)
   const facilityOverview = useMemo(() => {
     if (!reportAssessment || !baselineAssessment || !reportInfo) return [];
@@ -712,6 +773,9 @@ export default function Report() {
       const lateCrit = (((latestById[id]||{}).standards||[{}])[0].criteria)||[];
       const baseCounts = getCounts(baseCrit);
       const lateCounts = getCounts(lateCrit);
+      const baselinePercentValue = Number.isFinite(blPct[id]) ? Number(blPct[id]) : null;
+      const latestPercentValue = Number.isFinite(ltPct[id]) ? Number(ltPct[id]) : null;
+      const baselineDefTotal = baseCounts.NC + baseCounts.PC;
       const completed = baseCrit.reduce((acc, bc) => {
         const code = bc.code;
         const wasDef = ['NC','PC'].includes(norm(bc.response));
@@ -734,20 +798,32 @@ export default function Report() {
       const lateCritCritical = getCritical(lateCrit);
       const baseCriticalCounts = getCounts(baseCritCritical);
       const lateCriticalCounts = getCounts(lateCritCritical);
+      const latestDateValue = reportInfo.sectionLatestDates?.[id] || reportInfo.latestDate || null;
+      const scoreDelta = buildOverviewDeltaMeta(baselinePercentValue, latestPercentValue);
+      const resolutionRate = buildOverviewResolutionMeta(completed, baselineDefTotal);
+      const daysSince = buildOverviewAgeMeta(latestDateValue);
+      const status = buildOverviewStatusMeta({
+        criticalRemainingNC: lateCriticalCounts.NC,
+        criticalRemainingTotal: lateCritCritical.length,
+        remainingNC: lateCounts.NC,
+        scoreDelta: scoreDelta.value,
+      });
 
       return {
         seIndex: idx + 1,
         seName: name,
-        baselinePercent: Number.isFinite(blPct[id]) ? Number(blPct[id]).toFixed(0) : '—',
-        latestPercent: Number.isFinite(ltPct[id]) ? Number(ltPct[id]).toFixed(0) : '—',
-        blDefs: { total: baseCounts.NC + baseCounts.PC, NC: baseCounts.NC, PC: baseCounts.PC },
+        baselinePercent: baselinePercentValue !== null ? baselinePercentValue.toFixed(0) : '—',
+        latestPercent: latestPercentValue !== null ? latestPercentValue.toFixed(0) : '—',
+        scoreDelta,
+        resolutionRate,
+        daysSince,
+        status,
+        blDefs: { total: baselineDefTotal, NC: baseCounts.NC, PC: baseCounts.PC },
         completed,
         remaining: { total: lateCounts.NC + lateCounts.PC, NC: lateCounts.NC, PC: lateCounts.PC },
         critical: { total: baseCritCritical.length, NC: baseCriticalCounts.NC, PC: baseCriticalCounts.PC },
         criticalRemaining: { total: lateCritCritical.length, NC: lateCriticalCounts.NC, PC: lateCriticalCounts.PC },
-        latestDate: (reportInfo.sectionLatestDates?.[id] || reportInfo.latestDate)
-          ? new Date(reportInfo.sectionLatestDates?.[id] || reportInfo.latestDate).toLocaleDateString()
-          : '—',
+        latestDate: formatOverviewDate(latestDateValue),
         policies: { NC: 0, PC: 0, C: 0, total: 0 },
         qiCompliance: 'N/A',
       };
@@ -820,6 +896,27 @@ export default function Report() {
     );
   };
 
+  const renderOverviewMetaBadge = (meta) => {
+    const palette = overviewPalette[meta?.category] || overviewPalette.muted;
+    return (
+      <span style={{
+        display: 'inline-flex',
+        minWidth: 48,
+        justifyContent: 'center',
+        padding: '2px 7px',
+        borderRadius: 999,
+        fontWeight: 700,
+        fontSize: '0.76rem',
+        color: palette.color,
+        background: palette.background,
+        border: `1px solid ${palette.border}`,
+        whiteSpace: 'nowrap',
+      }}>
+        {meta?.display || '—'}
+      </span>
+    );
+  };
+
   const renderOverviewScore = (value) => {
     const meta = analyzeOverviewScore(value);
     const palette = overviewPalette[meta.category] || overviewPalette.muted;
@@ -870,6 +967,15 @@ export default function Report() {
 
   const baselineOverall = Number.isFinite(baselineScoring?.overall?.percent) ? baselineScoring.overall.percent.toFixed(0) : '—';
   const latestOverall = Number.isFinite(scoring?.overall?.percent) ? scoring.overall.percent.toFixed(0) : '—';
+  const overallDeltaMeta = buildOverviewDeltaMeta(baselineScoring?.overall?.percent, scoring?.overall?.percent);
+  const overallResolutionMeta = buildOverviewResolutionMeta(facilityOverviewTotals.completed, facilityOverviewTotals.blTotal);
+  const overallDaysSinceMeta = buildOverviewAgeMeta(reportInfo?.latestDate);
+  const overallStatusMeta = buildOverviewStatusMeta({
+    criticalRemainingNC: facilityOverviewTotals.critRemNC,
+    criticalRemainingTotal: facilityOverviewTotals.critRemTotal,
+    remainingNC: facilityOverviewTotals.remNC,
+    scoreDelta: overallDeltaMeta.value,
+  });
 
   const overviewHeaderCellStyle = (background = '#f8fafc', color = '#0f172a', extra = {}) => ({
     border: '1px solid #d8e1eb',
@@ -1300,6 +1406,11 @@ export default function Report() {
       const meta = analyzeOverviewMetric(value, options);
       return `<span class="fo-pill fo-pill-${meta.category}">${escapeHtml(meta.display)}</span>`;
     };
+    const buildPdfMetaPill = (meta) => {
+      const category = meta?.category || 'muted';
+      const display = meta?.display || '—';
+      return `<span class="fo-pill fo-pill-${category}">${escapeHtml(display)}</span>`;
+    };
     const buildPdfScoreCell = (value) => {
       const meta = analyzeOverviewScore(value);
       return `
@@ -1345,6 +1456,10 @@ export default function Report() {
           <td class="fo-service fo-service-strong">${escapeHtml(serviceName || `SE ${seCode}`)}</td>
           <td>${buildPdfScoreCell(row.baselinePercent)}</td>
           <td>${buildPdfScoreCell(row.latestPercent)}</td>
+          <td>${buildPdfMetaPill(row.scoreDelta)}</td>
+          <td>${buildPdfMetaPill(row.resolutionRate)}</td>
+          <td>${buildPdfMetaPill(row.daysSince)}</td>
+          <td>${buildPdfMetaPill(row.status)}</td>
           <td>${buildPdfMetricPill(row.blDefs?.total, { zeroAsDash: true })}</td>
           <td>${buildPdfMetricPill(row.blDefs?.NC, { tone: 'risk', zeroAsDash: true })}</td>
           <td>${buildPdfMetricPill(row.blDefs?.PC, { tone: 'warning', zeroAsDash: true })}</td>
@@ -1697,16 +1812,19 @@ export default function Report() {
             .se-facilitator { width: 16%; }
             .service-elements-footer-title { font-size: 20px; font-weight: normal; margin: 0; position: absolute; left: 4mm; bottom: 0; }
             .facility-overview-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; padding: 0; }
-            .facility-overview-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7px; line-height: 1.05; }
+            .facility-overview-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 6.6px; line-height: 1.05; }
             .facility-overview-table th, .facility-overview-table td { border: 1px solid #000; padding: 3px 2px; text-align: center; vertical-align: middle; }
             .facility-overview-table th { font-weight: 700; background: #f8fafc; }
             .facility-overview-table .fo-se { width: 3%; }
-            .facility-overview-table .fo-service { width: 14%; text-align: left; }
-            .facility-overview-table .fo-date { width: 7%; }
-            .facility-overview-table .fo-qi { width: 7%; }
+            .facility-overview-table .fo-service { width: 12%; text-align: left; }
+            .facility-overview-table .fo-date { width: 6%; }
+            .facility-overview-table .fo-qi { width: 6%; }
+            .facility-overview-table .fo-insight { width: 4.5%; }
+            .facility-overview-table .fo-status { width: 5.5%; }
             .facility-overview-table tbody tr:nth-child(even) td { background: #f8fafc; }
             .facility-overview-table tfoot td { font-weight: 700; background: #e2e8f0; }
             .facility-overview-table .group-scores { background: #dbeafe; color: #1e3a8a; }
+            .facility-overview-table .group-insights { background: #e0f2fe; color: #075985; }
             .facility-overview-table .group-baseline { background: #fef3c7; color: #92400e; }
             .facility-overview-table .group-completed { background: #dcfce7; color: #166534; }
             .facility-overview-table .group-remaining { background: #fee2e2; color: #991b1b; }
@@ -1827,6 +1945,7 @@ export default function Report() {
                   <th class="fo-service" rowspan="2">Service</th>
                   <th class="group-scores" rowspan="2">Overall<br />baseline<br />score</th>
                   <th class="group-scores" rowspan="2">Overall<br />progress<br />score</th>
+                  <th class="group-insights" colspan="4">Action<br />insights</th>
                   <th class="group-baseline" colspan="3">Deficiencies<br />identified at<br />baseline</th>
                   <th class="group-completed" rowspan="2">Deficiencies<br />completed<br />to date</th>
                   <th class="group-remaining" colspan="3">Remaining<br />deficiencies to be<br />addressed</th>
@@ -1837,6 +1956,10 @@ export default function Report() {
                   <th class="fo-qi group-qi" rowspan="2">Quality<br />improvement<br />standard<br />compliance</th>
                 </tr>
                 <tr>
+                  <th class="fo-insight">Δ<br />Change</th>
+                  <th class="fo-insight">Closure<br />Rate</th>
+                  <th class="fo-insight">Days<br />Since</th>
+                  <th class="fo-status">Status</th>
                   <th>Total</th><th>NC</th><th>PC</th>
                   <th>Total</th><th>NC</th><th>PC</th>
                   <th>Total</th><th>NC</th><th>PC</th>
@@ -1851,6 +1974,10 @@ export default function Report() {
                   <td class="fo-service">SE Count: ${escapeHtml(facilityOverview.length)}</td>
                   <td>${buildPdfScoreCell(baselineOverall)}</td>
                   <td>${buildPdfScoreCell(latestOverall)}</td>
+                  <td>${buildPdfMetaPill(overallDeltaMeta)}</td>
+                  <td>${buildPdfMetaPill(overallResolutionMeta)}</td>
+                  <td>${buildPdfMetaPill(overallDaysSinceMeta)}</td>
+                  <td>${buildPdfMetaPill(overallStatusMeta)}</td>
                   <td>${buildPdfMetricPill(facilityOverviewTotals.blTotal, { zeroAsDash: true })}</td>
                   <td>${buildPdfMetricPill(facilityOverviewTotals.blNC, { tone: 'risk', zeroAsDash: true })}</td>
                   <td>${buildPdfMetricPill(facilityOverviewTotals.blPC, { tone: 'warning', zeroAsDash: true })}</td>
@@ -2079,14 +2206,15 @@ export default function Report() {
                 <h3 style={{ margin: 0 }}>Facility Overview</h3>
               </div>
               {!isFacilityOverviewCollapsed && (
-              <div style={{ overflowX: 'auto', marginTop: 8 }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84em', minWidth: 1500 }}>
+              <div style={{ overflowX: 'auto', marginTop: 8, maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84em', minWidth: 1900 }}>
                   <thead>
                     <tr>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')}>SE</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a', { minWidth: 220 })}>Service</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')}>Overall baseline score</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')}>Overall progress score</th>
+                      <th colSpan={4} style={overviewHeaderCellStyle('#e0f2fe', '#075985')}>Action insights</th>
                       <th colSpan={3} style={overviewHeaderCellStyle('#fef3c7', '#92400e')}>Deficiencies identified at baseline</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#dcfce7', '#166534')}>Deficiencies completed to date</th>
                       <th colSpan={3} style={overviewHeaderCellStyle('#fee2e2', '#991b1b')}>Remaining deficiencies to be addressed</th>
@@ -2097,6 +2225,10 @@ export default function Report() {
                       <th rowSpan={2} style={overviewHeaderCellStyle('#e2e8f0', '#334155', { whiteSpace: 'nowrap' })}>Quality improvement standard compliance</th>
                     </tr>
                     <tr>
+                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })}>Δ Change</th>
+                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')}>Closure Rate</th>
+                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })}>Days Since</th>
+                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')}>Status</th>
                       <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>Total</th>
                       <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>NC</th>
                       <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>PC</th>
@@ -2122,6 +2254,10 @@ export default function Report() {
                         <td style={overviewBodyCellStyle(rowIndex, { minWidth: 220 })}>{renderOverviewService(row)}</td>
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewScore(row.baselinePercent)}</td>
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewScore(row.latestPercent)}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewMetaBadge(row.scoreDelta)}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewMetaBadge(row.resolutionRate)}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewMetaBadge(row.daysSince)}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewMetaBadge(row.status)}</td>
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.blDefs.total, { zeroAsDash: true })}</td>
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.blDefs.NC, { tone: 'risk', zeroAsDash: true })}</td>
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.blDefs.PC, { tone: 'warning', zeroAsDash: true })}</td>
@@ -2150,6 +2286,10 @@ export default function Report() {
                       <td style={overviewTotalsCellStyle({ textAlign: 'left' })}>{`SE Count: ${facilityOverview.length}`}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewScore(baselineOverall)}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewScore(latestOverall)}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewMetaBadge(overallDeltaMeta)}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewMetaBadge(overallResolutionMeta)}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewMetaBadge(overallDaysSinceMeta)}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewMetaBadge(overallStatusMeta)}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.blTotal, { zeroAsDash: true })}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.blNC, { tone: 'risk', zeroAsDash: true })}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.blPC, { tone: 'warning', zeroAsDash: true })}</td>
