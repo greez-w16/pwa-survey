@@ -53,6 +53,7 @@
                                     index[stdId] = {
                                         statement: standard.statement || '',
                                         intent: standard.intent_tooltip || '',
+	                                        guideline: standard.guideline || standard.guidelines || standard.guidline || '',
                                         is_critical: false,
                                         severity: null,
                                     };
@@ -63,6 +64,7 @@
                                     index[crit.id] = {
                                         statement: standard.statement || '',
                                         intent: standard.intent_tooltip || '',
+	                                        guideline: crit.guideline || crit.guidelines || crit.guidline || '',
                                         is_critical: crit.is_critical || false,
                                         severity: crit.severity || 1,
                                     };
@@ -2057,7 +2059,9 @@
 	                        isSysTagField);
 
                         // Look up EMS standard/intent tooltip for this data element code
-                        const criterionTooltip = (!isCommentField && field.code) ? getCriterionTooltip(field.code, activeLinks, criterionIndex, calculatedFieldScore) : '';
+	                        const criterionTooltip = (!isCommentField && field.code) ? getCriterionTooltip(field.code, activeLinks, criterionIndex, calculatedFieldScore) : '';
+	                        const criterionGuideline = String(configEntry.guideline || '').trim();
+	                        const hasCriterionInfo = Boolean(criterionTooltip || criterionGuideline);
             
                         // For Standard (x.x.x) rows, locate the hidden comment field we
                         // want to reuse as the backing store for the "Standard
@@ -2254,16 +2258,19 @@
                                                 Standard summary
                                             </button>
                                         )}
-                                {criterionTooltip && (
+	                                {hasCriterionInfo && (
                                     <button
                                         type="button"
                                         className="ems-info-icon"
-                                        data-ems-tooltip={criterionTooltip}
+	                                        data-ems-tooltip={criterionTooltip || (criterionGuideline ? `Guideline:\n${criterionGuideline}` : '')}
                                         aria-label="View EMS standard and intent"
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
-                                            setOpenCriterionTooltip(criterionTooltip);
+	                                            setOpenCriterionTooltip({
+	                                                text: criterionTooltip,
+	                                                guideline: criterionGuideline,
+	                                            });
                                         }}
                                     >
                                         ?
@@ -2516,8 +2523,10 @@
                                             };
                                             const joinCommentValue = (a, b) => `${a || ''}|${b || ''}`;
 
-                                            // Strip any injected tags from display only
-                                            const stripTags = (txt) => (txt || '').replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '').trim();
+	                                            // Strip any injected tags from display only, but preserve
+	                                            // user-entered whitespace while typing so the textarea does
+	                                            // not eat space-bar input at the end of a sentence.
+	                                            const stripTags = (txt) => (txt || '').replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '');
 
                                             const parts = splitCommentValue(formData[field.id] || '');
                                             const disabled = isSectionLocked || (!isParentAnswered && isCommentField) || isTechnicalField;
@@ -3741,7 +3750,7 @@
                         )}
                 </div>
                 {/* Click-to-open persistent tooltip panel */}
-                {openCriterionTooltip && (
+	                {openCriterionTooltip && (
                     <div className="scoring-modal-overlay" onClick={() => setOpenCriterionTooltip(null)}>
                         <div
                             className="scoring-modal-content"
@@ -3752,8 +3761,26 @@
                                 <div>Criterion information</div>
                                 <button className="close-modal-btn" onClick={() => setOpenCriterionTooltip(null)} aria-label="Close">&times;</button>
                             </div>
-                            <div className="scoring-modal-body" style={{ whiteSpace: 'pre-line' }}>
-                                {openCriterionTooltip}
+	                            <div className="scoring-modal-body" style={{ whiteSpace: 'pre-line' }}>
+	                                {(() => {
+	                                    const tooltipText = typeof openCriterionTooltip === 'string'
+	                                        ? openCriterionTooltip
+	                                        : (openCriterionTooltip?.text || '');
+	                                    const tooltipGuideline = typeof openCriterionTooltip === 'string'
+	                                        ? ''
+	                                        : (openCriterionTooltip?.guideline || '');
+	                                    return (
+	                                        <>
+	                                            {tooltipGuideline && (
+	                                                <div style={{ marginBottom: '16px', padding: '12px 14px', borderRadius: '8px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
+	                                                    <div style={{ fontWeight: 700, color: '#1e3a8a', marginBottom: '6px' }}>Guideline</div>
+	                                                    <div>{tooltipGuideline}</div>
+	                                                </div>
+	                                            )}
+	                                            {tooltipText && <div>{tooltipText}</div>}
+	                                        </>
+	                                    );
+	                                })()}
                             </div>
                         </div>
                     </div>

@@ -426,7 +426,7 @@ export const api = {
 
   getEnrollmentById: async (enrollmentId) => {
     if (!enrollmentId) throw new Error('getEnrollmentById: enrollmentId is required');
-    const fields = 'enrollment,program,status,trackedEntityInstance,orgUnit';
+    const fields = 'enrollment,program,status,trackedEntityInstance,orgUnit,deleted,enrollmentDate,incidentDate';
     const resp = await fetch(
       `${BASE_URL}/api/enrollments/${encodeURIComponent(enrollmentId)}?fields=${encodeURIComponent(fields)}`,
       { headers: getHeaders() }
@@ -485,39 +485,69 @@ export const api = {
   },
 
   getActiveEnrollments: async (programId, orgUnitId = null) => {
-    // Fetch active enrollments. If orgUnitId is provided, filter by it using DESCENDANTS
+    // Fetch active enrollments directly from the enrollments endpoint.
+    // This avoids missing records where the enrollment OU matches but a TEI-first
+    // trackedEntityInstances query does not return the TEI in the expected scope.
     const params = [
+      'paging=false',
       `program=${encodeURIComponent(programId)}`,
       `programStatus=ACTIVE`,
       `ouMode=${orgUnitId ? 'DESCENDANTS' : 'ALL'}`,
-      `fields=trackedEntityInstance,orgUnit,attributes[attribute,displayName,value],enrollments[enrollment,status,program,deleted,orgUnit,orgUnitName,enrollmentDate]`
+      `fields=enrollment,status,program,deleted,trackedEntityInstance,orgUnit,orgUnitName,enrollmentDate,incidentDate,attributes[attribute,displayName,value]`
     ];
     if (orgUnitId) params.push(`ou=${encodeURIComponent(orgUnitId)}`);
-    
-    // We use trackedEntityInstances endpoint because we want to see the active enrollments per TEI easily
-    const url = `${BASE_URL}/api/trackedEntityInstances?${params.join('&')}`;
+
+    const url = `${BASE_URL}/api/enrollments?${params.join('&')}`;
     const resp = await fetch(url, { headers: getHeaders() });
     if (!resp.ok) throw new Error(`Failed to fetch active enrollments: ${resp.status}`);
     const data = await resp.json();
-    
-    // Flatten into a nice list
-    const activeList = [];
-    (data.trackedEntityInstances || []).forEach(tei => {
-        (tei.enrollments || []).forEach(enr => {
-            if (enr.program === programId && enr.status === 'ACTIVE' && !enr.deleted) {
-                activeList.push({
-                    teiId: tei.trackedEntityInstance,
-                    enrollmentId: enr.enrollment,
-                    programId: enr.program,
-                    orgUnit: enr.orgUnit,
-                    orgUnitName: enr.orgUnitName || tei.orgUnit,
-                    enrollmentDate: enr.enrollmentDate,
-                    attributes: tei.attributes || []
-                });
-            }
-        });
-    });
-    return activeList;
+
+    return (data.enrollments || [])
+      .filter(enr => enr.program === programId && String(enr.status || '').toUpperCase() === 'ACTIVE' && !enr.deleted)
+      .map(enr => ({
+        teiId: enr.trackedEntityInstance,
+        enrollmentId: enr.enrollment,
+        programId: enr.program,
+        status: enr.status,
+        orgUnit: enr.orgUnit,
+        orgUnitName: enr.orgUnitName || enr.orgUnit,
+        enrollmentDate: enr.enrollmentDate || enr.incidentDate,
+        incidentDate: enr.incidentDate,
+        attributes: enr.attributes || []
+      }));
+  },
+
+  getEnrollmentsByStatusesDirect: async (programId, orgUnitId = null, statuses = ['ACTIVE', 'COMPLETED']) => {
+    const allowedStatuses = new Set((statuses || []).map(s => String(s || '').toUpperCase()).filter(Boolean));
+    const params = [
+      'paging=false',
+      `program=${encodeURIComponent(programId)}`,
+      `ouMode=${orgUnitId ? 'DESCENDANTS' : 'ALL'}`,
+      `fields=enrollment,status,program,deleted,trackedEntityInstance,orgUnit,orgUnitName,enrollmentDate,incidentDate,attributes[attribute,displayName,value]`
+    ];
+    if (orgUnitId) params.push(`ou=${encodeURIComponent(orgUnitId)}`);
+
+    const url = `${BASE_URL}/api/enrollments?${params.join('&')}`;
+    const resp = await fetch(url, { headers: getHeaders() });
+    if (!resp.ok) throw new Error(`Failed to fetch enrollments by status: ${resp.status}`);
+    const data = await resp.json();
+
+    return (data.enrollments || [])
+      .filter(enr => {
+        const status = String(enr.status || '').toUpperCase();
+        return enr.program === programId && !enr.deleted && (!allowedStatuses.size || allowedStatuses.has(status));
+      })
+      .map(enr => ({
+        teiId: enr.trackedEntityInstance,
+        enrollmentId: enr.enrollment,
+        programId: enr.program,
+        status: enr.status,
+        orgUnit: enr.orgUnit,
+        orgUnitName: enr.orgUnitName || enr.orgUnit,
+        enrollmentDate: enr.enrollmentDate || enr.incidentDate,
+        incidentDate: enr.incidentDate,
+        attributes: enr.attributes || []
+      }));
   },
 
   getProgramEnrollments: async (programId, orgUnitId = null, statuses = ['ACTIVE', 'COMPLETED']) => {

@@ -37,6 +37,10 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import AssessmentIcon from '@mui/icons-material/Assessment';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CloudSyncIcon from '@mui/icons-material/CloudSync';
+import FactCheckIcon from '@mui/icons-material/FactCheck';
+import EditNoteIcon from '@mui/icons-material/EditNote';
+import EventAvailableIcon from '@mui/icons-material/EventAvailable';
+import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import './Dashboard.css';
 
 export function Dashboard() {
@@ -774,9 +778,9 @@ export function Dashboard() {
 	        }
 	    }, [configuration]);
 
-	    React.useEffect(() => {
-	        if (assessmentsLoading) return;
-	        const all = [...(pendingAssessments || []), ...(upcomingAssessments || [])];
+		    React.useEffect(() => {
+		        if (assessmentsLoading) return;
+		        const all = [...(pendingAssessments || []), ...(upcomingAssessments || []), ...(accredAssignments || [])];
 	        const seen = new Set();
 	        all.forEach(assessment => {
 	            const assocKey = getAssocKey(assessment);
@@ -786,7 +790,7 @@ export function Dashboard() {
 	            if (current && (current.loading || typeof current.hasAssessmentEvent === 'boolean')) return;
 	            checkAssessmentEventPresence(assessment);
 	        });
-	    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, assessmentEventPresenceByKey, checkAssessmentEventPresence]);
+		    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, assessmentEventPresenceByKey, checkAssessmentEventPresence]);
 
     const toggleExpandAssessment = async (assessment) => {
         const k = getAssocKey(assessment);
@@ -797,7 +801,277 @@ export function Dashboard() {
         }
     };
 
-  // Open a modal to show team members for an assignment
+    const getAssessmentActionKey = (assessment) => (
+        assessment?.scheduleTeiId ||
+        assessment?.trackedEntityInstance ||
+        assessment?.enrollment ||
+        assessment?.eventId ||
+        assessment?.orgUnitId ||
+        (typeof assessment?.orgUnit === 'string' ? assessment.orgUnit : assessment?.orgUnit?.id) ||
+        'unknown'
+    );
+
+	const getAssessmentUiState = (assessment) => {
+	    const draftId = `draft-assessment-${assessment?.eventId}`;
+	    const existingDraft = events.find(e => e.event === draftId);
+	    const isSynced = existingDraft?.syncStatus === 'synced';
+	    const actionKey = getAssessmentActionKey(assessment);
+	    const isInitiating = initiatingAssessmentKey === actionKey;
+	    const assocKey = getAssocKey(assessment);
+	    const presence = assessmentEventPresenceByKey?.[assocKey];
+	    const hasAssessmentEvent = presence?.hasAssessmentEvent === true;
+	    const isCheckingPresence = !presence || presence.loading;
+	    const roleNorm = String(assessment?.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i, '').toUpperCase();
+	    const isLead = /LEAD|LEADER/.test(roleNorm);
+	    const roleLabel = roleNorm ? roleNorm.replace(/\s+/g, '_').replace(/_/g, ' ') : '';
+	    const label = hasAssessmentEvent ? 'Open Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
+	    const plannedDate = assessment?.scheduledAt ? assessment.scheduledAt.slice(0, 10) : 'N/A';
+	    const lastUpdated = assessment?.updatedAt ? assessment.updatedAt.slice(0, 10) : 'N/A';
+	    const evs = Array.isArray(assessment?.team) ? assessment.team : [];
+	    const parseDate = (d) => (d ? new Date(d) : null);
+	    const dates = evs
+	        .map(e => parseDate(e.eventDate || e.occurredAt || e.completedDate || e.scheduledAt || e.updatedAt))
+	        .filter(Boolean)
+	        .sort((a, b) => a - b);
+	    const authStart = dates[0] ? dates[0].toISOString().slice(0, 10) : plannedDate;
+	    const authEnd = dates.length ? dates[dates.length - 1].toISOString().slice(0, 10) : lastUpdated;
+	    const latestAuth = dates.length ? dates[dates.length - 1].toISOString().slice(0, 10) : (assessment?.sortDate || plannedDate);
+	    return {
+	        existingDraft,
+	        isSynced,
+	        actionKey,
+	        isInitiating,
+	        assocKey,
+	        presence,
+	        hasAssessmentEvent,
+	        isCheckingPresence,
+	        isLead,
+	        roleLabel,
+	        label,
+	        plannedDate,
+	        lastUpdated,
+	        authStart,
+	        authEnd,
+	        latestAuth,
+	    };
+	};
+
+	const renderAssessmentActionButton = (assessment, uiState) => {
+	    if (uiState.isCheckingPresence) {
+	        return (
+	            <button className="btn btn-secondary btn-sm" disabled>
+	                Checking assessment…
+	            </button>
+	        );
+	    }
+	    if (uiState.label === 'Initiate Survey' && !uiState.isLead) return null;
+	    return (
+	        <button
+	            className={`btn ${uiState.label === 'Initiate Survey' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
+	            disabled={uiState.label === 'Initiate Survey' && uiState.isInitiating}
+	            onClick={() => uiState.label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly: false }) : handleOpenAssessment(assessment)}
+	        >
+	            {uiState.label === 'Initiate Survey' && uiState.isInitiating ? 'Opening…' : uiState.label}
+	        </button>
+	    );
+	};
+
+	const renderAssociatedAssessmentsPanel = (assessment, isLead) => {
+	    const bundle = associatedByEnrollment[getAssocKey(assessment)];
+	    if (!bundle || bundle.loading) return <div style={{ color: '#666' }}>Loading associated events...</div>;
+	    const rawRows = [ ...(bundle.survey || []) ];
+	    const groupedByAssessment = rawRows.reduce((acc, ev) => {
+	        const enrollmentKey = ev?._type === 'Enrollment'
+	            ? (ev.enrollmentId || ev.enrollment || ev.event)
+	            : null;
+	        const tei = ev?.trackedEntityInstance;
+	        const key = enrollmentKey
+	            ? `enrollment-${enrollmentKey}`
+	            : (tei && tei !== 'unknown-tei' ? tei : `event-${ev.event}`);
+	        if (!acc[key]) acc[key] = [];
+	        acc[key].push(ev);
+	        return acc;
+	    }, {});
+	    const rows = Object.entries(groupedByAssessment).map(([key, evs]) => {
+	        const hasFinal = evs.some(ev => getSysTag(ev) === 'FINAL');
+	        const finalEv = hasFinal ? evs.find(ev => getSysTag(ev) === 'FINAL') : null;
+	        const latestWithTypeOrGroup = evs.find(ev => (ev.dataValues || []).some(d => d.dataElement === surveyTypeDeId || d.dataElement === surveyGroupDeId)) || null;
+	        const latestEv = [...evs].sort((a, b) => new Date(b?.eventDate || 0) - new Date(a?.eventDate || 0))[0] || evs[0];
+	        const representative = finalEv || latestWithTypeOrGroup || latestEv;
+	        const representativeTei = representative?.trackedEntityInstance
+	            || evs.find(ev => ev?.trackedEntityInstance)?.trackedEntityInstance
+	            || (key.startsWith('event-') ? 'unknown-tei' : key);
+	        const earliestDate = evs.reduce((acc, cur) => {
+	            if (!cur?.eventDate) return acc;
+	            if (!acc) return cur.eventDate;
+	            return new Date(cur.eventDate) < new Date(acc) ? cur.eventDate : acc;
+	        }, null);
+	        return {
+	            ...representative,
+	            trackedEntityInstance: representativeTei,
+	            _bundleEvents: evs,
+	            _displayEventId: representative?.enrollmentId || representative?.event || '-',
+	            _baselineDate: earliestDate,
+	            _assessmentDate: representative?.eventDate || latestEv?.eventDate || earliestDate,
+	        };
+	    }).sort((a, b) => new Date(b?._assessmentDate || 0) - new Date(a?._assessmentDate || 0));
+
+	    if (rows.length === 0) {
+	        return (
+	            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+	                <span style={{ color: '#334155' }}>No baseline survey found</span>
+	                <span style={{
+	                    display: 'inline-block',
+	                    fontSize: '0.75em',
+	                    fontWeight: 700,
+	                    color: '#9a3412',
+	                    background: '#ffedd5',
+	                    border: '1px solid #fdba74',
+	                    padding: '2px 8px',
+	                    borderRadius: '9999px'
+	                }}>NO BASELINE</span>
+	                {!isLead && (
+	                    <span style={{ color: '#9A3412', fontSize: '0.9em' }}>
+	                        Please contact the Team Lead to initiate the survey.
+	                    </span>
+	                )}
+	            </div>
+	        );
+	    }
+
+	    const getTypeValue = (ev) => {
+	        if (ev._type === 'Enrollment') {
+	            return getAttributeValue(
+	                ev.attributes,
+	                SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected,
+	                ['assessment type of assessment selected']
+	            ) || '-';
+	        }
+	        if (!surveyTypeDeId) return '-';
+	        const sourceEvents = Array.isArray(ev?._bundleEvents) ? ev._bundleEvents : [ev];
+	        const dv = sourceEvents
+	            .flatMap(src => src.dataValues || [])
+	            .find(d => d.dataElement === surveyTypeDeId && d.value !== undefined && String(d.value).trim() !== '');
+	        return dv?.value || '-';
+	    };
+	    const getGroupValue = (ev) => {
+	        if (ev._type === 'Enrollment') {
+	            return getAttributeValue(
+	                ev.attributes,
+	                SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType,
+	                ['assessment facility type']
+	            ) || '-';
+	        }
+	        if (!surveyGroupDeId) return '-';
+	        const sourceEvents = Array.isArray(ev?._bundleEvents) ? ev._bundleEvents : [ev];
+	        const dv = sourceEvents
+	            .flatMap(src => src.dataValues || [])
+	            .find(d => d.dataElement === surveyGroupDeId && d.value !== undefined && String(d.value).trim() !== '');
+	        return dv?.value || '-';
+	    };
+	    const formatAssessmentStatusLabel = (value) => {
+	        const raw = String(value || '').trim();
+	        if (!raw) return '-';
+	        if (raw === 'FAC_ASS_STATUS_IN_PROGRESS') return 'In Progress';
+	        return raw;
+	    };
+	    const getStatusValue = (ev) => {
+	        if (ev._type === 'Enrollment') {
+	            return formatAssessmentStatusLabel(
+	                getAttributeValue(
+	                    ev.attributes,
+	                    SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityAssessmentStatus,
+	                    ['facility assessment status']
+	                ) || ev.status || '-'
+	            );
+	        }
+	        return formatAssessmentStatusLabel(ev.status || '-');
+	    };
+
+	    const authDates = (() => {
+	        const evsAuth = Array.isArray(assessment.team) ? assessment.team : [];
+	        const parseD = (d) => (d ? new Date(d) : null);
+	        const ds = evsAuth.map(e => parseD(e.eventDate || e.occurredAt || e.completedDate || e.scheduledAt || e.updatedAt)).filter(Boolean).sort((a, b) => a - b);
+	        const start = ds[0] ? ds[0].toISOString().slice(0, 10) : '';
+	        const end = ds.length ? ds[ds.length - 1].toISOString().slice(0, 10) : '';
+	        return { start, end };
+	    })();
+
+	    return (
+	        <div style={{ overflowX: 'auto' }}>
+	            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9em' }}>
+	                <thead>
+	                    <tr style={{ textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
+	                        <th style={{ padding: '6px 8px' }}>Assessment_ID</th>
+	                        <th style={{ padding: '6px 8px' }}>Program</th>
+	                        <th style={{ padding: '6px 8px' }}>TEI</th>
+	                        <th style={{ padding: '6px 8px' }}>Assessment date</th>
+	                        <th style={{ padding: '6px 8px' }}>Authorised start</th>
+	                        <th style={{ padding: '6px 8px' }}>Authorised end</th>
+	                        <th style={{ padding: '6px 8px' }}>Type of assessment</th>
+	                        <th style={{ padding: '6px 8px' }}>Facility type</th>
+	                        <th style={{ padding: '6px 8px' }}>Status</th>
+	                        <th style={{ padding: '6px 8px' }}>Actions</th>
+	                    </tr>
+	                </thead>
+	                <tbody>
+	                    {rows.map(ev => (
+	                        <tr
+	                            key={`survey-${ev.enrollmentId || ev.enrollment || ev.event || ev.trackedEntityInstance}`}
+	                            onClick={() => openAssociatedSurvey(assessment, ev)}
+	                            style={{ borderTop: '1px dashed #eee', cursor: 'pointer' }}
+	                            title="Open this survey for editing"
+	                        >
+	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev._displayEventId || ev.event || '-'}</td>
+	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.programId || '-'}</td>
+	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.trackedEntityInstance || '-'}</td>
+	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{ev._assessmentDate ? new Date(ev._assessmentDate).toLocaleDateString() : 'N/A'}</td>
+	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.start || 'N/A'}</td>
+	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.end || 'N/A'}</td>
+	                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
+	                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getGroupValue(ev)}</td>
+	                            <td style={{ padding: '6px 8px' }}>{getStatusValue(ev)}</td>
+	                            <td style={{ padding: '6px 8px' }}>
+	                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+	                                    <button
+	                                        className="btn btn-secondary btn-xs"
+	                                        onClick={(e) => {
+	                                            e.stopPropagation();
+	                                            const baselineDate = ev._baselineDate || null;
+	                                            const ou = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || '';
+	                                            const tei = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
+	                                            const q = new URLSearchParams({
+	                                                facilityId: ou || '',
+	                                                teiId: tei || '',
+	                                                start: baselineDate || '',
+	                                                end: ev._assessmentDate || ev.eventDate || '',
+	                                                eventId: ev._displayEventId || ev.event || ''
+	                                            }).toString();
+	                                            navigate(`/report?${q}`);
+	                                        }}
+	                                    >
+	                                        View Report
+	                                    </button>
+	                                    <button
+	                                        className="btn btn-secondary btn-xs"
+	                                        onClick={(e) => {
+	                                            e.stopPropagation();
+	                                            openEditSeAssignments(assessment, ev, getGroupValue(ev), getTypeValue(ev));
+	                                        }}
+	                                    >
+	                                        Edit SE Assignments
+	                                    </button>
+	                                </div>
+	                            </td>
+	                        </tr>
+	                    ))}
+	                </tbody>
+	            </table>
+	        </div>
+	    );
+	};
+
+	  // Open a modal to show team members for an assignment
   const openTeamDialog = async (assessment) => {
     const team = Array.isArray(assessment.team) ? assessment.team : [];
     const label = assessment.orgUnitName || assessment.facilityId || assessment.orgUnitId || '';
@@ -1244,11 +1518,12 @@ export function Dashboard() {
         }
     };
 
-    // New explicit initiate handler: opens the Initiate dialog even if a
-    // baseline already exists. In follow-up mode, Type is locked to Self
-    // Assessment and Facility Group is locked to the baseline's group.
+	    // New explicit initiate handler. Non-self assessment TEIs are single-use:
+        // if the scheduling TEI already has a survey event, open that survey instead
+        // of offering another initiation on the same TEI. Self Assessment can still
+        // create its own new TEI from the dialog when explicitly requested.
     const handleInitiateSurvey = async (assessment, { selfOnly = false } = {}) => {
-        const actionKey = assessment?.eventId || assessment?.enrollment || assessment?.trackedEntityInstance || assessment?.scheduleTeiId || assessment?.orgUnitId || 'unknown';
+	        const actionKey = getAssessmentActionKey(assessment);
         setInitiatingAssessmentKey(actionKey);
         const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
         const isLead = /LEAD|LEADER/.test(roleNorm);
@@ -1263,10 +1538,14 @@ export function Dashboard() {
             const orgUnitId = resolveOrgUnitForAssessment(assessment);
             const teiId = resolveTeiForAssessment(assessment);
             let latestEventId = null;
-            try { latestEventId = await api.getLatestSurveyEventId({ programId, stageId, teiId, orgUnitId }); } catch (_) {}
+	            try { latestEventId = await api.getLatestSurveyEventId({ programId, stageId, teiId, orgUnitId: null }); } catch (_) {}
             if (latestEventId) {
-                // A baseline (or previous) event exists → open dialog in FOLLOWUP mode
-                await openInitiateSurveyFollowUp(assessment, { selfOnly });
+	                if (selfOnly) {
+	                    await openInitiateSurveyFollowUp(assessment, { selfOnly: true });
+	                    return;
+	                }
+	                showToast?.('This scheduled TEI already has a survey. Non-self survey types require a new TEI from the scheduling program.', 'warning');
+	                await handleOpenAssessment(assessment);
                 return;
             }
             // Else, use the baseline initiation path from handleOpenAssessment
@@ -1635,7 +1914,21 @@ export function Dashboard() {
                 setIsBaselineCreating(false);
                 return;
             }
-            const isSelfSelected = /self/i.test(String(selectedTypeMeta?.label || selectedTypeMeta?.value || ''));
+	            const isSelfSelected = isSelfSurveyType(selectedTypeMeta?.label || selectedTypeMeta?.value || initSurveyType);
+	            if (!isSelfSelected && teiId) {
+	                const [existingEventId, existingSurveyEnrollments] = await Promise.all([
+	                    api.getLatestSurveyEventId({ programId, stageId, teiId, orgUnitId: null }).catch(() => null),
+	                    api.getEnrollmentsForTei(teiId, programId).catch(() => [])
+	                ]);
+	                const hasExistingSurveyEnrollment = (existingSurveyEnrollments || []).some(enr => enr?.enrollment && !enr?.deleted);
+	                if (existingEventId || hasExistingSurveyEnrollment) {
+	                    const message = 'This scheduled TEI has already been used for a survey. Non-self survey types can only be initiated from a newly scheduled TEI.';
+	                    setCreateDetails(prev => [...prev, message]);
+	                    showToast?.(message, 'error');
+	                    setIsBaselineCreating(false);
+	                    return;
+	                }
+	            }
 	            const totalSteps = 3;
 
             const extraAttributes = [
@@ -1644,9 +1937,9 @@ export function Dashboard() {
                 { attribute: 'SlXgujGsSqv', value: 'FAC_ASS_STATUS_IN_PROGRESS' }
             ];
 
-            // New model: every Self Assessment gets its own assessment TEI.
-            // Normal assessments reuse the selected authorised TEI, but receive a
-            // fresh survey-program enrollment for this assessment instance.
+	            // New model: every Self Assessment gets its own assessment TEI.
+	            // Non-self assessments use the TEI issued by the scheduling program,
+	            // and that scheduled TEI is single-use for survey initiation.
             const generateDhis2Uid = () => {
                 const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
                 let result = chars.charAt(Math.floor(Math.random() * 52)); // Start with letter
@@ -2406,6 +2699,29 @@ export function Dashboard() {
         };
     }, [events]);
 
+    const getRecentSurveyMeta = React.useCallback((event) => {
+        const eventId = String(event?.event || '');
+        const groupCode = (eventId.match(/group-([A-Z_]+)/i)?.[1] || event?._draftData?.metadata?.groupId || 'SURVEY').toUpperCase();
+        const groupLabels = {
+            HOSPITAL: 'Hospital',
+            CLINICS: 'Clinics',
+            EMS: 'EMS',
+            SE: 'EMS',
+            MORTUARY: 'Mortuary',
+            GENERAL: 'Mortuary',
+        };
+        const groupLabel = groupLabels[groupCode] || groupCode;
+        const typeLabel = eventId.startsWith('draft-assessment-')
+            ? 'Assessment bundle'
+            : eventId.startsWith('draft-facility-')
+                ? 'Facility draft'
+                : 'Survey draft';
+        const updatedDate = event?.updatedAt ? new Date(event.updatedAt) : (event?.eventDate ? new Date(event.eventDate) : null);
+        const dateLabel = updatedDate && !Number.isNaN(updatedDate.getTime()) ? updatedDate.toLocaleDateString() : 'No date';
+        const shortId = eventId.length > 18 ? eventId.slice(-18) : eventId;
+        return { groupCode, groupLabel, typeLabel, dateLabel, shortId };
+    }, []);
+
     const handleEditForm = (event) => {
         // Resume drafts or failed submissions
         if (event.syncStatus === 'draft' || event.syncStatus === 'pending' || event.syncStatus === 'error') {
@@ -2466,28 +2782,28 @@ export function Dashboard() {
             {/* Stats Cards */}
             <div className="stats-dashboard">
                 <div className="stat-card total">
-                    <div className="stat-icon">[T]</div>
+	                    <div className="stat-icon"><FactCheckIcon fontSize="inherit" /></div>
                     <div className="stat-content">
                         <h3>{dashboardStats.totalEvents}</h3>
                         <p>Total Surveys</p>
                     </div>
                 </div>
                 <div className="stat-card pending">
-                    <div className="stat-icon">⏱</div>
+	                    <div className="stat-icon"><EditNoteIcon fontSize="inherit" /></div>
                     <div className="stat-content">
                         <h3>{dashboardStats.pendingEvents}</h3>
                         <p>Drafts</p>
                     </div>
                 </div>
                 <div className="stat-card upcoming">
-                    <div className="stat-icon">📅</div>
+	                    <div className="stat-icon"><EventAvailableIcon fontSize="inherit" /></div>
                     <div className="stat-content">
                         <h3>{assessmentStats.upcoming}</h3>
                         <p>Upcoming Assessments</p>
                     </div>
                 </div>
                 <div className="stat-card urgent">
-                    <div className="stat-icon">🔔</div>
+	                    <div className="stat-icon"><NotificationsActiveIcon fontSize="inherit" /></div>
                     <div className="stat-content">
                         <h3>{assessmentStats.pending}</h3>
                         <p>Pending Actions</p>
@@ -2513,8 +2829,12 @@ export function Dashboard() {
                                 const facilityId = assessment.facilityId || assessment.orgUnitId || assessment.orgUnit || '';
                                 const displayId = facilityId && facilityId !== 'N/A' ? ` (${facilityId})` : '';
                                 const isSynced = false;
-                                const actionKey = assessment?.eventId || assessment?.enrollment || assessment?.trackedEntityInstance || assessment?.scheduleTeiId || assessment?.orgUnitId || 'unknown';
+	                                const actionKey = getAssessmentActionKey(assessment);
                                 const isInitiating = initiatingAssessmentKey === actionKey;
+	                                const assocKey = getAssocKey(assessment);
+	                                const presence = assessmentEventPresenceByKey?.[assocKey];
+	                                const hasAssessmentEvent = presence?.hasAssessmentEvent === true;
+	                                const isCheckingPresence = !presence || presence.loading;
                                 return (
                                     <div key={`accred-${assessment.enrollment || assessment.eventId || assessment.trackedEntityInstance}`} className="form-item assessment-item">
                                         <div className="form-info">
@@ -2545,13 +2865,13 @@ export function Dashboard() {
                                             <p>Enrollment: {assessment.enrollment}</p>
                                         </div>
                                         <div className="form-actions">
-                                            <button
-                                                className={`btn ${isSynced ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-                                                disabled={isInitiating}
-                                                onClick={() => handleInitiateSurvey(assessment, { selfOnly: false })}
-                                            >
-                                                {isInitiating ? 'Opening…' : 'Initiate Survey'}
-                                            </button>
+	                                            <button
+	                                                className={`btn ${hasAssessmentEvent ? 'btn-secondary' : 'btn-primary'} btn-sm`}
+	                                                disabled={isCheckingPresence || (!hasAssessmentEvent && isInitiating)}
+	                                                onClick={() => hasAssessmentEvent ? handleOpenAssessment(assessment) : handleInitiateSurvey(assessment, { selfOnly: false })}
+	                                            >
+	                                                {isCheckingPresence ? 'Checking assessment…' : hasAssessmentEvent ? 'Open Survey' : (isInitiating ? 'Opening…' : 'Initiate Survey')}
+	                                            </button>
                                         </div>
                                     </div>
                                 );
@@ -2597,28 +2917,37 @@ export function Dashboard() {
                             <div className="empty-state">No assessments assigned</div>
                         ) : (
                             (() => {
-                                const allUniqueAssessments = [];
-                                const seenFacilities = new Map();
-                                [...pendingAssessments, ...upcomingAssessments].forEach(assessment => {
-                                    const facilityId = assessment.orgUnit || assessment.facilityId || assessment.eventId;
-                                    if (!seenFacilities.has(facilityId)) {
-                                        const newItem = { ...assessment, _duplicates: [assessment] };
-                                        allUniqueAssessments.push(newItem);
-                                        seenFacilities.set(facilityId, newItem);
-                                    } else {
-                                        const existing = seenFacilities.get(facilityId);
-                                        if (existing) {
-                                            existing._duplicates.push(assessment);
-                                        }
-                                    }
-                                });
+		                                const allUniqueAssessments = [];
+		                                const seenFacilities = new Map();
+	                                [...pendingAssessments, ...upcomingAssessments].forEach(assessment => {
+		                                    const facilityKey =
+		                                        assessment?.facilityId ||
+		                                        assessment?.orgUnitId ||
+		                                        (typeof assessment?.orgUnit === 'string' ? assessment.orgUnit : assessment?.orgUnit?.id) ||
+		                                        assessment?.orgUnitName ||
+		                                        getAssessmentActionKey(assessment);
+		                                    if (!seenFacilities.has(facilityKey)) {
+	                                        const newItem = { ...assessment, _duplicates: [assessment] };
+	                                        allUniqueAssessments.push(newItem);
+		                                        seenFacilities.set(facilityKey, newItem);
+	                                    } else {
+		                                        const existing = seenFacilities.get(facilityKey);
+	                                        if (existing) {
+	                                            existing._duplicates.push(assessment);
+	                                        }
+	                                    }
+	                                });
 
                                 return allUniqueAssessments.map(assessment => {
                                     const draftId = `draft-assessment-${assessment.eventId}`;
                                     const existingDraft = events.find(e => e.event === draftId);
                                     const isSynced = existingDraft?.syncStatus === 'synced';
-                                    const actionKey = assessment?.eventId || assessment?.enrollment || assessment?.trackedEntityInstance || assessment?.scheduleTeiId || assessment?.orgUnitId || 'unknown';
+	                                    const actionKey = getAssessmentActionKey(assessment);
                                     const isInitiating = initiatingAssessmentKey === actionKey;
+	                                    const assocKey = getAssocKey(assessment);
+	                                    const presence = assessmentEventPresenceByKey?.[assocKey];
+	                                    const hasAssessmentEvent = presence?.hasAssessmentEvent === true;
+	                                    const isCheckingPresence = !presence || presence.loading;
 
                                     // Robust Facility ID display
                                     const facilityId = assessment.facilityId || assessment.orgUnitId || assessment.orgUnit || '';
@@ -2643,11 +2972,11 @@ export function Dashboard() {
                                                             <>
                                                                 <span style={{ fontSize: '0.85em', color: '#666', marginTop: '-4px' }}>
                                                                     District: {assessment.parentOrgUnitName}
-                                                                    {assessment.myTeamRole ? (
+	                                                                    {assessment._duplicates?.length <= 1 && assessment.myTeamRole ? (
                                                                         <> {' \u2022 '} Role: {String(assessment.myTeamRole).replace(/^FAC_ASS_ROLE_/i,'').replace(/\s+/g,'_').replace(/_/g,' ').toUpperCase()}</>
                                                                     ) : null}
                                                                 </span>
-                                                                {assessment.isSelfAssessment && (
+	                                                                {assessment._duplicates?.length <= 1 && assessment.isSelfAssessment && (
                                                                     <div style={{ marginTop: '4px' }}>
                                                                         <span style={{
                                                                             fontSize: '0.7em',
@@ -2662,31 +2991,143 @@ export function Dashboard() {
                                                                         </span>
                                                                     </div>
                                                                 )}
-                                                                <div style={{ marginTop: '6px' }}>
-                                                                    <button
-                                                                        className="btn btn-secondary btn-sm"
-                                                                        onClick={() => openTeamDialog(assessment)}
-                                                                    >
-                                                                        Team ({Array.isArray(assessment.team) ? assessment.team.length : 0})
-                                                                    </button>
-                                                                </div>
+	                                                                {assessment._duplicates?.length <= 1 && (
+	                                                                    <div style={{ marginTop: '6px' }}>
+	                                                                        <button
+	                                                                            className="btn btn-secondary btn-sm"
+	                                                                            onClick={() => openTeamDialog(assessment)}
+	                                                                        >
+	                                                                            Team ({Array.isArray(assessment.team) ? assessment.team.length : 0})
+	                                                                        </button>
+	                                                                    </div>
+	                                                                )}
                                                             </>
                                                         )}
                                                     </div>
-                                                    <div style={{ display: 'flex', gap: '5px' }}>
-                                                        {assessment.requiresResponse && (
-                                                            <div className="form-status error">ACTION REQUIRED</div>
-                                                        )}
-                                                        {isSynced && (
-                                                            <div className="form-status success">✓ SYNCED</div>
-                                                        )}
-                                                    </div>
+	                                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+	                                                        {assessment._duplicates?.length > 1 ? (
+	                                                            <div className="form-status success">{new Set((assessment._duplicates || []).map(item => getAssessmentActionKey(item))).size} UNIQUE SCHEDULES</div>
+	                                                        ) : (
+	                                                            <>
+	                                                                {assessment.requiresResponse && (
+	                                                                    <div className="form-status error">ACTION REQUIRED</div>
+	                                                                )}
+		                                                            <div className={`form-status ${hasAssessmentEvent ? 'success' : 'warning'}`}>
+		                                                                {isCheckingPresence ? 'CHECKING TEI' : hasAssessmentEvent ? 'SURVEY EXISTS' : 'NEW SCHEDULED TEI'}
+		                                                            </div>
+	                                                                {isSynced && (
+	                                                                    <div className="form-status success">✓ SYNCED</div>
+	                                                                )}
+	                                                            </>
+	                                                        )}
+	                                                    </div>
                                                 </div>
-	                                            {(() => {
+		                                            {assessment._duplicates?.length > 1 ? (
+		                                                (() => {
+		                                                    const uniqueSchedules = [];
+		                                                    const seenScheduleKeys = new Map();
+		                                                    (assessment._duplicates || []).forEach(item => {
+		                                                        const scheduleKey = getAssessmentActionKey(item);
+		                                                        const existingSchedule = seenScheduleKeys.get(scheduleKey);
+		                                                        if (existingSchedule) {
+		                                                            existingSchedule._duplicates.push(item);
+		                                                            return;
+		                                                        }
+		                                                        const scheduleItem = { ...item, _duplicates: [item] };
+		                                                        uniqueSchedules.push(scheduleItem);
+		                                                        seenScheduleKeys.set(scheduleKey, scheduleItem);
+		                                                    });
+		                                                    return (
+		                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+		                                                            {uniqueSchedules.map((scheduledAssessment, scheduleIndex) => {
+		                                                                const scheduleUi = getAssessmentUiState(scheduledAssessment);
+		                                                                return (
+		                                                                    <div
+		                                                                        key={`${scheduleUi.actionKey}-${scheduleIndex}`}
+		                                                                        style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px', background: '#f8fafc' }}
+		                                                                    >
+		                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
+		                                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+		                                                                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
+		                                                                                    <div className="form-status success">SCHEDULE {scheduleIndex + 1}</div>
+		                                                                                    {scheduledAssessment.requiresResponse && (
+		                                                                                        <div className="form-status error">ACTION REQUIRED</div>
+		                                                                                    )}
+		                                                                                    <div className={`form-status ${scheduleUi.hasAssessmentEvent ? 'success' : 'warning'}`}>
+		                                                                                        {scheduleUi.isCheckingPresence ? 'CHECKING TEI' : scheduleUi.hasAssessmentEvent ? 'SURVEY EXISTS' : 'NEW SCHEDULED TEI'}
+		                                                                                    </div>
+		                                                                                    {scheduledAssessment.isSelfAssessment && (
+		                                                                                        <div className="form-status success">SELF ASSESSMENT</div>
+		                                                                                    )}
+		                                                                                    {scheduleUi.isSynced && (
+		                                                                                        <div className="form-status success">✓ SYNCED</div>
+		                                                                                    )}
+		                                                                                </div>
+		                                                                                <div style={{ fontSize: '0.85em', color: '#64748b' }}>
+		                                                                                    {scheduleUi.roleLabel ? <>Role: {scheduleUi.roleLabel}</> : 'Role: N/A'}
+		                                                                                </div>
+		                                                                            </div>
+
+		                                                                            <div className="form-actions" style={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+		                                                                                <button
+		                                                                                    className="btn btn-secondary btn-sm"
+		                                                                                    onClick={() => openTeamDialog(scheduledAssessment)}
+		                                                                                >
+		                                                                                    Team ({Array.isArray(scheduledAssessment.team) ? scheduledAssessment.team.length : 0})
+		                                                                                </button>
+		                                                                                {renderAssessmentActionButton(scheduledAssessment, scheduleUi)}
+		                                                                            </div>
+		                                                                        </div>
+
+		                                                                        <p style={{ margin: '10px 0 0', color: '#475569' }}>
+		                                                                            Date: {scheduleUi.latestAuth}
+		                                                                            {' '}| Authorised: {scheduleUi.authStart} to {scheduleUi.authEnd}
+		                                                                            {' '}| OU: {scheduledAssessment.orgUnit}
+		                                                                            {' '}| Enr: {scheduledAssessment.enrollment || scheduledAssessment.eventId}
+		                                                                            {' '}| TEI: {scheduledAssessment.scheduleTeiId || scheduledAssessment.trackedEntityInstance}
+		                                                                        </p>
+
+		                                                                        {!scheduleUi.isCheckingPresence && scheduleUi.label === 'Initiate Survey' && !scheduleUi.isLead && (
+		                                                                            <div style={{ marginTop: '8px', color: '#9A3412', fontSize: '0.9em' }}>
+		                                                                                Please contact the Team Lead to initiate this schedule.
+		                                                                            </div>
+		                                                                        )}
+
+		                                                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
+		                                                                            <button className="btn btn-secondary btn-sm" onClick={() => toggleExpandAssessment(scheduledAssessment)}>
+		                                                                                {expandedAssignments[getAssocKey(scheduledAssessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
+		                                                                            </button>
+		                                                                        </div>
+		                                                                        {expandedAssignments[getAssocKey(scheduledAssessment)] && (
+		                                                                            <div style={{ marginTop: '10px', width: '100%', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
+		                                                                                {scheduledAssessment._duplicates && scheduledAssessment._duplicates.length > 1 && (
+		                                                                                    <div style={{ marginBottom: '10px', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
+		                                                                                        <div style={{ fontWeight: 600, color: '#374151', marginBottom: '4px' }}>
+		                                                                                            Grouped Assignments ({scheduledAssessment._duplicates.length})
+		                                                                                        </div>
+		                                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+		                                                                                            {scheduledAssessment._duplicates.map(d => (
+		                                                                                                <div key={d.eventId} style={{ fontSize: '13px', color: '#4b5563' }}>
+		                                                                                                    • Status: <span style={{ fontWeight: 500 }}>{d.statusCode === 'FAC_ASS_ASSIGN_ACCEPTED' ? 'Accepted' : 'Pending'}</span> | Date: {d.sortDate} | ID: {d.eventId} | Enr: {d.enrollment || d.schedule?.enrollments?.[0]?.enrollment || 'N/A'} | Prog: {d.program || d.schedule?.enrollments?.[0]?.program || 'N/A'} | TEI: {d.trackedEntityInstance || d.scheduleTeiId || 'N/A'} | Start: {d.scheduledAt ? d.scheduledAt.slice(0,10) : 'N/A'} | End: {d.updatedAt ? d.updatedAt.slice(0,10) : 'N/A'}
+		                                                                                                </div>
+		                                                                                            ))}
+		                                                                                        </div>
+		                                                                                    </div>
+		                                                                                )}
+		                                                                                {renderAssociatedAssessmentsPanel(scheduledAssessment, scheduleUi.isLead)}
+		                                                                            </div>
+		                                                                        )}
+		                                                                    </div>
+		                                                                );
+		                                                            })}
+		                                                        </div>
+		                                                    );
+		                                                })()
+		                                            ) : (
+		                                                <>
+		                                            {(() => {
 	                                                // Only show this initiation description when the authorised
 	                                                // TEI does not yet have a main survey assessment event.
-	                                                const assocKey = getAssocKey(assessment);
-	                                                const presence = assessmentEventPresenceByKey?.[assocKey];
 	                                                const needsInitiation = presence?.hasAssessmentEvent === false;
 	                                                if (!needsInitiation) return null;
 
@@ -2929,30 +3370,25 @@ export function Dashboard() {
                     })()}
                 </div>
             )}
-
-        </div>
                                             <div className="form-actions">
                                                 {(() => {
-	                                                    const assocKey = getAssocKey(assessment);
-	                                                    const presence = assessmentEventPresenceByKey?.[assocKey];
-	                                                    const presenceLoading = !presence || presence.loading;
-	                                                    if (presenceLoading) {
+		                                                    if (isCheckingPresence) {
 	                                                        return (
 	                                                            <button className="btn btn-secondary btn-sm" disabled>
 	                                                                Checking assessment…
 	                                                            </button>
 	                                                        );
 	                                                    }
-                                                    const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
-                                                    const isLead = /LEAD|LEADER/.test(roleNorm);
-		                                                    const label = isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey');
+	                                                    const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
+	                                                    const isLead = /LEAD|LEADER/.test(roleNorm);
+		                                                    const label = hasAssessmentEvent ? 'Open Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
 		                                                    if (label === 'Initiate Survey' && !isLead) return null;
 	                                                    const onClick = () => {
 	                                                        return label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly: false }) : handleOpenAssessment(assessment);
 	                                                    };
                                                     return (
                                                         <button
-		                                                            className={`btn ${isSynced ? 'btn-secondary' : 'btn-primary'} btn-sm`}
+			                                                            className={`btn ${label === 'Initiate Survey' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
 		                                                            disabled={label === 'Initiate Survey' && isInitiating}
                                                             onClick={onClick}
                                                         >
@@ -2961,6 +3397,10 @@ export function Dashboard() {
                                                     );
                                                 })()}
                                             </div>
+	                                            </>
+	                                            )}
+
+	                                        </div>
         
                                         </div>
                                     );
@@ -2990,19 +3430,32 @@ export function Dashboard() {
                         <div className="loading">Loading...</div>
                     ) : filteredEvents.length === 0 ? (
                         <div className="empty-state">No Survey found</div>
-                    ) : (
-                        filteredEvents.map(event => (
-                            <div key={event.event} className={`form-item ${event.syncStatus}`} onClick={() => handleEditForm(event)}>
-                                <div className="form-info">
-                                    <div className="form-header-row">
-                                        <h4>{event._draftData?.formData?.facilityName_internal || 'Survey'} - {new Date(event.updatedAt).toLocaleDateString()}</h4>
-                                        <div className={`form-status ${event.syncStatus === 'error' ? 'error' : event.syncStatus === 'synced' ? 'success' : 'warning'}`}>
-                                            {event.syncStatus === 'error' ? 'Failed' : event.syncStatus === 'synced' ? 'Synced' : 'Draft'}
-                                        </div>
-                                    </div>
-                                    <p>ID: {event.event} {event.syncError && <span className="error-msg">| Error: {event.syncError}</span>}</p>
-                                </div>
-                                <div className="form-actions">
+	                    ) : (
+	                        filteredEvents.map(event => {
+                                const meta = getRecentSurveyMeta(event);
+                                return (
+	                            <div key={event.event} className={`form-item recent-survey-card ${event.syncStatus} group-${meta.groupCode.toLowerCase()}`} onClick={() => handleEditForm(event)}>
+	                                <div className="form-info recent-survey-info">
+	                                    <div className="form-header-row recent-survey-header">
+	                                        <div>
+	                                            <div className="recent-survey-eyebrow">{meta.typeLabel}</div>
+	                                            <h4>{event._draftData?.formData?.facilityName_internal || 'Survey'}</h4>
+	                                        </div>
+	                                        <div className="recent-survey-badges">
+	                                            <span className={`survey-group-chip group-${meta.groupCode.toLowerCase()}`}>{meta.groupLabel}</span>
+	                                            <span className="survey-date-chip">{meta.dateLabel}</span>
+	                                            <div className={`form-status ${event.syncStatus === 'error' ? 'error' : event.syncStatus === 'synced' ? 'success' : 'warning'}`}>
+	                                                {event.syncStatus === 'error' ? 'Failed' : event.syncStatus === 'synced' ? 'Synced' : 'Draft'}
+	                                            </div>
+	                                        </div>
+	                                    </div>
+	                                    <div className="recent-survey-meta">
+	                                        <span>Short ID: <strong>{meta.shortId || 'N/A'}</strong></span>
+	                                        <span className="recent-survey-id-full">Full ID: {event.event}</span>
+	                                        {event.syncError && <span className="error-msg">Error: {event.syncError}</span>}
+	                                    </div>
+	                                </div>
+	                                <div className="form-actions recent-survey-actions">
                                     {event.syncStatus === 'error' && (
                                         <button
                                             className="btn btn-warning btn-sm"
@@ -3026,7 +3479,8 @@ export function Dashboard() {
                                     </button>
                                 </div>
                             </div>
-                        ))
+	                                );
+                            })
                     )}
                 </div>
             </div>
@@ -3688,6 +4142,11 @@ export function Dashboard() {
                             Update the SE assignees for this assessment. Existing DHIS2 assessment events will not be recreated.
                         </div>
                     )}
+	                    {!initEditAssignmentsOnly && !forceSelfOnly && (
+	                        <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 8, background: '#f8fafc', border: '1px solid #cbd5e1', color: '#334155' }}>
+	                            Non-self survey types can only be initiated from a new TEI created by the scheduling programme. Existing TEIs can be opened or resumed, but not reused for another non-self survey.
+	                        </div>
+	                    )}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
                         <TextField
                             select

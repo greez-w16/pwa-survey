@@ -27,6 +27,13 @@ export default function Admin() {
   const [teiIdInput, setTeiIdInput] = useState('');
   const [teiChecking, setTeiChecking] = useState(false);
   const [teiResult, setTeiResult] = useState(null);
+  const [inspectEnrollmentId, setInspectEnrollmentId] = useState('');
+  const [inspectTeiId, setInspectTeiId] = useState('');
+  const [inspectLoading, setInspectLoading] = useState(false);
+  const [inspectResult, setInspectResult] = useState(null);
+
+  const schedulingProgramId = 'K9O5fdoBmKf';
+  const assignmentOrgUnitIds = Array.from(new Set((userAssignments || []).map(a => (typeof a.orgUnit === 'string' ? a.orgUnit : a.orgUnit?.id || a.orgUnitId)).filter(Boolean)));
 
   const runDryRun = async () => {
     try {
@@ -107,7 +114,7 @@ export default function Admin() {
   const [activeLoading, setActiveLoading] = useState(false);
   const [activeDeleteTeiId, setActiveDeleteTeiId] = useState(null);
   const ENROLLMENT_DELETE_PROGRAM_ID = 'G2gULe4jsfs';
-  const deletableActiveList = activeList.filter(item => item.programId === ENROLLMENT_DELETE_PROGRAM_ID && item.enrollmentId);
+  const deletableActiveList = activeList.filter(item => item.programId === ENROLLMENT_DELETE_PROGRAM_ID && item.enrollmentId && String(item.status || '').toUpperCase() === 'ACTIVE');
 
   const fetchActiveAssessments = async () => {
     try {
@@ -115,38 +122,107 @@ export default function Admin() {
       setActiveList([]);
       let orgUnits = [];
       if (useAllAssignmentOus) {
-          orgUnits = Array.from(new Set((userAssignments || []).map(a => (typeof a.orgUnit === 'string' ? a.orgUnit : a.orgUnit?.id || a.orgUnitId)).filter(Boolean)));
+          orgUnits = assignmentOrgUnitIds;
       } else if (orgUnitId) {
           orgUnits = [orgUnitId];
       }
 
       let allActive = [];
-      const schedulingProgramId = 'K9O5fdoBmKf';
       if (orgUnits.length === 0) {
           // Fetch ALL across the whole system (no org unit limit)
-          const list1 = await api.getActiveEnrollments(programId, null);
+          const list1 = await api.getEnrollmentsByStatusesDirect(programId, null, ['ACTIVE', 'COMPLETED']);
           let list2 = [];
           if (programId !== schedulingProgramId) {
-              list2 = await api.getActiveEnrollments(schedulingProgramId, null);
+              list2 = await api.getEnrollmentsByStatusesDirect(schedulingProgramId, null, ['ACTIVE', 'COMPLETED']);
           }
           allActive = [...list1, ...list2];
       } else {
           for (const ou of orgUnits) {
-              const list1 = await api.getActiveEnrollments(programId, ou);
+              const list1 = await api.getEnrollmentsByStatusesDirect(programId, ou, ['ACTIVE', 'COMPLETED']);
               let list2 = [];
               if (programId !== schedulingProgramId) {
-                  list2 = await api.getActiveEnrollments(schedulingProgramId, ou);
+                  list2 = await api.getEnrollmentsByStatusesDirect(schedulingProgramId, ou, ['ACTIVE', 'COMPLETED']);
               }
               allActive = [...allActive, ...list1, ...list2];
           }
       }
-      setActiveList(allActive);
-      showToast?.(`Found ${allActive.length} active assessments`, 'info');
+      const dedupedActive = Array.from(
+        new Map(allActive.map(item => [item.enrollmentId || `${item.programId}-${item.teiId}`, item])).values()
+      );
+      setActiveList(dedupedActive);
+      showToast?.(`Found ${dedupedActive.length} assessments`, 'info');
     } catch (e) {
       console.error('Failed to fetch active assessments', e);
       showToast?.('Failed to fetch active assessments', 'error');
     } finally {
       setActiveLoading(false);
+    }
+  };
+
+  const inspectEnrollmentOrTei = async () => {
+    const enrollmentId = String(inspectEnrollmentId || '').trim();
+    const teiId = String(inspectTeiId || '').trim();
+    if (!enrollmentId && !teiId) {
+      showToast?.('Enter an Enrollment ID or TEI ID to inspect.', 'error');
+      return;
+    }
+
+    try {
+      setInspectLoading(true);
+      setInspectResult(null);
+
+      const relevantProgramIds = Array.from(new Set([programId, schedulingProgramId].filter(Boolean)));
+      const scopeOrgUnitIds = useAllAssignmentOus ? assignmentOrgUnitIds : (orgUnitId ? [orgUnitId] : []);
+
+      let enrollment = null;
+      if (enrollmentId) {
+        enrollment = await api.getEnrollmentById(enrollmentId);
+      }
+
+      const resolvedTeiId = teiId || enrollment?.trackedEntityInstance || '';
+      let tei = null;
+      if (resolvedTeiId) {
+        const teiResponse = await api.getTrackedEntityInstances([resolvedTeiId]);
+        tei = (teiResponse?.trackedEntityInstances || []).find(item => item?.trackedEntityInstance === resolvedTeiId) || null;
+      }
+
+      const teiEnrollments = Array.isArray(tei?.enrollments) ? tei.enrollments : [];
+      const teiMatchedEnrollment = enrollmentId
+        ? teiEnrollments.find(item => item?.enrollment === enrollmentId) || null
+        : null;
+      const inspectedEnrollment = teiMatchedEnrollment || enrollment || null;
+      const normalizedStatus = String(inspectedEnrollment?.status || '').toUpperCase();
+      const matchesProgramFilter = inspectedEnrollment ? relevantProgramIds.includes(inspectedEnrollment.program) : null;
+      const isActiveEnrollment = inspectedEnrollment ? normalizedStatus === 'ACTIVE' : null;
+      const isDeletedEnrollment = inspectedEnrollment?.deleted === true;
+      const effectiveOrgUnit = inspectedEnrollment?.orgUnit || tei?.orgUnit || '';
+      const exactScopeMatch = scopeOrgUnitIds.length === 0 ? true : scopeOrgUnitIds.includes(effectiveOrgUnit);
+
+      setInspectResult({
+        requestedEnrollmentId: enrollmentId,
+        requestedTeiId: teiId,
+        enrollment,
+        tei,
+        teiEnrollments,
+        inspectedEnrollment,
+        relevantProgramIds,
+        scopeOrgUnitIds,
+        effectiveOrgUnit,
+        checks: {
+          matchesProgramFilter,
+          isActiveEnrollment,
+          isDeletedEnrollment,
+          exactScopeMatch,
+          teiContainsEnrollment: enrollmentId ? Boolean(teiMatchedEnrollment) : null,
+        },
+      });
+
+      showToast?.(`Loaded inspector details for ${enrollmentId || resolvedTeiId}`, 'info');
+    } catch (e) {
+      console.error('Enrollment / TEI inspector failed', e);
+      showToast?.(`Inspector failed: ${e.message || e}`, 'error');
+    } finally {
+      setInspectLoading(false);
     }
   };
 
@@ -246,11 +322,11 @@ export default function Admin() {
 
       {/* Active Assessments Manager */}
       <div style={{ marginTop: 8, padding: 12, border: '1px solid #e5e7eb', borderRadius: 6, marginBottom: 16 }}>
-        <h3>Manage Active Assessments (Safe Deletion)</h3>
-        <p style={{ color: '#6b7280' }}>Fetch all currently active assessments. Deleting an assessment here removes only the selected enrollment and its events, without deleting the whole TEI. Enrollment deletion is only allowed for program {ENROLLMENT_DELETE_PROGRAM_ID}.</p>
+        <h3>Manage Assessments (Safe Deletion)</h3>
+        <p style={{ color: '#6b7280' }}>Fetch ACTIVE and COMPLETED assessments. Deleting an assessment here removes only the selected enrollment and its events, without deleting the whole TEI. Bulk delete-all remains limited to ACTIVE rows. Enrollment deletion is only allowed for program {ENROLLMENT_DELETE_PROGRAM_ID}.</p>
         <div style={{ display: 'flex', gap: 8 }}>
             <Button variant="contained" onClick={fetchActiveAssessments} disabled={activeLoading}>
-                {activeLoading ? 'Loading...' : 'Fetch Active Assessments'}
+                {activeLoading ? 'Loading...' : 'Fetch Assessments'}
             </Button>
             {deletableActiveList.length > 0 && (
                 <Button variant="contained" color="error" onClick={performDeleteAllEnrollments} disabled={activeLoading}>
@@ -266,6 +342,7 @@ export default function Admin() {
                         <tr style={{ background: '#f9fafb', textAlign: 'left' }}>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Facility</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Program</th>
+	                            <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Status</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>TEI UID</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Enrollment ID</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Enrolled At</th>
@@ -281,6 +358,7 @@ export default function Admin() {
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>
                                     {item.programId === configuration?.program?.id ? (configuration?.program?.name || item.programId) : item.programId}
                                 </td>
+	                                <td style={{ padding: 8, borderBottom: '1px solid #eee', fontWeight: 600 }}>{item.status || 'N/A'}</td>
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}><code>{item.teiId}</code></td>
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}><code>{item.enrollmentId || 'N/A'}</code></td>
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>{new Date(item.enrollmentDate).toLocaleDateString()}</td>
@@ -297,6 +375,137 @@ export default function Admin() {
                 </table>
             </div>
         )}
+      </div>
+
+      {/* Enrollment / TEI Inspector */}
+      <div style={{ marginTop: 8, padding: 12, border: '1px solid #e5e7eb', borderRadius: 6, marginBottom: 16 }}>
+        <h3>Enrollment / TEI Inspector</h3>
+        <p style={{ color: '#6b7280', marginTop: 4 }}>
+          Directly inspect an enrollment ID or TEI ID and compare it against the current Active Assessments filters.
+        </p>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr auto', gap: 8, alignItems: 'center' }}>
+          <TextField
+            label="Enrollment ID"
+            size="small"
+            value={inspectEnrollmentId}
+            onChange={e => setInspectEnrollmentId(e.target.value.trim())}
+            placeholder="e.g. XKvgbPRMm4l"
+          />
+          <TextField
+            label="TEI ID"
+            size="small"
+            value={inspectTeiId}
+            onChange={e => setInspectTeiId(e.target.value.trim())}
+            placeholder="e.g. oy96rL4BeCY"
+          />
+          <Button variant="outlined" disabled={inspectLoading || (!inspectEnrollmentId && !inspectTeiId)} onClick={inspectEnrollmentOrTei}>
+            {inspectLoading ? 'Inspecting…' : 'Inspect'}
+          </Button>
+        </div>
+
+        {inspectResult && (() => {
+          const { enrollment, tei, teiEnrollments, inspectedEnrollment, relevantProgramIds, scopeOrgUnitIds, effectiveOrgUnit, checks } = inspectResult;
+          const formatProgram = (value) => {
+            if (!value) return 'N/A';
+            if (value === configuration?.program?.id) return configuration?.program?.name || value;
+            if (value === schedulingProgramId) return `Scheduling Program (${value})`;
+            return value;
+          };
+          const formatDate = (value) => (value ? new Date(value).toLocaleString() : 'N/A');
+          const statusColor = (ok, warn = false) => ok
+            ? { color: '#166534', background: '#dcfce7', border: '1px solid #86efac' }
+            : warn
+              ? { color: '#92400e', background: '#fef3c7', border: '1px solid #fcd34d' }
+              : { color: '#991b1b', background: '#fee2e2', border: '1px solid #fca5a5' };
+
+          return (
+            <div style={{ marginTop: 12, fontSize: 14, color: '#374151' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div style={{ background: '#f9fafb', borderRadius: 6, padding: 10 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Enrollment</div>
+                  <div>ID: <code>{inspectedEnrollment?.enrollment || enrollment?.enrollment || 'Not found'}</code></div>
+                  <div>Program: <strong>{formatProgram(inspectedEnrollment?.program || enrollment?.program)}</strong></div>
+                  <div>Status: <strong>{inspectedEnrollment?.status || enrollment?.status || 'N/A'}</strong></div>
+                  <div>Deleted: <strong>{inspectedEnrollment?.deleted === true || enrollment?.deleted === true ? 'YES' : 'NO / not returned'}</strong></div>
+                  <div>Org Unit: <code>{inspectedEnrollment?.orgUnit || enrollment?.orgUnit || 'N/A'}</code></div>
+                  <div>Enrollment Date: <strong>{formatDate(inspectedEnrollment?.enrollmentDate || enrollment?.enrollmentDate)}</strong></div>
+                </div>
+                <div style={{ background: '#f9fafb', borderRadius: 6, padding: 10 }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Tracked Entity</div>
+                  <div>TEI: <code>{tei?.trackedEntityInstance || enrollment?.trackedEntityInstance || 'Not found'}</code></div>
+                  <div>TEI Org Unit: <code>{tei?.orgUnit || 'N/A'}</code></div>
+                  <div>Effective Org Unit for check: <code>{effectiveOrgUnit || 'N/A'}</code></div>
+                  <div>Total enrollments on TEI: <strong>{teiEnrollments.length}</strong></div>
+                  <div>Current program filter: <strong>{formatProgram(programId)}</strong></div>
+                  <div>Also checked by admin: <strong>{formatProgram(schedulingProgramId)}</strong></div>
+                </div>
+              </div>
+
+              <div style={{ marginTop: 12 }}>
+                <div style={{ fontWeight: 700, marginBottom: 6 }}>Would Active Fetch include it?</div>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <span style={{ padding: '4px 8px', borderRadius: 9999, ...statusColor(Boolean(checks.matchesProgramFilter)) }}>
+                    Program match: {checks.matchesProgramFilter ? 'YES' : 'NO'}
+                  </span>
+                  <span style={{ padding: '4px 8px', borderRadius: 9999, ...statusColor(Boolean(checks.isActiveEnrollment)) }}>
+                    Active status: {checks.isActiveEnrollment ? 'YES' : 'NO'}
+                  </span>
+                  <span style={{ padding: '4px 8px', borderRadius: 9999, ...statusColor(!checks.isDeletedEnrollment) }}>
+                    Not deleted: {checks.isDeletedEnrollment ? 'NO' : 'YES'}
+                  </span>
+                  {checks.teiContainsEnrollment !== null && (
+                    <span style={{ padding: '4px 8px', borderRadius: 9999, ...statusColor(Boolean(checks.teiContainsEnrollment)) }}>
+                      Enrollment on TEI: {checks.teiContainsEnrollment ? 'YES' : 'NO'}
+                    </span>
+                  )}
+                  <span style={{ padding: '4px 8px', borderRadius: 9999, ...statusColor(Boolean(checks.exactScopeMatch), scopeOrgUnitIds.length > 0 && !checks.exactScopeMatch) }}>
+                    Exact scope match: {checks.exactScopeMatch ? 'YES' : 'NO'}
+                  </span>
+                </div>
+                <div style={{ marginTop: 8, color: '#6b7280' }}>
+                  Scope mode: <strong>{useAllAssignmentOus ? 'All assignment org units' : (orgUnitId ? 'Selected org unit' : 'No org unit restriction')}</strong>
+                  {scopeOrgUnitIds.length > 0 ? ` (${scopeOrgUnitIds.join(', ')})` : ''}
+                </div>
+                <div style={{ marginTop: 4, color: '#6b7280' }}>
+                  Note: the Active Assessments fetch uses DHIS2 server-side <code>DESCENDANTS</code> filtering on TEIs, so a non-exact org-unit match may still be included if the TEI is under a descendant org unit.
+                </div>
+              </div>
+
+              {teiEnrollments.length > 0 && (
+                <div style={{ marginTop: 12, overflowX: 'auto' }}>
+                  <div style={{ fontWeight: 700, marginBottom: 6 }}>Enrollments on this TEI</div>
+                  <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 13 }}>
+                    <thead>
+                      <tr style={{ background: '#f9fafb', textAlign: 'left' }}>
+                        <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Enrollment</th>
+                        <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Program</th>
+                        <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Status</th>
+                        <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Deleted</th>
+                        <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Org Unit</th>
+                        <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Enrollment Date</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {teiEnrollments.map(item => {
+                        const isTarget = item?.enrollment && item.enrollment === inspectEnrollmentId;
+                        return (
+                          <tr key={item.enrollment || `${item.program}-${item.orgUnit}`} style={{ background: isTarget ? '#eff6ff' : 'transparent' }}>
+                            <td style={{ padding: 8, borderBottom: '1px solid #eee' }}><code>{item.enrollment || 'N/A'}</code></td>
+                            <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>{formatProgram(item.program)}</td>
+                            <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>{item.status || 'N/A'}</td>
+                            <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>{item.deleted ? 'YES' : 'NO'}</td>
+                            <td style={{ padding: 8, borderBottom: '1px solid #eee' }}><code>{item.orgUnit || 'N/A'}</code></td>
+                            <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>{formatDate(item.enrollmentDate)}</td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          );
+        })()}
       </div>
 
       {/* Bulk Delete Events */}

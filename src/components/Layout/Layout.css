@@ -3,12 +3,14 @@
     flex-direction: column;
     height: 100vh;
     overflow: hidden;
+    background: var(--qims-canvas);
 }
 
 .layout-body {
     display: flex;
     flex: 1;
     overflow: hidden;
+    min-height: 0;
 }
 
 .main-content {
@@ -17,4 +19,17 @@
     flex-direction: column;
     overflow: hidden;
     position: relative;
+    background:
+        radial-gradient(circle at top right, rgba(37, 99, 235, 0.08), transparent 28rem),
+        var(--qims-canvas);
+}
+
+@media (max-width: 760px) {
+    .layout-body {
+        min-width: 0;
+    }
+
+    .main-content {
+        overflow-x: hidden;
+    }
 }
