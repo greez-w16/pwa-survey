@@ -1636,7 +1636,7 @@ export function Dashboard() {
                 return;
             }
             const isSelfSelected = /self/i.test(String(selectedTypeMeta?.label || selectedTypeMeta?.value || ''));
-            const totalSteps = 2;
+	            const totalSteps = 3;
 
             const extraAttributes = [
                 { attribute: 'qrTQdWKRYMB', value: initSurveyType || '' },
@@ -1761,7 +1761,7 @@ export function Dashboard() {
                 });
             }
 
-            updateCreateProgress(1, 2, 'Sending assessment bundle to DHIS2...');
+	            updateCreateProgress(1, totalSteps, 'Sending assessment bundle to DHIS2...');
 
 			let createResult = null;
 			try {
@@ -1786,7 +1786,7 @@ export function Dashboard() {
 				if (responseEventIds[idx]) responseEventIdMap[tag] = responseEventIds[idx];
 			});
 
-            updateCreateProgress(2, 2, 'Finalizing setup...');
+	            updateCreateProgress(2, totalSteps, 'Verifying assessment events in DHIS2...');
 
             // Verify that every expected SYS_TAG becomes visible in DHIS2.
 			// Do NOT open the form with only locally generated event IDs; they must
@@ -1815,33 +1815,72 @@ export function Dashboard() {
 				`Readback confirmed ${expectedTags.length - readbackMissingTags.length}/${expectedTags.length} SYS_TAGs${readbackMissingTags.length ? `; missing ${readbackMissingTags.join(', ')}` : ''}.`
 	            ]);
 
-			if (readbackMissingTags.length > 0) {
-				const failureInfo = {
-					message: `Assessment provisioning incomplete. Missing DHIS2 events for: ${readbackMissingTags.join(', ')}`,
-					missingTags: readbackMissingTags,
-					expectedCount: expectedTags.length,
-					verifiedCount: expectedTags.length - readbackMissingTags.length,
-					teiId,
-					orgUnitId,
-					programId,
-					stageId,
-					facilityGroup: ns,
-					surveyType: initSurveyType,
-				};
-				setPendingProvisionedBundle({
-					assessment: pendingOpenAssessment,
-					teiId,
-					orgUnitId,
-					enrollmentId,
-					facilityGroup: ns,
-					surveyType: initSurveyType,
-					eventIdMap: readbackTagMap,
-				});
-				setCreateErrorInfo(failureInfo);
-				const error = new Error(failureInfo.message);
-				error.createErrorInfo = failureInfo;
-				throw error;
-			}
+				if (readbackMissingTags.length > 0) {
+					updateCreateProgress(3, totalSteps, 'Completing setup: repairing missing assessment events automatically...');
+					setCreateDetails(prev => [...prev, `Auto-repair started for missing SYS_TAG events: ${readbackMissingTags.join(', ')}`]);
+
+					try {
+						const repaired = await repairAssessmentBundle({
+							assessment: pendingOpenAssessment,
+							teiId,
+							orgUnitId,
+							enrollmentId,
+							facilityGroup: ns,
+							surveyType: initSurveyType,
+							expectedTags,
+							logLine: (line) => setCreateDetails(prev => [...prev, line])
+						});
+						const repairedEventIdMap = { ...responseEventIdMap, ...readbackTagMap, ...(repaired.tagMap || {}) };
+						try {
+							await api.upsertDataStoreItem(ns, teiId, {
+								...body,
+								eventIdMap: repairedEventIdMap,
+								eventIdMapSource: 'DHIS2_READBACK_AUTO_REPAIR',
+								eventIdMapUpdatedAt: new Date().toISOString(),
+							});
+						} catch (e) {
+							console.warn('DataStore eventIdMap auto-repair upsert failed (non-fatal)', e);
+						}
+						setPendingProvisionedBundle(null);
+						updateCreateProgress(3, totalSteps, 'Repair complete. Opening assessment...');
+						finalizeProvisionedAssessmentOpen({
+							assessment: pendingOpenAssessment,
+							teiId,
+							enrollmentId,
+							eventIdMap: repairedEventIdMap,
+							surveyType: repaired.surveyType || initSurveyType,
+							facilityGroup: repaired.facilityGroup || ns,
+							detailsDataValues: assessmentDetailsDataValues,
+						});
+						return;
+					} catch (repairErr) {
+						const manualRepairBundle = {
+							assessment: pendingOpenAssessment,
+							teiId,
+							orgUnitId,
+							enrollmentId,
+							facilityGroup: ns,
+							surveyType: initSurveyType,
+							eventIdMap: readbackTagMap,
+						};
+						setPendingProvisionedBundle(manualRepairBundle);
+						const failureInfo = {
+							message: repairErr?.message || `Assessment provisioning incomplete. Missing DHIS2 events for: ${readbackMissingTags.join(', ')}`,
+							missingTags: readbackMissingTags,
+							expectedCount: expectedTags.length,
+							verifiedCount: expectedTags.length - readbackMissingTags.length,
+							teiId,
+							orgUnitId,
+							programId,
+							stageId,
+							facilityGroup: ns,
+							surveyType: initSurveyType,
+						};
+						const error = new Error(failureInfo.message);
+						error.createErrorInfo = failureInfo;
+						throw error;
+					}
+				}
 
 			const verifiedEventIdMap = { ...responseEventIdMap, ...readbackTagMap };
 

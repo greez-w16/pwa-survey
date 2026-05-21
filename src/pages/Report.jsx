@@ -762,6 +762,141 @@ export default function Report() {
     return printableSectionCount > 0 || facilityOverview.length > 0 || reportSectionCount > 0 || baselineSectionCount > 0;
   }, [reportInfo, reportAssessment, baselineAssessment, sectionLabels, facilityOverview]);
 
+  const analyzeOverviewMetric = (value, { tone = 'neutral', zeroAsDash = false, naLabel = 'N/A', suffix = '' } = {}) => {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return { numeric: null, display: naLabel, category: 'muted' };
+    const category = numeric === 0
+      ? 'muted'
+      : tone === 'success'
+        ? 'success'
+        : tone === 'risk'
+          ? 'risk'
+          : tone === 'warning'
+            ? 'warning'
+            : 'neutral';
+    return {
+      numeric,
+      display: numeric === 0 && zeroAsDash ? '—' : `${numeric}${suffix}`,
+      category,
+    };
+  };
+
+  const analyzeOverviewScore = (value) => {
+    const numeric = Number(value);
+    if (!Number.isFinite(numeric)) return { numeric: null, display: '—', category: 'muted' };
+    return {
+      numeric,
+      display: `${numeric}%`,
+      category: numeric >= 85 ? 'success' : numeric >= 65 ? 'warning' : 'risk',
+    };
+  };
+
+  const overviewPalette = {
+    muted: { color: '#64748b', background: '#f8fafc', border: '#e2e8f0' },
+    neutral: { color: '#1e293b', background: '#eef2ff', border: '#c7d2fe' },
+    success: { color: '#166534', background: '#dcfce7', border: '#86efac' },
+    warning: { color: '#92400e', background: '#fef3c7', border: '#fcd34d' },
+    risk: { color: '#991b1b', background: '#fee2e2', border: '#fca5a5' },
+  };
+
+  const renderOverviewBadge = (value, options = {}) => {
+    const meta = analyzeOverviewMetric(value, options);
+    const palette = overviewPalette[meta.category] || overviewPalette.neutral;
+    return (
+      <span style={{
+        display: 'inline-flex',
+        minWidth: 34,
+        justifyContent: 'center',
+        padding: '2px 7px',
+        borderRadius: 999,
+        fontWeight: 700,
+        fontSize: '0.76rem',
+        color: palette.color,
+        background: palette.background,
+        border: `1px solid ${palette.border}`,
+      }}>
+        {meta.display}
+      </span>
+    );
+  };
+
+  const renderOverviewScore = (value) => {
+    const meta = analyzeOverviewScore(value);
+    const palette = overviewPalette[meta.category] || overviewPalette.muted;
+    return (
+      <div style={{ minWidth: 74 }}>
+        <div style={{ fontWeight: 700, color: palette.color, textAlign: 'right', fontSize: '0.82rem' }}>{meta.display}</div>
+        <div style={{ height: 6, background: '#e2e8f0', borderRadius: 999, overflow: 'hidden', marginTop: 4 }}>
+          <div style={{ width: `${Math.max(0, Math.min(100, meta.numeric || 0))}%`, height: '100%', background: palette.border }} />
+        </div>
+      </div>
+    );
+  };
+
+  const renderOverviewService = (row) => {
+    const rawName = String(row.seName || '').trim();
+    const cleanName = rawName.replace(/^SE\s*[0-9]+\s*/i, '').trim() || rawName;
+    return (
+      <div style={{ fontWeight: 600, color: '#0f172a', lineHeight: 1.25 }}>{cleanName || rawName || `SE ${row.seIndex}`}</div>
+    );
+  };
+
+  const facilityOverviewTotals = useMemo(() => facilityOverview.reduce((totals, row) => {
+    totals.blTotal += Number(row.blDefs?.total || 0);
+    totals.blNC += Number(row.blDefs?.NC || 0);
+    totals.blPC += Number(row.blDefs?.PC || 0);
+    totals.completed += Number(row.completed || 0);
+    totals.remTotal += Number(row.remaining?.total || 0);
+    totals.remNC += Number(row.remaining?.NC || 0);
+    totals.remPC += Number(row.remaining?.PC || 0);
+    totals.critTotal += Number(row.critical?.total || 0);
+    totals.critNC += Number(row.critical?.NC || 0);
+    totals.critPC += Number(row.critical?.PC || 0);
+    totals.critRemTotal += Number(row.criticalRemaining?.total || 0);
+    totals.critRemNC += Number(row.criticalRemaining?.NC || 0);
+    totals.critRemPC += Number(row.criticalRemaining?.PC || 0);
+    totals.policyNC += Number(row.policies?.NC || 0);
+    totals.policyPC += Number(row.policies?.PC || 0);
+    totals.policyC += Number(row.policies?.C || 0);
+    totals.policyTotal += Number(row.policies?.total || 0);
+    return totals;
+  }, {
+    blTotal: 0, blNC: 0, blPC: 0, completed: 0,
+    remTotal: 0, remNC: 0, remPC: 0,
+    critTotal: 0, critNC: 0, critPC: 0,
+    critRemTotal: 0, critRemNC: 0, critRemPC: 0,
+    policyNC: 0, policyPC: 0, policyC: 0, policyTotal: 0,
+  }), [facilityOverview]);
+
+  const baselineOverall = Number.isFinite(baselineScoring?.overall?.percent) ? baselineScoring.overall.percent.toFixed(0) : '—';
+  const latestOverall = Number.isFinite(scoring?.overall?.percent) ? scoring.overall.percent.toFixed(0) : '—';
+
+  const overviewHeaderCellStyle = (background = '#f8fafc', color = '#0f172a', extra = {}) => ({
+    border: '1px solid #d8e1eb',
+    padding: '8px 6px',
+    background,
+    color,
+    fontWeight: 700,
+    ...extra,
+  });
+
+  const overviewBodyCellStyle = (rowIndex, extra = {}) => ({
+    border: '1px solid #e2e8f0',
+    padding: '8px 6px',
+    background: rowIndex % 2 === 1 ? '#f8fafc' : '#ffffff',
+    verticalAlign: 'middle',
+    ...extra,
+  });
+
+  const overviewTotalsCellStyle = (extra = {}) => ({
+    border: '1px solid #cbd5e1',
+    padding: '8px 6px',
+    background: '#e2e8f0',
+    fontWeight: 700,
+    verticalAlign: 'middle',
+    ...extra,
+  });
+
   const openDrillForSection = (sectionId) => {
     setDrillSectionId(sectionId);
     setDrillRootCode(null);
@@ -1161,6 +1296,19 @@ export default function Report() {
       return Number.isFinite(num) ? num : 0;
     };
     const formatReportCell = (value) => (value === undefined || value === null || value === '' ? '' : value);
+    const buildPdfMetricPill = (value, options = {}) => {
+      const meta = analyzeOverviewMetric(value, options);
+      return `<span class="fo-pill fo-pill-${meta.category}">${escapeHtml(meta.display)}</span>`;
+    };
+    const buildPdfScoreCell = (value) => {
+      const meta = analyzeOverviewScore(value);
+      return `
+        <div class="fo-score-card">
+          <div class="fo-score-value fo-score-${meta.category}">${escapeHtml(meta.display)}</div>
+          <div class="fo-score-track"><div class="fo-score-fill fo-score-${meta.category}" style="width:${Math.max(0, Math.min(100, meta.numeric || 0))}%"></div></div>
+        </div>
+      `;
+    };
     const facilityOverviewTotals = facilityOverview.reduce((totals, row) => {
       totals.blTotal += toReportNumber(row.blDefs?.total);
       totals.blNC += toReportNumber(row.blDefs?.NC);
@@ -1189,30 +1337,32 @@ export default function Report() {
     });
     const facilityOverviewTableRows = facilityOverview.map((row, idx) => {
       const scheduleRow = serviceElementRowsSource[idx] || {};
+      const seCode = formatReportCell(scheduleRow.seCode || row.seIndex);
+      const serviceName = formatReportCell(scheduleRow.serviceElement || row.seName).replace(/^SE\s*[0-9]+\s*/i, '').trim();
       return `
         <tr>
-          <td>${escapeHtml(formatReportCell(scheduleRow.seCode || row.seIndex))}</td>
-          <td class="fo-service">${escapeHtml(formatReportCell(scheduleRow.serviceElement || row.seName))}</td>
-          <td>${escapeHtml(formatReportCell(row.baselinePercent))}</td>
-          <td>${escapeHtml(formatReportCell(row.latestPercent))}</td>
-          <td>${escapeHtml(row.blDefs?.total ?? 0)}</td>
-          <td>${escapeHtml(row.blDefs?.NC ?? 0)}</td>
-          <td>${escapeHtml(row.blDefs?.PC ?? 0)}</td>
-          <td>${escapeHtml(row.completed ?? 0)}</td>
-          <td>${escapeHtml(row.remaining?.total ?? 0)}</td>
-          <td>${escapeHtml(row.remaining?.NC ?? 0)}</td>
-          <td>${escapeHtml(row.remaining?.PC ?? 0)}</td>
-          <td>${escapeHtml(row.critical?.total ?? 0)}</td>
-          <td>${escapeHtml(row.critical?.NC ?? 0)}</td>
-          <td>${escapeHtml(row.critical?.PC ?? 0)}</td>
-          <td>${escapeHtml(row.criticalRemaining?.total ?? 0)}</td>
-          <td>${escapeHtml(row.criticalRemaining?.NC ?? 0)}</td>
-          <td>${escapeHtml(row.criticalRemaining?.PC ?? 0)}</td>
+          <td class="fo-se-cell"><span class="fo-se-badge">SE ${escapeHtml(seCode)}</span></td>
+          <td class="fo-service fo-service-strong">${escapeHtml(serviceName || `SE ${seCode}`)}</td>
+          <td>${buildPdfScoreCell(row.baselinePercent)}</td>
+          <td>${buildPdfScoreCell(row.latestPercent)}</td>
+          <td>${buildPdfMetricPill(row.blDefs?.total, { zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.blDefs?.NC, { tone: 'risk', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.blDefs?.PC, { tone: 'warning', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.completed, { tone: 'success', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.remaining?.total, { tone: 'warning', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.remaining?.NC, { tone: 'risk', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.remaining?.PC, { tone: 'warning', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.critical?.total, { tone: 'warning', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.critical?.NC, { tone: 'risk', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.critical?.PC, { tone: 'warning', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.criticalRemaining?.total, { tone: 'warning', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.criticalRemaining?.NC, { tone: 'risk', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.criticalRemaining?.PC, { tone: 'warning', zeroAsDash: true })}</td>
           <td>${escapeHtml(formatReportCell(row.latestDate))}</td>
-          <td>${escapeHtml(row.policies?.NC ?? 0)}</td>
-          <td>${escapeHtml(row.policies?.PC ?? 0)}</td>
-          <td>${escapeHtml(row.policies?.C ?? 0)}</td>
-          <td>${escapeHtml(row.policies?.total ?? 0)}</td>
+          <td>${buildPdfMetricPill(row.policies?.NC, { tone: 'risk', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.policies?.PC, { tone: 'warning', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.policies?.C, { tone: 'success', zeroAsDash: true })}</td>
+          <td>${buildPdfMetricPill(row.policies?.total, { zeroAsDash: true })}</td>
           <td>${escapeHtml(formatReportCell(row.qiCompliance || 'N/A'))}</td>
         </tr>
       `;
@@ -1548,13 +1698,38 @@ export default function Report() {
             .service-elements-footer-title { font-size: 20px; font-weight: normal; margin: 0; position: absolute; left: 4mm; bottom: 0; }
             .facility-overview-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; padding: 0; }
             .facility-overview-table { width: 100%; border-collapse: collapse; table-layout: fixed; font-size: 7px; line-height: 1.05; }
-            .facility-overview-table th, .facility-overview-table td { border: 1px solid #000; padding: 2px 2px; text-align: center; vertical-align: middle; }
-            .facility-overview-table th { font-weight: normal; background: #f3f4f6; }
+            .facility-overview-table th, .facility-overview-table td { border: 1px solid #000; padding: 3px 2px; text-align: center; vertical-align: middle; }
+            .facility-overview-table th { font-weight: 700; background: #f8fafc; }
             .facility-overview-table .fo-se { width: 3%; }
             .facility-overview-table .fo-service { width: 14%; text-align: left; }
             .facility-overview-table .fo-date { width: 7%; }
             .facility-overview-table .fo-qi { width: 7%; }
-            .facility-overview-table tfoot td { font-weight: normal; }
+            .facility-overview-table tbody tr:nth-child(even) td { background: #f8fafc; }
+            .facility-overview-table tfoot td { font-weight: 700; background: #e2e8f0; }
+            .facility-overview-table .group-scores { background: #dbeafe; color: #1e3a8a; }
+            .facility-overview-table .group-baseline { background: #fef3c7; color: #92400e; }
+            .facility-overview-table .group-completed { background: #dcfce7; color: #166534; }
+            .facility-overview-table .group-remaining { background: #fee2e2; color: #991b1b; }
+            .facility-overview-table .group-critical { background: #fecaca; color: #7f1d1d; }
+            .facility-overview-table .group-policy { background: #ede9fe; color: #5b21b6; }
+            .facility-overview-table .group-qi { background: #e2e8f0; color: #334155; }
+            .fo-se-cell { background: #f8fafc; }
+            .fo-se-badge { display: inline-block; padding: 1px 6px; border-radius: 999px; background: #0f172a; color: #fff; font-weight: 700; }
+            .fo-service-strong { font-weight: 700; color: #0f172a; }
+            .fo-pill { display: inline-block; min-width: 18px; padding: 1px 6px; border-radius: 999px; border: 1px solid #cbd5e1; font-weight: 700; }
+            .fo-pill-muted { color: #64748b; background: #f8fafc; border-color: #e2e8f0; }
+            .fo-pill-neutral { color: #1e293b; background: #eef2ff; border-color: #c7d2fe; }
+            .fo-pill-success { color: #166534; background: #dcfce7; border-color: #86efac; }
+            .fo-pill-warning { color: #92400e; background: #fef3c7; border-color: #fcd34d; }
+            .fo-pill-risk { color: #991b1b; background: #fee2e2; border-color: #fca5a5; }
+            .fo-score-card { min-width: 42px; }
+            .fo-score-value { font-weight: 700; margin-bottom: 2px; }
+            .fo-score-track { height: 5px; background: #e2e8f0; border-radius: 999px; overflow: hidden; }
+            .fo-score-fill { height: 100%; border-radius: 999px; }
+            .fo-score-success { color: #166534; background: #86efac; }
+            .fo-score-warning { color: #92400e; background: #fbbf24; }
+            .fo-score-risk { color: #991b1b; background: #f87171; }
+            .fo-score-muted { color: #64748b; background: #cbd5e1; }
             .se-output-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; padding: 0; font-size: 7px; }
             .se-summary-table, .se-criteria-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
             .se-summary-table th, .se-summary-table td, .se-criteria-table th, .se-criteria-table td { border: 1px solid #000; padding: 2px; vertical-align: top; }
@@ -1650,16 +1825,16 @@ export default function Report() {
                 <tr>
                   <th class="fo-se" rowspan="2">SE</th>
                   <th class="fo-service" rowspan="2">Service</th>
-                  <th rowspan="2">Overall<br />baseline<br />score</th>
-                  <th rowspan="2">Overall<br />progress<br />score</th>
-                  <th colspan="3">Deficiencies<br />identified at<br />baseline</th>
-                  <th rowspan="2">Deficiencies<br />completed<br />to date</th>
-                  <th colspan="3">Remaining<br />deficiencies to be<br />addressed</th>
-                  <th colspan="3">Critical Criteria</th>
-                  <th colspan="3">Critical Criteria<br />Remaining</th>
+                  <th class="group-scores" rowspan="2">Overall<br />baseline<br />score</th>
+                  <th class="group-scores" rowspan="2">Overall<br />progress<br />score</th>
+                  <th class="group-baseline" colspan="3">Deficiencies<br />identified at<br />baseline</th>
+                  <th class="group-completed" rowspan="2">Deficiencies<br />completed<br />to date</th>
+                  <th class="group-remaining" colspan="3">Remaining<br />deficiencies to be<br />addressed</th>
+                  <th class="group-critical" colspan="3">Critical Criteria</th>
+                  <th class="group-critical" colspan="3">Critical Criteria<br />Remaining</th>
                   <th class="fo-date" rowspan="2">Most recent<br />assessment<br />date</th>
-                  <th colspan="4">Policies &amp; Procedures</th>
-                  <th class="fo-qi" rowspan="2">Quality<br />improvement<br />standard<br />compliance</th>
+                  <th class="group-policy" colspan="4">Policies &amp; Procedures</th>
+                  <th class="fo-qi group-qi" rowspan="2">Quality<br />improvement<br />standard<br />compliance</th>
                 </tr>
                 <tr>
                   <th>Total</th><th>NC</th><th>PC</th>
@@ -1674,26 +1849,26 @@ export default function Report() {
                 <tr>
                   <td>Totals:</td>
                   <td class="fo-service">SE Count: ${escapeHtml(facilityOverview.length)}</td>
-                  <td>${escapeHtml(baselineOverall)}</td>
-                  <td>${escapeHtml(latestOverall)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.blTotal)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.blNC)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.blPC)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.completed)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.remTotal)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.remNC)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.remPC)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.critTotal)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.critNC)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.critPC)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.critRemTotal)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.critRemNC)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.critRemPC)}</td>
+                  <td>${buildPdfScoreCell(baselineOverall)}</td>
+                  <td>${buildPdfScoreCell(latestOverall)}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.blTotal, { zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.blNC, { tone: 'risk', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.blPC, { tone: 'warning', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.completed, { tone: 'success', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.remTotal, { tone: 'warning', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.remNC, { tone: 'risk', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.remPC, { tone: 'warning', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.critTotal, { tone: 'warning', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.critNC, { tone: 'risk', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.critPC, { tone: 'warning', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.critRemTotal, { tone: 'warning', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.critRemNC, { tone: 'risk', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.critRemPC, { tone: 'warning', zeroAsDash: true })}</td>
                   <td></td>
-                  <td>${escapeHtml(facilityOverviewTotals.policyNC)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.policyPC)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.policyC)}</td>
-                  <td>${escapeHtml(facilityOverviewTotals.policyTotal)}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.policyNC, { tone: 'risk', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.policyPC, { tone: 'warning', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.policyC, { tone: 'success', zeroAsDash: true })}</td>
+                  <td>${buildPdfMetricPill(facilityOverviewTotals.policyTotal, { zeroAsDash: true })}</td>
                   <td></td>
                 </tr>
               </tfoot>
@@ -1905,70 +2080,97 @@ export default function Report() {
               </div>
               {!isFacilityOverviewCollapsed && (
               <div style={{ overflowX: 'auto', marginTop: 8 }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.85em' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84em', minWidth: 1500 }}>
                   <thead>
                     <tr>
-                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>SE</th>
-                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Service</th>
-                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Overall baseline score</th>
-                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Overall progress score</th>
-                      <th colSpan={3} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Deficiencies identified at baseline</th>
-                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Deficiencies completed to date</th>
-                      <th colSpan={3} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Remaining deficiencies to be addressed</th>
-                      <th colSpan={3} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Critical Criteria</th>
-                      <th colSpan={3} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Critical Criteria Remaining</th>
-                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Most recent assessment date</th>
-                      <th colSpan={4} style={{ border: '1px solid #e2e8f0', padding: 6 }}>Policies &amp; Procedures</th>
-                      <th rowSpan={2} style={{ border: '1px solid #e2e8f0', padding: 6, whiteSpace: 'nowrap' }}>Quality improvement standard compliance</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')}>SE</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a', { minWidth: 220 })}>Service</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')}>Overall baseline score</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')}>Overall progress score</th>
+                      <th colSpan={3} style={overviewHeaderCellStyle('#fef3c7', '#92400e')}>Deficiencies identified at baseline</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#dcfce7', '#166534')}>Deficiencies completed to date</th>
+                      <th colSpan={3} style={overviewHeaderCellStyle('#fee2e2', '#991b1b')}>Remaining deficiencies to be addressed</th>
+                      <th colSpan={3} style={overviewHeaderCellStyle('#fecaca', '#7f1d1d')}>Critical Criteria</th>
+                      <th colSpan={3} style={overviewHeaderCellStyle('#fecaca', '#7f1d1d')}>Critical Criteria Remaining</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')}>Most recent assessment date</th>
+                      <th colSpan={4} style={overviewHeaderCellStyle('#ede9fe', '#5b21b6')}>Policies &amp; Procedures</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#e2e8f0', '#334155', { whiteSpace: 'nowrap' })}>Quality improvement standard compliance</th>
                     </tr>
                     <tr>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>Total</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>NC</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>PC</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>Total</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>NC</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>PC</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>Total</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>NC</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>PC</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>Total</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>NC</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>PC</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>NC</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>PC</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>C</th>
-                      <th style={{ border: '1px solid #e2e8f0', padding: 6 }}>Total</th>
+                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>Total</th>
+                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>NC</th>
+                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>PC</th>
+                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')}>Total</th>
+                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')}>NC</th>
+                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')}>PC</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>Total</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>NC</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>PC</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>Total</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>NC</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>PC</th>
+                      <th style={overviewHeaderCellStyle('#f5f3ff', '#5b21b6')}>NC</th>
+                      <th style={overviewHeaderCellStyle('#f5f3ff', '#5b21b6')}>PC</th>
+                      <th style={overviewHeaderCellStyle('#f5f3ff', '#5b21b6')}>C</th>
+                      <th style={overviewHeaderCellStyle('#f5f3ff', '#5b21b6')}>Total</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {facilityOverview.map(row => (
+                    {facilityOverview.map((row, rowIndex) => (
                       <tr key={`ov-${row.seIndex}`}>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6 }}>{row.seIndex}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6 }}>{row.seName}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.baselinePercent}%</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.latestPercent}%</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.blDefs.total}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.blDefs.NC}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.blDefs.PC}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.completed}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.remaining.total}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.remaining.NC}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.remaining.PC}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.critical.total}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.critical.NC}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.critical.PC}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.criticalRemaining.total}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.criticalRemaining.NC}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.criticalRemaining.PC}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6 }}>{row.latestDate}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.policies.NC}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.policies.PC}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.policies.C}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6, textAlign: 'right' }}>{row.policies.total}</td>
-                        <td style={{ border: '1px solid #e2e8f0', padding: 6 }}>{row.qiCompliance}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{`SE ${row.seIndex}`}</td>
+                        <td style={overviewBodyCellStyle(rowIndex, { minWidth: 220 })}>{renderOverviewService(row)}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewScore(row.baselinePercent)}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewScore(row.latestPercent)}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.blDefs.total, { zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.blDefs.NC, { tone: 'risk', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.blDefs.PC, { tone: 'warning', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.completed, { tone: 'success', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.remaining.total, { tone: 'warning', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.remaining.NC, { tone: 'risk', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.remaining.PC, { tone: 'warning', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.critical.total, { tone: 'warning', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.critical.NC, { tone: 'risk', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.critical.PC, { tone: 'warning', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.criticalRemaining.total, { tone: 'warning', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.criticalRemaining.NC, { tone: 'risk', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.criticalRemaining.PC, { tone: 'warning', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex, { whiteSpace: 'nowrap' })}>{row.latestDate}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.policies.NC, { tone: 'risk', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.policies.PC, { tone: 'warning', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.policies.C, { tone: 'success', zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.policies.total, { zeroAsDash: true })}</td>
+                        <td style={overviewBodyCellStyle(rowIndex)}>{row.qiCompliance}</td>
                       </tr>
                     ))}
                   </tbody>
+                  <tfoot>
+                    <tr>
+                      <td style={overviewTotalsCellStyle()}>Totals</td>
+                      <td style={overviewTotalsCellStyle({ textAlign: 'left' })}>{`SE Count: ${facilityOverview.length}`}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewScore(baselineOverall)}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewScore(latestOverall)}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.blTotal, { zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.blNC, { tone: 'risk', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.blPC, { tone: 'warning', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.completed, { tone: 'success', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.remTotal, { tone: 'warning', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.remNC, { tone: 'risk', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.remPC, { tone: 'warning', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.critTotal, { tone: 'warning', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.critNC, { tone: 'risk', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.critPC, { tone: 'warning', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.critRemTotal, { tone: 'warning', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.critRemNC, { tone: 'risk', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.critRemPC, { tone: 'warning', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}></td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.policyNC, { tone: 'risk', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.policyPC, { tone: 'warning', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.policyC, { tone: 'success', zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.policyTotal, { zeroAsDash: true })}</td>
+                      <td style={overviewTotalsCellStyle()}></td>
+                    </tr>
+                  </tfoot>
                 </table>
               </div>
               )}
