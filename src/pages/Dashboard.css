@@ -151,6 +151,10 @@
     border-radius: 16px;
     display: flex;
     justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
     background: var(--qims-surface);
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
@@ -224,8 +228,11 @@
 .form-header-row {
     display: flex;
     align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
     gap: 1rem;
     margin-bottom: 0.5rem;
+    min-width: 0;
 }
 
 .form-status {
@@ -284,6 +291,35 @@
     border-left: 5px solid var(--qims-blue);
 }
 
+.forms-list,
+.assessment-item .form-info,
+.assessment-item .form-info > *,
+.assessment-item h4,
+.assessment-details-line,
+.assignment-details-line,
+.associated-assessments-panel {
+    min-width: 0;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.assessment-item .form-info {
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+.assessment-item h4,
+.assessment-details-line,
+.assignment-details-line {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+}
+
+.assessment-schedule-card,
+.associated-assessments-panel {
+    overflow: hidden;
+}
+
 .assessment-item .form-status.error {
     animation: pulse 2s infinite;
 }
@@ -326,6 +362,8 @@
     display: flex;
     gap: 0.5rem;
     align-items: center;
+    flex: 0 0 auto;
+    flex-wrap: wrap;
 }
 
 .recent-survey-card {

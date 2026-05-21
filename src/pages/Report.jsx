@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
-import { Button, TextField, MenuItem, FormControl, InputLabel, Select } from '@mui/material';
+import { Button, TextField, MenuItem, FormControl, InputLabel, Select, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { useNavigate } from 'react-router-dom';
 import { transformMetadata } from '../utils/transformers';
@@ -27,7 +27,12 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  LabelList
+	  LabelList,
+	  RadarChart,
+	  PolarGrid,
+	  PolarAngleAxis,
+	  PolarRadiusAxis,
+	  Radar
 } from 'recharts';
 
 export default function Report() {
@@ -669,6 +674,12 @@ export default function Report() {
 
   // Collapsible state for Facility Overview
   const [isFacilityOverviewCollapsed, setIsFacilityOverviewCollapsed] = useState(true);
+  // Large radar chart dialog state
+  const [isRadarChartOpen, setIsRadarChartOpen] = useState(false);
+	  // Collapsible state for C / PC / NC stacked distribution
+	  const [isResponseDistributionCollapsed, setIsResponseDistributionCollapsed] = useState(true);
+	  // Collapsible state for criteria heatmap
+	  const [isHeatmapCollapsed, setIsHeatmapCollapsed] = useState(true);
   // Collapsible state for Baseline vs Latest (per SE)
   const [isBaselineVsLatestCollapsed, setIsBaselineVsLatestCollapsed] = useState(true);
   // Drilldown state for Baseline vs Latest chart
@@ -837,6 +848,69 @@ export default function Report() {
     const baselineSectionCount = (baselineAssessment?.sections || []).filter(s => !isAssessmentDetailsSection(s)).length;
     return printableSectionCount > 0 || facilityOverview.length > 0 || reportSectionCount > 0 || baselineSectionCount > 0;
   }, [reportInfo, reportAssessment, baselineAssessment, sectionLabels, facilityOverview]);
+
+	  const radarChartData = useMemo(() => {
+	    const bl = Array.isArray(baselineScoring?.sections) ? baselineScoring.sections : [];
+	    const lt = Array.isArray(scoring?.sections) ? scoring.sections : [];
+	    const blMap = Object.fromEntries(bl.map(s => [s.id, s.percent]));
+	    const ltMap = Object.fromEntries(lt.map(s => [s.id, s.percent]));
+	    return Object.keys(sectionChartLabels || {})
+	      .filter((sectionId) => {
+	        const label = String(sectionChartLabels[sectionId] || sectionLabels[sectionId] || '').toLowerCase();
+	        const idLower = String(sectionId || '').toLowerCase();
+	        return label && !label.includes('assessment details') && !['ad', 'assessment-details', 'assessment_details'].includes(idLower);
+	      })
+	      .map(sectionId => {
+	        const label = sectionChartLabels[sectionId] || sectionLabels[sectionId] || sectionId;
+	        const shortName = String(label).replace(/^\s*SE\s*[0-9]+\s*/i, '').trim();
+	        return {
+	          id: sectionId,
+	          name: shortName.length > 22 ? `${shortName.slice(0, 21)}…` : shortName || label,
+	          fullName: label,
+	          Baseline: Number.isFinite(blMap[sectionId]) ? Number(blMap[sectionId]) : 0,
+	          Latest: Number.isFinite(ltMap[sectionId]) ? Number(ltMap[sectionId]) : 0,
+	        };
+	      });
+	  }, [baselineScoring, scoring, sectionChartLabels, sectionLabels]);
+
+	  const responseDistributionData = useMemo(() => {
+	    if (!reportAssessment) return [];
+	    const norm = (value) => {
+	      const s = String(value || '').trim().toLowerCase();
+	      if (['2', 'yes', 'y', 'compliant', 'c'].includes(s)) return 'C';
+	      if (['1', 'partial', 'partially compliant', 'pc'].includes(s)) return 'PC';
+	      if (['0', 'no', 'n', 'non compliant', 'non-compliant', 'nc'].includes(s)) return 'NC';
+	      return 'NA';
+	    };
+	    const sectionsById = Object.fromEntries((reportAssessment.sections || []).map(section => [section.id, section]));
+	    return Object.keys(sectionChartLabels || {})
+	      .filter((sectionId) => {
+	        const label = String(sectionChartLabels[sectionId] || sectionLabels[sectionId] || '').toLowerCase();
+	        const idLower = String(sectionId || '').toLowerCase();
+	        return label && !label.includes('assessment details') && !['ad', 'assessment-details', 'assessment_details'].includes(idLower);
+	      })
+	      .map((sectionId) => {
+	        const section = sectionsById[sectionId] || {};
+	        const criteria = (((section.standards || [{}])[0] || {}).criteria) || [];
+	        const counts = criteria.reduce((acc, criterion) => {
+	          acc[norm(criterion.response)] += 1;
+	          return acc;
+	        }, { C: 0, PC: 0, NC: 0, NA: 0 });
+	        const total = Math.max(1, counts.C + counts.PC + counts.NC);
+	        return {
+	          id: sectionId,
+	          name: sectionChartLabels[sectionId] || sectionLabels[sectionId] || sectionId,
+	          C: Math.round((counts.C / total) * 100),
+	          PC: Math.round((counts.PC / total) * 100),
+	          NC: Math.round((counts.NC / total) * 100),
+	          cCount: counts.C,
+	          pcCount: counts.PC,
+	          ncCount: counts.NC,
+	          naCount: counts.NA,
+	          total,
+	        };
+	      });
+	  }, [reportAssessment, sectionChartLabels, sectionLabels]);
 
   const analyzeOverviewMetric = (value, { tone = 'neutral', zeroAsDash = false, naLabel = 'N/A', suffix = '' } = {}) => {
     const numeric = Number(value);
@@ -1148,6 +1222,37 @@ export default function Report() {
 	    return criterionLabelForCode(normalized, latestByCode[normalized], baselineByCode[normalized]);
 	  };
 
+	  const heatmapData = useMemo(() => {
+	    if (!reportAssessment) return [];
+	    return Object.keys(sectionChartLabels || {})
+	      .filter((sectionId) => {
+	        const label = String(sectionChartLabels[sectionId] || sectionLabels[sectionId] || '').toLowerCase();
+	        const idLower = String(sectionId || '').toLowerCase();
+	        return label && !label.includes('assessment details') && !['ad', 'assessment-details', 'assessment_details'].includes(idLower);
+	      })
+	      .map((sectionId) => {
+	        const criteria = getSectionCriteria(reportAssessment, sectionId);
+	        const cells = criteria.map((criterion) => {
+	          const code = normalizeCriterionCode(criterion?.code || criterion?.id || '');
+	          const response = normalizeResponseLabel(criterion?.response || 'NA');
+	          return {
+	            code,
+	            label: criterionLabelForCode(code, criterion),
+	            response,
+	          };
+	        });
+	        return {
+	          id: sectionId,
+	          name: sectionChartLabels[sectionId] || sectionLabels[sectionId] || sectionId,
+	          cells,
+	          counts: cells.reduce((acc, cell) => {
+	            acc[cell.response] = (acc[cell.response] || 0) + 1;
+	            return acc;
+	          }, { C: 0, PC: 0, NC: 0, NA: 0, Pending: 0 }),
+	        };
+	      });
+	  }, [reportAssessment, sectionChartLabels, sectionLabels]);
+
   const ValueLabel = ({ x, y, width, value }) => {
     if (value === undefined || value === null) return null;
     const cx = (x || 0) + (width || 0) / 2;
@@ -1202,6 +1307,20 @@ export default function Report() {
     if (v === 'Pending') return { color: '#1d4ed8', background: '#dbeafe', border: '1px solid #93c5fd' };
     return { color: '#475569', background: '#e2e8f0', border: '1px solid #cbd5e1' };
   };
+
+	  const getHeatmapCellStyle = (label) => ({
+	    ...getStatusBadgeStyle(label),
+	    width: 30,
+	    height: 30,
+	    borderRadius: 6,
+	    display: 'inline-flex',
+	    alignItems: 'center',
+	    justifyContent: 'center',
+	    fontSize: 10,
+	    fontWeight: 800,
+	    cursor: 'help',
+	    flex: '0 0 auto',
+	  });
 
   const StatusBadge = ({ label }) => (
     <span
@@ -1266,6 +1385,34 @@ export default function Report() {
       </div>
     );
   };
+
+	  const RadarTooltip = ({ active, payload }) => {
+	    if (!active || !payload || payload.length === 0) return null;
+	    const item = payload[0]?.payload || {};
+	    return (
+	      <div style={{ background: '#111827', color: '#e5e7eb', padding: '8px 10px', borderRadius: 8, boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }}>
+	        <div style={{ fontWeight: 700, marginBottom: 6 }}>{item.fullName || item.name || 'Service element'}</div>
+	        <div style={{ color: '#bfdbfe' }}>Baseline: {Number(item.Baseline || 0).toFixed(1)}%</div>
+	        <div style={{ color: '#fecaca' }}>Latest: {Number(item.Latest || 0).toFixed(1)}%</div>
+	      </div>
+	    );
+	  };
+
+	  const ResponseDistributionTooltip = ({ active, payload }) => {
+	    if (!active || !payload || payload.length === 0) return null;
+	    const item = payload[0]?.payload || {};
+	    return (
+	      <div style={{ background: '#111827', color: '#e5e7eb', padding: '8px 10px', borderRadius: 8, boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }}>
+	        <div style={{ fontWeight: 700, marginBottom: 6 }}>{item.name || item.id || 'Service element'}</div>
+	        <div style={{ color: '#bbf7d0' }}>C: {item.cCount || 0} criteria ({Number(item.C || 0).toFixed(1)}%)</div>
+	        <div style={{ color: '#fde68a' }}>PC: {item.pcCount || 0} criteria ({Number(item.PC || 0).toFixed(1)}%)</div>
+	        <div style={{ color: '#fecaca' }}>NC: {item.ncCount || 0} criteria ({Number(item.NC || 0).toFixed(1)}%)</div>
+	        {Number(item.naCount || 0) > 0 && (
+	          <div style={{ color: '#cbd5e1', marginTop: 4 }}>N/A excluded: {item.naCount}</div>
+	        )}
+	      </div>
+	    );
+	  };
 
   const exportDrillAsPng = async () => {
     try {
@@ -2182,7 +2329,7 @@ export default function Report() {
                 <div style={{ fontWeight: 700 }}>{reportInfo.latestDate ? new Date(reportInfo.latestDate).toLocaleDateString() : 'N/A'}</div>
               </div>
               <div style={{ background: '#0b1220', color: '#e5e7eb', padding: '10px 12px', borderRadius: 8, minWidth: 220 }}>
-                <div style={{ fontSize: 12, opacity: 0.8 }}>Overall (COHSASA)</div>
+                <div style={{ fontSize: 12, opacity: 0.8 }}>Overall</div>
                 <div style={{ fontWeight: 700 }}>{Number.isFinite(scoring?.overall?.percent) ? `${scoring.overall.percent.toFixed(1)}%` : '—'}</div>
               </div>
             </div>
@@ -2315,6 +2462,139 @@ export default function Report() {
               </div>
               )}
             </div>
+
+	            {/* Radar Chart */}
+	            <div style={{ marginTop: 18 }}>
+	              <div
+	                className="section-header"
+	                onClick={() => setIsRadarChartOpen(true)}
+	                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+	              >
+	                <span
+	                  style={{
+	                    transform: isRadarChartOpen ? 'rotate(0deg)' : 'rotate(-90deg)',
+	                    transition: 'transform 0.2s ease',
+	                    display: 'inline-block',
+	                  }}
+	                >
+	                  ▼
+	                </span>
+	                <h3 style={{ margin: 0 }}>Radar Chart: Service Element Score Profile</h3>
+	              </div>
+	            </div>
+
+	            {/* Response Distribution (C / PC / NC) */}
+	            <div style={{ marginTop: 18 }}>
+	              <div
+	                className="section-header"
+	                onClick={() => setIsResponseDistributionCollapsed(!isResponseDistributionCollapsed)}
+	                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+	              >
+	                <span
+	                  style={{
+	                    transform: isResponseDistributionCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+	                    transition: 'transform 0.2s ease',
+	                    display: 'inline-block',
+	                  }}
+	                >
+	                  ▼
+	                </span>
+	                <h3 style={{ margin: 0 }}>Response Distribution (C / PC / NC)</h3>
+	              </div>
+	              {!isResponseDistributionCollapsed && (
+	                <div style={{ marginTop: 8 }}>
+	                  <div style={{ color: '#64748b', fontSize: 13, marginBottom: 8 }}>
+	                    Latest assessment criteria distribution by service element. N/A responses are excluded from the percentage bars.
+	                  </div>
+	                  {responseDistributionData.length === 0 ? (
+	                    <div style={{ color: '#64748b' }}>No response distribution data available.</div>
+	                  ) : (() => {
+	                    const chartWidth = Math.max(760, responseDistributionData.length * 150);
+	                    return (
+	                      <div style={{ width: '100%', overflowX: 'auto' }}>
+	                        <div style={{ width: chartWidth, height: 360 }}>
+	                          <BarChart width={chartWidth} height={360} data={responseDistributionData} margin={{ top: 16, right: 16, bottom: 64, left: 0 }}>
+	                            <CartesianGrid strokeDasharray="3 3" />
+	                            <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-25} textAnchor="end" height={86} />
+	                            <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={42} />
+	                            <Tooltip content={<ResponseDistributionTooltip />} />
+	                            <Legend />
+	                            <Bar dataKey="C" name="Compliant" stackId="latest" fill="#22c55e" />
+	                            <Bar dataKey="PC" name="Partially compliant" stackId="latest" fill="#f59e0b" />
+	                            <Bar dataKey="NC" name="Non-compliant" stackId="latest" fill="#ef4444" />
+	                          </BarChart>
+	                        </div>
+	                      </div>
+	                    );
+	                  })()}
+	                </div>
+	              )}
+	            </div>
+
+	            {/* Criteria Heatmap */}
+	            <div style={{ marginTop: 18 }}>
+	              <div
+	                className="section-header"
+	                onClick={() => setIsHeatmapCollapsed(!isHeatmapCollapsed)}
+	                style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}
+	              >
+	                <span
+	                  style={{
+	                    transform: isHeatmapCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
+	                    transition: 'transform 0.2s ease',
+	                    display: 'inline-block',
+	                  }}
+	                >
+	                  ▼
+	                </span>
+	                <h3 style={{ margin: 0 }}>Criteria Heatmap</h3>
+	              </div>
+	              {!isHeatmapCollapsed && (
+	                <div style={{ marginTop: 8 }}>
+	                  <div style={{ color: '#64748b', fontSize: 13, marginBottom: 10 }}>
+	                    Latest assessment criteria map by service element. Hover over a cell to see the criterion code and description.
+	                  </div>
+	                  <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 10, fontSize: 12 }}>
+	                    <span><StatusBadge label="C" /> Compliant</span>
+	                    <span><StatusBadge label="PC" /> Partially compliant</span>
+	                    <span><StatusBadge label="NC" /> Non-compliant</span>
+	                    <span><StatusBadge label="NA" /> N/A</span>
+	                  </div>
+	                  {heatmapData.length === 0 ? (
+	                    <div style={{ color: '#64748b' }}>No heatmap data available.</div>
+	                  ) : (
+	                    <div style={{ display: 'flex', flexDirection: 'column', gap: 10, overflowX: 'auto', paddingBottom: 4 }}>
+	                      {heatmapData.map((row) => (
+	                        <div key={`heat-${row.id}`} style={{ display: 'grid', gridTemplateColumns: '260px 1fr', gap: 12, alignItems: 'start', minWidth: 760 }}>
+	                          <div style={{ background: '#f8fafc', border: '1px solid #e2e8f0', borderRadius: 8, padding: '8px 10px' }}>
+	                            <div style={{ fontWeight: 700, color: '#0f172a', lineHeight: 1.25 }}>{row.name}</div>
+	                            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 6, fontSize: 11 }}>
+	                              <span style={{ color: '#166534' }}>C: {row.counts.C || 0}</span>
+	                              <span style={{ color: '#92400e' }}>PC: {row.counts.PC || 0}</span>
+	                              <span style={{ color: '#991b1b' }}>NC: {row.counts.NC || 0}</span>
+	                              <span style={{ color: '#64748b' }}>NA: {row.counts.NA || 0}</span>
+	                            </div>
+	                          </div>
+	                          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5, alignItems: 'center' }}>
+	                            {row.cells.length === 0 ? (
+	                              <span style={{ color: '#64748b' }}>No criteria available</span>
+	                            ) : row.cells.map((cell, idx) => (
+	                              <span
+	                                key={`${row.id}-${cell.code || idx}`}
+	                                style={getHeatmapCellStyle(cell.response)}
+	                                title={`${cell.code || 'Criterion'}: ${cell.label || ''} — ${cell.response}`}
+	                              >
+	                                {cell.response === 'Pending' ? 'P' : cell.response}
+	                              </span>
+	                            ))}
+	                          </div>
+	                        </div>
+	                      ))}
+	                    </div>
+	                  )}
+	                </div>
+	              )}
+	            </div>
 
             {/* Assessor Activity Summary (collapsible) */}
             {assessorSummary.length > 0 && (
@@ -2545,6 +2825,41 @@ export default function Report() {
             )}
           </div>
         )}
+
+	    <Dialog
+	      open={isRadarChartOpen}
+	      onClose={() => setIsRadarChartOpen(false)}
+	      fullWidth
+	      maxWidth="xl"
+	      PaperProps={{ style: { maxWidth: '96vw', width: '96vw' } }}
+	    >
+	      <DialogTitle>Radar Chart: Service Element Score Profile</DialogTitle>
+	      <DialogContent dividers>
+	        <div style={{ color: '#64748b', fontSize: 13, marginBottom: 12 }}>
+	          Compares baseline and latest score patterns across service elements in a larger view for easier reading.
+	        </div>
+	        {radarChartData.length === 0 ? (
+	          <div style={{ color: '#64748b' }}>No radar chart data available.</div>
+	        ) : (
+	          <div style={{ width: '100%', height: '72vh', minHeight: 540 }}>
+	            <ResponsiveContainer width="100%" height="100%">
+	              <RadarChart data={radarChartData} outerRadius="68%">
+	                <PolarGrid />
+	                <PolarAngleAxis dataKey="name" tick={{ fontSize: 12, fill: '#334155' }} />
+	                <PolarRadiusAxis angle={90} domain={[0, 100]} tickFormatter={(v) => `${v}%`} tick={{ fontSize: 11 }} />
+	                <Tooltip content={<RadarTooltip />} />
+	                <Legend />
+	                <Radar name="Baseline" dataKey="Baseline" stroke="#60a5fa" fill="#60a5fa" fillOpacity={0.18} />
+	                <Radar name={`Latest (${reportInfo?.latestType || 'Latest'})`} dataKey="Latest" stroke="#ef4444" fill="#ef4444" fillOpacity={0.18} />
+	              </RadarChart>
+	            </ResponsiveContainer>
+	          </div>
+	        )}
+	      </DialogContent>
+	      <DialogActions>
+	        <Button onClick={() => setIsRadarChartOpen(false)}>Close</Button>
+	      </DialogActions>
+	    </Dialog>
       </div>
     </div>
   );

@@ -824,7 +824,7 @@ export function Dashboard() {
 	    const roleNorm = String(assessment?.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i, '').toUpperCase();
 	    const isLead = /LEAD|LEADER/.test(roleNorm);
 	    const roleLabel = roleNorm ? roleNorm.replace(/\s+/g, '_').replace(/_/g, ' ') : '';
-	    const label = hasAssessmentEvent ? 'Open Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
+	    const label = hasAssessmentEvent ? 'Initiate Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
 	    const plannedDate = assessment?.scheduledAt ? assessment.scheduledAt.slice(0, 10) : 'N/A';
 	    const lastUpdated = assessment?.updatedAt ? assessment.updatedAt.slice(0, 10) : 'N/A';
 	    const evs = Array.isArray(assessment?.team) ? assessment.team : [];
@@ -865,11 +865,12 @@ export function Dashboard() {
 	        );
 	    }
 	    if (uiState.label === 'Initiate Survey' && !uiState.isLead) return null;
+	    const selfOnly = uiState.hasAssessmentEvent && uiState.label === 'Initiate Survey';
 	    return (
 	        <button
 	            className={`btn ${uiState.label === 'Initiate Survey' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
 	            disabled={uiState.label === 'Initiate Survey' && uiState.isInitiating}
-	            onClick={() => uiState.label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly: false }) : handleOpenAssessment(assessment)}
+	            onClick={() => uiState.label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly }) : handleOpenAssessment(assessment)}
 	        >
 	            {uiState.label === 'Initiate Survey' && uiState.isInitiating ? 'Opening…' : uiState.label}
 	        </button>
@@ -2835,6 +2836,8 @@ export function Dashboard() {
 	                                const presence = assessmentEventPresenceByKey?.[assocKey];
 	                                const hasAssessmentEvent = presence?.hasAssessmentEvent === true;
 	                                const isCheckingPresence = !presence || presence.loading;
+		                                const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i, '').toUpperCase();
+		                                const isLead = /LEAD|LEADER/.test(roleNorm);
                                 return (
                                     <div key={`accred-${assessment.enrollment || assessment.eventId || assessment.trackedEntityInstance}`} className="form-item assessment-item">
                                         <div className="form-info">
@@ -2864,15 +2867,17 @@ export function Dashboard() {
                                             </div>
                                             <p>Enrollment: {assessment.enrollment}</p>
                                         </div>
-                                        <div className="form-actions">
-	                                            <button
-	                                                className={`btn ${hasAssessmentEvent ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-	                                                disabled={isCheckingPresence || (!hasAssessmentEvent && isInitiating)}
-	                                                onClick={() => hasAssessmentEvent ? handleOpenAssessment(assessment) : handleInitiateSurvey(assessment, { selfOnly: false })}
-	                                            >
-	                                                {isCheckingPresence ? 'Checking assessment…' : hasAssessmentEvent ? 'Open Survey' : (isInitiating ? 'Opening…' : 'Initiate Survey')}
-	                                            </button>
-                                        </div>
+		                                        <div className="form-actions">
+		                                            {(isCheckingPresence || !hasAssessmentEvent || isLead) && (
+		                                                <button
+		                                                    className="btn btn-primary btn-sm"
+		                                                    disabled={isCheckingPresence || isInitiating}
+		                                                    onClick={() => handleInitiateSurvey(assessment, { selfOnly: hasAssessmentEvent })}
+		                                                >
+		                                                    {isCheckingPresence ? 'Checking assessment…' : (isInitiating ? 'Opening…' : 'Initiate Survey')}
+		                                                </button>
+		                                            )}
+	                                        </div>
                                     </div>
                                 );
                             })
@@ -3037,17 +3042,22 @@ export function Dashboard() {
 		                                                        uniqueSchedules.push(scheduleItem);
 		                                                        seenScheduleKeys.set(scheduleKey, scheduleItem);
 		                                                    });
+			                                                    const facilityIsLead = uniqueSchedules.some(item => {
+			                                                        const roleNorm = String(item.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i, '').toUpperCase();
+			                                                        return /LEAD|LEADER/.test(roleNorm);
+			                                                    });
 		                                                    return (
-		                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px' }}>
+			                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px', minWidth: 0, width: '100%' }}>
 		                                                            {uniqueSchedules.map((scheduledAssessment, scheduleIndex) => {
 		                                                                const scheduleUi = getAssessmentUiState(scheduledAssessment);
 		                                                                return (
 		                                                                    <div
 		                                                                        key={`${scheduleUi.actionKey}-${scheduleIndex}`}
-		                                                                        style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px', background: '#f8fafc' }}
+			                                                                        className="assessment-schedule-card"
+			                                                                        style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px', background: '#f8fafc', minWidth: 0, maxWidth: '100%', boxSizing: 'border-box' }}
 		                                                                    >
-		                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap' }}>
-		                                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+			                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', minWidth: 0 }}>
+			                                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
 		                                                                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
 		                                                                                    <div className="form-status success">SCHEDULE {scheduleIndex + 1}</div>
 		                                                                                    {scheduledAssessment.requiresResponse && (
@@ -3079,7 +3089,7 @@ export function Dashboard() {
 		                                                                            </div>
 		                                                                        </div>
 
-		                                                                        <p style={{ margin: '10px 0 0', color: '#475569' }}>
+			                                                                        <p className="assessment-details-line" style={{ margin: '10px 0 0', color: '#475569' }}>
 		                                                                            Date: {scheduleUi.latestAuth}
 		                                                                            {' '}| Authorised: {scheduleUi.authStart} to {scheduleUi.authEnd}
 		                                                                            {' '}| OU: {scheduledAssessment.orgUnit}
@@ -3092,34 +3102,19 @@ export function Dashboard() {
 		                                                                                Please contact the Team Lead to initiate this schedule.
 		                                                                            </div>
 		                                                                        )}
-
-		                                                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
-		                                                                            <button className="btn btn-secondary btn-sm" onClick={() => toggleExpandAssessment(scheduledAssessment)}>
-		                                                                                {expandedAssignments[getAssocKey(scheduledAssessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
-		                                                                            </button>
-		                                                                        </div>
-		                                                                        {expandedAssignments[getAssocKey(scheduledAssessment)] && (
-		                                                                            <div style={{ marginTop: '10px', width: '100%', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
-		                                                                                {scheduledAssessment._duplicates && scheduledAssessment._duplicates.length > 1 && (
-		                                                                                    <div style={{ marginBottom: '10px', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
-		                                                                                        <div style={{ fontWeight: 600, color: '#374151', marginBottom: '4px' }}>
-		                                                                                            Grouped Assignments ({scheduledAssessment._duplicates.length})
-		                                                                                        </div>
-		                                                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-		                                                                                            {scheduledAssessment._duplicates.map(d => (
-		                                                                                                <div key={d.eventId} style={{ fontSize: '13px', color: '#4b5563' }}>
-		                                                                                                    • Status: <span style={{ fontWeight: 500 }}>{d.statusCode === 'FAC_ASS_ASSIGN_ACCEPTED' ? 'Accepted' : 'Pending'}</span> | Date: {d.sortDate} | ID: {d.eventId} | Enr: {d.enrollment || d.schedule?.enrollments?.[0]?.enrollment || 'N/A'} | Prog: {d.program || d.schedule?.enrollments?.[0]?.program || 'N/A'} | TEI: {d.trackedEntityInstance || d.scheduleTeiId || 'N/A'} | Start: {d.scheduledAt ? d.scheduledAt.slice(0,10) : 'N/A'} | End: {d.updatedAt ? d.updatedAt.slice(0,10) : 'N/A'}
-		                                                                                                </div>
-		                                                                                            ))}
-		                                                                                        </div>
-		                                                                                    </div>
-		                                                                                )}
-		                                                                                {renderAssociatedAssessmentsPanel(scheduledAssessment, scheduleUi.isLead)}
-		                                                                            </div>
-		                                                                        )}
 		                                                                    </div>
 		                                                                );
 		                                                            })}
+			                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+			                                                                <button className="btn btn-secondary btn-sm" onClick={() => toggleExpandAssessment(assessment)}>
+			                                                                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
+			                                                                </button>
+			                                                            </div>
+			                                                            {expandedAssignments[getAssocKey(assessment)] && (
+			                                                                <div className="associated-assessments-panel" style={{ width: '100%', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
+			                                                                    {renderAssociatedAssessmentsPanel(assessment, facilityIsLead)}
+			                                                                </div>
+			                                                            )}
 		                                                        </div>
 		                                                    );
 		                                                })()
@@ -3381,10 +3376,11 @@ export function Dashboard() {
 	                                                    }
 	                                                    const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
 	                                                    const isLead = /LEAD|LEADER/.test(roleNorm);
-		                                                    const label = hasAssessmentEvent ? 'Open Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
+		                                                    const label = hasAssessmentEvent ? 'Initiate Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
 		                                                    if (label === 'Initiate Survey' && !isLead) return null;
+		                                                    const selfOnly = hasAssessmentEvent && label === 'Initiate Survey';
 	                                                    const onClick = () => {
-	                                                        return label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly: false }) : handleOpenAssessment(assessment);
+		                                                        return label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly }) : handleOpenAssessment(assessment);
 	                                                    };
                                                     return (
                                                         <button
