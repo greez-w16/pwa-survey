@@ -1447,10 +1447,10 @@
                     subsections.forEach((subFields, subsectionIndex) => {
                         if (!Array.isArray(subFields) || subFields.length === 0) return;
             
-                        const selectIds = subFields
-                            .filter((f) => f && f.type === 'select')
-                            .map((f) => f.id);
-                        if (!selectIds.length) return;
+	                        const selectFields = subFields
+	                            .filter((f) => f && f.type === 'select');
+	                        const selectIds = selectFields.map((f) => f.id);
+	                        if (!selectIds.length) return;
             
                 let totalPoints = 0;
                 let scoredCount = 0;
@@ -1458,13 +1458,26 @@
                 // Track worst scored CRITICAL status within this x.x.x group for capping
                 let worstCritical = null; // 'NC' | 'PC' | null
             
-                selectIds.forEach((id) => {
+	                const contributions = [];
+	                selectFields.forEach((field) => {
+	                    const id = field.id;
                     const score = criteriaScores[id];
                     if (!score) return;
                     if (score.criticalFail) hasCriticalFail = true;
                     if (score.isScored && score.points !== null) {
                         totalPoints += score.points;
                         scoredCount += 1;
+	                        let criterionCode = normalizeCriterionCode(field.code);
+	                        if (!criterionCode || !/\d/.test(criterionCode)) {
+	                            const labelMatch = String(field.label || '').match(/\b\d+(?:\.\d+){2,3}\b/);
+	                            if (labelMatch) criterionCode = labelMatch[0];
+	                        }
+	                        const responseValue = String(score.response || '').trim();
+	                        contributions.push({
+	                            code: criterionCode || id,
+	                            response: responseValue || '-',
+	                            points: score.points,
+	                        });
                     }
                     // Determine worst scored critical child status for this subgroup
                     if (score.isCritical && score.isScored && typeof score.response === 'string') {
@@ -1527,14 +1540,22 @@
                             return;
                         }
             
-                            result[subsectionIndex] = {
-                            code: standardCode,
-                            title: standardTitle || standardCode,
-                            percent: avgPercent,
-                                rawPercent,
-                    criticalFail: hasCriticalFail,
-                    ...(worstCritical ? { cappedByCritical: worstCritical } : {}),
-                        };
+	                            const maxScore = scoredCount * 100;
+	                            const displayedTotalScore = maxScore > 0
+	                                ? Math.round(((avgPercent / 100) * maxScore) * 10) / 10
+	                                : 0;
+
+	                            result[subsectionIndex] = {
+	                            code: standardCode,
+	                            title: standardTitle || standardCode,
+	                            percent: avgPercent,
+	                                rawPercent,
+	                                totalScore: displayedTotalScore,
+	                                maxScore,
+	                                contributions,
+	                    criticalFail: hasCriticalFail,
+	                    ...(worstCritical ? { cappedByCritical: worstCritical } : {}),
+	                        };
                     });
             
                     return result;
@@ -2216,7 +2237,28 @@
                                                 {isScoringPending && (
                                                     <span className="score-spinner" aria-label="Recalculating standard score" />
                                                 )}
-                                                {subsectionStandardScore.percent.toFixed(1)}% Score (Not Saved)
+	                                                {subsectionStandardScore.percent.toFixed(1)}% Score (Not Saved)
+	                                                {subsectionStandardScore.maxScore > 0 && (
+	                                                    <>
+	                                                        {' '}• {subsectionStandardScore.totalScore}/{subsectionStandardScore.maxScore} pts
+	                                                    </>
+	                                                )}
+	                                                {Array.isArray(subsectionStandardScore.contributions) && subsectionStandardScore.contributions.length > 0 && (
+	                                                    <span
+	                                                        style={{
+	                                                            display: 'block',
+	                                                            marginTop: '4px',
+	                                                            fontSize: '0.9em',
+	                                                            fontWeight: 500,
+	                                                            lineHeight: 1.35,
+	                                                            whiteSpace: 'normal'
+	                                                        }}
+	                                                    >
+	                                                        {subsectionStandardScore.contributions
+	                                                            .map((item) => `${item.code}=${item.response} (${item.points})`)
+	                                                            .join(' • ')}
+	                                                    </span>
+	                                                )}
                                             </span>
                                         )}
                                     {isStandardCriterion && subsectionStandardScore?.cappedByCritical && (
