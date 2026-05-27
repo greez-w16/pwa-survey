@@ -255,6 +255,14 @@ export default function Report() {
     return null;
   };
 
+  const withTimeout = (promise, ms, label = 'Request') => new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} timed out`)), ms);
+    Promise.resolve(promise)
+      .then(value => resolve(value))
+      .catch(err => reject(err))
+      .finally(() => clearTimeout(timer));
+  });
+
   useEffect(() => {
     let cancelled = false;
     async function loadFacilitiesAuthorised() {
@@ -262,8 +270,16 @@ export default function Report() {
       setError(null);
       try {
         let options = [];
+        const directFacilityId = reportQueryParams.facilityId;
         // Prefer authorised facilities from scheduling assignments
-        if (Array.isArray(userAssignments) && userAssignments.length > 0) {
+        if (directFacilityId) {
+          try {
+            const ou = await api.getFacilityDetails(directFacilityId);
+            options = [{ id: directFacilityId, name: ou.displayName || ou.name || directFacilityId }];
+          } catch (_) {
+            options = [{ id: directFacilityId, name: directFacilityId }];
+          }
+        } else if (Array.isArray(userAssignments) && userAssignments.length > 0) {
           const byOu = new Map();
           userAssignments.forEach(a => {
             const id = a.orgUnitId || (typeof a.orgUnit === 'string' ? a.orgUnit : a.orgUnit?.id);
@@ -295,16 +311,6 @@ export default function Report() {
           options = detailed;
         }
 
-	        const directFacilityId = reportQueryParams.facilityId;
-	        if (directFacilityId && !options.some(opt => opt.id === directFacilityId)) {
-	          try {
-	            const ou = await api.getFacilityDetails(directFacilityId);
-	            options.push({ id: directFacilityId, name: ou.displayName || ou.name || directFacilityId });
-	          } catch (_) {
-	            options.push({ id: directFacilityId, name: directFacilityId });
-	          }
-	        }
-
 	        if (cancelled) return;
         options.sort((a, b) => String(a.name).localeCompare(String(b.name)));
         setFacilityOptions(options);
@@ -332,29 +338,65 @@ export default function Report() {
       setReportInfo(null);
       setReportAssessment(null);
       try {
-        // Fetch all events for this facility OU, including descendants, to ensure we catch 
-        // both scheduled and self-initiated assessments.
-	        const eventFields = 'event,enrollment,eventDate,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value],notes[note,value]';
-	        const events = await api.getSurveyEventsForOrgUnit({ 
-	            orgUnitId: selectedFacilityId,
-	            programId,
-	            stageId,
-	            fields: eventFields
-	        });
-	        let all = Array.isArray(events) ? events : [];
-	        if (reportQueryParams.teiId) {
-	          const teiEvents = await api.getSurveyEventsForTei({
-	            teiId: reportQueryParams.teiId,
-	            orgUnitId: selectedFacilityId,
-	            programId,
-	            stageId,
+	        const eventFields = 'event,enrollment,eventDate,program,programStage,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value],notes[note,value]';
+	        let all = [];
+	        let effectiveStageId = stageId;
+	        const mergeEvents = (...lists) => {
+	          const byEvent = new Map();
+	          lists.flat().forEach(ev => {
+	            if (ev?.event) byEvent.set(ev.event, ev);
+	          });
+	          return Array.from(byEvent.values());
+	        };
+
+	        if (reportQueryParams.eventId) {
+	          const enrollmentEvents = await api.getEventsList({
+	            enrollmentId: reportQueryParams.eventId,
+	            order: 'eventDate:desc',
 	            fields: eventFields,
 	          }).catch(() => []);
-	          const mergedByEvent = new Map();
-	          [...all, ...(Array.isArray(teiEvents) ? teiEvents : [])].forEach(ev => {
-	            if (ev?.event) mergedByEvent.set(ev.event, ev);
+	          const directEvent = await api.getEventById(reportQueryParams.eventId, eventFields).then(ev => ev ? [ev] : []).catch(() => []);
+	          all = mergeEvents(enrollmentEvents || [], directEvent || []);
+	        }
+
+	        if (reportQueryParams.teiId) {
+	          const candidateStages = Array.from(new Set([
+	            effectiveStageId,
+	            stageIdFromGroup,
+	            configuration?.programStage?.id,
+	            DEFAULT_SURVEY_PROGRAM_STAGE_ID,
+	            SURVEY_PROGRAM_STAGE_BY_GROUP.HOSPITAL,
+	          ].filter(Boolean)));
+
+	          for (const candidateStageId of candidateStages) {
+	            const teiEvents = await api.getSurveyEventsForTei({
+	              teiId: reportQueryParams.teiId,
+	              orgUnitId: all.length > 0 ? undefined : selectedFacilityId,
+	              programId,
+	              stageId: candidateStageId,
+	              fields: eventFields,
+	            }).catch(() => []);
+	            if (Array.isArray(teiEvents) && teiEvents.length > 0) {
+	              all = mergeEvents(all, teiEvents);
+	              effectiveStageId = candidateStageId;
+	              break;
+	            }
+	          }
+	        }
+
+	        if (all.length > 0) {
+	          const firstEventStage = all.find(ev => ev?.programStage)?.programStage;
+	          if (firstEventStage) effectiveStageId = firstEventStage;
+	        } else {
+	          // Fetch all events for this facility OU, including descendants, to ensure we catch
+	          // both scheduled and self-initiated assessments when no specific TEI was supplied.
+	          const events = await api.getSurveyEventsForOrgUnit({
+	            orgUnitId: selectedFacilityId,
+	            programId,
+	            stageId: effectiveStageId,
+	            fields: eventFields
 	          });
-	          all = Array.from(mergedByEvent.values());
+	          all = Array.isArray(events) ? events : [];
 	        }
 
         if (all.length === 0) {
@@ -468,7 +510,21 @@ export default function Report() {
 
 	        const groupText = baselineBundle.groupText || latestBundle.groupText || '';
 	        const groupId = resolveGroupIdFromText(groupText) || 'GENERAL';
-	        const directGroupObj = groups.find(g => g.id === groupId) || null;
+	        let reportGroups = groups;
+	        if (effectiveStageId && configuration?.programStage?.id !== effectiveStageId) {
+	          try {
+	            const metadata = await api.getFormMetadata(effectiveStageId);
+	            reportGroups = transformMetadata(metadata) || [];
+	            setConfiguration?.({
+	              programStage: metadata,
+	              program: metadata?.program || configuration?.program || { id: programId, displayName: 'MOH Survey Dashboard' },
+	              organisationUnits: configuration?.organisationUnits || []
+	            });
+	          } catch (metadataErr) {
+	            console.warn('Report: failed to load metadata for resolved event stage; using current metadata', metadataErr);
+	          }
+	        }
+	        const directGroupObj = reportGroups.find(g => g.id === groupId) || null;
 	        const hasServiceSections = (sections = []) => sections.some(s => !isAssessmentDetailsSection(s));
 	        const uniqueSections = (sections = []) => {
 	          const byId = new Map();
@@ -479,9 +535,9 @@ export default function Report() {
 	          return Array.from(byId.values());
 	        };
 	        const directSections = directGroupObj?.sections || [];
-	        const stageIsDedicatedToGroup = stageId && stageId !== DEFAULT_SURVEY_PROGRAM_STAGE_ID && stageId === getSurveyProgramStageIdForGroup(groupId);
+	        const stageIsDedicatedToGroup = effectiveStageId && effectiveStageId !== DEFAULT_SURVEY_PROGRAM_STAGE_ID && effectiveStageId === getSurveyProgramStageIdForGroup(groupId);
 	        const fallbackStageSections = stageIsDedicatedToGroup
-	          ? uniqueSections(groups.flatMap(g => g.sections || []))
+	          ? uniqueSections(reportGroups.flatMap(g => g.sections || []))
 	          : [];
 	        const targetSections = hasServiceSections(directSections) ? directSections : fallbackStageSections;
 	        const groupObj = directGroupObj || (targetSections.length > 0 ? {
@@ -604,7 +660,7 @@ export default function Report() {
         setReportInfo({
           groupId,
           groupLabel: groupObj?.name || groupId,
-	          programStageId: stageId,
+		          programStageId: effectiveStageId,
           count: inPeriodBundles.length,
           baselineDate: baselineBundle.assessmentDate || null,
           latestDate: latestBundle.assessmentDate || null,
@@ -1697,11 +1753,6 @@ export default function Report() {
           <td>${buildPdfMetricPill(row.criticalRemaining?.NC, { tone: 'risk', zeroAsDash: true })}</td>
           <td>${buildPdfMetricPill(row.criticalRemaining?.PC, { tone: 'warning', zeroAsDash: true })}</td>
           <td>${escapeHtml(formatReportCell(row.latestDate))}</td>
-          <td>${buildPdfMetricPill(row.policies?.NC, { tone: 'risk', zeroAsDash: true })}</td>
-          <td>${buildPdfMetricPill(row.policies?.PC, { tone: 'warning', zeroAsDash: true })}</td>
-          <td>${buildPdfMetricPill(row.policies?.C, { tone: 'success', zeroAsDash: true })}</td>
-          <td>${buildPdfMetricPill(row.policies?.total, { zeroAsDash: true })}</td>
-          <td>${escapeHtml(formatReportCell(row.qiCompliance || 'N/A'))}</td>
         </tr>
       `;
     }).join('');
@@ -2175,8 +2226,6 @@ export default function Report() {
                   <th class="group-critical" colspan="3">Critical Criteria</th>
                   <th class="group-critical" colspan="3">Critical Criteria<br />Remaining</th>
                   <th class="fo-date" rowspan="2">Most recent<br />assessment<br />date</th>
-                  <th class="group-policy" colspan="4">Policies &amp; Procedures</th>
-                  <th class="fo-qi group-qi" rowspan="2">Quality<br />improvement<br />standard<br />compliance</th>
                 </tr>
                 <tr>
                   <th class="fo-insight">Δ<br />Change</th>
@@ -2187,7 +2236,6 @@ export default function Report() {
                   <th>Total</th><th>NC</th><th>PC</th>
                   <th>Total</th><th>NC</th><th>PC</th>
                   <th>Total</th><th>NC</th><th>PC</th>
-                  <th>NC</th><th>PC</th><th>C</th><th>Total</th>
                 </tr>
               </thead>
               <tbody>${facilityOverviewTableRows}</tbody>
@@ -2214,11 +2262,6 @@ export default function Report() {
                   <td>${buildPdfMetricPill(facilityOverviewTotals.critRemTotal, { tone: 'warning', zeroAsDash: true })}</td>
                   <td>${buildPdfMetricPill(facilityOverviewTotals.critRemNC, { tone: 'risk', zeroAsDash: true })}</td>
                   <td>${buildPdfMetricPill(facilityOverviewTotals.critRemPC, { tone: 'warning', zeroAsDash: true })}</td>
-                  <td></td>
-                  <td>${buildPdfMetricPill(facilityOverviewTotals.policyNC, { tone: 'risk', zeroAsDash: true })}</td>
-                  <td>${buildPdfMetricPill(facilityOverviewTotals.policyPC, { tone: 'warning', zeroAsDash: true })}</td>
-                  <td>${buildPdfMetricPill(facilityOverviewTotals.policyC, { tone: 'success', zeroAsDash: true })}</td>
-                  <td>${buildPdfMetricPill(facilityOverviewTotals.policyTotal, { zeroAsDash: true })}</td>
                   <td></td>
                 </tr>
               </tfoot>
@@ -2435,7 +2478,7 @@ export default function Report() {
               </div>
               {!isFacilityOverviewCollapsed && (
               <div style={{ overflowX: 'auto', marginTop: 8, maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84em', minWidth: 1900 }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84em', minWidth: 1500 }}>
                   <thead>
                     <tr>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')}>SE</th>
@@ -2449,8 +2492,6 @@ export default function Report() {
                       <th colSpan={3} style={overviewHeaderCellStyle('#fecaca', '#7f1d1d')}>Critical Criteria</th>
                       <th colSpan={3} style={overviewHeaderCellStyle('#fecaca', '#7f1d1d')}>Critical Criteria Remaining</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')}>Most recent assessment date</th>
-                      <th colSpan={4} style={overviewHeaderCellStyle('#ede9fe', '#5b21b6')}>Policies &amp; Procedures</th>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#e2e8f0', '#334155', { whiteSpace: 'nowrap' })}>Quality improvement standard compliance</th>
                     </tr>
                     <tr>
                       <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })}>Δ Change</th>
@@ -2469,10 +2510,6 @@ export default function Report() {
                       <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>Total</th>
                       <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>NC</th>
                       <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>PC</th>
-                      <th style={overviewHeaderCellStyle('#f5f3ff', '#5b21b6')}>NC</th>
-                      <th style={overviewHeaderCellStyle('#f5f3ff', '#5b21b6')}>PC</th>
-                      <th style={overviewHeaderCellStyle('#f5f3ff', '#5b21b6')}>C</th>
-                      <th style={overviewHeaderCellStyle('#f5f3ff', '#5b21b6')}>Total</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2500,11 +2537,6 @@ export default function Report() {
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.criticalRemaining.NC, { tone: 'risk', zeroAsDash: true })}</td>
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.criticalRemaining.PC, { tone: 'warning', zeroAsDash: true })}</td>
                         <td style={overviewBodyCellStyle(rowIndex, { whiteSpace: 'nowrap' })}>{row.latestDate}</td>
-                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.policies.NC, { tone: 'risk', zeroAsDash: true })}</td>
-                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.policies.PC, { tone: 'warning', zeroAsDash: true })}</td>
-                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.policies.C, { tone: 'success', zeroAsDash: true })}</td>
-                        <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewBadge(row.policies.total, { zeroAsDash: true })}</td>
-                        <td style={overviewBodyCellStyle(rowIndex)}>{row.qiCompliance}</td>
                       </tr>
                     ))}
                   </tbody>
@@ -2531,11 +2563,6 @@ export default function Report() {
                       <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.critRemTotal, { tone: 'warning', zeroAsDash: true })}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.critRemNC, { tone: 'risk', zeroAsDash: true })}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.critRemPC, { tone: 'warning', zeroAsDash: true })}</td>
-                      <td style={overviewTotalsCellStyle()}></td>
-                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.policyNC, { tone: 'risk', zeroAsDash: true })}</td>
-                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.policyPC, { tone: 'warning', zeroAsDash: true })}</td>
-                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.policyC, { tone: 'success', zeroAsDash: true })}</td>
-                      <td style={overviewTotalsCellStyle()}>{renderOverviewBadge(facilityOverviewTotals.policyTotal, { zeroAsDash: true })}</td>
                       <td style={overviewTotalsCellStyle()}></td>
                     </tr>
                   </tfoot>
