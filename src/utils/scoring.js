@@ -85,6 +85,13 @@ export const setHospitalSubcriteriaConfig = (computeConfig) => {
 	    return null; // NA or unhandled
 	};
 
+export const normalizeCriterionPoints = (points) => {
+    if (points === null || points === undefined || points === '') return null;
+    const numeric = Number(points);
+    if (!Number.isFinite(numeric)) return null;
+    return numeric >= 80 ? 100 : numeric;
+};
+
 /**
  * Computes deep recursive graph scores for all criteria.
  * 
@@ -393,6 +400,12 @@ export const computeGraphScores = (criteriaMap) => {
                 isScored = true;
             }
         }
+
+        // Normalize the final criterion score band so anything 80+ is treated as
+        // a full score of 100. This applies to both direct criteria and computed
+        // root/Hospital criteria, and also to the live draft value shown in the UI.
+        points = normalizeCriterionPoints(points);
+        rootDraftPoints = normalizeCriterionPoints(rootDraftPoints);
 
         // If a root has not been finalized, present it as Pending rather than NA
         // so the UI can reflect that it is intentionally not auto-scored.
