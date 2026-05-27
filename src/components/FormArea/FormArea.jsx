@@ -64,6 +64,7 @@
                                     index[crit.id] = {
                                         statement: standard.statement || '',
                                         intent: standard.intent_tooltip || '',
+	                                        description: crit.description || '',
 	                                        guideline: crit.guideline || crit.guidelines || crit.guidline || '',
                                         is_critical: crit.is_critical || false,
                                         severity: crit.severity || 1,
@@ -150,7 +151,7 @@
                 : { primaryIntent: '', overviewText: '' };
         };
 
-                const getCriterionTooltip = (code, links, index, scoreResult) => {
+	                const getCriterionTooltip = (code, links, index, scoreResult, hospitalSubcriteriaMap = HOSPITAL_SUBCRITERIA_MAP) => {
                     const normalized = normalizeCriterionCode(code);
                     if (!normalized) return '';
                     const info = index[normalized];
@@ -213,17 +214,19 @@
             }
                 }
 
-                // Add Hospital computation sub-criteria for root criteria (if configured)
-                if (scoreResult && scoreResult.isRoot) {
-                    const configuredSubs = HOSPITAL_SUBCRITERIA_MAP[normalized];
-                    if (configuredSubs && configuredSubs.length > 0) {
-                        const sortedSubs = [...configuredSubs].sort(compareCodes);
-                        const enumeratedSubs = sortedSubs
-                            .map((subCode, idx) => `${idx + 1}. ${subCode}`)
-                            .join('\n');
-                        parts.push(`Sub-criteria for computation:\n${enumeratedSubs}`);
-                    }
-                }
+	                // Add Hospital computation sub-criteria whenever configured.
+	                // Do not require scoreResult.isRoot here: some Hospital roots only
+	                // have visual -G/-B links and are therefore not marked as scoring
+	                // roots, but their configured sub-criteria should still be visible
+	                // in the criterion information panel.
+	                const configuredSubs = hospitalSubcriteriaMap?.[normalized];
+	                if (configuredSubs && configuredSubs.length > 0) {
+	                    const sortedSubs = [...configuredSubs].sort(compareCodes);
+	                    const enumeratedSubs = sortedSubs
+	                        .map((subCode, idx) => `${idx + 1}. ${subCode}`)
+	                        .join('\n');
+	                    parts.push(`Sub-criteria for computation:\n${enumeratedSubs}`);
+	                }
 
                 // Add Linked Criteria if available
                 if (links && Array.isArray(links)) {
@@ -579,8 +582,8 @@
             const HOSPITAL_SUBCRITERIA_MAP = React.useMemo(() => {
                 const map = {};
                 try {
-                    const computeConfig = configuration?.compute || {};
-                    const seList = computeConfig?.hospital_standards_config?.service_elements || [];
+	                    const computeConfig = configuration?.compute || hospitalComputeCriteria;
+	                    const seList = computeConfig?.hospital_standards_config?.service_elements || [];
                     seList.forEach(se => {
                         (se.root_criteria || []).forEach(root => {
                             if (!root || !root.id) return;
@@ -2049,7 +2052,7 @@
 	                        isSysTagField);
 
                         // Look up EMS standard/intent tooltip for this data element code
-	                        const criterionTooltip = (!isCommentField && field.code) ? getCriterionTooltip(field.code, activeLinks, criterionIndex, calculatedFieldScore) : '';
+	                        const criterionTooltip = (!isCommentField && field.code) ? getCriterionTooltip(field.code, activeLinks, criterionIndex, calculatedFieldScore, HOSPITAL_SUBCRITERIA_MAP) : '';
 	                        const criterionGuideline = String(configEntry.guideline || '').trim();
 	                        const hasCriterionInfo = Boolean(criterionTooltip || criterionGuideline);
             

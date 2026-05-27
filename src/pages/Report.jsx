@@ -524,8 +524,10 @@ export default function Report() {
                   const formDataForSection = Object.fromEntries((((sectionEvent || {}).dataValues) || []).map(dv => [dv.dataElement, dv.value]));
                   const code = f.code || f.id;
                   const normalizedCode = normalizeCriterionCode(code);
-                  const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
-                  const isRoot = linksData.linked_criteria.length > 0;
+	                  const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
+	                  const rawLinks = Array.isArray(linksData.linked_criteria) ? linksData.linked_criteria : [];
+	                  const effectiveLinks = rawLinks.filter(l => !String(l || '').trim().match(/-(G|B)$/i));
+	                  const isRoot = effectiveLinks.length > 0;
                   const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
                   return {
                     id: f.id,
@@ -534,7 +536,7 @@ export default function Report() {
                     response: formDataForSection[f.id] || 'NA',
                     isCritical: false,
                     isRoot,
-                    links: linksData.linked_criteria,
+	                    links: effectiveLinks,
                     roots: linksData.roots,
                     severity
                   };

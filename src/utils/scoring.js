@@ -116,7 +116,11 @@ export const computeGraphScores = (criteriaMap) => {
 
         const rootSourcesInfo = []; // To store details of linked children for traceability
 
-        const { id, response, isRoot, links, severity, isCritical, roots, overrideEnabled, overrideResponse } = criterion;
+	        const { id, response, isRoot, links, severity, isCritical, roots, overrideEnabled, overrideResponse } = criterion;
+	        const normalizedCode = normalizeCriterionCode(code);
+	        const configuredSubs = HOSPITAL_SUBCRITERIA_MAP[normalizedCode] || [];
+	        const hasConfiguredSubs = configuredSubs.length > 0;
+	        const effectiveIsRoot = Boolean(isRoot || hasConfiguredSubs);
 
         let points = null;
         let isScored = false;
@@ -136,9 +140,11 @@ export const computeGraphScores = (criteriaMap) => {
 	        // provisional "Calculated Root Score" instead of "--- pts".
 	        let rootDraftPoints = null;
 
-        // NA check entirely ignores non-roots
-        if (response === 'NA' && !isRoot) {
-            const res = { points: null, response: 'NA', rawResponse: response, normalizedValue: 'NA', isRoot, isDraft: false, criticalFail: false, isScored: false, rootSources: [] };
+	        // NA check entirely ignores non-roots. Hospital criteria with configured
+	        // sub-criteria are root-like even when they have no qualifying linked
+	        // criteria, because they compute from available sub-criteria.
+	        if (response === 'NA' && !effectiveIsRoot) {
+	            const res = { points: null, response: 'NA', rawResponse: response, normalizedValue: 'NA', isRoot: false, isDraft: false, criticalFail: false, isScored: false, rootSources: [] };
             globalScores[code] = res;
             currentlyResolving.delete(code);
             return res;
@@ -158,14 +164,15 @@ export const computeGraphScores = (criteriaMap) => {
             criticalFail = true;
         }
 
-            // Determine if a manual override should short-circuit root computation.
-            // We treat a root as manually overridden if either:
-            //  - overrideEnabled is truthy AND an overrideResponse is present; OR
-            //  - (for read-only contexts like Report) the root has a non-NA, non-empty
-            //    response value (stored in the event), implying a user-entered value.
-            const hasOverrideResponse = (overrideResponse !== undefined && overrideResponse !== null && String(overrideResponse).trim() !== '' && String(overrideResponse).toUpperCase() !== 'NA');
-            const overrideFlag = (overrideEnabled === true || String(overrideEnabled).toLowerCase() === 'true' || overrideEnabled === 1 || overrideEnabled === '1');
-            manualOverrideActive = isRoot && (hasOverrideResponse || (overrideFlag && String(response || '').trim() !== '' && String(response || '').toUpperCase() !== 'NA'));
+	            // Determine if a manual override should short-circuit root computation.
+	            // For Hospital configured roots, prefer the configured sub-criteria /
+	            // qualifying-link computation unless an override is explicitly enabled.
+	            const hasOverrideResponse = (overrideResponse !== undefined && overrideResponse !== null && String(overrideResponse).trim() !== '' && String(overrideResponse).toUpperCase() !== 'NA');
+	            const hasOwnResponse = (response !== undefined && response !== null && String(response).trim() !== '' && String(response).toUpperCase() !== 'NA');
+	            const overrideFlag = (overrideEnabled === true || String(overrideEnabled).toLowerCase() === 'true' || overrideEnabled === 1 || overrideEnabled === '1');
+	            const explicitOverrideActive = overrideFlag && (hasOverrideResponse || hasOwnResponse);
+	            const storedRootOverrideActive = !hasConfiguredSubs && hasOverrideResponse;
+	            manualOverrideActive = effectiveIsRoot && (explicitOverrideActive || storedRootOverrideActive);
 
             if (manualOverrideActive) {
                 // Treat overridden root like a leaf: compute points directly from
@@ -176,7 +183,7 @@ export const computeGraphScores = (criteriaMap) => {
                     isScored = true;
                     isDraft = false;
                 }
-            } else if (links && links.length > 0) {
+	            } else if (effectiveIsRoot) {
             // ROOT CRITERION LOGIC (Recursive)
             let ncPcCount = 0;
             let anyChildCriticalFail = false;
@@ -185,7 +192,7 @@ export const computeGraphScores = (criteriaMap) => {
                 // the root's label to match the worst critical child's label.
                 const criticalChildStatuses = [];
 
-            for (const linkCode of links) {
+	            for (const linkCode of (Array.isArray(links) ? links : [])) {
                 const rawLink = String(linkCode || '').trim();
                 // Detect optional visual tag suffix "-G" or "-B" and strip it
                 // for lookup while keeping the suffix for display.
@@ -243,9 +250,7 @@ export const computeGraphScores = (criteriaMap) => {
                 }
             }
 
-                const normalizedCode = normalizeCriterionCode(code);
-                const configuredSubs = HOSPITAL_SUBCRITERIA_MAP[normalizedCode];
-                const usesHospitalAverageFormula = isRoot && configuredSubs && configuredSubs.length > 0 && effectiveLinkCount > 0;
+	                const usesHospitalAverageFormula = hasConfiguredSubs;
 
                 // If any critical child is non-C, force this root's categorical
                 // result to the worst critical child's label and bypass numeric
@@ -279,12 +284,13 @@ export const computeGraphScores = (criteriaMap) => {
                     }
                 }
 
-                if (!forcedByCriticalChild && isRoot) {
-                    // If all links are excluded (e.g., all are -G/-B visual-only),
-                    // this root must remain unscored/pending.
-                    if (effectiveLinkCount === 0) {
-                        isDraft = true;
-                    }
+	                if (!forcedByCriticalChild && effectiveIsRoot) {
+	                    // Non-Hospital graph roots with no effective links remain
+	                    // pending. Hospital configured roots can still compute from
+	                    // available configured sub-criteria.
+	                    if (!hasConfiguredSubs && effectiveLinkCount === 0) {
+	                        isDraft = true;
+	                    }
 	                    // A root is considered "finalized" only when all linked
 	                    // children have been assessed. However, we still want a
 	                    // draft numeric score while it is Pending so that the UI
@@ -321,16 +327,13 @@ export const computeGraphScores = (criteriaMap) => {
 	                    rootDraftPoints = majorityAdjusted;
 	                }
 	
-	                // --- Hospital computation rule: for configured roots, set the
-	                // root's numeric score to the average of:
-	                //   (a) linked-criteria average (graph), and
-	                //   (b) average of configured sub-criteria (from
-	                //       hospital_compute_criteria.json), when both are
-	                //       available. If only one side has data, fall back to it.
-                // IMPORTANT: If this root has zero effective links (all links are
-                // visual-only -G/-B), do NOT compute a numeric draft from
-                // configured sub-criteria either. The requirement is that such
-                // roots are not auto-scored at all.
+		                // --- Hospital computation rule: for configured roots, set the
+		                // root's numeric score from the available scoring inputs:
+		                //   (a) qualifying linked-criteria average (non -G/-B links), and
+		                //   (b) configured sub-criteria average, when scored.
+	                // If both sides are available, average them together. If only one
+	                // side is available, use that side by itself. Missing sides are not
+	                // treated as zero.
                 if (!forcedByCriticalChild && usesHospitalAverageFormula) {
 	                    let cfgSum = 0;
 	                    let cfgCount = 0;
@@ -347,16 +350,21 @@ export const computeGraphScores = (criteriaMap) => {
                     const subAvg = cfgCount > 0 ? (cfgSum / cfgCount) : null;
                     const linkedAvg = linkedAvgForCombination;
 
-                    // Hospital configured root formula:
-                    //   1) round linked average to nearest whole number
-                    //   2) round sub-criteria average to nearest whole number
-                    //   3) root score = rounded average of those two rounded averages
-                    // Missing sides are treated as 0 only when the other side has data.
-                    if (subAvg !== null || linkedAvg !== null) {
-	                        const roundedSubAvg = (subAvg !== null) ? Math.round(subAvg) : 0;
-	                        const roundedLinkedAvg = (linkedAvg !== null) ? Math.round(linkedAvg) : 0;
-	                        rootDraftPoints = Math.round((roundedSubAvg + roundedLinkedAvg) / 2);
-                    }
+	                    const availableAverages = [];
+	                    if (linkedAvg !== null) availableAverages.push(Math.round(linkedAvg));
+	                    if (subAvg !== null) availableAverages.push(Math.round(subAvg));
+
+	                    if (availableAverages.length > 0) {
+		                        rootDraftPoints = Math.round(
+		                            availableAverages.reduce((sum, value) => sum + value, 0) / availableAverages.length
+		                        );
+	                        points = rootDraftPoints;
+	                        isScored = true;
+	                        isDraft = false;
+	                    } else {
+	                        isScored = false;
+	                        isDraft = true;
+	                    }
 	                }
 	
 	                // If all children have been assessed and we have a
@@ -388,10 +396,10 @@ export const computeGraphScores = (criteriaMap) => {
 
         // If a root has not been finalized, present it as Pending rather than NA
         // so the UI can reflect that it is intentionally not auto-scored.
-            let displayRes = isScored ? calculatedResponse : (isRoot ? 'Pending' : 'NA');
+	            let displayRes = isScored ? calculatedResponse : (effectiveIsRoot ? 'Pending' : 'NA');
             // If the root was explicitly forced to NA by a critical child's NA,
             // show NA instead of Pending to reflect the rule.
-            if (!isScored && isRoot) {
+	            if (!isScored && effectiveIsRoot) {
                 // We don't have access to forcedRootNa here directly; infer it
                 // from calculatedResponse when unscored.
                 if (String(calculatedResponse).toUpperCase() === 'NA') {
@@ -400,14 +408,14 @@ export const computeGraphScores = (criteriaMap) => {
             }
 
         // Derive response for roots or critical fails
-        if (isScored && (isRoot || criticalFail)) {
+	        if (isScored && (effectiveIsRoot || criticalFail)) {
             const cThreshold = calculatePointsForLink('C', severity);
             const pcThreshold = calculatePointsForLink('PC', severity);
             const ncThreshold = calculatePointsForLink('NC', severity);
 
             if (criticalFail) {
                 displayRes = 'NC';
-            } else if (isRoot && isDraft) {
+	            } else if (effectiveIsRoot && isDraft) {
                 displayRes = 'Pending';
             } else if (points >= cThreshold) {
                 displayRes = 'C';
@@ -424,11 +432,11 @@ export const computeGraphScores = (criteriaMap) => {
             else if (/^([A-Z]+_)?(NC|NON|NON_COMPLIANT|NON-COMPLIANT|NOT_MET|FAIL)$/.test(dispStr) || dispStr.includes('NON') || dispStr.includes('FAIL')) displayRes = 'NC';
         }
 
-	            const liveDisplayPoints = isRoot && rootDraftPoints !== null
+		            const liveDisplayPoints = effectiveIsRoot && rootDraftPoints !== null
 	                ? rootDraftPoints
 	                : ((isScored && points !== null) ? points : null);
 	            const liveDisplayResponse = (() => {
-	                if (isRoot && liveDisplayPoints !== null && !criticalFail) {
+		                if (effectiveIsRoot && liveDisplayPoints !== null && !criticalFail) {
 	                    const cThreshold = calculatePointsForLink('C', severity);
 	                    const pcThreshold = calculatePointsForLink('PC', severity);
 	                    if (liveDisplayPoints >= cThreshold) return 'C';
@@ -445,14 +453,14 @@ export const computeGraphScores = (criteriaMap) => {
 	                normalizedValue: displayRes,
 		                displayPoints: liveDisplayPoints,
 		                displayResponse: liveDisplayResponse,
-	                isRoot,
+		                isRoot: effectiveIsRoot,
 	                isDraft,
 	                criticalFail,
 	                isScored,
 	                isCritical,
                 // For diagnostics, surface whether a manual override was applied
                 // (root treated as a leaf) during this computation.
-                isOverridden: Boolean(manualOverrideActive && isRoot),
+	                isOverridden: Boolean(manualOverrideActive && effectiveIsRoot),
 	                // Average over scored linked criteria only (used in some
 	                // debug views).
 	                draftAvg: countScoredLinks > 0 ? (sumLinkedPoints / countScoredLinks) : null,
