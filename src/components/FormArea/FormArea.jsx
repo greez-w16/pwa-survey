@@ -474,8 +474,6 @@
         isScoringPending,
         onCriterionChange
     }) => {
-        const [customLinks, setCustomLinks] = useState(null);
-        const [customConfig, setCustomConfig] = useState(null);
         const [isScoringModalOpen, setIsScoringModalOpen] = useState(false);
         const [viewingRootCalc, setViewingRootCalc] = useState(null); // { code, result }
         const [currentSubsectionIndex, setCurrentSubsectionIndex] = useState(0);
@@ -504,26 +502,6 @@
             selectedFacility?.enrollmentId,
             activeEventId,
         ]);
-
-        React.useEffect(() => {
-            const savedLinks = localStorage.getItem('custom_ems_links');
-            if (savedLinks) {
-                try {
-                    setCustomLinks(JSON.parse(savedLinks));
-                } catch (e) {
-                    console.error('FormArea: Failed to parse saved custom links');
-                }
-            }
-
-            const savedConfig = localStorage.getItem('custom_ems_config');
-            if (savedConfig) {
-                try {
-                    setCustomConfig(JSON.parse(savedConfig));
-                } catch (e) {
-                    console.error('FormArea: Failed to parse saved custom config');
-                }
-            }
-        }, []);
 
             const activeGroup = groups.find(g => g.sections?.some(s => s.id === activeSection?.id));
             const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
@@ -793,7 +771,10 @@
             }
         }, [formData]);
 
-                const isADSection = activeSection?.name === "Assessment Details";
+	                const isADSection = (() => {
+	                    const name = String(activeSection?.name || activeSection?.code || activeSection?.id || '').toLowerCase().trim();
+	                    return name === 'ad' || name === 'assessment_details' || name === 'assessment-details' || name.includes('assessment details');
+	                })();
 
         // ── SE-level editing restrictions ─────────────────────────────────
         // Fetch the assignment plan once and determine which SEs the current
@@ -922,10 +903,10 @@
             return { hasAssignments: Object.keys(seAssignments).length > 0, isLead, mySeNums, seAssignments, teamMembers };
         }, [assignmentPlan, assignmentLoaded, user]);
 
-        const isAssessmentDetailsSection = React.useCallback((sec) => {
-            const name = String(sec?.name || '').toLowerCase();
-            return name === 'assessment details' || name === 'assessment_details';
-        }, []);
+	        const isAssessmentDetailsSection = React.useCallback((sec) => {
+	            const name = String(sec?.name || sec?.code || sec?.id || '').toLowerCase().trim();
+	            return name === 'ad' || name === 'assessment_details' || name === 'assessment-details' || name.includes('assessment details');
+	        }, []);
 
         const assessmentScopedSections = React.useMemo(
             () => (Array.isArray(assessmentScopedGroup?.sections) ? assessmentScopedGroup.sections : []),
@@ -1036,10 +1017,15 @@
             return isAssessmentDetailsSection(activeSection) ? 'FINAL' : (activeSeNum || null);
         }, [activeSection, activeSeNum, isAssessmentDetailsSection]);
 
-        const activeSectionEventId = React.useMemo(() => {
-            if (!activeExpectedSysTag) return null;
-            return effectiveEventIdMap?.[activeExpectedSysTag] || null;
-        }, [activeExpectedSysTag, effectiveEventIdMap]);
+	        const activeSectionEventId = React.useMemo(() => {
+	            if (!activeExpectedSysTag) return null;
+	            const mapped = effectiveEventIdMap?.[activeExpectedSysTag] || null;
+	            if (mapped) return mapped;
+	            if (activeExpectedSysTag === 'FINAL') {
+	                return selectedFacility?.baselineEventId || formData?.eventId_internal || null;
+	            }
+	            return null;
+	        }, [activeExpectedSysTag, effectiveEventIdMap, selectedFacility?.baselineEventId, formData?.eventId_internal]);
 
         const activeMappedEventPayload = React.useMemo(() => {
             if (!activeSectionEventId) return null;
@@ -2011,6 +1997,9 @@
                     const labelUpper = rawLabel.toUpperCase();
                     const isEnrollmentField = labelLower.includes('enrollment');
                     const isTeiField = labelLower.includes('tei id');
+	                    const isProgramStageIdField =
+	                        labelLower.includes('program stage id') ||
+	                        labelUpper.includes('PROGRAM_STAGE');
                     const isAssessorUserField =
                         labelUpper.includes('FAC_ASS_ASSESSOR_USER_ID') ||
                         labelUpper.includes('ASSESSOR USER ID');
@@ -2053,6 +2042,7 @@
                     isADSection &&
                     (isEnrollmentField ||
                         isTeiField ||
+	                        isProgramStageIdField ||
 	                        isFacilityGroupField ||
 	                        isAssessorUserField ||
 	                        isHospitalAssessmentTypeField ||
@@ -3211,36 +3201,44 @@
                         <div className="form-header">
                             <div className="header-content">
                                     <h2>
-                                        {(() => {
-                                            const raw = activeSection?.name || '';
-                                            if (!raw) return '';
-                                            const upper = raw.toUpperCase();
+	                                        {(() => {
+	                                            const raw = String(activeSection?.name || '').trim();
+	                                            if (!raw) return '';
+	                                            const upper = raw.toUpperCase();
+	                                            const seId = activeSection?.se_id ?? activeSection?.seId ?? activeSection?.sectionNumber ?? null;
+	                                            const isAD = isAssessmentDetailsSection(activeSection);
+	                                            const escapeRegExp = (value) => String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-                                            // If the name already starts with an SE prefix like
-                                            // "SE7 RISK MANAGEMENT" or "SE 7 RISK MANAGEMENT",
-                                            // normalise it to "SE 7 ..." (i.e. always include a
-                                            // space between SE and the number).
-                                            const sePrefixMatch = raw.match(/^\s*SE\s*([0-9]+(?:\.[0-9]+)*)\s*(.*)$/i);
-                                            if (sePrefixMatch) {
-                                                const num = sePrefixMatch[1];
-                                                const rest = sePrefixMatch[2].trim();
-                                                const seToken = `SE ${num}`;
-                                                return rest ? `${seToken} ${rest}` : seToken;
-                                            }
+	                                            // If the name already starts with an SE prefix like
+	                                            // "SE7 RISK MANAGEMENT" or "SE 7 RISK MANAGEMENT",
+	                                            // normalise it to "SE 7 ...".
+	                                            const sePrefixMatch = raw.match(/^\s*SE\s*([0-9]+(?:\.[0-9]+)*)\s*(.*)$/i);
+	                                            if (sePrefixMatch) {
+	                                                const num = sePrefixMatch[1];
+	                                                const rest = sePrefixMatch[2].trim();
+	                                                const seToken = `SE ${num}`;
+	                                                return rest ? `${seToken} ${rest}` : seToken;
+	                                            }
 
-                                            // Try to derive SE code from HOSP patterns, e.g.
-                                            // "1-HOSPITAL_1 HOSP_SE1 ..." or "SURV_HOSP_1.1 ...".
-                                            const hospMatch = upper.match(/HOSP[_\s-]*(SE)?(\d+(?:\.\d+)*)/);
-                                            if (hospMatch) {
-                                                const numPart = hospMatch[2]; // e.g. "1" or "1.1"
-                                                const seToken = `SE ${numPart}`;
-                                                const rest = raw
-                                                    .slice(hospMatch.index + hospMatch[0].length)
-                                                    .replace(/^[\s\-_:]+/, '');
-                                                return rest ? `${seToken} ${rest}` : seToken;
-                                            }
-                                            return raw.trim();
-                                        })()}
+	                                            // Try to derive SE code from HOSP patterns.
+	                                            const hospMatch = upper.match(/HOSP[_\s-]*(SE)?(\d+(?:\.\d+)*)/);
+	                                            if (hospMatch) {
+	                                                const numPart = hospMatch[2];
+	                                                const seToken = `SE ${numPart}`;
+	                                                const rest = raw
+	                                                    .slice(hospMatch.index + hospMatch[0].length)
+	                                                    .replace(/^[\s\-_:]+/, '');
+	                                                return rest ? `${seToken} ${rest}` : seToken;
+	                                            }
+
+	                                            if (seId && !isAD) {
+	                                                const leadingSePattern = new RegExp(`^\\s*(?:SE\\s*)?${escapeRegExp(seId)}(?:[\\s\\-_:]+)?`, 'i');
+	                                                const rest = raw.replace(leadingSePattern, '').trim();
+	                                                const seToken = `SE ${seId}`;
+	                                                return rest ? `${seToken} ${rest}` : seToken;
+	                                            }
+	                                            return raw;
+	                                        })()}
                                 {subsections.length > 1 && (
                                 <span style={{ fontSize: '0.6em', opacity: 0.8, marginLeft: '10px', verticalAlign: 'middle', backgroundColor: 'rgba(255,255,255,0.15)', padding: '2px 8px', borderRadius: '4px' }}>
                                     Part {currentSubsectionIndex + 1} of {subsections.length}

@@ -24,6 +24,22 @@ import './App.css';
 import Report from './pages/Report';
 import Admin from './pages/Admin';
 
+const DEFAULT_SURVEY_PROGRAM_STAGE_ID = 'HpHD6u6MV37';
+const SURVEY_PROGRAM_STAGE_BY_GROUP = {
+  HOSPITAL: 'hup8BqEe7Mn',
+};
+
+const getSurveyProgramStageIdForGroupText = (text) => {
+  const value = String(text || '').toLowerCase();
+  if (value.includes('hosp')) return SURVEY_PROGRAM_STAGE_BY_GROUP.HOSPITAL;
+  return DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+};
+
+const isAssessmentDetailsName = (value) => {
+  const name = String(value || '').toLowerCase().trim();
+  return name === 'ad' || name === 'assessment_details' || name === 'assessment-details' || name.includes('assessment details');
+};
+
 // Helper to build scoring metadata (links + severity + critical) for each programme
 // type. The actual programmeScoringMeta object is built inside AppContent so
 // that it can react to configuration version changes.
@@ -101,6 +117,7 @@ const PrivateRoute = ({ children }) => {
 	  // Data element ID for "SURV-Facility Assessment Group"
 		  const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
 		  const TYPE_OF_ASSESSMENT_DE_ID = 'LNszX9xHx8s';
+			  const SYS_TAG_DE_ID = 'r8pqjX6Jtr0';
 
 		  const typeOfAssessmentDeId = React.useMemo(() => {
 		    const ps = configuration?.programStage;
@@ -199,14 +216,18 @@ const PrivateRoute = ({ children }) => {
 		    }
 		  }, []);
 
-	  const saveField = React.useCallback((fieldKey, fieldValue) => {
-	    baseSaveField(fieldKey, fieldValue);
-	  }, [baseSaveField]);
+		  const locallyEditedFieldIdsRef = React.useRef(new Set());
+
+		  const saveField = React.useCallback((fieldKey, fieldValue) => {
+		    if (fieldKey) locallyEditedFieldIdsRef.current.add(fieldKey);
+		    baseSaveField(fieldKey, fieldValue);
+		  }, [baseSaveField]);
 
 		  useEffect(() => {
 		    setLocalScoringOverrides({});
 		    setServerAssessmentData({});
 		    setDataStoreScoringEventIdMap({});
+			    locallyEditedFieldIdsRef.current = new Set();
 		  }, [activeEventId]);
 
 		  useEffect(() => {
@@ -348,8 +369,8 @@ const PrivateRoute = ({ children }) => {
   const loadInitialData = async () => {
     setIsLoading(true);
     try {
-      const [metadata, msgAssignments] = await Promise.all([
-        api.getFormMetadata(),
+	      const [metadata, msgAssignments] = await Promise.all([
+	        api.getFormMetadata(DEFAULT_SURVEY_PROGRAM_STAGE_ID),
         api.getAssignments()
       ]);
 
@@ -390,6 +411,50 @@ const PrivateRoute = ({ children }) => {
     }
   };
 
+	  const loadProgramStageMetadata = React.useCallback(async (programStageId, preferredGroupText = '') => {
+	    const targetStageId = programStageId || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+	    if (configuration?.programStage?.id === targetStageId && groups.length > 0) return;
+
+	    setIsFormLoading(true);
+	    try {
+	      const metadata = await api.getFormMetadata(targetStageId);
+	      const transformedGroups = transformMetadata(metadata);
+	      setGroups(transformedGroups);
+	      setConfiguration({
+	        programStage: metadata,
+	        program: metadata.program || configuration?.program || { id: 'G2gULe4jsfs', displayName: 'MOH Survey Dashboard' },
+	        organisationUnits: assignments.map(a => a.orgUnit)
+	      });
+
+	      const preferredGroupId = resolveGroupIdFromText(preferredGroupText);
+	      const nextGroup = transformedGroups.find(g => g.id === preferredGroupId) || transformedGroups[0] || null;
+	      setActiveGroup(nextGroup);
+	      setActiveSection(nextGroup?.sections?.[0] || null);
+	    } catch (err) {
+	      console.error('Failed to load form metadata for program stage', targetStageId, err);
+	      showToast?.('Failed to load survey questions for this facility type.', 'error');
+	    } finally {
+	      setIsFormLoading(false);
+	    }
+	  }, [assignments, configuration, groups.length, resolveGroupIdFromText, setConfiguration, showToast]);
+
+	  useEffect(() => {
+	    if (location.pathname !== '/form') return;
+	    const stateAssignment = location.state && location.state.selectedAssignment;
+	    const groupText =
+	      stateAssignment?.preloadDataValues?.[FACILITY_GROUP_DE_ID] ||
+	      stateAssignment?.parentGroupId ||
+	      formData?.[FACILITY_GROUP_DE_ID] ||
+	      '';
+	    const targetStageId =
+	      searchParams.get('programStageId') ||
+	      stateAssignment?.programStageId ||
+	      getSurveyProgramStageIdForGroupText(groupText);
+
+	    if (!targetStageId || configuration?.programStage?.id === targetStageId) return;
+	    loadProgramStageMetadata(targetStageId, groupText);
+	  }, [location.pathname, location.state, searchParams, configuration?.programStage?.id, formData?.[FACILITY_GROUP_DE_ID], loadProgramStageMetadata]);
+
 	  // Auto-select facility based on navigation state or URL parameter
 	  useEffect(() => {
 	    const stateAssignment = location.state && location.state.selectedAssignment;
@@ -415,6 +480,7 @@ const PrivateRoute = ({ children }) => {
 	    const assessmentId = searchParams.get('assessmentId');
         const baselineIdParam = searchParams.get('baselineId');
 	    const assessmentTeiIdParam = searchParams.get('assessmentTeiId');
+		    const programStageIdParam = searchParams.get('programStageId');
 
 	    if (assessmentId && assignments.length > 0) {
 	      // Fallback: match against locally loaded assignments (older workflow)
@@ -437,6 +503,9 @@ const PrivateRoute = ({ children }) => {
 	            restored.trackedEntityInstance = assessmentTeiIdParam;
 	            restored.scheduleTeiId = assessmentTeiIdParam;
             }
+	        if (programStageIdParam) {
+	          restored.programStageId = programStageIdParam;
+	        }
 	        console.log(`🎯 App: Auto-selecting facility for assessment ${assessmentId}:`, matched.orgUnitName);
 	        setSelectedFacility(restored);
 	      }
@@ -451,9 +520,7 @@ const PrivateRoute = ({ children }) => {
 
   // Auto-populate Assessment Details from selected assessment
   useEffect(() => {
-    const nameLower = (activeSection?.name || '').toLowerCase().trim();
-    const isADSection =
-      nameLower === 'assessment details' || nameLower === 'assessment_details';
+	    const isADSection = isAssessmentDetailsName(activeSection?.name || activeSection?.code || activeSection?.id);
 
     // If navigation carried a baseline event id, persist it to the draft so
     // the Save flow can reuse it without refetching.
@@ -531,6 +598,11 @@ const PrivateRoute = ({ children }) => {
       const enrField = adFields.find(f =>
         (f.label || '').toLowerCase().includes('enrollment')
       );
+	      const programStageField = adFields.find(f => {
+	        const label = (f.label || '').toLowerCase();
+	        const code = (f.code || '').toUpperCase();
+	        return label.includes('program stage id') || code.includes('PROGRAM_STAGE');
+	      });
       const groupField = adFields.find(
         f =>
           f.id === FACILITY_GROUP_DE_ID ||
@@ -545,6 +617,17 @@ const PrivateRoute = ({ children }) => {
           label.includes('ASSESSOR USER ID')
         );
       });
+	      const sysTagField = adFields.find(f => {
+	        const label = (f.label || '').toLowerCase().trim();
+	        const code = (f.code || '').toUpperCase();
+	        return (
+	          f.id === SYS_TAG_DE_ID ||
+	          label === 'tag' ||
+	          label.includes('sys tag') ||
+	          code === 'TAG' ||
+	          code.includes('SYS_TAG')
+	        );
+	      });
 
       if (teiField && teiId && !formData[teiField.id]) {
         console.log(`📝 App: Auto-populating TEI ID: ${teiId}`);
@@ -556,6 +639,10 @@ const PrivateRoute = ({ children }) => {
         );
         saveField(enrField.id, enrollmentId);
       }
+	      if (programStageField && selectedFacility?.programStageId && !formData[programStageField.id]) {
+	        console.log(`📝 App: Auto-populating Program Stage ID: ${selectedFacility.programStageId}`);
+	        saveField(programStageField.id, selectedFacility.programStageId);
+	      }
       // Avoid overwriting a preloaded group value from a clicked event.
       const preloadedGroupText = preload && preload[FACILITY_GROUP_DE_ID];
       // If we didn't preload from a clicked event, resolve the facility's
@@ -613,6 +700,10 @@ const PrivateRoute = ({ children }) => {
         );
         saveField(assessorField.id, user.id);
       }
+	      if (sysTagField && String(formData[sysTagField.id] || '').trim() !== 'FINAL') {
+	        console.log('📝 App: Auto-populating Assessment Details TAG: FINAL');
+	        saveField(sysTagField.id, 'FINAL');
+	      }
     }
   }, [selectedFacility, activeSection, activeGroup, saveField, formData, user?.id, assessmentIdParam, groups, hasLoadedDraft, activeEventId]);
 
@@ -763,30 +854,32 @@ const PrivateRoute = ({ children }) => {
 	    };
 		  }, [user, scoringEventIds.length, scoringEventIdsKey]);
 
-	  const nonEmptyLocalFormData = React.useMemo(() => {
-	    const result = {};
-	    Object.entries(formData || {}).forEach(([key, value]) => {
-	      if (value === undefined || value === null) return;
-	      if (typeof value === 'string' && value.trim() === '') return;
-	      result[key] = value;
-	    });
-	    return result;
-	  }, [formData]);
+		  const displayFormData = React.useMemo(() => {
+		    const result = { ...(serverAssessmentData || {}) };
+		    Object.entries(formData || {}).forEach(([key, value]) => {
+		      const valueText = value === undefined || value === null ? '' : String(value);
+		      const hasLocalValue = valueText.trim() !== '';
+		      const wasEditedThisSession = locallyEditedFieldIdsRef.current.has(key);
+		      const hasServerValue = Object.prototype.hasOwnProperty.call(result, key);
+		      if (hasLocalValue || wasEditedThisSession || !hasServerValue) {
+		        result[key] = value;
+		      }
+		    });
+		    return result;
+		  }, [serverAssessmentData, formData]);
 
 	  const scoringFormData = React.useMemo(() => ({
-	    ...(serverAssessmentData || {}),
-	    ...(nonEmptyLocalFormData || {}),
+		    ...(displayFormData || {}),
 	    ...(localScoringOverrides || {}),
-	  }), [serverAssessmentData, nonEmptyLocalFormData, localScoringOverrides]);
+		  }), [displayFormData, localScoringOverrides]);
 
   // Assessment Details Prerequisite Check
   const isADComplete = React.useMemo(() => {
-    if (!groups || groups.length === 0 || !formData) return false;
+	    if (!groups || groups.length === 0 || !displayFormData) return false;
 
     // Find AD section (usually first section of first group)
     const adSection = groups.flatMap(g => g.sections).find(s => {
-      const nameLower = (s.name || '').toLowerCase().trim();
-      return nameLower === "assessment details" || nameLower === "assessment_details";
+	      return isAssessmentDetailsName(s.name || s.code || s.id);
     });
     if (!adSection) return true; // If AD section doesn't exist, don't block anything
 	
@@ -816,10 +909,10 @@ const PrivateRoute = ({ children }) => {
 	    if (requiredFields.length === 0) return true; // nothing to enforce
 	
 	    return requiredFields.every(f => {
-	      const val = formData[f.id];
+		      const val = displayFormData[f.id];
 	      return val !== undefined && val !== null && String(val).trim() !== '';
 	    });
-	  }, [groups, formData]);
+		  }, [groups, displayFormData]);
 
 		  // Scoring Integration: Map flat formData to hierarchical structure for the scoring hook
   // Build a lightweight fingerprint of only the values that affect scoring
@@ -996,7 +1089,7 @@ const PrivateRoute = ({ children }) => {
                 assignments={assignments}
                 selectedFacility={selectedFacility}
 			                onSelectFacility={setSelectedFacility}
-			                formData={formData}
+				                formData={displayFormData}
 		                scoringEventIdMap={scoringEventIdMap}
 				                scoringResults={scoringResults}
 				                isAssignedAssessment={Boolean(assessmentIdParam)}
@@ -1007,7 +1100,7 @@ const PrivateRoute = ({ children }) => {
                   selectedFacility={selectedFacility}
                   user={user}
                   groups={groups}
-                  formData={formData}
+	                  formData={displayFormData}
                   saveField={saveField}
                   isSaving={isSaving}
                   lastSaved={lastSaved}

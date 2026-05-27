@@ -29,6 +29,8 @@ export const transformMetadata = (metadata) => {
         return [];
     }
 
+    const isDedicatedHospitalStage = metadata.id === 'hup8BqEe7Mn';
+
     // 1. Map Data Elements for quick lookup during section transformation
     const deMap = {};
     if (metadata.programStageDataElements) {
@@ -274,9 +276,12 @@ export const transformMetadata = (metadata) => {
         const isAD = nl.includes('assessment details') || nl.includes('assessment_details');
 
 	        // Determine group: SE/EMS, Clinics, and Hospital get specific groups.
-	        // Everything else (Mortuary or untagged) goes to the general (Mortuary) group.
-	        const groupKey =
-	            (prefix === 'SE' || (prefix && prefix.startsWith('SE'))) ? 'SE' :
+	        // The dedicated Hospital program stage does not consistently prefix all
+	        // sections, so treat every non-Assessment-Details section from that stage
+	        // as Hospital instead of falling back to Mortuary/GENERAL.
+	        const groupKey = isDedicatedHospitalStage && !isAD
+	            ? 'HOSPITAL'
+	            : (prefix === 'SE' || (prefix && prefix.startsWith('SE'))) ? 'SE' :
 	            (prefix === 'CLINICS' || prefix === 'CLINIC' ? 'CLINICS' :
 	            (prefix === 'HOSPITAL' || prefix === 'HOSP') ? 'HOSPITAL' : null);
 
@@ -323,14 +328,24 @@ export const transformMetadata = (metadata) => {
 
     const allGroups = [];
 
-    // Always include Mortuary (General) group
-    allGroups.push({
-        id: 'GENERAL',
-        name: PREFIX_NAME_MAP['MORTUARY'],
-        sections: finalMortuarySections
-    });
+	    // The dedicated Hospital stage should open as Hospital, not as the fallback
+	    // Mortuary/GENERAL group.
+	    if (isDedicatedHospitalStage) {
+	        allGroups.push({
+	            id: 'HOSPITAL',
+	            name: PREFIX_NAME_MAP['HOSPITAL'],
+	            sections: [...sharedSections, ...sortedHospitalSections]
+	        });
+	    } else {
+	        // Always include Mortuary (General) group for mixed/default stages.
+	        allGroups.push({
+	            id: 'GENERAL',
+	            name: PREFIX_NAME_MAP['MORTUARY'],
+	            sections: finalMortuarySections
+	        });
+	    }
 
-    // Add EMS group if sections exist
+	    // Add EMS group if sections exist
     if (sortedEmsSections.length > 0) {
         allGroups.push({
             id: 'SE',
@@ -339,8 +354,8 @@ export const transformMetadata = (metadata) => {
         });
     }
 
-	    // Add Hospital group if sections exist
-	    if (sortedHospitalSections.length > 0) {
+	    // Add Hospital group if sections exist on mixed/default stages.
+	    if (!isDedicatedHospitalStage && sortedHospitalSections.length > 0) {
 	        allGroups.push({
 	            id: 'HOSPITAL',
 	            name: PREFIX_NAME_MAP['HOSPITAL'],

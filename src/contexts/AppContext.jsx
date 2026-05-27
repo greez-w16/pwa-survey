@@ -60,11 +60,18 @@ export const AppProvider = ({ children }) => {
 	        };
 	    }, []);
 
-		    // Initialise configuration versions metadata and per-version bundles
-		    // from localStorage. This centralises versioning so that both the
-		    // Dashboard (editor) and the scoring engine can use the same active
-		    // configuration.
+		    // Initialise configuration versions metadata and in-memory bundles.
+		    // Large config/link bundles are intentionally not loaded from or saved to
+		    // browser storage to avoid localStorage quota errors on the login page.
 		    useEffect(() => {
+		        try {
+		            localStorage.removeItem('qims_config_bundles');
+		            localStorage.removeItem('custom_ems_config');
+		            localStorage.removeItem('custom_ems_links');
+		        } catch (e) {
+		            console.warn('AppContext: Failed to clear legacy large config cache', e);
+		        }
+
 		        // --- Load or initialise versions metadata ---
 		        let versionsPayload = null;
 		        const savedVersionsRaw = localStorage.getItem('qims_config_versions');
@@ -101,51 +108,14 @@ export const AppProvider = ({ children }) => {
 		        setConfigVersions(versionsPayload.versions);
 		        setActiveConfigVersionId(versionsPayload.activeVersionId);
 
-		        // --- Load or initialise per-version bundles ---
-		        const savedBundlesRaw = localStorage.getItem('qims_config_bundles');
-		        if (savedBundlesRaw) {
-		            try {
-		                const parsedBundles = JSON.parse(savedBundlesRaw) || {};
-		                setConfigBundles(parsedBundles);
-		                return;
-		            } catch (e) {
-		                console.error('AppContext: Failed to parse configuration bundles', e);
-		            }
-		        }
-
-		        // No bundles saved yet 
-		        // Build a baseline bundle from on-disk JSON and any legacy
-		        // overrides stored in custom_ems_config / custom_ems_links.
-		        let baseConfig = null;
-		        const legacyConfigRaw = localStorage.getItem('custom_ems_config');
-		        if (legacyConfigRaw) {
-		            try {
-		                baseConfig = JSON.parse(legacyConfigRaw);
-		            } catch (e) {
-		                console.error('AppContext: Failed to parse legacy custom_ems_config', e);
-		            }
-		        }
-		        if (!baseConfig) {
-		            baseConfig = { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig };
-		        }
-
-		        let baseLinks = null;
-		        const legacyLinksRaw = localStorage.getItem('custom_ems_links');
-		        if (legacyLinksRaw) {
-		            try {
-		                baseLinks = JSON.parse(legacyLinksRaw);
-		            } catch (e) {
-		                console.error('AppContext: Failed to parse legacy custom_ems_links', e);
-		            }
-		        }
-		        if (!baseLinks) {
-		            baseLinks = {
-		                ems: emsLinks,
-		                mortuary: mortuaryLinks,
-		                clinics: clinicsLinks,
-		                hospital: hospitalLinks,
-		            };
-		        }
+		        // --- Build per-version bundles in memory only ---
+		        const baseConfig = { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig };
+		        const baseLinks = {
+		            ems: emsLinks,
+		            mortuary: mortuaryLinks,
+		            clinics: clinicsLinks,
+		            hospital: hospitalLinks,
+		        };
 
 		        const baselineBundle = {
 		            config: baseConfig,
@@ -159,64 +129,19 @@ export const AppProvider = ({ children }) => {
 		        });
 
 		        setConfigBundles(initialBundles);
-		        try {
-		            localStorage.setItem('qims_config_bundles', JSON.stringify(initialBundles));
-		        } catch (e) {
-		            console.error('AppContext: Failed to persist default configuration bundles', e);
-		        }
 		    }, []);
 
             const loadRemoteConfig = useCallback(async () => {
-                setAuthInitializing(true);
-                try {
-                    console.log(`[AppContext] Loading remote config from DataStore (namespace: qims-config-assessment)`);
-                    let remoteBundle = null;
-
-                    // Fetch from DataStore namespace 'qims-config-assessment'
-                    const keys = ['hospital_bundle', 'clinics_bundle', 'ems_bundle', 'mortuary_bundle'];
-                    const results = await Promise.all(keys.map(k => api.getDataStoreItem('qims-config-assessment', k).catch(() => null)));
-                    const [hospitalBundle, clinicsBundle, emsBundle, mortuaryBundle] = results;
-                    
-                    if (hospitalBundle || clinicsBundle || emsBundle || mortuaryBundle) {
-                        remoteBundle = {
-                            config: { 
-                                ...(emsBundle?.config || emsConfig), 
-                                ...(mortuaryBundle?.config || mortuaryConfig), 
-                                ...(clinicsBundle?.config || clinicsConfig), 
-                                ...(hospitalBundle?.config || hospitalConfig) 
-                            },
-                            links: { 
-                                ems: emsBundle?.links || emsLinks, 
-                                mortuary: mortuaryBundle?.links || mortuaryLinks, 
-                                clinics: clinicsBundle?.links || clinicsLinks, 
-                                hospital: hospitalBundle?.links || hospitalLinks 
-                            },
-                            compute: hospitalBundle?.compute || hospitalComputeCriteria
-                        };
-                    }
-
-                    if (remoteBundle && remoteBundle.config) {
-                        const newBundles = { ...configBundles, [activeConfigVersionId]: remoteBundle };
-                        setConfigBundles(newBundles);
-                        localStorage.setItem('qims_config_bundles', JSON.stringify(newBundles));
-                        showToast(`Successfully loaded config from DHIS2 DataStore`, 'success');
-                    } else {
-                        showToast(`No remote config found in DataStore. Falling back to local/cached.`, 'warning');
-                    }
-                } catch (err) {
-                    console.error('Failed to load remote config from DataStore:', err);
-                    showToast('Remote config load failed', 'error');
-                } finally {
-                    setAuthInitializing(false);
-                }
-            }, [configBundles, activeConfigVersionId, showToast]);
+	                console.info('[AppContext] Remote configuration bundle loading is disabled. Using built-in configuration.');
+	                showToast?.('Remote configuration bundle loading is disabled for now. Using built-in configuration.', 'info');
+	            }, [showToast]);
 
             // Automatically fetch latest DHIS2 config when the user logs in 
             // and the DataStore strategy is selected
             useEffect(() => {
-                if (user && configSource === 'datastore') {
-                    loadRemoteConfig();
-                }
+	                if (user && configSource === 'datastore') {
+	                    console.info('[AppContext] DataStore configuration strategy selected, but remote bundle loading is disabled.');
+	                }
             }, [user, configSource, loadRemoteConfig]);
 
 	    // Load initial user session and their facility assignments.

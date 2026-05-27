@@ -12,6 +12,9 @@
 				    || selectedFacility?.enrollment
 				    || selectedFacility?.enrollmentId
 				    || null;
+				  const assessmentProgramStageId = selectedFacility?.programStageId
+				    || selectedFacility?.programStage?.id
+				    || null;
 					  const effectiveEventIdMap = scoringEventIdMap || {};
 					  const getSectionSysTag = (sec) => {
 					    const nameLower = (sec?.name || '').toLowerCase().trim();
@@ -94,22 +97,36 @@
 			          const isMappedToEvent = Boolean(expectedSysTag && effectiveEventIdMap?.[expectedSysTag]);
 		  
 			          const label = (() => {
-	            const raw = sec.name || '';
+	            const raw = String(sec.name || '').trim();
 	            if (!raw) return '';
 	            const upper = raw.toUpperCase();
-	            // If already starts with SE, just use it
-	            if (upper.trim().startsWith('SE')) return raw.trim();
-	            // Try to derive SE code from HOSP patterns
+	            const seId = sec?.se_id ?? sec?.seId ?? sec?.sectionNumber ?? null;
+	            const escapeRegExp = (value) => String(value || '').replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+	            // If already starts with SE, normalise spacing and keep it.
+	            const sePrefixMatch = raw.match(/^\s*SE\s*([0-9]+(?:\.[0-9]+)*)\s*(.*)$/i);
+	            if (sePrefixMatch) {
+	              const num = sePrefixMatch[1];
+	              const rest = sePrefixMatch[2].trim();
+	              const seToken = `SE ${num}`;
+	              return rest ? `${seToken} ${rest}` : seToken;
+	            }
+	            // Try to derive SE code from HOSP patterns.
 	            const hospMatch = upper.match(/HOSP[_\s-]*(SE)?(\d+(?:\.\d+)*)/);
 	            if (hospMatch) {
 	              const numPart = hospMatch[2];
-	              const seToken = `SE${numPart}`;
+	              const seToken = `SE ${numPart}`;
 	              const rest = raw
 	                .slice(hospMatch.index + hospMatch[0].length)
 	                .replace(/^[\s\-_:]+/, '');
 	              return rest ? `${seToken} ${rest}` : seToken;
 	            }
-	            return raw.trim();
+	            if (seId && !isADSection) {
+	              const leadingSePattern = new RegExp(`^\\s*(?:SE\\s*)?${escapeRegExp(seId)}(?:[\\s\\-_:]+)?`, 'i');
+	              const rest = raw.replace(leadingSePattern, '').trim();
+	              const seToken = `SE ${seId}`;
+	              return rest ? `${seToken} ${rest}` : seToken;
+	            }
+	            return raw;
 	          })();
 
 		          return (
@@ -125,11 +142,13 @@
 		            >
 			              <div className="section-info">
 					                <span className="section-label">{label}</span>
-				                {isADSection && (assessmentTeiId || assessmentEnrollmentId) && (
+				                {isADSection && (assessmentTeiId || assessmentEnrollmentId || assessmentProgramStageId) && (
 				                  <span className="assessment-identity">
 				                    {assessmentTeiId && <>TEI: <code>{assessmentTeiId}</code></>}
 				                    {assessmentTeiId && assessmentEnrollmentId && <span className="identity-separator"> | </span>}
 				                    {assessmentEnrollmentId && <>Enrollment: <code>{assessmentEnrollmentId}</code></>}
+				                    {(assessmentTeiId || assessmentEnrollmentId) && assessmentProgramStageId && <span className="identity-separator"> | </span>}
+				                    {assessmentProgramStageId && <>Program Stage ID: <code>{assessmentProgramStageId}</code></>}
 				                  </span>
 				                )}
 			              </div>

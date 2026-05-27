@@ -35,10 +35,32 @@ import {
 	  Radar
 } from 'recharts';
 
+const DEFAULT_SURVEY_PROGRAM_STAGE_ID = 'HpHD6u6MV37';
+const SURVEY_PROGRAM_STAGE_BY_GROUP = {
+  HOSPITAL: 'hup8BqEe7Mn',
+};
+
+const toFacilityGroupKey = (value) => {
+  const t = String(value || '').trim().toLowerCase();
+  if (!t || t === '-') return '';
+  if (t.includes('hosp')) return 'HOSPITAL';
+  if (t.includes('clinic')) return 'CLINICS';
+  if (t.includes('ems') || t === 'se' || t.includes(' se')) return 'SE';
+  if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
+  return String(value || '').trim().toUpperCase();
+};
+
+const getSurveyProgramStageIdForGroup = (facilityGroupKey) => {
+  const normalized = toFacilityGroupKey(facilityGroupKey);
+  if (!normalized) return '';
+  return SURVEY_PROGRAM_STAGE_BY_GROUP[normalized] || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+};
+
 export default function Report() {
-  const { user, configuration, showToast, configBundles, activeConfigVersionId, userAssignments } = useApp();
+  const { user, configuration, setConfiguration, showToast, configBundles, activeConfigVersionId, userAssignments } = useApp();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
+  const [metadataLoading, setMetadataLoading] = useState(false);
   const [error, setError] = useState(null);
   const [facilityOptions, setFacilityOptions] = useState([]); // [{id, name}]
   const [selectedFacilityId, setSelectedFacilityId] = useState('');
@@ -69,9 +91,6 @@ export default function Report() {
     if (code === 'ad' || code === 'assessment_details' || code === 'assessment-details') return true;
     return name.includes('assessment details');
   };
-
-  const programId = configuration?.program?.id || 'G2gULe4jsfs';
-  const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
 	  const reportQueryParams = useMemo(() => {
 	    try {
 	      const sp = new URLSearchParams(window.location.search);
@@ -79,13 +98,45 @@ export default function Report() {
 	        facilityId: sp.get('facilityId') || '',
 	        teiId: sp.get('teiId') || '',
 	        eventId: sp.get('eventId') || '',
+	        programId: sp.get('programId') || '',
+	        programStageId: sp.get('programStageId') || sp.get('stageId') || '',
+	        facilityGroup: sp.get('facilityGroup') || sp.get('group') || '',
 	        start: sp.get('start') || '',
 	        end: sp.get('end') || '',
 	      };
 	    } catch {
-	      return { facilityId: '', teiId: '', eventId: '', start: '', end: '' };
+	      return { facilityId: '', teiId: '', eventId: '', programId: '', programStageId: '', facilityGroup: '', start: '', end: '' };
 	    }
 	  }, []);
+
+  const queryFacilityGroupKey = useMemo(() => toFacilityGroupKey(reportQueryParams.facilityGroup), [reportQueryParams.facilityGroup]);
+  const programId = reportQueryParams.programId || configuration?.program?.id || 'G2gULe4jsfs';
+  const stageIdFromGroup = queryFacilityGroupKey ? getSurveyProgramStageIdForGroup(queryFacilityGroupKey) : '';
+  const stageId = reportQueryParams.programStageId || stageIdFromGroup || configuration?.programStage?.id || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+  const metadataReadyForStage = !stageId || configuration?.programStage?.id === stageId;
+
+  useEffect(() => {
+    if (!stageId || configuration?.programStage?.id === stageId) return undefined;
+    let cancelled = false;
+    setMetadataLoading(true);
+    api.getFormMetadata(stageId)
+      .then((metadata) => {
+        if (cancelled) return;
+        setConfiguration?.({
+          programStage: metadata,
+          program: metadata?.program || configuration?.program || { id: programId, displayName: 'MOH Survey Dashboard' },
+          organisationUnits: configuration?.organisationUnits || []
+        });
+      })
+      .catch((err) => {
+        console.error('Report: failed to load selected program stage metadata', { stageId, err });
+        if (!cancelled) showToast?.('Failed to load the selected programme stage metadata for this report.', 'error');
+      })
+      .finally(() => {
+        if (!cancelled) setMetadataLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, [stageId, configuration?.programStage?.id, configuration?.program, configuration?.organisationUnits, programId, setConfiguration, showToast]);
 
   // Compute a sensible default OU to search under (user's first org unit)
   const rootOrgUnitId = useMemo(() => {
@@ -273,6 +324,7 @@ export default function Report() {
   const handleGenerate = () => {
     (async () => {
       if (!selectedFacilityId) { showToast?.('Please select a facility.', 'warning'); return; }
+	      if (!metadataReadyForStage) { showToast?.('Report setup is still loading. Please try again in a moment.', 'info'); return; }
       const periodStart = parseDateStart(startDate);
       const periodEnd = parseDateEnd(endDate);
       if (periodStart && periodEnd && periodStart > periodEnd) { showToast?.('Start date must be before end date.', 'warning'); return; }
@@ -284,7 +336,9 @@ export default function Report() {
         // both scheduled and self-initiated assessments.
 	        const eventFields = 'event,enrollment,eventDate,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value],notes[note,value]';
 	        const events = await api.getSurveyEventsForOrgUnit({ 
-	            orgUnitId: selectedFacilityId, 
+	            orgUnitId: selectedFacilityId,
+	            programId,
+	            stageId,
 	            fields: eventFields
 	        });
 	        let all = Array.isArray(events) ? events : [];
@@ -412,14 +466,33 @@ export default function Report() {
           return;
         }
 
-        const groupText = baselineBundle.groupText || latestBundle.groupText || '';
-        const groupId = resolveGroupIdFromText(groupText) || 'GENERAL';
-        const groupObj = groups.find(g => g.id === groupId) || null;
+	        const groupText = baselineBundle.groupText || latestBundle.groupText || '';
+	        const groupId = resolveGroupIdFromText(groupText) || 'GENERAL';
+	        const directGroupObj = groups.find(g => g.id === groupId) || null;
+	        const hasServiceSections = (sections = []) => sections.some(s => !isAssessmentDetailsSection(s));
+	        const uniqueSections = (sections = []) => {
+	          const byId = new Map();
+	          sections.forEach((section, idx) => {
+	            const key = section?.id || section?.code || `${section?.name || 'section'}-${idx}`;
+	            if (key && !byId.has(key)) byId.set(key, section);
+	          });
+	          return Array.from(byId.values());
+	        };
+	        const directSections = directGroupObj?.sections || [];
+	        const stageIsDedicatedToGroup = stageId && stageId !== DEFAULT_SURVEY_PROGRAM_STAGE_ID && stageId === getSurveyProgramStageIdForGroup(groupId);
+	        const fallbackStageSections = stageIsDedicatedToGroup
+	          ? uniqueSections(groups.flatMap(g => g.sections || []))
+	          : [];
+	        const targetSections = hasServiceSections(directSections) ? directSections : fallbackStageSections;
+	        const groupObj = directGroupObj || (targetSections.length > 0 ? {
+	          id: groupId,
+	          name: groupId === 'HOSPITAL' ? 'Hospital' : groupId,
+	          sections: targetSections,
+	        } : null);
 
         // Build assessment structure for scoring based on facility group
         const programmeType = (groupId === 'HOSPITAL') ? 'hospital' : (groupId === 'CLINICS') ? 'clinics' : (groupId === 'SE') ? 'ems' : 'mortuary';
         const { linksDataLookup, severityLookup } = programmeScoringMeta[programmeType] || programmeScoringMeta.ems;
-        const targetSections = groupObj ? groupObj.sections || [] : [];
 
         // Under the new model, each SE lives in its own event tagged as SYS_TAG:<seNum>
         const sectionTagMap = Object.fromEntries(
@@ -529,6 +602,7 @@ export default function Report() {
         setReportInfo({
           groupId,
           groupLabel: groupObj?.name || groupId,
+	          programStageId: stageId,
           count: inPeriodBundles.length,
           baselineDate: baselineBundle.assessmentDate || null,
           latestDate: latestBundle.assessmentDate || null,
@@ -660,14 +734,14 @@ export default function Report() {
 	  }, [reportQueryParams]);
 
 	  useEffect(() => {
-	    if (!autoGenerateRequested || !selectedFacilityId) return undefined;
+	    if (!autoGenerateRequested || !selectedFacilityId || metadataLoading || !metadataReadyForStage) return undefined;
 	    const t = setTimeout(() => {
 	      handleGenerate();
 	      setAutoGenerateRequested(false);
 	    }, 0);
 	    return () => clearTimeout(t);
 	  // eslint-disable-next-line react-hooks/exhaustive-deps
-	  }, [autoGenerateRequested, selectedFacilityId, startDate, endDate]);
+	  }, [autoGenerateRequested, selectedFacilityId, startDate, endDate, metadataLoading, metadataReadyForStage]);
 
   const scoring = useAssessmentScoring(reportAssessment || { sections: [] });
   const baselineScoring = useAssessmentScoring(baselineAssessment || { sections: [] });
@@ -2278,10 +2352,10 @@ export default function Report() {
         <Button
           variant="contained"
           color="primary"
-	          disabled={loading || reportLoading || !selectedFacilityId}
+		          disabled={loading || metadataLoading || !metadataReadyForStage || reportLoading || !selectedFacilityId}
           onClick={handleGenerate}
         >
-          {reportLoading ? 'Generating…' : 'Generate'}
+	          {metadataLoading || !metadataReadyForStage ? 'Loading setup…' : (reportLoading ? 'Generating…' : 'Generate')}
         </Button>
         {reportInfo && (
           <Button
@@ -2294,6 +2368,7 @@ export default function Report() {
           </Button>
         )}
         {loading && <span style={{ color: '#64748b' }}>Loading facilities…</span>}
+	        {!loading && metadataLoading && <span style={{ color: '#64748b' }}>Loading selected programme stage…</span>}
         {!loading && error && <span style={{ color: '#dc2626' }}>{error}</span>}
         {!loading && !error && (
           <span style={{ color: '#64748b' }}>
@@ -2312,10 +2387,14 @@ export default function Report() {
         {reportInfo && (
           <div>
             <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              <div style={{ background: '#0b1220', color: '#e5e7eb', padding: '10px 12px', borderRadius: 8, minWidth: 180 }}>
-                <div style={{ fontSize: 12, opacity: 0.8 }}>Facility group</div>
-                <div style={{ fontWeight: 700 }}>{reportInfo.groupLabel}</div>
-              </div>
+	              <div style={{ background: '#0b1220', color: '#e5e7eb', padding: '10px 12px', borderRadius: 8, minWidth: 180 }}>
+	                <div style={{ fontSize: 12, opacity: 0.8 }}>Facility type</div>
+	                <div style={{ fontWeight: 700 }}>{reportInfo.groupLabel}</div>
+	              </div>
+	              <div style={{ background: '#0b1220', color: '#e5e7eb', padding: '10px 12px', borderRadius: 8, minWidth: 180 }}>
+	                <div style={{ fontSize: 12, opacity: 0.8 }}>Program Stage ID</div>
+	                <div style={{ fontWeight: 700, fontFamily: 'monospace' }}>{reportInfo.programStageId || '—'}</div>
+	              </div>
               <div style={{ background: '#0b1220', color: '#e5e7eb', padding: '10px 12px', borderRadius: 8, minWidth: 180 }}>
                 <div style={{ fontSize: 12, opacity: 0.8 }}>Assessments in period</div>
                 <div style={{ fontWeight: 700 }}>{reportInfo.count}</div>

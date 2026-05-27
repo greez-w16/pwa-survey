@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
@@ -43,11 +43,17 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import './Dashboard.css';
 
+const DEFAULT_SURVEY_PROGRAM_STAGE_ID = 'HpHD6u6MV37';
+const SURVEY_PROGRAM_STAGE_BY_GROUP = {
+    HOSPITAL: 'hup8BqEe7Mn',
+};
+
 export function Dashboard() {
 	    const navigate = useNavigate();
 	    const [searchParams] = useSearchParams();
 	    const {
 	        configuration,
+		        setConfiguration,
 	        stats,
 	        pendingEvents,
 	        isOnline,
@@ -81,6 +87,8 @@ export function Dashboard() {
     const [isBaselineCreating, setIsBaselineCreating] = useState(false);
     const [createProgress, setCreateProgress] = useState(null);
     const [createDetails, setCreateDetails] = useState([]);
+	    const [createElapsedSeconds, setCreateElapsedSeconds] = useState(0);
+	    const createDetailsEndRef = useRef(null);
     const [createErrorInfo, setCreateErrorInfo] = useState(null);
     const [pendingProvisionedBundle, setPendingProvisionedBundle] = useState(null);
     const [repairingAssessments, setRepairingAssessments] = useState({});
@@ -92,6 +100,7 @@ export function Dashboard() {
     const [initAssessorLookupInfo, setInitAssessorLookupInfo] = useState(null);
     const [initSeOptions, setInitSeOptions] = useState([]); // [{id, label}]
     const [initAssignments, setInitAssignments] = useState({}); // { [seId]: [userIds] }
+	    const [initMetadataLoading, setInitMetadataLoading] = useState(false);
     const [initPlanLoading, setInitPlanLoading] = useState(false);
     const [initMode, setInitMode] = useState('BASELINE'); // BASELINE | FOLLOWUP
     const [forceSelfOnly, setForceSelfOnly] = useState(false);
@@ -109,6 +118,22 @@ export function Dashboard() {
         }
         return true;
     }, [initFacilityGroup, initSeOptions, initAssignments]);
+
+	    useEffect(() => {
+	        if (!isBaselineCreating) {
+	            setCreateElapsedSeconds(0);
+	            return undefined;
+	        }
+	        const startedAt = Date.now();
+	        const timer = window.setInterval(() => {
+	            setCreateElapsedSeconds(Math.floor((Date.now() - startedAt) / 1000));
+	        }, 1000);
+	        return () => window.clearInterval(timer);
+	    }, [isBaselineCreating]);
+
+	    useEffect(() => {
+	        createDetailsEndRef.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+	    }, [createDetails.length]);
   // Team dialog state
   const [teamDialogOpen, setTeamDialogOpen] = useState(false);
   const [teamDialogData, setTeamDialogData] = useState({ orgUnitName: '', team: [], loading: false });
@@ -255,8 +280,8 @@ export function Dashboard() {
 	        return false;
 	    };
 
-	    const buildMetadataSeOptions = (groupKey) => {
-	        const sections = configuration?.programStage?.programStageSections || [];
+		    const buildMetadataSeOptions = (groupKey, programStageOverride = null) => {
+		        const sections = (programStageOverride || configuration?.programStage)?.programStageSections || [];
 	        const optionsById = new Map();
 	        sections.forEach(section => {
 	            if (!stageSectionMatchesFacilityGroup(section, groupKey)) return;
@@ -275,11 +300,11 @@ export function Dashboard() {
 	    // Build SE options for the selected Facility Group. Prefer the live DHIS2
 	    // program-stage sections because those are the sections the form renders.
 	    // Static JSON config is only a fallback if metadata is not available yet.
-	    const buildSeOptions = (groupKey) => {
+		    const buildSeOptions = (groupKey, programStageOverride = null) => {
 	        try {
 	            const rawNs = String(groupKey || '').toUpperCase();
 	            const ns = rawNs === 'SE' ? 'EMS' : (rawNs === 'GENERAL' ? 'MORTUARY' : rawNs);
-	            const metadataSeList = buildMetadataSeOptions(ns);
+		            const metadataSeList = buildMetadataSeOptions(ns, programStageOverride);
 	            if (metadataSeList.length > 0) return metadataSeList;
 
 	            let arr = [];
@@ -311,6 +336,25 @@ export function Dashboard() {
         return labelMap[String(facilityGroupKey).toUpperCase()] || String(facilityGroupKey || '');
     }, []);
 
+	    const getSurveyProgramStageIdForGroup = React.useCallback((facilityGroupKey) => {
+	        const normalizedGroup = toFacilityGroupKey(facilityGroupKey);
+	        return SURVEY_PROGRAM_STAGE_BY_GROUP[normalizedGroup] || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+	    }, [toFacilityGroupKey]);
+
+	    const ensureSurveyMetadataForGroup = React.useCallback(async (facilityGroupKey) => {
+	        const targetStageId = getSurveyProgramStageIdForGroup(facilityGroupKey);
+	        if (!targetStageId) return configuration?.programStage || null;
+	        if (configuration?.programStage?.id === targetStageId) return configuration.programStage;
+
+	        const metadata = await api.getFormMetadata(targetStageId);
+	        setConfiguration?.({
+	            programStage: metadata,
+	            program: metadata?.program || configuration?.program || { id: 'G2gULe4jsfs', displayName: 'MOH Survey Dashboard' },
+	            organisationUnits: configuration?.organisationUnits || []
+	        });
+	        return metadata;
+	    }, [configuration, getSurveyProgramStageIdForGroup, setConfiguration]);
+
     const assessmentDetailsFields = useMemo(() => {
         const ps = configuration?.programStage;
         const sections = Array.isArray(ps?.programStageSections) ? ps.programStageSections : [];
@@ -340,6 +384,7 @@ export function Dashboard() {
         enrollmentId = null,
         surveyTypeValue = '',
         facilityGroupKey = '',
+	        programStageId = null,
         assessorUserId = null,
     } = {}) => {
         if (!assessmentDetailsFields.length) return [];
@@ -372,6 +417,10 @@ export function Dashboard() {
                 if (!hasValue(fieldId)) setValue(fieldId, facilityGroupLabel);
                 return;
             }
+	            if ((label.includes('program stage') && label.includes('id')) || code.includes('PROGRAM_STAGE')) {
+	                setValue(fieldId, programStageId);
+	                return;
+	            }
             if (label.includes('tei id')) {
                 setValue(fieldId, teiId);
                 return;
@@ -402,7 +451,7 @@ export function Dashboard() {
         });
 
         return Array.from(valuesByDe.values());
-    }, [assessmentDetailsFields, getFacilityGroupLabel, surveyGroupDeId, surveyTypeDeId]);
+	    }, [assessmentDetailsFields, getFacilityGroupLabel, surveyGroupDeId, surveyTypeDeId]);
 
     const findAssessmentPlanForTei = React.useCallback(async ({ teiId, preferredNs = null }) => {
         if (!teiId) return { plan: null, nsKey: null };
@@ -458,7 +507,7 @@ export function Dashboard() {
         };
     }, [readSurveyTagMap]);
 
-    const finalizeProvisionedAssessmentOpen = React.useCallback(({ assessment, teiId, enrollmentId, eventIdMap, surveyType, facilityGroup, detailsDataValues = [] }) => {
+	    const finalizeProvisionedAssessmentOpen = React.useCallback(({ assessment, teiId, enrollmentId, eventIdMap, surveyType, facilityGroup, programStageId = null, detailsDataValues = [] }) => {
         const preload = {};
         (Array.isArray(detailsDataValues) ? detailsDataValues : []).forEach(dv => {
             if (dv?.dataElement && dv?.value !== undefined && dv?.value !== null) {
@@ -484,6 +533,7 @@ export function Dashboard() {
             trackedEntityInstance: teiId,
             scheduleTeiId: teiId,
             baselineEventId: finalEventId,
+	            programStageId: programStageId || assessment?.programStageId || getSurveyProgramStageIdForGroup(facilityGroup),
 	            eventIdMap: eventIdMap || {},
 	            parentGroupId: facilityGroup || assessment?.parentGroupId,
             preloadDataValues: preload,
@@ -493,16 +543,32 @@ export function Dashboard() {
 	            // readback/repair attempt.
 	            preloadMode: 'REPLACE'
         };
+	        const targetProgramStageId = withBaseline.programStageId || '';
         navigate(
-            `/form?assessmentId=${encodeURIComponent(formIdentityId || '')}&baselineId=${encodeURIComponent(finalEventId || '')}&draftKey=${encodeURIComponent(formIdentityId || '')}&assessmentTeiId=${encodeURIComponent(teiId || '')}${enrollmentId ? `&enrollmentId=${encodeURIComponent(enrollmentId)}` : ''}`,
+	            `/form?assessmentId=${encodeURIComponent(formIdentityId || '')}&baselineId=${encodeURIComponent(finalEventId || '')}&draftKey=${encodeURIComponent(formIdentityId || '')}&assessmentTeiId=${encodeURIComponent(teiId || '')}${enrollmentId ? `&enrollmentId=${encodeURIComponent(enrollmentId)}` : ''}${targetProgramStageId ? `&programStageId=${encodeURIComponent(targetProgramStageId)}` : ''}`,
             { state: { selectedAssignment: withBaseline } }
         );
-    }, [getFacilityGroupLabel, navigate, surveyGroupDeId, surveyTypeDeId]);
+	    }, [getFacilityGroupLabel, getSurveyProgramStageIdForGroup, navigate, surveyGroupDeId, surveyTypeDeId]);
 
     const repairAssessmentBundle = React.useCallback(async ({ assessment, teiId, orgUnitId, enrollmentId = null, facilityGroup, surveyType, expectedTags = null, logLine = null }) => {
         if (!teiId || !orgUnitId) throw new Error('Assessment TEI or org unit is missing for repair.');
-        const programId = configuration?.program?.id || 'G2gULe4jsfs';
-        const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+		            const programId = configuration?.program?.id || 'G2gULe4jsfs';
+		            const scheduleFacilityGroup =
+		                assessment?.schedule?.facilityGroup ||
+		                assessment?.schedule?.parentGroupId ||
+		                assessment?.schedule?.attributes?.find?.(attr => attr?.attribute === SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType)?.value ||
+		                '';
+			            const resolvedFacilityGroup =
+			                facilityGroup ||
+			                assessment?.parentGroupId ||
+		                assessment?.facilityGroup ||
+		                scheduleFacilityGroup ||
+		                '';
+		            const stageId =
+		                assessment?.programStageId ||
+		                getSurveyProgramStageIdForGroup(resolvedFacilityGroup) ||
+		                configuration?.programStage?.id ||
+		                DEFAULT_SURVEY_PROGRAM_STAGE_ID;
         const planInfo = await findAssessmentPlanForTei({ teiId, preferredNs: facilityGroup });
         const resolvedGroup = toFacilityGroupKey(facilityGroup || planInfo?.plan?.facilityGroup || assessment?.parentGroupId || '');
         const resolvedType = surveyType || planInfo?.plan?.typeOfAssessment || '';
@@ -511,6 +577,7 @@ export function Dashboard() {
             enrollmentId: enrollmentId || null,
             surveyTypeValue: resolvedType,
             facilityGroupKey: resolvedGroup,
+	            programStageId: stageId,
             assessorUserId: user?.id || null,
         });
         const tagsToExpect = Array.isArray(expectedTags) && expectedTags.length > 0 ? expectedTags : getExpectedTagsForGroup(resolvedGroup);
@@ -523,7 +590,7 @@ export function Dashboard() {
             return { tagMap: beforeMap, missingTags: [], facilityGroup: resolvedGroup, surveyType: resolvedType };
         }
 
-        logLine?.(`Repairing missing SYS_TAG events: ${missingTags.join(', ')}`);
+        logLine?.(`Preparing remaining assessment sections: ${missingTags.join(', ')}`);
         const createdTagMap = {};
         for (const tag of missingTags) {
             const dataValues = [
@@ -551,14 +618,14 @@ export function Dashboard() {
             pollDelaysMs: [0, 800, 1800, 3200, 5000],
             onAttempt: ({ attempt, totalAttempts, missingTags: stillMissing, latestTagMap }) => {
                 const visibleCount = tagsToExpect.length - stillMissing.length;
-                logLine?.(`Repair verification ${attempt}/${totalAttempts}: ${visibleCount}/${tagsToExpect.length} tags visible${stillMissing.length ? `; still missing ${stillMissing.join(', ')}` : ''}.`);
+                logLine?.(`Setup check ${attempt}/${totalAttempts}: ${visibleCount}/${tagsToExpect.length} sections ready${stillMissing.length ? `; still preparing ${stillMissing.join(', ')}` : ''}.`);
             }
         });
 
         const mergedTagMap = { ...createdTagMap, ...verification.tagMap };
         missingTags = tagsToExpect.filter(tag => !mergedTagMap[tag]);
         if (missingTags.length > 0) {
-            throw new Error(`Assessment repair incomplete. Missing DHIS2 events for: ${missingTags.join(', ')}`);
+            throw new Error(`Assessment setup is taking a little longer. Some sections are still not available in DHIS2: ${missingTags.join(', ')}`);
         }
 
 	        try {
@@ -578,7 +645,7 @@ export function Dashboard() {
 	        }
 
         return { tagMap: mergedTagMap, missingTags: [], facilityGroup: resolvedGroup, surveyType: resolvedType };
-    }, [buildAssessmentDetailsDataValues, configuration, findAssessmentPlanForTei, getExpectedTagsForGroup, pollForExpectedTags, readSurveyTagMap, toFacilityGroupKey, user?.id]);
+	    }, [buildAssessmentDetailsDataValues, configuration, findAssessmentPlanForTei, getExpectedTagsForGroup, getSurveyProgramStageIdForGroup, pollForExpectedTags, readSurveyTagMap, toFacilityGroupKey, user?.id]);
 
     // (duplicate declarations removed)
 
@@ -679,9 +746,23 @@ export function Dashboard() {
     const loadAssociatedEvents = async (assessment) => {
         const assocKey = getAssocKey(assessment);
         setAssociatedByEnrollment(prev => ({ ...prev, [assocKey]: { ...(prev[assocKey]||{}), loading: true } }));
-        try {
-            const programId = configuration?.program?.id || 'G2gULe4jsfs';
-            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+		        try {
+		            const programId = configuration?.program?.id || 'G2gULe4jsfs';
+		            const scheduleFacilityGroup =
+		                assessment?.schedule?.facilityGroup ||
+		                assessment?.schedule?.parentGroupId ||
+		                assessment?.schedule?.attributes?.find?.(attr => attr?.attribute === SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType)?.value ||
+		                '';
+		            const resolvedFacilityGroup =
+		                assessment?.parentGroupId ||
+		                assessment?.facilityGroup ||
+		                scheduleFacilityGroup ||
+		                '';
+		            const stageId =
+		                assessment?.programStageId ||
+		                getSurveyProgramStageIdForGroup(resolvedFacilityGroup) ||
+		                configuration?.programStage?.id ||
+		                DEFAULT_SURVEY_PROGRAM_STAGE_ID;
             const teiId = assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
             // Prefer facility orgUnit id for event lookup; fall back to program OU
             const orgUnitId = assessment.orgUnitId || assessment.programOrgUnitId || null;
@@ -733,7 +814,7 @@ export function Dashboard() {
         }
     };
 
-	    const checkAssessmentEventPresence = React.useCallback(async (assessment) => {
+		    const checkAssessmentEventPresence = React.useCallback(async (assessment) => {
 	        const assocKey = getAssocKey(assessment);
 	        const teiId = assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
 	        if (!teiId) {
@@ -750,8 +831,22 @@ export function Dashboard() {
 	        }));
 
 	        try {
-	            const programId = configuration?.program?.id || 'G2gULe4jsfs';
-	            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+		            const programId = configuration?.program?.id || 'G2gULe4jsfs';
+		            const scheduleFacilityGroup =
+		                assessment?.schedule?.facilityGroup ||
+		                assessment?.schedule?.parentGroupId ||
+		                assessment?.schedule?.attributes?.find?.(attr => attr?.attribute === SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType)?.value ||
+		                '';
+		            const resolvedFacilityGroup =
+		                assessment?.parentGroupId ||
+		                assessment?.facilityGroup ||
+		                scheduleFacilityGroup ||
+		                '';
+		            const stageId =
+		                assessment?.programStageId ||
+		                getSurveyProgramStageIdForGroup(resolvedFacilityGroup) ||
+		                configuration?.programStage?.id ||
+		                DEFAULT_SURVEY_PROGRAM_STAGE_ID;
 	            // Intentionally check by authorised TEI only. The purpose here is
 	            // not to hydrate the row, but to know whether an assessment event
 	            // already exists for this authorised assessment TEI.
@@ -776,7 +871,7 @@ export function Dashboard() {
 	                [assocKey]: { loading: false, hasAssessmentEvent: false }
 	            }));
 	        }
-	    }, [configuration]);
+		    }, [configuration, getSurveyProgramStageIdForGroup]);
 
 		    React.useEffect(() => {
 		        if (assessmentsLoading) return;
@@ -824,7 +919,7 @@ export function Dashboard() {
 	    const roleNorm = String(assessment?.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i, '').toUpperCase();
 	    const isLead = /LEAD|LEADER/.test(roleNorm);
 	    const roleLabel = roleNorm ? roleNorm.replace(/\s+/g, '_').replace(/_/g, ' ') : '';
-	    const label = hasAssessmentEvent ? 'Initiate Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
+		    const label = hasAssessmentEvent ? 'Update Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
 	    const plannedDate = assessment?.scheduledAt ? assessment.scheduledAt.slice(0, 10) : 'N/A';
 	    const lastUpdated = assessment?.updatedAt ? assessment.updatedAt.slice(0, 10) : 'N/A';
 	    const evs = Array.isArray(assessment?.team) ? assessment.team : [];
@@ -856,6 +951,70 @@ export function Dashboard() {
 	    };
 	};
 
+		const getAssignmentFacilityGroupValue = (assessment) => {
+		    const raw = assessment?.parentGroupId
+		        || assessment?.facilityGroup
+		        || assessment?.schedule?.parentGroupId
+		        || assessment?.schedule?.facilityGroup
+		        || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
+		        || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
+		        || '';
+		    const key = toFacilityGroupKey(raw);
+		    return key ? getFacilityGroupLabel(key) : (raw || '-');
+		};
+
+		const getAssignmentTypeValue = (assessment) => (
+		    assessment?.typeOfAssessment
+		    || assessment?.assessmentType
+		    || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
+		    || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
+		    || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentType, ['assessment type'])
+		    || '-'
+		);
+
+		const getAssignmentProgramId = (assessment) => (
+		    assessment?.program
+		    || assessment?.schedule?.enrollments?.[0]?.program
+		    || configuration?.program?.id
+		    || 'G2gULe4jsfs'
+		);
+
+		const getAssignmentProgramStageId = (assessment) => {
+		    const facilityGroup = getAssignmentFacilityGroupValue(assessment);
+		    return assessment?.programStageId
+		        || getSurveyProgramStageIdForGroup(facilityGroup)
+		        || configuration?.programStage?.id
+		        || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+		};
+
+		const formatAssignmentStatusLabel = (value) => {
+		    const raw = String(value || '').trim();
+		    const map = {
+		        FAC_ASS_ASSIGN_ACCEPTED: 'Accepted',
+		        FAC_ASS_ASSIGN_PENDING: 'Pending',
+		        FAC_ASS_ASSIGN_DECLINED: 'Declined',
+		        FAC_ASS_ASSIGN_CANCELLED: 'Cancelled',
+		        FAC_ASS_ASSIGN_COMPLETED: 'Completed',
+		        FAC_ASS_ASSIGN_REPLACED: 'Replaced',
+		    };
+		    return map[raw] || raw || '-';
+		};
+
+		const canOpenAssessmentFromUiState = (uiState, { allowWhileChecking = false } = {}) => {
+		    if (!uiState) return false;
+		    if (!allowWhileChecking && uiState.isCheckingPresence) return false;
+		    if (uiState.label === 'Initiate Survey' && !uiState.isLead) return false;
+		    return true;
+		};
+
+		const openAssessmentFromUiState = (assessment, uiState, { allowWhileChecking = false } = {}) => {
+		    if (!canOpenAssessmentFromUiState(uiState, { allowWhileChecking })) return;
+	    const selfOnly = uiState.hasAssessmentEvent && uiState.label === 'Initiate Survey';
+	    return uiState.label === 'Initiate Survey'
+	        ? handleInitiateSurvey(assessment, { selfOnly })
+	        : handleOpenAssessment(assessment);
+	};
+
 	const renderAssessmentActionButton = (assessment, uiState) => {
 	    if (uiState.isCheckingPresence) {
 	        return (
@@ -870,7 +1029,10 @@ export function Dashboard() {
 	        <button
 	            className={`btn ${uiState.label === 'Initiate Survey' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
 	            disabled={uiState.label === 'Initiate Survey' && uiState.isInitiating}
-	            onClick={() => uiState.label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly }) : handleOpenAssessment(assessment)}
+	            onClick={(e) => {
+	                e.stopPropagation();
+	                openAssessmentFromUiState(assessment, uiState);
+	            }}
 	        >
 	            {uiState.label === 'Initiate Survey' && uiState.isInitiating ? 'Opening…' : uiState.label}
 	        </button>
@@ -1041,9 +1203,14 @@ export function Dashboard() {
 	                                            const baselineDate = ev._baselineDate || null;
 	                                            const ou = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || '';
 	                                            const tei = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
+		                                            const facilityGroup = getGroupValue(ev);
+		                                            const reportProgramStageId = ev.programStage || ev.programStageId || getSurveyProgramStageIdForGroup(facilityGroup);
 	                                            const q = new URLSearchParams({
 	                                                facilityId: ou || '',
 	                                                teiId: tei || '',
+		                                                programId: ev.programId || configuration?.program?.id || 'G2gULe4jsfs',
+		                                                programStageId: reportProgramStageId || '',
+		                                                facilityGroup: facilityGroup || '',
 	                                                start: baselineDate || '',
 	                                                end: ev._assessmentDate || ev.eventDate || '',
 	                                                eventId: ev._displayEventId || ev.event || ''
@@ -1119,6 +1286,14 @@ export function Dashboard() {
         const assocKey = getAssocKey(assessment);
         let relatedEvents = [];
         const clickedEnrollmentId = ev.enrollmentId || ev.enrollment || (ev._type === 'Enrollment' ? ev.event : null);
+	        const clickedFacilityGroup = getGroupValue(ev);
+	        const resolvedFacilityGroup = clickedFacilityGroup && clickedFacilityGroup !== '-'
+	            ? clickedFacilityGroup
+	            : (assessment?.parentGroupId || assessment?.facilityGroup || '');
+	        const resolvedProgramStageId = ev.programStage
+	            || ev.programStageId
+	            || assessment?.programStageId
+	            || getSurveyProgramStageIdForGroup(resolvedFacilityGroup);
 
         // The table now loads enrollments, which lack dataValues. Treat the clicked
         // enrollment as the pointer to the assessment bundle and fetch its actual
@@ -1128,7 +1303,7 @@ export function Dashboard() {
             const teiId = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
             const orgUnitId = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || null;
             const programId = configuration?.program?.id || 'G2gULe4jsfs';
-            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+	            const stageId = resolvedProgramStageId || configuration?.programStage?.id || 'HpHD6u6MV37';
 
             if (clickedEnrollmentId) {
                 try {
@@ -1195,6 +1370,9 @@ export function Dashboard() {
             const tag = getSysTag(relatedEv);
             if (tag) eventIdMap[tag] = relatedEv.event;
         });
+	        if (primaryEvent?.event && !eventIdMap.FINAL) {
+	            eventIdMap.FINAL = primaryEvent.event;
+	        }
         
         // Save the eventIdMap into preload so App.jsx can use it
         preload['eventIdMap_internal'] = JSON.stringify(eventIdMap);
@@ -1208,7 +1386,7 @@ export function Dashboard() {
             // Fallback: resolve baseline Assessment Group from earliest event for this TEI
             try {
                 const programId = configuration?.program?.id || 'G2gULe4jsfs';
-                const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+	                const stageId = resolvedProgramStageId || configuration?.programStage?.id || 'HpHD6u6MV37';
                 // Prefer TEI from the clicked event row; fall back to assignment
                 const teiId = primaryEvent.trackedEntityInstance || ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
                 const orgUnitId = assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || null;
@@ -1234,12 +1412,12 @@ export function Dashboard() {
         // Carry TEI so PUT can include trackedEntityInstance if needed
         if (primaryEvent.trackedEntityInstance || ev.trackedEntityInstance) preload['teiId_internal'] = primaryEvent.trackedEntityInstance || ev.trackedEntityInstance;
 
-        const selected = { ...withBaseline, enrollment: clickedEnrollmentId || withBaseline.enrollment, baselineEventId: primaryEvent.event, preloadDataValues: preload, hydrateAll: true, preloadMode: 'REPLACE' };
+	        const selected = { ...withBaseline, enrollment: clickedEnrollmentId || withBaseline.enrollment, baselineEventId: primaryEvent.event, programStageId: resolvedProgramStageId, preloadDataValues: preload, hydrateAll: true, preloadMode: 'REPLACE' };
         // Use the clicked enrollment/event as the form identity. Using the parent
         // assignment id here can reopen an older local draft bucket.
         const urlId = clickedEnrollmentId || primaryEvent.event || ev.event;
         const teiForUrl = primaryEvent.trackedEntityInstance || ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
-        navigate(`/form?assessmentId=${encodeURIComponent(urlId || '')}&baselineId=${encodeURIComponent(primaryEvent.event || ev.event || '')}&draftKey=${encodeURIComponent(urlId || '')}&assessmentTeiId=${encodeURIComponent(teiForUrl)}${clickedEnrollmentId ? `&enrollmentId=${encodeURIComponent(clickedEnrollmentId)}` : ''}`, { state: { selectedAssignment: selected } });
+	        navigate(`/form?assessmentId=${encodeURIComponent(urlId || '')}&baselineId=${encodeURIComponent(primaryEvent.event || ev.event || '')}&draftKey=${encodeURIComponent(urlId || '')}&assessmentTeiId=${encodeURIComponent(teiForUrl)}${clickedEnrollmentId ? `&enrollmentId=${encodeURIComponent(clickedEnrollmentId)}` : ''}${resolvedProgramStageId ? `&programStageId=${encodeURIComponent(resolvedProgramStageId)}` : ''}`, { state: { selectedAssignment: selected } });
     };
 
     const resolveOrgUnitForAssessment = (assessment) => {
@@ -1384,12 +1562,34 @@ export function Dashboard() {
     const handleOpenAssessment = async (assessment) => {
         try {
             const programId = configuration?.program?.id || 'G2gULe4jsfs';
-            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+	            const scheduleFacilityGroup =
+	                assessment?.schedule?.facilityGroup ||
+	                assessment?.schedule?.parentGroupId ||
+	                assessment?.schedule?.attributes?.find?.(attr => attr?.attribute === SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType)?.value ||
+	                '';
+	            const resolvedFacilityGroup =
+	                assessment?.parentGroupId ||
+	                assessment?.facilityGroup ||
+	                scheduleFacilityGroup ||
+	                '';
+	            const stageId =
+	                assessment?.programStageId ||
+	                getSurveyProgramStageIdForGroup(resolvedFacilityGroup) ||
+	                configuration?.programStage?.id ||
+	                DEFAULT_SURVEY_PROGRAM_STAGE_ID;
             const orgUnitId = resolveOrgUnitForAssessment(assessment);
             const teiId = resolveTeiForAssessment(assessment);
 
             if (!orgUnitId || !teiId) {
-                navigate(`/form?assessmentId=${assessment.eventId}`, { state: { selectedAssignment: assessment } });
+	                const selected = {
+	                    ...assessment,
+	                    programStageId: stageId,
+	                    parentGroupId: assessment?.parentGroupId || resolvedFacilityGroup || assessment?.facilityGroup,
+	                };
+	                navigate(
+	                    `/form?assessmentId=${encodeURIComponent(assessment.eventId || '')}${stageId ? `&programStageId=${encodeURIComponent(stageId)}` : ''}`,
+	                    { state: { selectedAssignment: selected } }
+	                );
                 return;
             }
 
@@ -1429,6 +1629,9 @@ export function Dashboard() {
                 if (!finalEventId) {
                     finalEventId = eventIdMap.FINAL || surveyEvents[0]?.event || null;
                 }
+	                if (finalEventId && !eventIdMap.FINAL) {
+	                    eventIdMap.FINAL = finalEventId;
+	                }
 
                 if (Object.keys(eventIdMap).length > 0) {
                     preload['eventIdMap_internal'] = JSON.stringify(eventIdMap);
@@ -1451,13 +1654,15 @@ export function Dashboard() {
                     trackedEntityInstance: teiId,
                     scheduleTeiId: teiId,
                     baselineEventId: finalEventId,
+	                    programStageId: stageId,
+	                    parentGroupId: assessment?.parentGroupId || resolvedFacilityGroup || assessment?.facilityGroup,
                     preloadDataValues: preload,
                     hydrateAll: true,
                     preloadMode: 'REPLACE'
                 };
                 const urlId = assessment.eventId || assessment.enrollment || finalEventId;
                 navigate(
-                    `/form?assessmentId=${encodeURIComponent(urlId)}&baselineId=${encodeURIComponent(finalEventId || '')}&draftKey=${encodeURIComponent(finalEventId || urlId)}&assessmentTeiId=${encodeURIComponent(teiId)}`,
+	                    `/form?assessmentId=${encodeURIComponent(urlId)}&baselineId=${encodeURIComponent(finalEventId || '')}&draftKey=${encodeURIComponent(finalEventId || urlId)}&assessmentTeiId=${encodeURIComponent(teiId)}&programStageId=${encodeURIComponent(stageId)}`,
                     { state: { selectedAssignment: selected } }
                 );
                 return;
@@ -1603,7 +1808,8 @@ export function Dashboard() {
             const grp = toGroupKey(baselineGroupText) || (assessment.parentGroupId || '');
             if (grp) {
                 setInitFacilityGroup(grp);
-                setInitSeOptions(buildSeOptions(grp));
+	                const metadata = await ensureSurveyMetadataForGroup(grp);
+	                setInitSeOptions(buildSeOptions(grp, metadata));
                 setLockGroup(true);
             }
 
@@ -1658,7 +1864,8 @@ export function Dashboard() {
             // Set survey details
             const grp = String(found.facilityGroup || nsHit || '').toUpperCase();
             setInitFacilityGroup(grp);
-            const seOpts = buildSeOptions(grp);
+	            const metadata = await ensureSurveyMetadataForGroup(grp);
+	            const seOpts = buildSeOptions(grp, metadata);
             setInitSeOptions(seOpts);
             const toCode = (val) => {
                 const m = (surveyTypeOptions || []).find(o => o.value === val || o.label === val);
@@ -1779,7 +1986,8 @@ export function Dashboard() {
             };
 
             setInitFacilityGroup(groupKey);
-            setInitSeOptions(buildSeOptions(groupKey));
+	            const metadata = await ensureSurveyMetadataForGroup(groupKey);
+	            setInitSeOptions(buildSeOptions(groupKey, metadata));
             setInitSurveyType(toSurveyTypeCode(plan?.typeOfAssessment || surveyTypeValue || ''));
             setInitAssignments(plan?.seAssignments || {});
             setInitTeamOptions(mergedTeam);
@@ -1851,9 +2059,9 @@ export function Dashboard() {
             setCreateErrorInfo(null);
             setCreateDetails([]);
             setPendingProvisionedBundle(null);
-            const programId = configuration?.program?.id || 'G2gULe4jsfs';
-            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
-            const trackedEntityTypeId = configuration?.program?.trackedEntityType?.id || 'uTTDt3fuXZK';
+	            let programId = configuration?.program?.id || 'G2gULe4jsfs';
+	            let stageId = configuration?.programStage?.id || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+	            let trackedEntityTypeId = configuration?.program?.trackedEntityType?.id || 'uTTDt3fuXZK';
             const orgUnitId = resolveOrgUnitForAssessment(pendingOpenAssessment);
             let teiId = resolveTeiForAssessment(pendingOpenAssessment);
             let enrollmentId = null;
@@ -1872,7 +2080,11 @@ export function Dashboard() {
                 return;
             }
 
-	            const provisioningSeOptions = buildSeOptions(initFacilityGroup);
+		            const selectedStageMetadata = await ensureSurveyMetadataForGroup(initFacilityGroup);
+		            programId = selectedStageMetadata?.program?.id || programId;
+		            stageId = selectedStageMetadata?.id || getSurveyProgramStageIdForGroup(initFacilityGroup);
+		            trackedEntityTypeId = selectedStageMetadata?.program?.trackedEntityType?.id || trackedEntityTypeId;
+		            const provisioningSeOptions = buildSeOptions(initFacilityGroup, selectedStageMetadata);
 	            if (provisioningSeOptions.length === 0) {
 	                showToast?.('No SE sections were found for this Facility Type. Survey initialization was blocked.', 'error');
 	                setIsBaselineCreating(false);
@@ -2021,6 +2233,7 @@ export function Dashboard() {
                 enrollmentId,
                 surveyTypeValue: initSurveyType,
                 facilityGroupKey: initFacilityGroup,
+	                programStageId: stageId,
                 assessorUserId: user?.id || null,
             });
 
@@ -2098,7 +2311,7 @@ export function Dashboard() {
                         updateCreateProgress(2, totalSteps, 'Verifying assessment events in DHIS2...');
                     }
                     const visibleCount = expectedTags.length - missingTags.length;
-                    setCreateDetails(prev => [...prev, `DHIS2 visibility check ${attempt}/${totalAttempts}: ${visibleCount}/${expectedTags.length} tags visible${missingTags.length ? `; still missing ${missingTags.join(', ')}` : ''}.`]);
+                    setCreateDetails(prev => [...prev, `DHIS2 setup check ${attempt}/${totalAttempts}: ${visibleCount}/${expectedTags.length} sections ready${missingTags.length ? `; still preparing ${missingTags.join(', ')}` : ''}.`]);
                 }
             });
 			const readbackTagMap = visibilityResult.tagMap || {};
@@ -2106,12 +2319,12 @@ export function Dashboard() {
 			setCreateDetails(prev => [
 	                ...prev,
 				`DHIS2 create response returned ${Object.keys(responseEventIdMap).length}/${expectedTags.length} event IDs.`,
-				`Readback confirmed ${expectedTags.length - readbackMissingTags.length}/${expectedTags.length} SYS_TAGs${readbackMissingTags.length ? `; missing ${readbackMissingTags.join(', ')}` : ''}.`
+				`DHIS2 confirmed ${expectedTags.length - readbackMissingTags.length}/${expectedTags.length} sections are ready${readbackMissingTags.length ? `; still preparing ${readbackMissingTags.join(', ')}` : ''}.`
 	            ]);
 
 				if (readbackMissingTags.length > 0) {
-					updateCreateProgress(3, totalSteps, 'Completing setup: repairing missing assessment events automatically...');
-					setCreateDetails(prev => [...prev, `Auto-repair started for missing SYS_TAG events: ${readbackMissingTags.join(', ')}`]);
+						updateCreateProgress(3, totalSteps, 'Completing setup: preparing any remaining assessment sections automatically...');
+						setCreateDetails(prev => [...prev, `Automatic setup completion started for sections still pending in DHIS2: ${readbackMissingTags.join(', ')}`]);
 
 					try {
 						const repaired = await repairAssessmentBundle({
@@ -2136,7 +2349,7 @@ export function Dashboard() {
 							console.warn('DataStore eventIdMap auto-repair upsert failed (non-fatal)', e);
 						}
 						setPendingProvisionedBundle(null);
-						updateCreateProgress(3, totalSteps, 'Repair complete. Opening assessment...');
+						updateCreateProgress(3, totalSteps, 'Setup complete. Opening assessment...');
 						finalizeProvisionedAssessmentOpen({
 							assessment: pendingOpenAssessment,
 							teiId,
@@ -2144,6 +2357,7 @@ export function Dashboard() {
 							eventIdMap: repairedEventIdMap,
 							surveyType: repaired.surveyType || initSurveyType,
 							facilityGroup: repaired.facilityGroup || ns,
+								programStageId: stageId,
 							detailsDataValues: assessmentDetailsDataValues,
 						});
 						return;
@@ -2155,11 +2369,12 @@ export function Dashboard() {
 							enrollmentId,
 							facilityGroup: ns,
 							surveyType: initSurveyType,
+								programStageId: stageId,
 							eventIdMap: readbackTagMap,
 						};
 						setPendingProvisionedBundle(manualRepairBundle);
 						const failureInfo = {
-							message: repairErr?.message || `Assessment provisioning incomplete. Missing DHIS2 events for: ${readbackMissingTags.join(', ')}`,
+							message: repairErr?.message || `Assessment setup is taking a little longer. Some sections are still not available in DHIS2: ${readbackMissingTags.join(', ')}`,
 							missingTags: readbackMissingTags,
 							expectedCount: expectedTags.length,
 							verifiedCount: expectedTags.length - readbackMissingTags.length,
@@ -2181,7 +2396,7 @@ export function Dashboard() {
 	            Object.entries(readbackTagMap).forEach(([tag, readbackEventId]) => {
 	                if (!expectedTags.includes(tag) || !readbackEventId) return;
 	                if (eventIdMap[tag] && eventIdMap[tag] !== readbackEventId) {
-					setCreateDetails(prev => [...prev, `SYS_TAG ${tag} readback returned ${readbackEventId}; using readback ID instead of local generated ID ${eventIdMap[tag]}.`]);
+					setCreateDetails(prev => [...prev, `Section ${tag} is now available in DHIS2; using the confirmed event ID.`]);
 	                }
 	            });
 
@@ -2205,12 +2420,13 @@ export function Dashboard() {
 				eventIdMap: verifiedEventIdMap,
                 surveyType: initSurveyType,
                 facilityGroup: ns,
+	                programStageId: stageId,
                 detailsDataValues: assessmentDetailsDataValues,
             });
         } catch (err) {
             console.error('Failed to create baseline event:', err);
             const info = err?.createErrorInfo || (() => {
-                const match = String(err?.message || '').match(/Missing DHIS2 events for:\s*(.*)$/i);
+                const match = String(err?.message || '').match(/(?:Missing DHIS2 events for:|not available in DHIS2:)\s*(.*)$/i);
                 const missingTags = match?.[1] ? match[1].split(',').map(s => s.trim()).filter(Boolean) : [];
                 return {
                     message: err?.message || 'Failed to initialize assessment.',
@@ -2237,8 +2453,8 @@ export function Dashboard() {
         try {
             setIsBaselineCreating(true);
             setCreateErrorInfo(null);
-            setCreateProgress({ current: 0, total: 1, message: 'Repairing missing assessment events...' });
-            setCreateDetails(prev => [...prev, 'Starting assessment repair...']);
+            setCreateProgress({ current: 0, total: 1, message: 'Completing remaining setup steps...' });
+            setCreateDetails(prev => [...prev, 'Continuing assessment setup...']);
             const repaired = await repairAssessmentBundle({
                 assessment: pendingProvisionedBundle.assessment,
                 teiId: pendingProvisionedBundle.teiId,
@@ -2251,7 +2467,7 @@ export function Dashboard() {
             });
             const repairedEventMap = { ...(pendingProvisionedBundle.eventIdMap || {}), ...(repaired.tagMap || {}) };
             setPendingProvisionedBundle(null);
-            showToast?.('Missing assessment events repaired successfully.', 'success');
+            showToast?.('Assessment setup completed successfully.', 'success');
             finalizeProvisionedAssessmentOpen({
                 assessment: pendingProvisionedBundle.assessment,
                 teiId: pendingProvisionedBundle.teiId,
@@ -2264,20 +2480,21 @@ export function Dashboard() {
                     enrollmentId: pendingProvisionedBundle.enrollmentId,
                     surveyTypeValue: repaired.surveyType || pendingProvisionedBundle.surveyType,
                     facilityGroupKey: repaired.facilityGroup || pendingProvisionedBundle.facilityGroup,
+	                    programStageId: pendingProvisionedBundle.programStageId || getSurveyProgramStageIdForGroup(repaired.facilityGroup || pendingProvisionedBundle.facilityGroup),
                     assessorUserId: user?.id || null,
                 }),
             });
         } catch (err) {
-            const match = String(err?.message || '').match(/Missing DHIS2 events for:\s*(.*)$/i);
+            const match = String(err?.message || '').match(/(?:Missing DHIS2 events for:|not available in DHIS2:)\s*(.*)$/i);
             const missingTags = match?.[1] ? match[1].split(',').map(s => s.trim()).filter(Boolean) : [];
             setCreateErrorInfo({
-                message: err?.message || 'Assessment repair failed.',
+                message: err?.message || 'Assessment setup could not be completed yet.',
                 missingTags,
                 expectedCount: pendingProvisionedBundle?.facilityGroup ? getExpectedTagsForGroup(pendingProvisionedBundle.facilityGroup).length : null,
                 verifiedCount: pendingProvisionedBundle?.facilityGroup && missingTags.length > 0 ? (getExpectedTagsForGroup(pendingProvisionedBundle.facilityGroup).length - missingTags.length) : null,
             });
-            setCreateDetails(prev => [...prev, `Error: ${err?.message || 'Assessment repair failed.'}`]);
-            showToast?.(err?.message || 'Assessment repair failed.', 'error');
+            setCreateDetails(prev => [...prev, `Notice: ${err?.message || 'Assessment setup could not be completed yet.'}`]);
+            showToast?.(err?.message || 'Assessment setup could not be completed yet.', 'warning');
         } finally {
             setIsBaselineCreating(false);
             setCreateProgress(null);
@@ -2288,7 +2505,7 @@ export function Dashboard() {
         const teiId = ev?.trackedEntityInstance || resolveTeiForAssessment(assessment);
         const orgUnitId = ev?.orgUnit || resolveOrgUnitForAssessment(assessment);
         if (!teiId || !orgUnitId) {
-            showToast?.('Cannot repair this assessment because TEI or org unit is missing.', 'error');
+            showToast?.('Cannot continue setup for this assessment because TEI or org unit is missing.', 'error');
             return;
         }
         setRepairingAssessments(prev => ({ ...prev, [teiId]: true }));
@@ -2301,9 +2518,9 @@ export function Dashboard() {
                 surveyType: surveyTypeValue,
             });
             await loadAssociatedEvents(assessment);
-            showToast?.(`Repaired missing events for assessment ${teiId}.`, 'success');
+            showToast?.(`Completed remaining setup steps for assessment ${teiId}.`, 'success');
         } catch (err) {
-            showToast?.(err?.message || 'Failed to repair assessment events.', 'error');
+            showToast?.(err?.message || 'Failed to complete the remaining setup steps for this assessment.', 'error');
         } finally {
             setRepairingAssessments(prev => ({ ...prev, [teiId]: false }));
         }
@@ -2467,11 +2684,6 @@ export function Dashboard() {
 		            const updated = updater(existingBundle);
 		            if (!updated) return prevBundles;
 		            const nextBundles = { ...bundles, [activeId]: updated };
-		            try {
-		                localStorage.setItem('qims_config_bundles', JSON.stringify(nextBundles));
-		            } catch (e) {
-		                console.error('Failed to persist configuration bundles', e);
-		            }
 		            return nextBundles;
 		        });
 		    };
@@ -2648,11 +2860,6 @@ export function Dashboard() {
 		        const clonedBundle = JSON.parse(JSON.stringify(sourceBundle));
 		        setConfigBundles(prev => {
 		            const next = { ...(prev || {}), [newVersion.id]: clonedBundle };
-		            try {
-		                localStorage.setItem('qims_config_bundles', JSON.stringify(next));
-		            } catch (e) {
-		                console.error('Failed to persist configuration bundles for new version', e);
-		            }
 		            return next;
 		        });
 		        setShowNewVersionDialog(false);
@@ -2868,13 +3075,13 @@ export function Dashboard() {
                                             <p>Enrollment: {assessment.enrollment}</p>
                                         </div>
 		                                        <div className="form-actions">
-		                                            {(isCheckingPresence || !hasAssessmentEvent || isLead) && (
+			                                            {(isCheckingPresence || hasAssessmentEvent || isLead) && (
 		                                                <button
-		                                                    className="btn btn-primary btn-sm"
+			                                                    className={`btn ${hasAssessmentEvent ? 'btn-secondary' : 'btn-primary'} btn-sm`}
 		                                                    disabled={isCheckingPresence || isInitiating}
-		                                                    onClick={() => handleInitiateSurvey(assessment, { selfOnly: hasAssessmentEvent })}
+			                                                    onClick={() => hasAssessmentEvent ? handleOpenAssessment(assessment) : handleInitiateSurvey(assessment)}
 		                                                >
-		                                                    {isCheckingPresence ? 'Checking assessment…' : (isInitiating ? 'Opening…' : 'Initiate Survey')}
+			                                                    {isCheckingPresence ? 'Checking assessment…' : (isInitiating ? 'Opening…' : (hasAssessmentEvent ? 'Update Survey' : 'Initiate Survey'))}
 		                                                </button>
 		                                            )}
 	                                        </div>
@@ -2953,6 +3160,38 @@ export function Dashboard() {
 	                                    const presence = assessmentEventPresenceByKey?.[assocKey];
 	                                    const hasAssessmentEvent = presence?.hasAssessmentEvent === true;
 	                                    const isCheckingPresence = !presence || presence.loading;
+	                                    const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
+	                                    const isLead = /LEAD|LEADER/.test(roleNorm);
+	                                    const singleAssessmentUiState = {
+	                                        hasAssessmentEvent,
+	                                        isCheckingPresence,
+	                                        isLead,
+		                                        label: hasAssessmentEvent ? 'Update Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey')),
+	                                    };
+	                                    const groupedSchedules = assessment._duplicates?.length > 1
+	                                        ? (() => {
+	                                            const uniqueSchedules = [];
+	                                            const seenScheduleKeys = new Map();
+	                                            (assessment._duplicates || []).forEach(item => {
+	                                                const scheduleKey = getAssessmentActionKey(item);
+	                                                const existingSchedule = seenScheduleKeys.get(scheduleKey);
+	                                                if (existingSchedule) {
+	                                                    existingSchedule._duplicates.push(item);
+	                                                    return;
+	                                                }
+	                                                const scheduleItem = { ...item, _duplicates: [item] };
+	                                                uniqueSchedules.push(scheduleItem);
+	                                                seenScheduleKeys.set(scheduleKey, scheduleItem);
+	                                            });
+	                                            return uniqueSchedules;
+	                                        })()
+	                                        : [];
+		                                    const cardOpenTarget = groupedSchedules.find(item => canOpenAssessmentFromUiState(getAssessmentUiState(item), { allowWhileChecking: true }))
+	                                        || groupedSchedules[0]
+	                                        || assessment;
+	                                    const cardOpenUiState = cardOpenTarget === assessment
+	                                        ? singleAssessmentUiState
+	                                        : getAssessmentUiState(cardOpenTarget);
 
                                     // Robust Facility ID display
                                     const facilityId = assessment.facilityId || assessment.orgUnitId || assessment.orgUnit || '';
@@ -2968,7 +3207,20 @@ export function Dashboard() {
 		                                        : 'N/A';
 
                                     return (
-                                        <div key={assessment.eventId} className="form-item assessment-item">
+	                                        <div
+	                                            key={assessment.eventId}
+	                                            className="form-item assessment-item"
+		                                            onClick={() => openAssessmentFromUiState(cardOpenTarget, cardOpenUiState, { allowWhileChecking: true })}
+	                                            onKeyDown={(e) => {
+	                                                if (e.key === 'Enter' || e.key === ' ') {
+	                                                    e.preventDefault();
+		                                                    openAssessmentFromUiState(cardOpenTarget, cardOpenUiState, { allowWhileChecking: true });
+	                                                }
+	                                            }}
+	                                            role="button"
+	                                            tabIndex={0}
+		                                            style={{ cursor: canOpenAssessmentFromUiState(cardOpenUiState, { allowWhileChecking: true }) ? 'pointer' : 'default' }}
+	                                        >
                                             <div className="form-info">
                                                 <div className="form-header-row">
                                                     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -3000,7 +3252,10 @@ export function Dashboard() {
 	                                                                    <div style={{ marginTop: '6px' }}>
 	                                                                        <button
 	                                                                            className="btn btn-secondary btn-sm"
-	                                                                            onClick={() => openTeamDialog(assessment)}
+	                                                                            onClick={(e) => {
+	                                                                                e.stopPropagation();
+	                                                                                openTeamDialog(assessment);
+	                                                                            }}
 	                                                                        >
 	                                                                            Team ({Array.isArray(assessment.team) ? assessment.team.length : 0})
 	                                                                        </button>
@@ -3029,19 +3284,7 @@ export function Dashboard() {
                                                 </div>
 		                                            {assessment._duplicates?.length > 1 ? (
 		                                                (() => {
-		                                                    const uniqueSchedules = [];
-		                                                    const seenScheduleKeys = new Map();
-		                                                    (assessment._duplicates || []).forEach(item => {
-		                                                        const scheduleKey = getAssessmentActionKey(item);
-		                                                        const existingSchedule = seenScheduleKeys.get(scheduleKey);
-		                                                        if (existingSchedule) {
-		                                                            existingSchedule._duplicates.push(item);
-		                                                            return;
-		                                                        }
-		                                                        const scheduleItem = { ...item, _duplicates: [item] };
-		                                                        uniqueSchedules.push(scheduleItem);
-		                                                        seenScheduleKeys.set(scheduleKey, scheduleItem);
-		                                                    });
+		                                                    const uniqueSchedules = groupedSchedules;
 			                                                    const facilityIsLead = uniqueSchedules.some(item => {
 			                                                        const roleNorm = String(item.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i, '').toUpperCase();
 			                                                        return /LEAD|LEADER/.test(roleNorm);
@@ -3054,7 +3297,20 @@ export function Dashboard() {
 		                                                                    <div
 		                                                                        key={`${scheduleUi.actionKey}-${scheduleIndex}`}
 			                                                                        className="assessment-schedule-card"
-			                                                                        style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px', background: '#f8fafc', minWidth: 0, maxWidth: '100%', boxSizing: 'border-box' }}
+		                                                                        onClick={(e) => {
+		                                                                            e.stopPropagation();
+		                                                                            openAssessmentFromUiState(scheduledAssessment, scheduleUi, { allowWhileChecking: true });
+		                                                                        }}
+	                                                                        onKeyDown={(e) => {
+	                                                                            if (e.key === 'Enter' || e.key === ' ') {
+	                                                                                e.preventDefault();
+		                                                                                e.stopPropagation();
+		                                                                                openAssessmentFromUiState(scheduledAssessment, scheduleUi, { allowWhileChecking: true });
+	                                                                            }
+	                                                                        }}
+	                                                                        role="button"
+	                                                                        tabIndex={0}
+		                                                                        style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px', background: '#f8fafc', minWidth: 0, maxWidth: '100%', boxSizing: 'border-box', cursor: canOpenAssessmentFromUiState(scheduleUi, { allowWhileChecking: true }) ? 'pointer' : 'default' }}
 		                                                                    >
 			                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', minWidth: 0 }}>
 			                                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
@@ -3081,7 +3337,10 @@ export function Dashboard() {
 		                                                                            <div className="form-actions" style={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
 		                                                                                <button
 		                                                                                    className="btn btn-secondary btn-sm"
-		                                                                                    onClick={() => openTeamDialog(scheduledAssessment)}
+	                                                                                    onClick={(e) => {
+	                                                                                        e.stopPropagation();
+	                                                                                        openTeamDialog(scheduledAssessment);
+	                                                                                    }}
 		                                                                                >
 		                                                                                    Team ({Array.isArray(scheduledAssessment.team) ? scheduledAssessment.team.length : 0})
 		                                                                                </button>
@@ -3089,13 +3348,18 @@ export function Dashboard() {
 		                                                                            </div>
 		                                                                        </div>
 
-			                                                                        <p className="assessment-details-line" style={{ margin: '10px 0 0', color: '#475569' }}>
-		                                                                            Date: {scheduleUi.latestAuth}
-		                                                                            {' '}| Authorised: {scheduleUi.authStart} to {scheduleUi.authEnd}
-		                                                                            {' '}| OU: {scheduledAssessment.orgUnit}
-		                                                                            {' '}| Enr: {scheduledAssessment.enrollment || scheduledAssessment.eventId}
-		                                                                            {' '}| TEI: {scheduledAssessment.scheduleTeiId || scheduledAssessment.trackedEntityInstance}
-		                                                                        </p>
+				                                                                        <p className="assessment-details-line" style={{ margin: '10px 0 0', color: '#475569' }}>
+			                                                                            Assessment ID: {scheduledAssessment.enrollment || scheduledAssessment.eventId || '-'}
+			                                                                            {' '}| Program: {getAssignmentProgramId(scheduledAssessment)}
+			                                                                            {' '}| Stage: {getAssignmentProgramStageId(scheduledAssessment)}
+			                                                                            {' '}| TEI: {scheduledAssessment.scheduleTeiId || scheduledAssessment.trackedEntityInstance || '-'}
+			                                                                            {' '}| Date: {scheduleUi.latestAuth}
+			                                                                            {' '}| Authorised: {scheduleUi.authStart} to {scheduleUi.authEnd}
+			                                                                            {' '}| Facility type: {getAssignmentFacilityGroupValue(scheduledAssessment)}
+			                                                                            {' '}| Type: {getAssignmentTypeValue(scheduledAssessment)}
+			                                                                            {' '}| Status: {formatAssignmentStatusLabel(scheduledAssessment.statusCode || scheduledAssessment.status)}
+			                                                                            {' '}| OU: {scheduledAssessment.orgUnit || '-'}
+			                                                                        </p>
 
 		                                                                        {!scheduleUi.isCheckingPresence && scheduleUi.label === 'Initiate Survey' && !scheduleUi.isLead && (
 		                                                                            <div style={{ marginTop: '8px', color: '#9A3412', fontSize: '0.9em' }}>
@@ -3105,13 +3369,24 @@ export function Dashboard() {
 		                                                                    </div>
 		                                                                );
 		                                                            })}
-			                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-			                                                                <button className="btn btn-secondary btn-sm" onClick={() => toggleExpandAssessment(assessment)}>
+				                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+				                                                                <button
+				                                                                    type="button"
+				                                                                    className="btn btn-secondary btn-sm"
+				                                                                    onClick={(e) => {
+				                                                                        e.stopPropagation();
+				                                                                        toggleExpandAssessment(assessment);
+				                                                                    }}
+				                                                                >
 			                                                                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
 			                                                                </button>
 			                                                            </div>
 			                                                            {expandedAssignments[getAssocKey(assessment)] && (
-			                                                                <div className="associated-assessments-panel" style={{ width: '100%', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
+				                                                                <div
+				                                                                    className="associated-assessments-panel"
+				                                                                    onClick={(e) => e.stopPropagation()}
+				                                                                    style={{ width: '100%', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}
+				                                                                >
 			                                                                    {renderAssociatedAssessmentsPanel(assessment, facilityIsLead)}
 			                                                                </div>
 			                                                            )}
@@ -3120,39 +3395,25 @@ export function Dashboard() {
 		                                                })()
 		                                            ) : (
 		                                                <>
-		                                            {(() => {
-	                                                // Only show this initiation description when the authorised
-	                                                // TEI does not yet have a main survey assessment event.
-	                                                const needsInitiation = presence?.hasAssessmentEvent === false;
-	                                                if (!needsInitiation) return null;
-
-                                                // Compute latest authorised window from team events (per OU)
-                                                const evs = Array.isArray(assessment.team) ? assessment.team : [];
-                                                const parseDate = (d) => (d ? new Date(d) : null);
-                                                const dates = evs
-                                                    .map(e => parseDate(e.eventDate || e.occurredAt || e.completedDate || e.scheduledAt || e.updatedAt))
-                                                    .filter(Boolean)
-                                                    .sort((a,b) => a - b);
-                                                const authStart = dates[0] ? dates[0].toISOString().slice(0,10) : (plannedDate || 'N/A');
-                                                const authEnd = dates.length ? dates[dates.length-1].toISOString().slice(0,10) : (lastUpdated || 'N/A');
-                                                const latestAuth = dates.length ? dates[dates.length-1].toISOString().slice(0,10) : (assessment.sortDate || 'N/A');
-                                                return (
-                                                    <p>
-                                                        Date: {latestAuth}
-                                                        {' '}| Authorised: {authStart} to {authEnd}
-                                                        {' '}| OU: {assessment.orgUnit}
-                                                        {' '}| Enr: {assessment.eventId}
-                                                        {' '}| TEI: {assessment.scheduleTeiId || assessment.trackedEntityInstance}
-                                                    </p>
-                                                );
-                                            })()}
+				                                            <p className="assessment-details-line">
+				                                                Assessment ID: {assessment.enrollment || assessment.eventId || '-'}
+				                                                {' '}| Program: {getAssignmentProgramId(assessment)}
+				                                                {' '}| Stage: {getAssignmentProgramStageId(assessment)}
+				                                                {' '}| TEI: {assessment.scheduleTeiId || assessment.trackedEntityInstance || '-'}
+				                                                {' '}| Date: {singleAssessmentUiState.latestAuth}
+				                                                {' '}| Authorised: {singleAssessmentUiState.authStart} to {singleAssessmentUiState.authEnd}
+				                                                {' '}| Facility type: {getAssignmentFacilityGroupValue(assessment)}
+				                                                {' '}| Type: {getAssignmentTypeValue(assessment)}
+				                                                {' '}| Status: {formatAssignmentStatusLabel(assessment.statusCode || assessment.status)}
+				                                                {' '}| OU: {assessment.orgUnit || '-'}
+				                                            </p>
                                             <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                <button className="btn btn-secondary btn-sm" onClick={() => toggleExpandAssessment(assessment)}>
+	                <button className="btn btn-secondary btn-sm" onClick={(e) => { e.stopPropagation(); toggleExpandAssessment(assessment); }}>
                     {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
                 </button>
             </div>
             {expandedAssignments[getAssocKey(assessment)] && (
-                <div style={{ marginTop: '10px', width: '100%', background: '#f8f9fa', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
+	                <div onClick={(e) => e.stopPropagation()} style={{ marginTop: '10px', width: '100%', background: '#f8f9fa', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
                     {assessment._duplicates && assessment._duplicates.length > 1 && (
                         <div style={{ marginBottom: '10px', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
                             <div style={{ fontWeight: 600, color: '#374151', marginBottom: '4px' }}>
@@ -3333,9 +3594,14 @@ export function Dashboard() {
                                                                                                 const baselineDate = ev._baselineDate || null;
                                                                                                 const ou = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || '';
                                                                                                 const tei = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
+	                                                                                                const facilityGroup = getGroupValue(ev);
+	                                                                                                const reportProgramStageId = ev.programStage || ev.programStageId || getSurveyProgramStageIdForGroup(facilityGroup);
                                                                                                 const q = new URLSearchParams({
                                                                                                     facilityId: ou || '',
                                                                                                     teiId: tei || '',
+	                                                                                                    programId: ev.programId || configuration?.program?.id || 'G2gULe4jsfs',
+	                                                                                                    programStageId: reportProgramStageId || '',
+	                                                                                                    facilityGroup: facilityGroup || '',
                                                                                                     start: baselineDate || '',
                                                                                                     end: ev._assessmentDate || ev.eventDate || '',
                                                                                                     eventId: ev._displayEventId || ev.event || ''
@@ -3376,7 +3642,7 @@ export function Dashboard() {
 	                                                    }
 	                                                    const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
 	                                                    const isLead = /LEAD|LEADER/.test(roleNorm);
-		                                                    const label = hasAssessmentEvent ? 'Initiate Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
+		                                                    const label = hasAssessmentEvent ? 'Update Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
 		                                                    if (label === 'Initiate Survey' && !isLead) return null;
 		                                                    const selfOnly = hasAssessmentEvent && label === 'Initiate Survey';
 	                                                    const onClick = () => {
@@ -3386,7 +3652,10 @@ export function Dashboard() {
                                                         <button
 			                                                            className={`btn ${label === 'Initiate Survey' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
 		                                                            disabled={label === 'Initiate Survey' && isInitiating}
-                                                            onClick={onClick}
+	                                                            onClick={(e) => {
+	                                                                e.stopPropagation();
+	                                                                onClick();
+	                                                            }}
                                                         >
 		                                                            {label === 'Initiate Survey' && isInitiating ? 'Opening…' : label}
                                                         </button>
@@ -4190,17 +4459,27 @@ export function Dashboard() {
                             select
 	                            label="Facility Type"
                             value={initFacilityGroup}
-                            onChange={e => { 
-                                const v = e.target.value; 
-                                setInitFacilityGroup(v); 
-                                setInitSeOptions(buildSeOptions(v)); 
-                                setInitAssignments({}); 
-                                if (configSource === 'datastore' && isOnline) {
-                                    loadRemoteConfig();
-                                }
-                            }}
+	                            onChange={async e => { 
+	                                const v = e.target.value; 
+	                                setInitFacilityGroup(v); 
+	                                setInitAssignments({});
+	                                setInitMetadataLoading(true);
+	                                try {
+	                                    const metadata = await ensureSurveyMetadataForGroup(v);
+	                                    setInitSeOptions(buildSeOptions(v, metadata));
+	                                    if (configSource === 'datastore' && isOnline) {
+	                                        loadRemoteConfig();
+	                                    }
+	                                } catch (err) {
+	                                    console.error('Failed to load metadata for selected facility type', err);
+	                                    showToast?.('Failed to load survey questions for the selected Facility Type.', 'error');
+	                                    setInitSeOptions(buildSeOptions(v));
+	                                } finally {
+	                                    setInitMetadataLoading(false);
+	                                }
+	                            }}
                             size="small"
-	                            disabled={isBaselineCreating || lockGroup}
+		                            disabled={isBaselineCreating || initMetadataLoading || lockGroup}
                         >
                             <MenuItem value="">Select...</MenuItem>
                             <MenuItem value={'HOSPITAL'}>Hospital</MenuItem>
@@ -4209,21 +4488,9 @@ export function Dashboard() {
                             <MenuItem value={'MORTUARY'}>Mortuary</MenuItem>
                         </TextField>
                     </div>
-                  	                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (
-	                        <div style={{
-	                            position: 'fixed',
-	                            top: 0,
-	                            left: 0,
-	                            width: '100vw',
-	                            height: '100vh',
-	                            background: 'rgba(0, 0, 0, 0.6)',
-	                            backdropFilter: 'blur(4px)',
-	                            display: 'flex',
-	                            alignItems: 'center',
-	                            justifyContent: 'center',
-	                            zIndex: 9999
-	                        }}>
-	                            <div style={{ padding: '24px', borderRadius: 12, background: '#ffffff', border: '1px solid #e2e8f0', width: '90%', maxWidth: '500px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)' }}>
+	                  	                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (
+		                        <div className="create-progress-overlay">
+		                            <div className={`create-progress-card ${isBaselineCreating ? 'is-running' : ''}`}>
 	                                {createProgress && (() => {
 	                                    const progressPercent = createProgress.total > 0
 	                                        ? Math.min(100, Math.max(0, Math.round((createProgress.current / createProgress.total) * 100)))
@@ -4231,38 +4498,73 @@ export function Dashboard() {
 	                                    const displayStep = createProgress.total > 0
 	                                        ? Math.min(createProgress.total, Math.max(1, createProgress.current))
 	                                        : createProgress.current;
+				                                    const progressMessage = String(createProgress.message || 'Working...');
+				                                    const isFinalizingSetup =
+				                                        displayStep >= 3 ||
+				                                        /setup check|remaining setup|still preparing|setup complete|automatic setup completion|not available in dhis2/i.test(`${progressMessage} ${createDetails.join(' ')}`);
+		                                    const latestDetail = createDetails[createDetails.length - 1] || progressMessage;
+		                                    const elapsedLabel = createElapsedSeconds >= 60
+		                                        ? `${Math.floor(createElapsedSeconds / 60)}m ${createElapsedSeconds % 60}s`
+		                                        : `${createElapsedSeconds}s`;
+				                                    const phaseLabel = isFinalizingSetup
+				                                        ? 'Preparing remaining assessment sections'
+		                                        : progressPercent >= 67
+		                                            ? 'Verifying DHIS2 event visibility'
+		                                            : 'Creating enrollment and event bundle';
 	                                    return (
-	                                        <div>
-	                                            <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, alignItems: 'flex-start', marginBottom: 16 }}>
-	                                                <div>
-	                                                    <div style={{ fontSize: '1.1rem', color: '#0f172a', fontWeight: 800 }}>
-	                                                        {isBaselineCreating ? 'Creating assessment in DHIS2' : 'Assessment setup'}
-	                                                    </div>
-	                                                    <div style={{ fontSize: '0.95rem', color: '#2563eb', marginTop: 4, fontWeight: 500 }}>
-	                                                        {createProgress.message}
-	                                                    </div>
-	                                                </div>
-	                                                <div style={{ fontSize: '0.9rem', color: '#1e40af', fontWeight: 700, whiteSpace: 'nowrap', background: '#eff6ff', padding: '4px 8px', borderRadius: '6px' }}>
-	                                                    {progressPercent}% · Step {displayStep} of {createProgress.total}
-	                                                </div>
-	                                            </div>
-	                                            <LinearProgress variant="determinate" value={progressPercent} style={{ height: 8, borderRadius: 4 }} />
-	                                            <div style={{ marginTop: 12, fontSize: '0.85rem', color: '#64748b' }}>
-	                                                Please keep this window open. The app is creating the enrollment, assessment events, and event map.
-	                                            </div>
+		                                        <div className="create-progress-main">
+		                                            <div className="create-progress-header">
+		                                                <div className="create-progress-title-wrap">
+		                                                    <div className="create-progress-spinner" aria-hidden="true" />
+		                                                    <div>
+		                                                        <div className="create-progress-title">
+		                                                            {isBaselineCreating ? 'Creating assessment in DHIS2' : 'Assessment setup'}
+		                                                        </div>
+		                                                        <div className="create-progress-message">
+		                                                            {progressMessage}
+		                                                        </div>
+		                                                    </div>
+		                                                </div>
+		                                                <div className="create-progress-badge">
+		                                                    <span className="create-progress-live-dot" />
+		                                                    {progressPercent}% · Step {displayStep} of {createProgress.total}
+		                                                </div>
+		                                            </div>
+		                                            <LinearProgress
+		                                                variant="determinate"
+		                                                value={progressPercent}
+		                                                className={`create-progress-bar ${isBaselineCreating ? 'is-running' : ''}`}
+		                                            />
+		                                            <div className="create-progress-meta-grid">
+		                                                <div className="create-progress-meta-card">
+		                                                    <span>Current phase</span>
+		                                                    <strong>{phaseLabel}</strong>
+		                                                </div>
+		                                                <div className="create-progress-meta-card">
+		                                                    <span>Elapsed time</span>
+		                                                    <strong>{elapsedLabel}</strong>
+		                                                </div>
+		                                            </div>
+		                                            <div className="create-progress-latest">
+		                                                <span className="create-progress-latest-label">Latest update</span>
+		                                                <span>{latestDetail}</span>
+		                                            </div>
+		                                            <div className="create-progress-hint">
+		                                                Please keep this window open. DHIS2 can take a moment to index events; the app is still working and will open the assessment automatically.
+		                                            </div>
 	                                        </div>
 	                                    );
 	                                })()}
 
-	                                {createErrorInfo && (
-	                                    <div style={{ marginTop: 16, padding: '12px 14px', borderRadius: 8, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b' }}>
-	                                        <div style={{ fontWeight: 700, marginBottom: 6 }}>Provisioning issue</div>
+		                                {createErrorInfo && (
+		                                    <div style={{ marginTop: 16, padding: '12px 14px', borderRadius: 8, background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e' }}>
+		                                        <div style={{ fontWeight: 700, marginBottom: 6 }}>Setup needs a little longer</div>
 	                                        <div style={{ marginBottom: 6 }}>{createErrorInfo.message}</div>
 	                                        {Array.isArray(createErrorInfo.missingTags) && createErrorInfo.missingTags.length > 0 && (
 	                                            <div style={{ fontSize: '0.9rem' }}>
-	                                                <div><strong>Missing DHIS2 event tags:</strong> {createErrorInfo.missingTags.join(', ')}</div>
+		                                                <div><strong>Sections still being prepared:</strong> {createErrorInfo.missingTags.join(', ')}</div>
 	                                                {Number.isFinite(createErrorInfo.verifiedCount) && Number.isFinite(createErrorInfo.expectedCount) && (
-	                                                    <div style={{ marginTop: 4 }}><strong>Verified:</strong> {createErrorInfo.verifiedCount} / {createErrorInfo.expectedCount}</div>
+		                                                    <div style={{ marginTop: 4 }}><strong>Ready so far:</strong> {createErrorInfo.verifiedCount} / {createErrorInfo.expectedCount}</div>
 	                                                )}
 	                                            </div>
 	                                        )}
@@ -4283,9 +4585,9 @@ export function Dashboard() {
 	                                            </div>
 	                                        )}
 	                                        <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-	                                            {pendingProvisionedBundle && (
-	                                                <Button size="small" variant="outlined" color="error" onClick={handleRepairProvisionedBundle} disabled={isBaselineCreating}>
-	                                                    {isBaselineCreating ? 'Repairing…' : 'Repair missing events & open'}
+		                                            {pendingProvisionedBundle && (
+		                                                <Button size="small" variant="outlined" color="primary" onClick={handleRepairProvisionedBundle} disabled={isBaselineCreating}>
+		                                                    {isBaselineCreating ? 'Finishing setup…' : 'Continue setup & open'}
 	                                                </Button>
 	                                            )}
 	                                            <Button size="small" variant="outlined" style={{ color: '#64748b', borderColor: '#cbd5e1' }} onClick={() => { setIsBaselineCreating(false); setCreateErrorInfo(null); setCreateDetails([]); }}>
@@ -4295,19 +4597,27 @@ export function Dashboard() {
 	                                    </div>
 	                                )}
 
-	                                {createDetails.length > 0 && (
-	                                    <div style={{ marginTop: 16, padding: '12px 14px', borderRadius: 8, background: '#f8fafc', border: '1px solid #e2e8f0' }}>
-	                                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-	                                            <div style={{ fontWeight: 700, color: '#334155' }}>Live activity</div>
-	                                            {isBaselineCreating && <div style={{ fontSize: '0.78rem', color: '#2563eb', fontWeight: 700 }}>Running…</div>}
-	                                        </div>
-	                                        <ul style={{ margin: 0, paddingLeft: '1.1rem', color: '#475569', maxHeight: 140, overflowY: 'auto' }}>
-	                                            {createDetails.map((line, idx) => (
-	                                                <li key={`create-detail-top-${idx}`}>{line}</li>
-	                                            ))}
-	                                        </ul>
-	                                    </div>
-	                                )}
+		                                {createDetails.length > 0 && (
+		                                    <div className="create-progress-activity">
+		                                        <div className="create-progress-activity-header">
+		                                            <div>Live activity</div>
+		                                            {isBaselineCreating && (
+		                                                <div className="create-progress-running-label">
+		                                                    <span className="create-progress-live-dot" /> Running<span className="create-progress-dots">...</span>
+		                                                </div>
+		                                            )}
+		                                        </div>
+		                                        <div className="create-progress-log" role="log" aria-live="polite">
+		                                            {createDetails.slice(-80).map((line, idx) => (
+		                                                <div className="create-progress-log-line" key={`create-detail-top-${idx}`}>
+		                                                    <span className="create-progress-log-bullet" />
+		                                                    <span>{line}</span>
+		                                                </div>
+		                                            ))}
+		                                            <div ref={createDetailsEndRef} />
+		                                        </div>
+		                                    </div>
+		                                )}
 	                            </div>
 	                        </div>
 	                    ) : null}
@@ -4374,7 +4684,7 @@ export function Dashboard() {
                     >
                         {initEditAssignmentsOnly
                             ? (isBaselineCreating ? 'Saving…' : 'Save Assignments')
-                            : (isBaselineCreating ? (pendingProvisionedBundle ? 'Repairing…' : 'Creating...') : (pendingProvisionedBundle ? 'Repair missing events & open' : 'Create & Open'))}
+	                            : (isBaselineCreating ? (pendingProvisionedBundle ? 'Finishing setup…' : 'Creating...') : (pendingProvisionedBundle ? 'Continue setup & open' : 'Create & Open'))}
                     </Button>
                 </DialogActions>
             </Dialog>
@@ -4608,3 +4918,4 @@ export function Dashboard() {
         </div>
     );
 }
+    
