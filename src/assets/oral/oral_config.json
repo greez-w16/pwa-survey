@@ -1,0 +1,1359 @@
+{
+  "service": "oral",
+  "service_elements": [
+    {
+      "se_id": 1,
+      "se_name": "Human Resource Management",
+      "source_file": "Personnel Record audit tool- Oral Health version 1 July 2025.xls",
+      "sections": [
+        {
+          "section_pi_id": "1.1",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "1.1.1",
+              "statement": "The practice's clinical and managerial leaders are identified and are collectively responsible for defining the practice's mission and creating the plans and policies needed to fulfil the mission.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "1.1.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The leaders of the practice are formally or informally identified.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.1.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice has a mission statement that reflects its strategic objectives and matches the needs of the community served.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.1.1.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The leaders are collectively responsible for ensuring that the mission statement is known to all personnel, patients, carers and the community served.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.1.1.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice participates in community health activities.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.1.1.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "The leaders, in liaison with the whole practice team, coordinates the compilation of an annual strategic plan and budget.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.1.1.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "The leaders are collectively responsible for implementing the practice's mission and strategic plan.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.1.1.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "The strategic plan is evaluated on an annual basis.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.1.1.8",
+                  "category": "",
+                  "severity": null,
+                  "description": "Regular monitoring of the implementation of the strategic plan against envisaged timeframes and progress in achieving its objectives is documented at intervals determined by the practice.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.1.1.9",
+                  "category": "",
+                  "severity": null,
+                  "description": "Where appropriate, the leadership roles in various positions are documented, agreed to and known by the personnel.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "1.2",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "1.2.1",
+              "statement": "A manager is responsible for operating the practice within relevant laws and regulations.",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "1.7",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "1.7.1",
+              "statement": "",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "1.7.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "There are documented risk management processes for identifying all risks relating to practice processes and systems, personnel, patients, visitors to the practice and physical facilities.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice manager ensures the development and implementation of written policies and procedures for risk management processes and activities.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.1.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "A nominated individual with relevant qualifications, skills and/or experience supervises the implementation of the risk management programme.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.1.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Ongoing in-service training of all personnel in risk management policies, procedures and principles is documented.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "1.7.2",
+              "statement": "",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "1.7.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "A nominated individual is responsible for infection control in the practice and practice personnel are aware of the nomination.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.2.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.2.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.2.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.2.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.2.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.2.8",
+                  "category": "",
+                  "severity": null,
+                  "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.7.2.9",
+                  "category": "",
+                  "severity": null,
+                  "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 3,
+      "se_name": "Oral Health Interview",
+      "source_file": "Patient Interview audit tool- Oral Health Standards NHQS version 1 July 2025.xls",
+      "sections": [
+        {
+          "section_pi_id": "3.2",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.2.1",
+              "statement": "Patients are informed of the range of services and the processes to access the practice services.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.1",
+              "statement": "Patients are informed of the processes to access the practice services.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.1.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice renders services based on the needs of the population, during the hours that they publish",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.2",
+              "statement": "There is a process for appropriate referral of patients for specialised consultation/investigations at other healthcare facilities.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is a documented process to refer patients.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The lines of communication between the practice, referral facility and community services are clearly defined.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.2.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The clinician informs the patient if he/she has any financial interest in the referral service.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.4",
+              "statement": "At registration, sufficient details are taken from the patient to ensure that the patient can be contacted by the practice when necessary and that the clinician seeing the patient for the first time has sufficient background information to provide adequate care to the patient.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.4.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "New patients to the practice are asked to complete a form detailing at least a) – o) in the standard intent above.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.5",
+              "statement": "Patients can obtain advice or information related to their clinical care by telephone and electronic means.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.5.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice implements a policy on telephonic and electronic communication with patients that details at least a) – e) in the standard intent above.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.5.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is evidence of practice/patient telephone or electronic advice and information in the patient health records.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.5.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice can demonstrate how it receives and returns telephone and electronic messages from patients.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.1",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.1.3",
+              "statement": "The practice takes measures to protect patient privacy.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.1.3.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "When appropriate, patients are permitted to be accompanied by a family member/care-giver during consultations.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.1.5",
+              "statement": "The practice informs patients and their families about the processes which it has instituted to receive and act on complaints, conflicts and differences of opinion about patient care and the patient's right to participate in those processes.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.1.5.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients are aware of their right to voice complaints and the processes by which to do so, internally as well as externally where applicable.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.3",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.3.1",
+              "statement": "Patient and family education promotes the concept of taking responsibility for one's own health care.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.3.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice offers relevant health education to its patients in a planned and consistent manner which enables patients to meet their ongoing health needs and achieve their health goals.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.3.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Posters and pamphlets regarding high risk and commonly treated conditions relevant to the practice population are visibly displayed and accessible in the waiting room and routinely provided to patients during the consultation when appropriate.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.3.1.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Information is provided in a manner and in a language that is understood by those making the care decisions.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.9",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.9.2",
+              "statement": "The practice respects the rights of patients and their families to refuse or discontinue treatment.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.9.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients are informed about their condition and the proposed treatment.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.9.3",
+              "statement": "The practice takes measures to protect patient privacy.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.9.3.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The patient's need for privacy is protected during all examinations, procedures and treatments.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.9.3.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patient privacy is protected when providing personal information.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.9.3.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The patient's right to privacy is protected for all forms of counselling.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.9.3.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "When appropriate, patients are permitted to be accompanied by a family member/care-giver during consultations.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 3,
+      "se_name": "Oral Health Services",
+      "source_file": "Oral Health Patient record audit tool - NHQS version1   05 July 2025.xls",
+      "sections": [
+        {
+          "section_pi_id": "3.1",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.1.1",
+              "statement": "In consultation with the patient, the practice provides care that is consistent with best available evidence and in accordance with patient needs and values.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.1.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The clinical team uses current clinical guidelines relevant to its practice, to assist in the diagnosis and management of patients.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.1.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The clinical team set criteria to select clinical practice guidelines.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.1.1.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The clinical team can describe how they ensure consistency of diagnosis and management of patients.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.2",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.2.1",
+              "statement": "Patients are informed of the range of services and the processes to access the practice services.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "When patients register with the practice they are informed of the range of services offered by the practice, opening hours, contact details and after hours’ care arrangements.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "When patients register with the practice they are informed of the range of services offered by the practice, opening hours, contact details and after hours’ care arrangements.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.1.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "When patients register with the practice they are informed of the range of services offered by the practice, opening hours, contact details and after hours’ care arrangements.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.1.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice renders services based on the needs of the population, during the hours published.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is a documented process to refer patients.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.2",
+              "statement": "There is a process for appropriate referral of patients for specialised consultation/investigations at other healthcare facilities.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The lines of communication between the practice, referral facility and community services are clearly defined.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.2.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The clinician informs the patient if he/she has any financial interest in the referral service.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.2.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients and as appropriate their families are given follow-up instructions which are provided in an understandable form and manner.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.2.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "A copy of the referral note is available in the patient record.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.2.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "The referral is made on appropriate stationery or electronically.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.2.8",
+                  "category": "",
+                  "severity": null,
+                  "description": "The referral contains as a minimum a) – g) in the standard intent above.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.2.9",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice keeps a record of replies received following the referral of patients.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.2.11",
+                  "category": "",
+                  "severity": null,
+                  "description": "Follow-up care based on the findings of investigations/consultations performed outside the practice are noted in the patient record.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.4",
+              "statement": "At registration, sufficient details are taken from the patient to ensure that the patient can be contacted by the practice when necessary and that the clinician seeing the patient for the first time has sufficient background information to provide adequate care to the patient.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.4.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "New patients to the practice are asked to complete a form detailing at least a) – o) in the standard intent above.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.4.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients are asked to update the practice if their contact details change.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.4.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Health funder details are accurately recorded for each new patient when required.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.5",
+              "statement": "Patients can obtain advice or information related to their clinical care by telephone and electronic means.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.5.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice implements a policy on telephonic and electronic communication with patients that details at least a) – e) in the standard intent above.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.5.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is evidence of practice/patient telephone or electronic advice and information in the patient health records.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.6",
+              "statement": "The practice has a system for the follow up and review of tests and results.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.6.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "A documented policy on the review and management of pathology results, imaging reports, investigation reports and other clinical correspondence received by the practice is implemented.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.6.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is evidence of review of the results of procedures and diagnostic tests performed by a Dental practitioner.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.6.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is a system to advise patients of the process to follow up on results.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.6.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "When patients are informed of results over the telephone, the patient is identified with 3 approved identifiers before the information is given.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.6.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "When results are given over the telephone, the result is given to the patient themselves or the patient’s consent is obtained before giving the result to a nominated third party.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.4",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.4.2",
+              "statement": "",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.4.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The Dietician's assessment is documented, dated, and appropriately authenticated by the dietician who performed it",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The nutritional assessment identifies the dietary/nutritional needs of the patient/client.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.2.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The dietitians examination incorporates appropriate history taking, systems review and tests and measures to facilitate outcome measurement.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.2.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "The assessment produces data which is sufficient to allow evaluation, diagnosis, prognosis/plan of care, and determination of interventions/treatment.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.2.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "The nutritional assessment may result in recommendations for additional services to meet the needs of the patient/client",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.2.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "The assessment provides written evidence of the reasons why no further management has been given to the patient/client and, when appropriate, to the carer.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.4.3",
+              "statement": "The Dietician determines the intervensions/treatments and manages the needs of the patient/client based on the examination, diagnosis, evaluation, prognosis/plan anticipated goals and expected outcomes of the planned intervensions/treatment for the identified imparements, activity limitations",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.4.3.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The dietician collaboratively involves the patient and others as appropriate in the planning,implementation,and assessment of the intervension/treatment",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.3.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The intervension/treatment is based on the initial assessment, diagnosis, prognosis and plan, and informed by current evidence",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.3.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The intervention/treatment identifies anticipated goals and expected outcomes describes the proposed intervention/treatment, including frequency and duration",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.3.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "The intervension or treatment includes documentation that is dated and appropriately authenticated by the dietecian who established the plan",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.3.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "Interventions/treatments provided by support personnel is directed and supervised by the principal dietitian",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.3.8",
+                  "category": "",
+                  "severity": null,
+                  "description": "Interventions/treatments provided by support personnel are commensurate with the qualifications and the legal limitations of such personnel",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.3.9",
+                  "category": "",
+                  "severity": null,
+                  "description": "Intervensions/treatments provided by trainee may be altered by the dietician in accordance with patient's response or status",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.3.10",
+                  "category": "",
+                  "severity": null,
+                  "description": "Interventions/treatments provided by trainee includes documentation of the intervention/treatment that is consistant with established guidelines and that is dated appropriately and authenticated by the dietician",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.4.4",
+              "statement": "The dietitian re-assesses the patient/client as necessary during an episode to evaluate progress or change in patient/client status and modifies the plan accordingly or discontinues dietetics services",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.4.4.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The re-assessment is documented,dated and appropriately authenticated by the dietician who performs it",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.4.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The re-assessment includes modifications to the intervensions/treatment or referral to the other practitioner/professionals",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.4.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The dietitian obtains the patients consent for any modifications to the treatment where necessary",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.5",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.5.1",
+              "statement": "The dietitian discharges the patient/client from the services when the anticipated goals or expected outcomes for the patient/client have been achieved or the patient/client status reveals findings outside the scope of knowledge, experience, and/or expertise of the dietitian",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.5.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The dietician discontinues intervension/treatment when the patient/client is unable to continue to progress toward goals or when the dietician determines that the patient/client will no longer benefit from the ditetics service",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The dietician informsthe patient that the patient/client has a right to discontinue treatment/intervensin at any time",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.5.2",
+              "statement": "There is a process for appropriate referral of patients for specialised consultation/investigations at other healthcare facilities.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.5.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is a documented process to refer patients",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The lines of communication between the practice,referral centres and community services are clearly defined",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.2.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Referrals are to specific individuals and or agencies in the patient's home community whereevr possible",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.2.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients and as appropriate their families are given follow-up instructions which are provided in an understandable form and manner.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.2.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "A copy of the referral note is available in the patient record.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.2.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "The referral is made on appropriate stationery or electronically.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.2.8",
+                  "category": "",
+                  "severity": null,
+                  "description": "The referral contains as a minimum a) – f) in the standard intent above",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.2.11",
+                  "category": "",
+                  "severity": null,
+                  "description": "Follow-up care based on the findings of investigations/consultations performed outside the practice is noted in the patient record",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.6",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.6.1",
+              "statement": "The practice has an effective clinical handover system that ensures safe and continuing healthcare delivery for patients.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.6.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is implementation of a documented policy on clinical handover to ensure that standard processes are followed",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients share in decision making regarding the handing over of clinical information",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.1.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Handover of clinical information is recorded in the patients' health records",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.1.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Information relating to those patients requiring special attention, such as the chronically ill or those with infections which require specific infection control measures, is provided in a patient held letter, a copy of which is kept in the patient record",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.6.2",
+              "statement": "The practice provides resuscitation in accordance with practice policy",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.6.2.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patient health records contain reports or notes of dietetics service occurring outside normal opening hours by or on behalf of the practice",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.7",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.7.1",
+              "statement": "Prescribing medications adheres to laws, regulations and professional standards of practice.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.7.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Medication is prescribed and in accordance with legislation and current pharmaceutical, medical and dental guidelines.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.7.1.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "The person prescribing the medication has access to patient information that would contra-indicate prescription of particular medication.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.7.1.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "Controlled medication is prescribed in accordance with legislation and practice policy.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.7.1.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "Verbal/telephonic medication orders are documented in the patient's record.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.7.1.8",
+                  "category": "",
+                  "severity": null,
+                  "description": "Prescriptions conform to all legal requirements.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.8",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.8.1",
+              "statement": "8 The procedure room and sedation services are managed and staffed to provide a safe and effective service.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.8.1.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Sedation is administered only by sedation practitioners who have the necessary qualifications and who have received specific theoretical and supervised practical training, including updated airway certification.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.8.7",
+              "statement": "Patients and their families receive sufficient information to make informed decisions regarding their care.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.8.7.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "A legally valid, informed consent document for surgical or other invasive procedures is completed comprehensively and available in the patient records.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.8.8",
+              "statement": "A pre-sedation assessment is conducted and recorded after evaluation of the medical history questionnaire. Special attention is paid to a focused airway examination.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.8.8.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is a pre-sedation assessment and examination, including evaluation of a medical history questionnaire, to evaluate risk and indication for sedation need for the specific patient.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.8.8.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The medical history questionnaire and preoperative patient assessment are used to assist the sedation practitioner to identify the possible risks of allergic or adverse medication interactions.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.8.8.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The patient/guardian signs for receipt of documented pre- and post-procedure information and instructions.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.8.9",
+              "statement": "Patient safety measures for sedation are implemented intraoperatively and the patient's haemodynamic status is evaluated and recorded on specified documents during sedation and surgery and in the recovery period.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.8.9.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "A qualified sedation practitioner and observer, where indicated, monitor the patient during sedation and during recovery from sedation and documents all parameters monitored.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.8.9.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The patient's haemodynamic status is continuously monitored and recorded during sedation, surgery and recovery.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.8.9.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The sedation medication used is entered on to the patient’s sedation flow-sheet.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.8.9.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Analgesia administered on conclusion of the surgical procedure and during recovery, is documented in the patient's record.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.8.10",
+              "statement": "There is a system to monitor and document each patient's post-sedation status and to safely discharge the patient from the recovery area.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.8.10.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The sedation practitioner is responsible for supervising the recovery period and for discharging the patient according to established criteria.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.8.10.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Monitoring is appropriate to assess the patient's condition during the post-sedation recovery period.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.8.10.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Monitoring findings are documented in the patient's record.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.8.10.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "The sedation practitioner gives permission for the patient to be discharged.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.8.10.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "The sedation practitioner gives permission for the patient to be discharged.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.8.10.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "The sedation practitioner gives permission for the patient to be discharged.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.9",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.9.1",
+              "statement": "The practice has a patient rights policy.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.9.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patient and family rights are identified in a policy and documented in accordance with relevant and current laws, charters and regulations.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.9.2",
+              "statement": "The practice respects the rights of patients and their families to refuse or discontinue treatment.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.9.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients are informed about their condition and the proposed treatment.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.9.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.9.4",
+              "statement": "The practice has a clearly defined process for obtaining consent.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.9.4.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice has a documented policy outlining the procedure for obtaining general consent for treatment.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.9.4.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice has a documented policy outlining the procedure for obtaining consent in the case of patients who are unable to grant consent for themselves by way of age or mental/physical incapacity, which is in accordance with the relevant laws and regulations.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

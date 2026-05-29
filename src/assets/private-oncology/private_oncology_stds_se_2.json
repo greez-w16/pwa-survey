@@ -1,0 +1,577 @@
+{
+  "se_id": 2,
+  "se_name": "Facilities, Equipment and Contracted Services",
+  "sections": [
+    {
+      "section_pi_id": "2.1",
+      "title": "Access to care",
+      "standards": [
+        {
+          "standard_id": "2.1.1",
+          "statement": "Measures are in place to ensure that patient access to the practice is facilitated by adequate infrastructural arrangements.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "2.1.1.1",
+              "category": "",
+              "severity": null,
+              "description": "Directional signs to the practice are clearly readable and up to date.",
+              "is_critical": false,
+              "guideline": "This requirement ensures that members of the public, both locals and visitors, who are not familiar with the location of the practice will be able to find it when necessary."
+            },
+            {
+              "id": "2.1.1.2",
+              "category": "",
+              "severity": null,
+              "description": "A telephone/emergency number is available and provided to patients on registration and on request.",
+              "is_critical": false,
+              "guideline": "This can be in the form of a business card or patient information leaflet. Where the practice does not provide emergency services the emergency number must reflect the closest emergency facility to the practice."
+            },
+            {
+              "id": "2.1.1.3",
+              "category": "",
+              "severity": null,
+              "description": "A phone number for the after-hours service of the practice is clearly displayed on the outside of the facility.",
+              "is_critical": false,
+              "guideline": "Where the practice does not offer an after-hours service, an emergency number must be displayed. Compliance will be verified by observation."
+            },
+            {
+              "id": "2.1.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Parking is provided close to the building entrance for patients, including the physically challenged.",
+              "is_critical": false,
+              "guideline": "Surveyors will make a judgement based on the size of the practice and services provided."
+            },
+            {
+              "id": "2.1.1.5",
+              "category": "",
+              "severity": null,
+              "description": "There is wheelchair access to and within the building.",
+              "is_critical": false,
+              "guideline": "This will be assessed during the visit to each practice."
+            },
+            {
+              "id": "2.1.1.6",
+              "category": "",
+              "severity": null,
+              "description": "Ramps and stairs include safety features such as rails.",
+              "is_critical": false,
+              "guideline": "The provision of such safety features will be assessed during the visit to each practice. Buildings and grounds are maintained and do not pose hazards to the occupants. The construction of the building in terms of walls, ceilings, floors, doors and windows must be sound. The general appearance will be examined for neatness, condition of paintwork, signs of leakage, mould spots etc."
+            }
+          ]
+        },
+        {
+          "standard_id": "2.1.2",
+          "statement": "Functional facilities are available to provide safety and comfort for patients, personnel and other visitors.",
+          "intent_tooltip": "In order to provide safe patient care, each unit requires adequate resources. The building is appropriate for a healthcare practice in terms of size and layout. The physical facilities required include adequate office accommodation for personnel, a designated sluice area which is hygienically clean at all times, treatment and dressing rooms. Cleaning equipment is safely stored in a room or cupboard used for this purpose only. There are adequate toilet facilities for the number of patients as determined by country-specific legislation. There is adequate lighting and ventilation. Each consulting room, which may include an attached examination room/area: • Is free from excessive noise • Has adequate lighting • Is maintained at a comfortable ambient temperature • Ensures patient privacy when the patient needs to undress for a clinical examination (for example the use of adequate curtains or screens and gowns or sheets) 2.1.1.1. Directional signs to the practice are clearly readable and up to date. Guideline statement: This requirement ensures that members of the public, both locals and visitors, who are not familiar with the location of the practice will be able to find it when necessary. 2.1.1.2. A telephone/emergency number is available and provided to patients on registration and on request. Guideline statement: This can be in the form of a business card or patient information leaflet. Where the practice does not provide emergency services the emergency number must reflect the closest emergency facility to the practice. 2.1.1.3. A phone number for the after-hours service of the practice is clearly displayed on the outside of the facility. Guideline statement: Where the practice does not offer an after-hours service, an emergency number must be displayed. Compliance will be verified by observation. 2.1.1.4. Parking is provided close to the building entrance for patients, including the physically challenged. Guideline statement: Surveyors will make a judgement based on the size of the practice and services provided. 2.1.1.5. There is wheelchair access to and within the building. Guideline statement: This will be assessed during the visit to each practice. 2.1.1.6. Ramps and stairs include safety features such as rails. Guideline statement: The provision of such safety features will be assessed during the visit to each practice. Buildings and grounds are maintained and do not pose hazards to the occupants. The construction of the building in terms of walls, ceilings, floors, doors and windows must be sound. The general appearance will be examined for neatness, condition of paintwork, signs of leakage, mould spots etc.",
+          "criteria": [
+            {
+              "id": "2.1.2.1",
+              "category": "",
+              "severity": null,
+              "description": "Laws, regulations and other requirements applicable to the practice’s facilities are implemented and are available to the personnel.",
+              "is_critical": true,
+              "guideline": "A copy of the “Permit to Occupy” issued in terms of the Building Control Regulations must be available during the survey. Where the practice is a tenant, a copy must be obtained from the landlord. Copies of the laws, regulations and other requirements applicable to the structure of the facility should be available and accessible to personnel in either hard copy or electronic format and should include at least the Building Control Act and regulations."
+            },
+            {
+              "id": "2.1.2.2",
+              "category": "",
+              "severity": null,
+              "description": "The building is appropriate as a healthcare facility in terms of size and lay-out.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.1.2.3",
+              "category": "",
+              "severity": null,
+              "description": "The lay-out of the facility allows for effective flow of patient care.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.1.2.4",
+              "category": "",
+              "severity": null,
+              "description": "The waiting area is sufficient to accommodate the usual number of patients and other people who could be waiting at any given time.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation and by examination of daily patient attendance figures."
+            },
+            {
+              "id": "2.1.2.5",
+              "category": "",
+              "severity": null,
+              "description": "The waiting area caters for the specific safety needs of children.",
+              "is_critical": false,
+              "guideline": "This includes for example, no open electrical sockets, measure to prevent children leaving the practice unnoticed, measures to prevent injury from inappropriate toys (ingestion of small objects, sharp protrusions, easily cleanable), measures to secure hazardous substances etc."
+            },
+            {
+              "id": "2.1.2.6",
+              "category": "",
+              "severity": null,
+              "description": "There is at least one consulting/examination room for every member of the clinical team working in the practice at any time.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.1.2.7",
+              "category": "",
+              "severity": null,
+              "description": "All areas of the facility, including consultation rooms are clean, well ventilated and well maintained.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.1.2.8",
+              "category": "",
+              "severity": null,
+              "description": "Sufficient office/administrative space is available for the personnel.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.1.2.9",
+              "category": "",
+              "severity": null,
+              "description": "Toilet/washroom facilities are clean and in working order.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.1.2.10",
+              "category": "",
+              "severity": null,
+              "description": "Separate sanitary facilities are provided for personnel.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.1.2.11",
+              "category": "",
+              "severity": null,
+              "description": "There is a separate, secure area for personnel with adequate secure storage facilities for outdoor clothing, handbags and personal possessions.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.1.2.12",
+              "category": "",
+              "severity": null,
+              "description": "Required furniture is available according to established lists and functioning properly.",
+              "is_critical": false,
+              "guideline": "The practice must compile and maintain an inventory of furniture which must be available at the survey. As a minimum, a practice must have at least the following: • Chairs (in the waiting area, for administrative personnel, for clinical personnel and for patients and families in the treatment areas) • Desks/workstations (sufficient for the size of the practice) • Examination bed (in each examination area) • File cabinets • Locking cabinet (for all confidential documentation) • Refuse bins for domestic waste in each functional area"
+            },
+            {
+              "id": "2.1.2.13",
+              "category": "",
+              "severity": null,
+              "description": "Hand washing facilities, including water, soap and paper towels are available for patients and personnel. 2.2.1. Medical equipment is available and properly maintained to meet the needs of the patient population. Intent of 2.2.1 Practices are responsible for ensuring that appropriate medical equipment is available and ready for use at all times. There is an accountable, systematic approach to ensuring that cost-effective, safe and appropriate medical equipment is available to meet the demands of quality patient care. The practice manager takes responsibility for ensuring that medical equipment is available, appropriately maintained and calibrated and that the relevant personnel are competent to use it. Each practice ensures that it has the required equipment for comprehensive primary care and emergency resuscitation detailed as a minimum below. • Auroscope • Blood glucose monitoring equipment • Diagnostic Set • Disposable syringes and needles • Eye examination equipment (for example, fluorescein staining, ophthalmoscope) • Examination light • Gloves (sterile and non-sterile) • Height measurement device • Measuring tape • Monofilament for sensation testing • Nebulising equipment and supplies • Oxygen • Patella hammer • Peak flow meter • Scales • Spacer for inhaler • Specimen collection equipment • Sphygmomanometer with small medium and large cuffs • Stethoscope • Surgical masks • Thermometer • Torch • Tourniquet • Urine testing strips • Vaginal speculae • Visual acuity charts",
+              "is_critical": true,
+              "guideline": "Compliance will be measured by observation. 2.3.1. Facility maintenance is managed to ensure the provision of a safe and effective service. Intent of 2.3.1 Management ensures that sufficient, competent personnel are available to manage routine and emergency functions and meet the needs of a safe and effective health service. Personnel may be in the employ of the practice or be contracted out. Where there are contracted personnel, there must be clearly specified contracts, outlining their roles and responsibilities."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "2.2",
+      "title": "Medical equipment",
+      "standards": [
+        {
+          "standard_id": "2.2.1",
+          "statement": "Medical equipment is available and properly maintained to meet the needs of the patient population.",
+          "intent_tooltip": "Practices are responsible for ensuring that appropriate medical equipment is available and ready for use at all times. There is an accountable, systematic approach to ensuring that cost-effective, safe and appropriate medical equipment is available to meet the demands of quality patient care. The practice manager takes responsibility for ensuring that medical equipment is available, appropriately maintained and calibrated and that the relevant personnel are competent to use it. Each practice ensures that it has the required equipment for comprehensive primary care and emergency resuscitation detailed as a minimum below. • Auroscope • Blood glucose monitoring equipment • Diagnostic Set • Disposable syringes and needles • Eye examination equipment (for example, fluorescein staining, ophthalmoscope) • Examination light • Gloves (sterile and non-sterile) • Height measurement device • Measuring tape • Monofilament for sensation testing • Nebulising equipment and supplies • Oxygen • Patella hammer • Peak flow meter • Scales • Spacer for inhaler • Specimen collection equipment • Sphygmomanometer with small medium and large cuffs • Stethoscope • Surgical masks • Thermometer • Torch • Tourniquet • Urine testing strips • Vaginal speculae • Visual acuity charts",
+          "criteria": [
+            {
+              "id": "2.2.1.1",
+              "category": "",
+              "severity": null,
+              "description": "Implemented policies and procedures guide the management of medical equipment.",
+              "is_critical": false,
+              "guideline": "Policies and procedures that detail how equipment is to be used, maintained and repaired and the level of personnel training required to use the equipment are implemented."
+            },
+            {
+              "id": "2.2.1.2",
+              "category": "",
+              "severity": null,
+              "description": "A designated individual supervises the management of medical equipment in the practice.",
+              "is_critical": false,
+              "guideline": "The responsibilities of this individual include as a minimum: • Ensuring that the required medical equipment as listed in the standard intent above is available in the practice • Audits on available medical equipment (for example to ensure that it is correctly used, calibrated, stored etc.) • Compiling an inventory of medical equipment, which includes description, make, manufacturer, model, serial number, tracing number, date of purchase, purchase price, list of accessories, supplier details and guarantee expiry dates • Regular inspections of medical equipment • Testing of medical equipment, as appropriate to its use and requirements • Ensuring planned preventative maintenance of equipment"
+            },
+            {
+              "id": "2.2.1.3",
+              "category": "",
+              "severity": null,
+              "description": "There is an inventory of the medical equipment available at the practice.",
+              "is_critical": false,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "2.2.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The supply of medical equipment is adequate to meet the needs of the practice.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified by observation and during personnel and patient interviews."
+            },
+            {
+              "id": "2.2.1.5",
+              "category": "",
+              "severity": null,
+              "description": "Records are kept of the checking and maintenance of medical equipment.",
+              "is_critical": false,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "2.2.1.6",
+              "category": "",
+              "severity": null,
+              "description": "There is a documented procedure known to the personnel for reporting defects in medical equipment.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured during personnel interviews."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "2.3",
+      "title": "Maintenance management",
+      "standards": [
+        {
+          "standard_id": "2.3.1",
+          "statement": "Facility maintenance is managed to ensure the provision of a safe and effective service.",
+          "intent_tooltip": "Management ensures that sufficient, competent personnel are available to manage routine and emergency functions and meet the needs of a safe and effective health service. Personnel may be in the employ of the practice or be contracted out. Where there are contracted personnel, there must be clearly specified contracts, outlining their roles and responsibilities.",
+          "criteria": [
+            {
+              "id": "2.3.1.1",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures guide practice personnel on the implementation of all maintenance service requirements.",
+              "is_critical": false,
+              "guideline": "This criterion is assessed based on the evidence of effective maintenance found throughout the practice during the survey. If this criterion is scored PC or NC, the transgressions need to be recorded in detail to motivate for the PC/NC rating and it should be based on accurate facts."
+            },
+            {
+              "id": "2.3.1.2",
+              "category": "",
+              "severity": null,
+              "description": "A designated, competent individual is responsible for supervising the maintenance of buildings, grounds and utilities.",
+              "is_critical": false,
+              "guideline": "If this role is fulfilled by the practice manager or solo practitioner, compliance will be measured on evidence of effective maintenance of the buildings, grounds and utilities. Where a designated individual has been identified to fulfil this role, compliance will be measured in accordance with the requirements set out in the employee’s position description."
+            },
+            {
+              "id": "2.3.1.3",
+              "category": "",
+              "severity": null,
+              "description": "Where these services are outsourced the practice personnel have access to a list of these private contractors/service providers with their contact numbers at all times.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured on documented evidence and during personnel interviews. 2.3.2. The practice implements a documented preventative planned maintenance programme for buildings, grounds and utilities. Intent of 2.3.2 The practice plans for regular in-house inspection of facilities to avoid hazards. Building maintenance includes the monitoring of the following aspects: a) The general appearance of the inside and outside structure which includes the construction of walls, floors, doors and windows. b) The condition of the paintwork c) Water leaks, mould spots d) Electrical wiring, for example exposed wires, switches, electrical sockets e) Maintenance of the grounds (no litter, neat garden and grass kept short) 2.3.3. Information and communication technology (ICT) equipment is available and properly maintained to meet the needs of the service. Intent of 2.3.3 The practice is responsible for ensuring that appropriate ICT equipment is available and ready for use at all times. There is an accountable, systematic approach to ensuring that cost-effective, safe and appropriate equipment is available to meet the demands of quality patient care. Managers take responsibility for ensuring that ICT equipment is available and appropriately maintained and that personnel are competent to use it."
+            },
+            {
+              "id": "2.3.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Written agreements ensure technical back-up services are available at all times during the opening hours of the practice.",
+              "is_critical": false,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "2.3.1.5",
+              "category": "",
+              "severity": null,
+              "description": "Basic maintenance equipment, tools and spare parts are available.",
+              "is_critical": false,
+              "guideline": "The type and number of items available will vary in each practice according to the size of the facility and the services offered, but should be suitable and sufficient to prevent unnecessary risk to patients, visitors and personnel or cessation of services due to deficiencies that are easily rectifiable."
+            }
+          ]
+        },
+        {
+          "standard_id": "2.3.2",
+          "statement": "The practice implements a documented preventative planned maintenance programme for buildings, grounds and utilities.",
+          "intent_tooltip": "The practice plans for regular in-house inspection of facilities to avoid hazards. Building maintenance includes the monitoring of the following aspects: a) The general appearance of the inside and outside structure which includes the construction of walls, floors, doors and windows. b) The condition of the paintwork c) Water leaks, mould spots d) Electrical wiring, for example exposed wires, switches, electrical sockets e) Maintenance of the grounds (no litter, neat garden and grass kept short)",
+          "criteria": [
+            {
+              "id": "2.3.2.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice plans and budgets for the upgrading or replacing of systems, buildings or components needed for the continued operation of a safe and effective facility.",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided for example in the budget and/or strategic plan."
+            },
+            {
+              "id": "2.3.2.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice has a documented preventative maintenance management plan in place.",
+              "is_critical": false,
+              "guideline": "Where the practice is a tenant, parts of the preventative maintenance plan may be the function of the landlord. There must however still be documented evidence provided to the surveyors to demonstrate that the landlord has a preventative maintenance plan for the facility. This will allow the surveyors to assess the responsibilities of the landlord and the responsibilities of the practice."
+            },
+            {
+              "id": "2.3.2.3",
+              "category": "",
+              "severity": null,
+              "description": "Documented inspections of the buildings and grounds are conducted at regular intervals as determined by the practice policy.",
+              "is_critical": false,
+              "guideline": "The policy must include at least a) – e) in the standard intent above. Documented evidence will be required."
+            },
+            {
+              "id": "2.3.2.4",
+              "category": "",
+              "severity": null,
+              "description": "There is a documented procedure known to the personnel for reporting defects.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured during personnel interviews. 2.4.1. A system for the storage, retrieval, retention and destruction of health records and personal information that meets the need for confidentiality and safety is implemented. Intent of 2.4.1 Policies and procedures as well as managerial supervision ensure the safety and confidentiality of patient records and personal information. The practice develops and implements a policy that guides the storage, retrieval, retention and destruction of patient records. Patient records and other data and information are retained for sufficient periods to comply with law and regulation and support patient care, the management of the practice, legal documentation, research and education. The retention policy is consistent with the confidentiality and security of such information. When the retention period is complete, patient records and other data"
+            }
+          ]
+        },
+        {
+          "standard_id": "2.3.3",
+          "statement": "Information and communication technology (ICT) equipment is available and properly maintained to meet the needs of the service.",
+          "intent_tooltip": "The practice is responsible for ensuring that appropriate ICT equipment is available and ready for use at all times. There is an accountable, systematic approach to ensuring that cost-effective, safe and appropriate equipment is available to meet the demands of quality patient care. Managers take responsibility for ensuring that ICT equipment is available and appropriately maintained and that personnel are competent to use it. 2.3.1.4. Written agreements ensure technical back-up services are available at all times during the opening hours of the practice. Guideline statement: Documented evidence is required. 2.3.1.5. Basic maintenance equipment, tools and spare parts are available. Guideline statement: The type and number of items available will vary in each practice according to the size of the facility and the services offered, but should be suitable and sufficient to prevent unnecessary risk to patients, visitors and personnel or cessation of services due to deficiencies that are easily rectifiable. 2.3.2.1. The practice plans and budgets for the upgrading or replacing of systems, buildings or components needed for the continued operation of a safe and effective facility. Guideline statement: Documented evidence must be provided for example in the budget and/or strategic plan. 2.3.2.2. The practice has a documented preventative maintenance management plan in place. Guideline statement: Where the practice is a tenant, parts of the preventative maintenance plan may be the function of the landlord. There must however still be documented evidence provided to the surveyors to demonstrate that the landlord has a preventative maintenance plan for the facility. This will allow the surveyors to assess the responsibilities of the landlord and the responsibilities of the practice. 2.3.2.3. Documented inspections of the buildings and grounds are conducted at regular intervals as determined by the practice policy. Guideline statement: The policy must include at least a) – e) in the standard intent above. Documented evidence will be required. 2.3.2.4. There is a documented procedure known to the personnel for reporting defects. Guideline statement: Compliance will be measured during personnel interviews.",
+          "criteria": [
+            {
+              "id": "2.3.3.1",
+              "category": "",
+              "severity": null,
+              "description": "Policies and procedures guide the management of ICT equipment are implemented.",
+              "is_critical": false,
+              "guideline": "All key processes that relate to the management of ICT equipment should be identified and the correct manner of performing the tasks documented. The purpose of this requirement is to ensure that important tasks are performed correctly and consistently."
+            },
+            {
+              "id": "2.3.3.2",
+              "category": "",
+              "severity": null,
+              "description": "A designated individual supervises the management of ICT equipment in the practice.",
+              "is_critical": false,
+              "guideline": "If this role is fulfilled by the practice manager or solo practitioner, compliance will be measured on evidence of effective management of ICT equipment. Where a designated individual has been identified to fulfil this role, compliance will be measured in accordance with the requirements set out in the employee’s position description."
+            },
+            {
+              "id": "2.3.3.3",
+              "category": "",
+              "severity": null,
+              "description": "There is an inventory of all ICT equipment.",
+              "is_critical": false,
+              "guideline": "This does not have to be a separate inventory, it can form part of a single inventory document for the practice. All ICT equipment must be included in the inventory (printers, laptop computers, desktop computers etc.)"
+            },
+            {
+              "id": "2.3.3.4",
+              "category": "",
+              "severity": null,
+              "description": "All desktop and server computers are provided with surge protection and the server is protected by an uninterruptable power supply.",
+              "is_critical": false,
+              "guideline": "Compliance with this criterion will ensure that data is not lost due to loss of power and that ICT equipment is not damaged, with potential loss of data, due to power surges."
+            },
+            {
+              "id": "2.3.3.5",
+              "category": "",
+              "severity": null,
+              "description": "A documented policy is available clearly describing appropriate back up procedures for electronic records.",
+              "is_critical": false,
+              "guideline": "Documented evidence will be required."
+            },
+            {
+              "id": "2.3.3.6",
+              "category": "",
+              "severity": null,
+              "description": "Regular checks are made and documented to ensure that backup has been successful.",
+              "is_critical": false,
+              "guideline": "Documented evidence will be required."
+            },
+            {
+              "id": "2.3.3.7",
+              "category": "",
+              "severity": null,
+              "description": "Records are kept of the checking and maintenance of ICT equipment.",
+              "is_critical": false,
+              "guideline": "Documented evidence will be required."
+            },
+            {
+              "id": "2.3.3.8",
+              "category": "",
+              "severity": null,
+              "description": "The practice has appropriate virus protection software and firewall protection to ensure adequate security and confidentiality of patient related information.",
+              "is_critical": true,
+              "guideline": "Documented evidence will be required."
+            },
+            {
+              "id": "2.3.3.9",
+              "category": "",
+              "severity": null,
+              "description": "There is documented evidence that relevant personnel are regularly trained to use/operate ICT equipment.",
+              "is_critical": false,
+              "guideline": "Documented evidence will be required. and information are destroyed appropriately. The policy will define: a) Levels of access for individual personnel members b) The user's obligation to keep information confidential c) The process followed when confidentiality and/or security are violated d) Secure storage and retrieval of paper based and electronic patient records and personal information e) The protection of records against damage, fire, flood, theft, loss and electronic failure f) The arrangements for succession of patient records in the event of closure of the practice or death of the practitioner g) The criteria for selection and method of destruction of patient records and personal information Personnel members responsible for health record management must have suitable training and experience. Patient records must be readily available each time the patient visits the practice and therefore must be filed in such a way that they are easily identified. 2.5.1. The cleaning and laundry service is managed to ensure the provision of a safe and effective service. Intent of 2.5.1 Practice managers must ensure that a documented policy is available detailing the cleaning and laundry duties to be undertaken and the frequency with which these need to be performed. Where"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "2.4",
+      "title": "Patient record and personal information safety",
+      "standards": [
+        {
+          "standard_id": "2.4.1",
+          "statement": "A system for the storage, retrieval, retention and destruction of health records and personal information that meets the need for confidentiality and safety is implemented.",
+          "intent_tooltip": "Policies and procedures as well as managerial supervision ensure the safety and confidentiality of patient records and personal information. The practice develops and implements a policy that guides the storage, retrieval, retention and destruction of patient records. Patient records and other data and information are retained for sufficient periods to comply with law and regulation and support patient care, the management of the practice, legal documentation, research and education. The retention policy is consistent with the confidentiality and security of such information. When the retention period is complete, patient records and other data 2.3.3.1. Policies and procedures guide the management of ICT equipment are implemented. Guideline statement: All key processes that relate to the management of ICT equipment should be identified and the correct manner of performing the tasks documented. The purpose of this requirement is to ensure that important tasks are performed correctly and consistently. 2.3.3.2. A designated individual supervises the management of ICT equipment in the practice. Guideline statement: If this role is fulfilled by the practice manager or solo practitioner, compliance will be measured on evidence of effective management of ICT equipment. Where a designated individual has been identified to fulfil this role, compliance will be measured in accordance with the requirements set out in the employee’s position description. 2.3.3.3. There is an inventory of all ICT equipment. Guideline statement: This does not have to be a separate inventory, it can form part of a single inventory document for the practice. All ICT equipment must be included in the inventory (printers, laptop computers, desktop computers etc.) 2.3.3.4. All desktop and server computers are provided with surge protection and the server is protected by an uninterruptable power supply. Guideline statement: Compliance with this criterion will ensure that data is not lost due to loss of power and that ICT equipment is not damaged, with potential loss of data, due to power surges. 2.3.3.5. A documented policy is available clearly describing appropriate back up procedures for electronic records. Guideline statement: Documented evidence will be required. 2.3.3.6. Regular checks are made and documented to ensure that backup has been successful. Guideline statement: Documented evidence will be required. 2.3.3.7. Records are kept of the checking and maintenance of ICT equipment. Guideline statement: Documented evidence will be required. 2.3.3.8. CRITICAL The practice has appropriate virus protection software and firewall protection to ensure adequate security and confidentiality of patient related information. Guideline statement: Documented evidence will be required. 2.3.3.9. There is documented evidence that relevant personnel are regularly trained to use/operate ICT equipment. Guideline statement: Documented evidence will be required. and information are destroyed appropriately. The policy will define: a) Levels of access for individual personnel members b) The user's obligation to keep information confidential c) The process followed when confidentiality and/or security are violated d) Secure storage and retrieval of paper based and electronic patient records and personal information e) The protection of records against damage, fire, flood, theft, loss and electronic failure f) The arrangements for succession of patient records in the event of closure of the practice or death of the practitioner g) The criteria for selection and method of destruction of patient records and personal information Personnel members responsible for health record management must have suitable training and experience. Patient records must be readily available each time the patient visits the practice and therefore must be filed in such a way that they are easily identified.",
+          "criteria": [
+            {
+              "id": "2.4.1.1",
+              "category": "",
+              "severity": null,
+              "description": "Policies and procedures for the storage, retrieval, retention, destruction and confidentiality and safety of patient records and personal information are implemented.",
+              "is_critical": false,
+              "guideline": "Policies and procedures must include at least a) – g) in the standard intent above."
+            },
+            {
+              "id": "2.4.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Designated individuals are responsible for the storage, maintenance and retrieval of patient files.",
+              "is_critical": false,
+              "guideline": "Only those designated individuals may have access to the patient records. There must be evidence of signed confidentiality agreements with each individual who has access to patient information."
+            },
+            {
+              "id": "2.4.1.3",
+              "category": "",
+              "severity": null,
+              "description": "The filing system allows for incorrectly filed records to be easily identified (for example, through colour coding of the records).",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.4.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Storage space for health records is sufficient and secure against unauthorised entry.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.4.1.5",
+              "category": "",
+              "severity": null,
+              "description": "Records that have been removed from the designated storage area for use are kept out of public view.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "2.4.1.6",
+              "category": "",
+              "severity": null,
+              "description": "The retention process provides the necessary confidentiality and security.",
+              "is_critical": true,
+              "guideline": "This will be confirmed by observation. these services are outsourced a contract defines the details of the service to be provided. The practice manager must ensure that facilities and equipment are adequate for the provision of a safe and effective cleaning and laundry service. 2.6.1. Where contracts/service agreement exist for clinical, managerial or hotel services (cleaning, laundry, food) they provide for adequate number of suitably trained contract personnel to provide a safe and effective service. Intent of 2.6.1 Where support services have been contracted to outside agencies such as cleaning, building maintenance, gardening, ICT management, etc., the practice leaders must ensure supervision of these services to ensures that they comply with the terms of the contract, meet patient needs and are monitored as part of the quality management and improvement activities. The practice manager identifies the number of personnel required for contracted services and defines the desired education, knowledge, skills and any other requirements needed. Orientation and induction programmes ensure the competence of personnel before they begin to carry out their functions. Contract personnel must act in accordance with position descriptions and are evaluated in accordance with their assigned responsibilities. Where appropriate, personnel in the employ of the contractor are made aware of issues relating to infection control, waste management, confidential waste and health and safety requirements."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "2.5",
+      "title": "Cleaning and laundry services",
+      "standards": [
+        {
+          "standard_id": "2.5.1",
+          "statement": "The cleaning and laundry service is managed to ensure the provision of a safe and effective service.",
+          "intent_tooltip": "Practice managers must ensure that a documented policy is available detailing the cleaning and laundry duties to be undertaken and the frequency with which these need to be performed. Where 2.4.1.1. Policies and procedures for the storage, retrieval, retention, destruction and confidentiality and safety of patient records and personal information are implemented. Guideline statement: Policies and procedures must include at least a) – g) in the standard intent above. 2.4.1.2. Designated individuals are responsible for the storage, maintenance and retrieval of patient files. Guideline statement: Only those designated individuals may have access to the patient records. There must be evidence of signed confidentiality agreements with each individual who has access to patient information. 2.4.1.3. The filing system allows for incorrectly filed records to be easily identified (for example, through colour coding of the records). Guideline statement: Compliance will be measured by observation. 2.4.1.4. Storage space for health records is sufficient and secure against unauthorised entry. Guideline statement: Compliance will be measured by observation. 2.4.1.5. Records that have been removed from the designated storage area for use are kept out of public view. Guideline statement: Compliance will be measured by observation. 2.4.1.6. CRITICAL The retention process provides the necessary confidentiality and security. Guideline statement: This will be confirmed by observation. these services are outsourced a contract defines the details of the service to be provided. The practice manager must ensure that facilities and equipment are adequate for the provision of a safe and effective cleaning and laundry service.",
+          "criteria": [
+            {
+              "id": "2.5.1.1",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures relating to cleaning and laundry duties and the frequency with which these duties are carried out are implemented and monitored.",
+              "is_critical": false,
+              "guideline": "Policies and procedures must detail how the core functions are to be performed. Implementation of these policies and procedures should be monitored to ensure consistent service delivery according to agreed standards of practice. Compliance will be verified by documented evidence of monitoring activities and by observation of implementation of the policies."
+            },
+            {
+              "id": "2.5.1.2",
+              "category": "",
+              "severity": null,
+              "description": "There is evidence that laundry used for patients is washed separately from domestic laundry.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during personnel interviews."
+            },
+            {
+              "id": "2.5.1.3",
+              "category": "",
+              "severity": null,
+              "description": "Adequate, secure and well-ventilated storage areas are available for cleaning and laundry equipment and chemicals.",
+              "is_critical": false,
+              "guideline": "Chemicals for cleaning and laundry are safely stored in a well-ventilated, locked cupboard or room out of the reach of patients, children and visitors. There is adequate storage place for brooms and mops. Compliance will be measured by observation."
+            },
+            {
+              "id": "2.5.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Mops and brooms are cleaned and dried before being stored.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during personnel interviews and by observation."
+            },
+            {
+              "id": "2.5.1.5",
+              "category": "",
+              "severity": null,
+              "description": "The practice manager ensures that cleaning and laundry personnel are appropriately trained regarding waste management, infection control procedures, confidentiality issues and any other relevant matters.",
+              "is_critical": false,
+              "guideline": "Evidence of such training will be required."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "2.6",
+      "title": "Contracted Services",
+      "standards": [
+        {
+          "standard_id": "2.6.1",
+          "statement": "Where contracts/service agreement exist for clinical, managerial or hotel services (cleaning, laundry, food) they provide for adequate number of suitably trained contract personnel to provide a safe and effective service.",
+          "intent_tooltip": "Where support services have been contracted to outside agencies such as cleaning, building maintenance, gardening, ICT management, etc., the practice leaders must ensure supervision of these services to ensures that they comply with the terms of the contract, meet patient needs and are monitored as part of the quality management and improvement activities. The practice manager identifies the number of personnel required for contracted services and defines the desired education, knowledge, skills and any other requirements needed. Orientation and induction programmes ensure the competence of personnel before they begin to carry out their functions. Contract personnel must act in accordance with position descriptions and are evaluated in accordance with their assigned responsibilities. Where appropriate, personnel in the employ of the contractor are made aware of issues relating to infection control, waste management, confidential waste and health and safety requirements. 2.5.1.1. Written policies and procedures relating to cleaning and laundry duties and the frequency with which these duties are carried out are implemented and monitored. Guideline statement: Policies and procedures must detail how the core functions are to be performed. Implementation of these policies and procedures should be monitored to ensure consistent service delivery according to agreed standards of practice. Compliance will be verified by documented evidence of monitoring activities and by observation of implementation of the policies. 2.5.1.2. There is evidence that laundry used for patients is washed separately from domestic laundry. Guideline statement: Compliance will be verified during personnel interviews. 2.5.1.3. Adequate, secure and well-ventilated storage areas are available for cleaning and laundry equipment and chemicals. Guideline statement: Chemicals for cleaning and laundry are safely stored in a well-ventilated, locked cupboard or room out of the reach of patients, children and visitors. There is adequate storage place for brooms and mops. Compliance will be measured by observation. 2.5.1.4. Mops and brooms are cleaned and dried before being stored. Guideline statement: Compliance will be verified during personnel interviews and by observation. 2.5.1.5. The practice manager ensures that cleaning and laundry personnel are appropriately trained regarding waste management, infection control procedures, confidentiality issues and any other relevant matters. Guideline statement: Evidence of such training will be required.",
+          "criteria": [
+            {
+              "id": "2.6.1.1",
+              "category": "",
+              "severity": null,
+              "description": "Copies of contracts for outside service providers are available to those who ensure they are implemented.",
+              "is_critical": false,
+              "guideline": "It is very important that those who are required to monitor compliance with a contract have access to the deliverable elements of the document. The criterion does not require that leaders share the financial details of the contract. Documented evidence must be provided."
+            },
+            {
+              "id": "2.6.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Services provided under contracts and other arrangements are formally monitored and compliance with the contract is documented.",
+              "is_critical": false,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "2.6.1.3",
+              "category": "",
+              "severity": null,
+              "description": "Contracted personnel are managed as determined in the written service agreement.",
+              "is_critical": false,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "2.6.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The practice ensures that contracted personnel are oriented to the practice and to relevant practice policies and procedures.",
+              "is_critical": false,
+              "guideline": "Documented evidence of orientation to both the facility, the position and relevant policies and procedures is required."
+            },
+            {
+              "id": "2.6.1.5",
+              "category": "",
+              "severity": null,
+              "description": "The practice ensures that contracted personnel participate in relevant practice in-service training programmes.",
+              "is_critical": false,
+              "guideline": "In-service training must include for example, infection control, health and safety, fire and evacuation etc. A record must be kept of such training and must include all contracted personnel. 3.Clinical Services and Patient Care Overview of Clinical Services and Patient Care The main purpose of a healthcare facility is to provide healthcare services to patients. Providing appropriate care in an environment that supports and responds to each patient's unique needs requires a high level of planning and coordination. Certain activities are basic to patient care, such as planning and delivering appropriate care to each patient, monitoring the patient's response to the care provided, modifying care when necessary and completing the follow-up. Throughout all phases of care, patient needs are matched with appropriate resources within and, when necessary, outside the practice. Processes for continuity and coordination of care among physicians, nurses and other healthcare providers must be implemented in and between all services. These processes should be designed collaboratively and implemented by the leaders of the various settings and services to ensure coordination of care. 3.1.1. In consultation with the patient, the practice provides care that is consistent with best available evidence and in accordance with patient needs and values. Intent of 3.1.1 Clinical guidelines should be selected and agreed by all clinicians. Consideration should be given to providing guidelines for high risk, high volume and high cost conditions. In addition, guidelines should be available for conditions which are rarely seen but may have severe consequences for patients if misdiagnosed or mismanaged, for example, malaria in a nonendemic area. Guidelines are found in the literature under many names including practice parameters, practice guidelines, patient care protocols, standards of practice, care pathways, etc. National guidelines for selected conditions are further provided by the Ministry of Health and Wellness. Regardless of the source, the scientific basis of guidelines should be reviewed and approved by the clinical leaders and clinical practitioners before implementation. This will ensure that they meet the criteria established by the leaders and are adapted to the community, patient needs and practice resources. Once adopted, guidelines should be reviewed on a regular basis to ensure their continued relevance. Consistency in the approach to diagnosis and management of care among those who are involved in the clinical care of an individual patient is an important aspect of continuity of care. Patients value consistency in the quality of treatment they receive from a practice and expect that treatment and advice given by different medical practitioners within the practice will not be in conflict. Clinical practice guidelines provide important recommendations for clinical care and should be accessible at the point of care. Practices need to check that clinical practice guidelines are current."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

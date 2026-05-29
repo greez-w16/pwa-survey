@@ -1,0 +1,253 @@
+{
+  "se_id": 3,
+  "se_name": "Oral Health Interview",
+  "source_file": "Patient Interview audit tool- Oral Health Standards NHQS version 1 July 2025.xls",
+  "sections": [
+    {
+      "section_pi_id": "3.2",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "3.2.1",
+          "statement": "Patients are informed of the range of services and the processes to access the practice services.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.2.1.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.1",
+          "statement": "Patients are informed of the processes to access the practice services.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.2.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The practice renders services based on the needs of the population, during the hours that they publish",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.2",
+          "statement": "There is a process for appropriate referral of patients for specialised consultation/investigations at other healthcare facilities.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.2.2.1",
+              "category": "",
+              "severity": null,
+              "description": "There is a documented process to refer patients.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.2.2.2",
+              "category": "",
+              "severity": null,
+              "description": "The lines of communication between the practice, referral facility and community services are clearly defined.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.2.2.3",
+              "category": "",
+              "severity": null,
+              "description": "The clinician informs the patient if he/she has any financial interest in the referral service.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.4",
+          "statement": "At registration, sufficient details are taken from the patient to ensure that the patient can be contacted by the practice when necessary and that the clinician seeing the patient for the first time has sufficient background information to provide adequate care to the patient.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.2.4.1",
+              "category": "",
+              "severity": null,
+              "description": "New patients to the practice are asked to complete a form detailing at least a) – o) in the standard intent above.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.5",
+          "statement": "Patients can obtain advice or information related to their clinical care by telephone and electronic means.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.2.5.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice implements a policy on telephonic and electronic communication with patients that details at least a) – e) in the standard intent above.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.2.5.2",
+              "category": "",
+              "severity": null,
+              "description": "There is evidence of practice/patient telephone or electronic advice and information in the patient health records.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.2.5.6",
+              "category": "",
+              "severity": null,
+              "description": "The practice can demonstrate how it receives and returns telephone and electronic messages from patients.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.1",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "3.1.3",
+          "statement": "The practice takes measures to protect patient privacy.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.1.3.5",
+              "category": "",
+              "severity": null,
+              "description": "When appropriate, patients are permitted to be accompanied by a family member/care-giver during consultations.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "3.1.5",
+          "statement": "The practice informs patients and their families about the processes which it has instituted to receive and act on complaints, conflicts and differences of opinion about patient care and the patient's right to participate in those processes.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.1.5.2",
+              "category": "",
+              "severity": null,
+              "description": "Patients are aware of their right to voice complaints and the processes by which to do so, internally as well as externally where applicable.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.3",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "3.3.1",
+          "statement": "Patient and family education promotes the concept of taking responsibility for one's own health care.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.3.1.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice offers relevant health education to its patients in a planned and consistent manner which enables patients to meet their ongoing health needs and achieve their health goals.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.3.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Posters and pamphlets regarding high risk and commonly treated conditions relevant to the practice population are visibly displayed and accessible in the waiting room and routinely provided to patients during the consultation when appropriate.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.3.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Information is provided in a manner and in a language that is understood by those making the care decisions.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.9",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "3.9.2",
+          "statement": "The practice respects the rights of patients and their families to refuse or discontinue treatment.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.9.2.1",
+              "category": "",
+              "severity": null,
+              "description": "Patients are informed about their condition and the proposed treatment.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "3.9.3",
+          "statement": "The practice takes measures to protect patient privacy.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.9.3.1",
+              "category": "",
+              "severity": null,
+              "description": "The patient's need for privacy is protected during all examinations, procedures and treatments.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.9.3.2",
+              "category": "",
+              "severity": null,
+              "description": "Patient privacy is protected when providing personal information.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.9.3.3",
+              "category": "",
+              "severity": null,
+              "description": "The patient's right to privacy is protected for all forms of counselling.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.9.3.5",
+              "category": "",
+              "severity": null,
+              "description": "When appropriate, patients are permitted to be accompanied by a family member/care-giver during consultations.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

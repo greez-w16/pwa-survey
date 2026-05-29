@@ -1,0 +1,1317 @@
+{
+  "se_id": 1,
+  "se_name": "Management and Leadership",
+  "sections": [
+    {
+      "section_pi_id": "1.1",
+      "title": "Mission statement",
+      "standards": [
+        {
+          "standard_id": "1.1.1",
+          "statement": "The practice’s clinical and managerial leaders are identified and are collectively responsible for defining the practice’s mission and creating the plans and policies needed to fulfil the mission.",
+          "intent_tooltip": "It is important that all members of the practice team are recognised and included in the process of defining the practice's mission. A practice's mission statement usually reflects the needs of its patient population and patient care services are designed and planned to respond to those needs. Effective leadership is essential for a practice to be able to operate efficiently and fulfil its mission. Leadership is provided by individuals working together or separately and can be provided by any number of individuals. Patient care services are planned and designed to respond to the needs of the patient population. The leaders of the practice determine what primary care services are essential to the community, ideally in collaboration with the community, as well as the scope and intensity of these services. A strategic plan outlining the proposed development of the practice over the coming year is a useful tool to support the practice in achieving its mission and meeting identified patient needs. To ensure effective implementation, the plan should be revisited regularly throughout the year to document progress against agreed, predetermined, time-bound targets. The practice's strategic plan should be reviewed yearly to ensure that it remains reflective of the current needs of the practice population.",
+          "criteria": [
+            {
+              "id": "1.1.1.1",
+              "category": "",
+              "severity": null,
+              "description": "The leaders of the practice are formally or informally identified.",
+              "is_critical": false,
+              "guideline": "Where a practice consists of more than two practitioners the leaders of the practice must be formally identified."
+            },
+            {
+              "id": "1.1.1.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice has a mission statement that reflects its strategic objectives and matches the needs of the community served by the practice.",
+              "is_critical": false,
+              "guideline": "The mission statement is critical to the strategic planning process since it provides clear, guiding principles that further define who the healthcare provider is as an organisation and why the practice exists. Mission statements create the foundation for action planning and a basis for accountability with the community."
+            },
+            {
+              "id": "1.1.1.3",
+              "category": "",
+              "severity": null,
+              "description": "The leaders are collectively responsible for ensuring that the mission statement is known to all personnel, patients, carers and the community served.",
+              "is_critical": false,
+              "guideline": "This can be achieved in many ways. For example, by public display of the mission statement on notice boards, in the waiting area or included in printed information leaflets given to each patient when they first visit the practice. If the practice has a website, the mission statement can also be published on the website. Documented evidence that personnel have read the mission statement must be provided for full compliance with this criterion."
+            },
+            {
+              "id": "1.1.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The practice participates in community health activities.",
+              "is_critical": false,
+              "guideline": "The mission of a practice needs to meet the needs of the community. To be compliant with this criterion evidence must be provided of interaction with Community Health Committee members and participation in community health activities."
+            },
+            {
+              "id": "1.1.1.5",
+              "category": "",
+              "severity": null,
+              "description": "The leaders, in liaison with the whole practice team, coordinates the compilation of an annual strategic plan and budget. 1.2.1. A manager is responsible for operating the practice within relevant laws and regulations. Intent of 1.2.1 The practice manager is appointed to be responsible for the overall, day-to-day operation of the practice. These responsibilities are documented and known to the practice personnel. The practice manager is responsible for promoting and monitoring the implementation of the policy and procedure framework of the practice.",
+              "is_critical": false,
+              "guideline": "This criterion requires all departments within the practice to be involved in the compilation of the annual strategic plan and budget to ensure that the needs of each department are discussed, considered and met if possible within the scope of the practice budget. Compliance will be demonstrated by documented evidence, for example, minutes of meetings."
+            },
+            {
+              "id": "1.1.1.6",
+              "category": "",
+              "severity": null,
+              "description": "The leaders are collectively responsible for implementing the practice’s mission and strategic plan.",
+              "is_critical": false,
+              "guideline": "Evidence of an action plan for achieving the practice’s mission and strategic plan will be required."
+            },
+            {
+              "id": "1.1.1.7",
+              "category": "",
+              "severity": null,
+              "description": "The strategic plan is reviewed on an annual basis.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by providing documented evidence that the practice’s strategic plan has been reviewed."
+            },
+            {
+              "id": "1.1.1.8",
+              "category": "",
+              "severity": null,
+              "description": "Regular monitoring of the implementation of the strategic plan against envisaged timeframes and progress in achieving its objectives is documented at intervals determined by the practice.",
+              "is_critical": false,
+              "guideline": "This criterion requires that practice leaders adhere to the timeframes that were set at the beginning of each year for achieving the strategic plan. For any plan to be implemented effectively, it is essential to monitor the progress that is being made towards achieving the outcomes that have been planned. This criterion further requires the practice to document the progress that is being made during the year towards achieving the strategic plan."
+            },
+            {
+              "id": "1.1.1.9",
+              "category": "",
+              "severity": null,
+              "description": "Where appropriate, the leadership roles in various positions are documented, agreed to and known by the personnel.",
+              "is_critical": false,
+              "guideline": "This may, for example include personnel responsible for monitoring infection control practices, resuscitation, stock control, patient files etc."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.2",
+      "title": "Management systems",
+      "standards": [
+        {
+          "standard_id": "1.2.1",
+          "statement": "A manager is responsible for operating the practice within relevant laws and regulations.",
+          "intent_tooltip": "The practice manager is appointed to be responsible for the overall, day-to-day operation of the practice. These responsibilities are documented and known to the practice personnel. The practice manager is responsible for promoting and monitoring the implementation of the policy and procedure framework of the practice.",
+          "criteria": [
+            {
+              "id": "1.2.1.1",
+              "category": "",
+              "severity": null,
+              "description": "The manager is responsible for the day-to-day running of the practice.",
+              "is_critical": false,
+              "guideline": "This criterion is assessed on evidence of effective management found throughout the practice during the survey. If this criterion is scored PC or NC, the transgressions need to be recorded in detail to motivate for the PC/NC rating and it should be based on accurate facts."
+            },
+            {
+              "id": "1.2.1.2",
+              "category": "",
+              "severity": null,
+              "description": "The manager has the education and/or experience necessary to carry out his or her responsibilities.",
+              "is_critical": false,
+              "guideline": "If the practice manager is a solo practitioner or partner in the practice this criterion will scored based on the evidence of effective management found throughout the practice during the survey. If the practice manager is an employee of the practice, compliance will be assessed against the requirements set out in the position description."
+            },
+            {
+              "id": "1.2.1.3",
+              "category": "",
+              "severity": null,
+              "description": "The practice is licensed in terms of relevant legislation for the level and type of services provided.",
+              "is_critical": true,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "1.2.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The manager ensures that there is a system in place to monitor the implementation of applicable laws and regulations. 1.2.2. The practice facilitates communication between teams and individuals within the practice. Intent of 1.2.2 The leaders develop a culture that emphasises cooperation and communication. Relevant personnel members become part of the communication network.",
+              "is_critical": false,
+              "guideline": "This criterion will be scored compliant by default, although a PC rating is given whenever there is definite evidence of non-adherence to any legal requirement. In these cases, the transgression needs to be recorded in detail to motivate for the PC rating and it should be based on accurate facts. Common examples of non-conformance with legal requirements include the following deficiencies: • The required certificates are not available, for example, fire clearance certificates, electrical installation certificates, commissioning certificates (for example, ethylene oxide sterilisers), pressure test certificates for vessels under pressure • Internal/external financial audits are not conducted • Nurses transcribe doctors’ prescriptions and/or dispense medication • Pharmaceutical items are incorrectly labelled • Proof of current registration of professional personnel with the relevant councils is not available In order to demonstrate compliance, practices may wish to compile a template listing the accreditation criteria requiring demonstration of compliance with country-specific legislation and regulations against the relevant national acts, regulations, etc. applicable to the criterion."
+            },
+            {
+              "id": "1.2.1.5",
+              "category": "",
+              "severity": null,
+              "description": "There is evidence of response to any reports from inspecting and regulatory authorities.",
+              "is_critical": true,
+              "guideline": "This requires documented evidence for whatever inspections may have been conducted. Examples may include inspections by the following authorities • The local fire authority for fire clearance purposes • The national authority responsible for radiation safety aspects • The national authority responsible for health and safety compliance • The national authority responsible for financial compliance • The national authority responsible for maintenance requirements such as boiler inspections and pressure tests, autoclave pressure tests • The local authority responsible for testing of water supplies • The relevant professional bodies where student training is provided • Licensing authorities for facilities such as the pharmacy, etc."
+            },
+            {
+              "id": "1.2.1.6",
+              "category": "",
+              "severity": null,
+              "description": "The manager implements processes to manage and control human, financial and other resources.",
+              "is_critical": false,
+              "guideline": "The criterion will be scored after the final assessment of Management and Leadership criteria and will be scored according to the findings of financial and human resource management and other criteria dealing with adequate supply and effective management of resources (medication, consumables, equipment etc.)."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.2.2",
+          "statement": "The practice facilitates communication between teams and individuals within the practice.",
+          "intent_tooltip": "The leaders develop a culture that emphasises cooperation and communication. Relevant personnel members become part of the communication network.",
+          "criteria": [
+            {
+              "id": "1.2.2.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice leaders facilitate communication between teams where relevant and between individual personnel members.",
+              "is_critical": false,
+              "guideline": "“Teams” refer to all the groups of employees and practitioners involved in the practice, for example administration, cleaning and clinical personnel. Evidence of for example, minutes of personnel meetings, memos and communication tools can be provided as evidence. There must be evidence of at least quarterly personnel meetings."
+            },
+            {
+              "id": "1.2.2.2",
+              "category": "",
+              "severity": null,
+              "description": "Agendas are prepared for meetings in order to allow those attending to prepare for participation.",
+              "is_critical": false,
+              "guideline": "An assessment of a sample of agendas of meetings should be undertaken to determine the trend and “general” compliance as the criterion should not be penalised on one or two exceptions."
+            },
+            {
+              "id": "1.2.2.3",
+              "category": "",
+              "severity": null,
+              "description": "Minutes of meetings are taken and are circulated to all relevant personnel.",
+              "is_critical": false,
+              "guideline": "An assessment of a sample of minutes of meetings should be undertaken to determine the trend and “general” compliance as the criterion should not be penalised for one or two exceptions. The manner in which minutes are circulated should be assessed and should consist of documented evidence of the circulation and acknowledgment of receipt."
+            },
+            {
+              "id": "1.2.2.4",
+              "category": "",
+              "severity": null,
+              "description": "There is a procedure to make sure that important matters resulting from management meetings are communicated to and acted upon by personnel. 1.2.3. The practice engages with a range of health, community and disability services to plan and facilitate optimal patient care. Intent of 1.2.3 Coordination of care for individuals, families and communities is part of the accepted definition of medical care. For patients with complex care needs, for example, frail elderly, severe disabilities or multiple co-morbidities, practices are encouraged to coordinate patient care with other health services including allied health and pharmacy as well as social, disability and community services. It is important for practices to identify relevant services within the local area that can enhance patient care, to have updated registers of such services at hand and to build sound working relationships with these service providers to facilitate good, collaborative care. 1.3.1. The practice manager ensures that policies and procedures which support the activities of the practice are implemented. Intent of 1.3.1 The practice manager ensures that all policies which apply to each team within the practice are available to personnel and that they are implemented and monitored.",
+              "is_critical": false,
+              "guideline": "The existing “mechanism” should be assessed for effectiveness in conveying this information to personnel but surveyors must further note the importance of searching for evidence of “and acted upon”. This generally requires that minutes should reflect the allocation of responsibilities for carrying out tasks and that these are reported on at subsequent meetings."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.2.3",
+          "statement": "The practice engages with a range of health, community and disability services to plan and facilitate optimal patient care.",
+          "intent_tooltip": "Coordination of care for individuals, families and communities is part of the accepted definition of medical care. For patients with complex care needs, for example, frail elderly, severe disabilities or multiple co-morbidities, practices are encouraged to coordinate patient care with other health services including allied health and pharmacy as well as social, disability and community services. It is important for practices to identify relevant services within the local area that can enhance patient care, to have updated registers of such services at hand and to build sound working relationships with these service providers to facilitate good, collaborative care.",
+          "criteria": [
+            {
+              "id": "1.2.3.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice plans and coordinates comprehensive care by establishing relations and maintaining contact with other relevant services and agencies, including both governmental and non- governmental agencies.",
+              "is_critical": false,
+              "guideline": "The purpose of this criterion is to ensure that practitioners are aware of members of the multidisciplinary team in both the private and government sector and engage them when required to ensure that the patient receives the best possible care. Documented evidence of such networking (for example, minutes of the meetings or e-mail correspondence) should be made available for assessment."
+            },
+            {
+              "id": "1.2.3.2",
+              "category": "",
+              "severity": null,
+              "description": "Information on services, hours of operation and processes for obtaining care is provided to services in the community who work in collaboration with the practice.",
+              "is_critical": false,
+              "guideline": "This information needs to be provided for example, to community nursing teams, step down care, allied health professionals etc. Compliance can be demonstrated by for example, e-mail correspondence with the various services or by providing information pamphlets about to the practice to these services."
+            },
+            {
+              "id": "1.2.3.3",
+              "category": "",
+              "severity": null,
+              "description": "The practice determines that the receiving individual/organisation can meet the patient’s continuing care needs, and establishes arrangements to ensure continuity.",
+              "is_critical": false,
+              "guideline": "Documented evidence is required."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.3",
+      "title": "Policies and procedures",
+      "standards": [
+        {
+          "standard_id": "1.3.1",
+          "statement": "The practice manager ensures that policies and procedures which support the activities of the practice are implemented.",
+          "intent_tooltip": "The practice manager ensures that all policies which apply to each team within the practice are available to personnel and that they are implemented and monitored.",
+          "criteria": [
+            {
+              "id": "1.3.1.1",
+              "category": "",
+              "severity": null,
+              "description": "Policies and procedures that guide and support the different services offered by the practice are implemented. 1.4.1. There is a plan for the provision of adequate numbers of suitably qualified personnel. Intent of 1.4.1 It is advisable for the practice to plan and implement uniform programmes and processes related to the recruitment, retention and development of all personnel. Personnel retention rather than recruitment provides greater long-term benefit. Retention is increased when leaders support personnel development. The practice has a written plan which identifies the numbers and types of personnel required and the skills, knowledge and other requirements needed in each team. The planning process includes: • Personnel recruitment • Numbers and categories of personnel required • Desired education, qualifications, skills and knowledge • Personal development of personnel • Personnel retention",
+              "is_critical": false,
+              "guideline": "The criterion will be scored at the end of the survey. If this criterion is scored PC or NC Surveyors must document examples of non-compliance. This criterion will automatically be scored NC if there is evidence of non-compliance with policies and procedures that effect patient and personnel safety."
+            },
+            {
+              "id": "1.3.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Policies and procedures are signed and dated by persons authorised to do so.",
+              "is_critical": false,
+              "guideline": "The initial implementation date and the name, designation and signature of the person authorising the policy must be clearly legible on each policy and procedure."
+            },
+            {
+              "id": "1.3.1.3",
+              "category": "",
+              "severity": null,
+              "description": "Policies and procedures are correctly compiled, indexed and filed.",
+              "is_critical": false,
+              "guideline": "• Title: Each policy should have a name or title for identification and reference. • Identifying number: This is to facilitate indexing, locating the policy when required and communicating about the policy accurately. • Policy statement: What is to be achieved and why. • Procedure: How the policy is to be achieved. This is a step-by-step description of what needs to be done (like a recipe – following each step should result in a predictable outcome irrespective of who follows the steps). • Associated references: This is required when the policy is directly associated with specific laws, regulations or policies or corporate policies and procedures. • Dates: The date of the original policy, the date(s) of any revision(s) and the date of the next planned review. • Signature: This is the signature of the person identified and authorised to approve policies and procedures If policies and procedures are only available electronically, all personnel must be able to demonstrate how to access the documents."
+            },
+            {
+              "id": "1.3.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Policies and procedures are reviewed according to practice policy and then dated and signed.",
+              "is_critical": false,
+              "guideline": "Policies and procedures must be reviewed at least every 5 years and when changes in evidence based practice requires earlier review."
+            },
+            {
+              "id": "1.3.1.5",
+              "category": "",
+              "severity": null,
+              "description": "There is a process to ensure that personnel are familiar with relevant policies and procedures.",
+              "is_critical": false,
+              "guideline": "Compliance with this criterion can be achieved by means of, for example, signature sheets attached to each policy and procedure or by attendance registers at in-service training relating to policies and procedures."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.4",
+      "title": "Human Resource Management",
+      "standards": [
+        {
+          "standard_id": "1.4.1",
+          "statement": "There is a plan for the provision of adequate numbers of suitably qualified personnel.",
+          "intent_tooltip": "It is advisable for the practice to plan and implement uniform programmes and processes related to the recruitment, retention and development of all personnel. Personnel retention rather than recruitment provides greater long-term benefit. Retention is increased when leaders support personnel development. The practice has a written plan which identifies the numbers and types of personnel required and the skills, knowledge and other requirements needed in each team. The planning process includes: • Personnel recruitment • Numbers and categories of personnel required • Desired education, qualifications, skills and knowledge • Personal development of personnel • Personnel retention",
+          "criteria": [
+            {
+              "id": "1.4.1.1",
+              "category": "",
+              "severity": null,
+              "description": "There are documented processes for staffing the practice. 1.4.2. There is an effective process for gathering, verifying and evaluating the credentials (registration, education, training and experience) of those health care professionals who are permitted to practice independently. Intent of 1.4.2 The practice needs to ensure that it has qualified health care professional personnel who appropriately match its mission, resources and patient needs. An individual's credentials consist of an appropriate current registration, evidence of completion of professional education and any additional training and experience. There is a process for gathering this information and verifying its accuracy. The process applies to all clinical personnel employed by the practice, including locums. 1.4.3. Clinical and administrative personnel are orientated to the practice and participate in continuing education, research and other educational experiences to acquire new skills and knowledge and to support job advancement.",
+              "is_critical": false,
+              "guideline": "Compliance with this criterion will require the practitioner to show documented evidence that patient load and patient acuity were studied and considered when planning the staffing for the practice. This must be evident for both the number of personnel required as well as their qualifications."
+            },
+            {
+              "id": "1.4.1.2",
+              "category": "",
+              "severity": null,
+              "description": "The desired education, qualifications, skills and knowledge are defined for personnel members.",
+              "is_critical": false,
+              "guideline": "These requirements must be discussed and agreed by all relevant personnel during the recruitment process and form part of the position description."
+            },
+            {
+              "id": "1.4.1.3",
+              "category": "",
+              "severity": null,
+              "description": "The processes include measures to improve personnel retention.",
+              "is_critical": false,
+              "guideline": "Retention of personnel as opposed to the recruitment of new personnel is more cost effective and more likely to result in better patient care due to improved continuity of care and service provision and the accumulation of experience. It is therefore strategically important for retention to be considered as part of the recruitment process. As an additional benefit, measures taken to improve retention are likely to improve personnel satisfaction, and satisfied personnel provide better services. For a practice to be compliant with this criterion evidence must be provided of at least a personnel satisfaction survey."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.4.2",
+          "statement": "There is an effective process for gathering, verifying and evaluating the credentials (registration, education, training and experience) of those health care professionals who are permitted to practice independently.",
+          "intent_tooltip": "The practice needs to ensure that it has qualified health care professional personnel who appropriately match its mission, resources and patient needs. An individual's credentials consist of an appropriate current registration, evidence of completion of professional education and any additional training and experience. There is a process for gathering this information and verifying its accuracy. The process applies to all clinical personnel employed by the practice, including locums.",
+          "criteria": [
+            {
+              "id": "1.4.2.1",
+              "category": "",
+              "severity": null,
+              "description": "There is implementation of a reliable, documented process for evaluating and verifying the credentials of all health professionals.",
+              "is_critical": false,
+              "guideline": "This can be achieved for example, by having a standardised checklist of requirements that must be verified. This should include reference checks. The completed document can then be retained in the employee’s personnel file. Compliance will be verified during an audit of the personnel files of various categories of professional personnel."
+            },
+            {
+              "id": "1.4.2.2",
+              "category": "",
+              "severity": null,
+              "description": "Personnel files contain copies of qualifications and licences/registration from the relevant authority for all health professionals.",
+              "is_critical": true,
+              "guideline": "Copies of all the relevant original degrees/diplomas/certificates must be available, as well as evidence of registration with the relevant registration bodies. Compliance will be verified during an audit of the personnel files."
+            },
+            {
+              "id": "1.4.2.3",
+              "category": "",
+              "severity": null,
+              "description": "There is a system to track the annual registration of all health professionals.",
+              "is_critical": false,
+              "guideline": "The system must reflect the date that each category of health professional’s licence is due for renewal and document that the original, renewed licence has been seen."
+            },
+            {
+              "id": "1.4.2.4",
+              "category": "",
+              "severity": null,
+              "description": "All personnel members with direct contact with the public have had a police check, a copy of which is kept in their personnel file.",
+              "is_critical": false,
+              "guideline": "Police checks are repeated every 3 years or as appropriate. Compliance will be verified during an audit of the personnel file. Intent of 1.4.3 The decision to appoint an individual to a position within the practice sets several processes in motion. To perform well, new personnel need to understand the functioning of the entire practice and how his or her specific role and responsibilities contribute to the practice's mission. This is accomplished through a general orientation to the practice and his or her role in the practice and a specific orientation to the responsibilities of his or her position. The orientation process should include for example infection control practices, confidentiality etc. The practice supports opportunities for continuing education and training of personnel to ensure they remain up to date with current best practice and to acquire advanced or new skills. These opportunities may be offered by the practice by a professional association or through educational programmes in the community. The practice supports such opportunities as appropriate to its mission and resources. Such support may be given through tuition support, scheduled time away from work, recognition for achievement and in other ways. 1.5.1. The practice manager is responsible for the implementation and maintenance of a financial strategy. Intent of 1.5.1 Financial planning and management needs to be conducted by a person who is suitably qualified or skilled and experienced in all matters relating to the finances of the practice. Clinical and managerial personnel both need to be included in planning the financial requirements of the practice. They require information relating to the funds available to them for the management of the practice and up-to-date statements of current expenditure. Sound accounting and auditing practices are implemented to ensure transparency. This is guided by documented policies and procedures. The practice manager ensures that these policies and procedures are implemented."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.4.3",
+          "statement": "Clinical and administrative personnel are orientated to the practice and participate in continuing education, research and other educational experiences to acquire new skills and knowledge and to support job advancement. Guideline statement: Compliance with this criterion will require the practitioner to show documented evidence that patient load and patient acuity were studied and considered when planning the staffing for the practice. This must be evident for both the number of personnel required as well as their qualifications. 1.4.1.2. The desired education, qualifications, skills and knowledge are defined for personnel members. Guideline statement: These requirements must be discussed and agreed by all relevant personnel during the recruitment process and form part of the position description. 1.4.1.3. The processes include measures to improve personnel retention. Guideline statement: Retention of personnel as opposed to the recruitment of new personnel is more cost effective and more likely to result in better patient care due to improved continuity of care and service provision and the accumulation of experience. It is therefore strategically important for retention to be considered as part of the recruitment process. As an additional benefit, measures taken to improve retention are likely to improve personnel satisfaction, and satisfied personnel provide better services. For a practice to be compliant with this criterion evidence must be provided of at least a personnel satisfaction survey. 1.4.2.1. There is implementation of a reliable, documented process for evaluating and verifying the credentials of all health professionals. Guideline statement: This can be achieved for example, by having a standardised checklist of requirements that must be verified. This should include reference checks. The completed document can then be retained in the employee’s personnel file. Compliance will be verified during an audit of the personnel files of various categories of professional personnel. 1.4.2.2. CRITICAL Personnel files contain copies of qualifications and licences/registration from the relevant authority for all health professionals. Guideline statement: Copies of all the relevant original degrees/diplomas/certificates must be available, as well as evidence of registration with the relevant registration bodies. Compliance will be verified during an audit of the personnel files. 1.4.2.3. There is a system to track the annual registration of all health professionals. Guideline statement: The system must reflect the date that each category of health professional’s licence is due for renewal and document that the original, renewed licence has been seen. 1.4.2.4. All personnel members with direct contact with the public have had a police check, a copy of which is kept in their personnel file. Guideline statement: Police checks are repeated every 3 years or as appropriate. Compliance will be verified during an audit of the personnel file.",
+          "intent_tooltip": "The decision to appoint an individual to a position within the practice sets several processes in motion. To perform well, new personnel need to understand the functioning of the entire practice and how his or her specific role and responsibilities contribute to the practice's mission. This is accomplished through a general orientation to the practice and his or her role in the practice and a specific orientation to the responsibilities of his or her position. The orientation process should include for example infection control practices, confidentiality etc. The practice supports opportunities for continuing education and training of personnel to ensure they remain up to date with current best practice and to acquire advanced or new skills. These opportunities may be offered by the practice by a professional association or through educational programmes in the community. The practice supports such opportunities as appropriate to its mission and resources. Such support may be given through tuition support, scheduled time away from work, recognition for achievement and in other ways.",
+          "criteria": [
+            {
+              "id": "1.4.3.1",
+              "category": "",
+              "severity": null,
+              "description": "There are documented processes for orientation of personnel to the practice.",
+              "is_critical": false,
+              "guideline": "This includes general orientation and position-specific orientation as discussed in the standard intent above."
+            },
+            {
+              "id": "1.4.3.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice supports continuing education for its clinical personnel and maintains records of this in personnel files.",
+              "is_critical": false,
+              "guideline": "This refers specifically to professional personnel and the requirements for continued registration with the relevant professional bodies, where applicable. Management must have a clear strategy for assisting professional personnel to maintain their continued registration."
+            },
+            {
+              "id": "1.4.3.3",
+              "category": "",
+              "severity": null,
+              "description": "There is a development strategy for the practice that ensures that the practice manager and administrative personnel receive the training required to fulfil their responsibilities.",
+              "is_critical": false,
+              "guideline": "This training could include billing, medical aid codes and triaging, (which is particularly important when administrative personnel are responsible for the initial assessment of waiting room patients)."
+            },
+            {
+              "id": "1.4.3.4",
+              "category": "",
+              "severity": null,
+              "description": "Personnel members are informed of opportunities to participate in advanced education, training, research, and other experiences.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during an audit of the personnel files of various categories of personnel or other training records. Personnel members may also be interviewed. 1.5.2. Budgeting and reporting processes are consistent with statutory requirements and accepted standards. Intent of 1.5.2 An approved budget should be available in the management documentation. There should be evidence of the allocation of resources in accordance with the approved budget. This ensures that the practice plans for and is able to meet its financial obligations. 1.5.3. The practice provides patient services in line with legally and ethically accepted business and financial standards.. Intent of 1.5.3 The practice has ethical and legal responsibilities to its patients, personnel and the wider community. The leaders understand these responsibilities as they apply to the business activities of the practice."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.5",
+      "title": "Financial Management",
+      "standards": [
+        {
+          "standard_id": "1.5.1",
+          "statement": "The practice manager is responsible for the implementation and maintenance of a financial strategy.",
+          "intent_tooltip": "Financial planning and management needs to be conducted by a person who is suitably qualified or skilled and experienced in all matters relating to the finances of the practice. Clinical and managerial personnel both need to be included in planning the financial requirements of the practice. They require information relating to the funds available to them for the management of the practice and up-to-date statements of current expenditure. Sound accounting and auditing practices are implemented to ensure transparency. This is guided by documented policies and procedures. The practice manager ensures that these policies and procedures are implemented. 1.4.3.1. There are documented processes for orientation of personnel to the practice. Guideline statement: This includes general orientation and position-specific orientation as discussed in the standard intent above. 1.4.3.2. The practice supports continuing education for its clinical personnel and maintains records of this in personnel files. Guideline statement: This refers specifically to professional personnel and the requirements for continued registration with the relevant professional bodies, where applicable. Management must have a clear strategy for assisting professional personnel to maintain their continued registration. 1.4.3.3. There is a development strategy for the practice that ensures that the practice manager and administrative personnel receive the training required to fulfil their responsibilities. Guideline statement: This training could include billing, medical aid codes and triaging, (which is particularly important when administrative personnel are responsible for the initial assessment of waiting room patients). 1.4.3.4. Personnel members are informed of opportunities to participate in advanced education, training, research, and other experiences. Guideline statement: Compliance will be verified during an audit of the personnel files of various categories of personnel or other training records. Personnel members may also be interviewed.",
+          "criteria": [
+            {
+              "id": "1.5.1.1",
+              "category": "",
+              "severity": null,
+              "description": "A designated person is responsible for the implementation and maintenance of a financial strategy.",
+              "is_critical": false,
+              "guideline": "This requires that an individual in the practice has the officially assigned duties of overseeing and taking responsibility for all aspects of financial management. This may be the practice manager, a financial manager or a shared responsibility between practice manager and a financial officer."
+            },
+            {
+              "id": "1.5.1.2",
+              "category": "",
+              "severity": null,
+              "description": "This person is suitably qualified and/or experienced in accounting and financial management.",
+              "is_critical": false,
+              "guideline": "This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ finances. Where a financial manager or financial officer is employed, compliance will be assessed against the requirements set out in the position description."
+            },
+            {
+              "id": "1.5.1.3",
+              "category": "",
+              "severity": null,
+              "description": "The responsibilities of this person include ensuring that policies and procedures for all financial functions are implemented.",
+              "is_critical": false,
+              "guideline": "This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ finances. Where a financial manager or financial officer is employed, policies and procedures must guide their functions."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.5.2",
+          "statement": "Budgeting and reporting processes are consistent with statutory requirements and accepted standards.",
+          "intent_tooltip": "An approved budget should be available in the management documentation. There should be evidence of the allocation of resources in accordance with the approved budget. This ensures that the practice plans for and is able to meet its financial obligations.",
+          "criteria": [
+            {
+              "id": "1.5.2.1",
+              "category": "",
+              "severity": null,
+              "description": "There is a current budget for the practice.",
+              "is_critical": false,
+              "guideline": "For practices that comprise of more than one practitioner there should be an approved budget available in the management documentation. For practices that comprise of a solo practitioner there should be evidence of a practice budget. The budget must demonstrate allocation of resources. The budget will include, for example, salaries, rent, utility costs (water and electricity), consumable stock etc."
+            },
+            {
+              "id": "1.5.2.2",
+              "category": "",
+              "severity": null,
+              "description": "A report is produced at least annually, setting out the financial position to date.",
+              "is_critical": false,
+              "guideline": "This criterion requires that at least the most recent financial report that is prepared annually for submission to the Botswana Unified Revenue Service (BURS) must be available during the survey."
+            },
+            {
+              "id": "1.5.2.3",
+              "category": "",
+              "severity": null,
+              "description": "There is a mechanism for establishing the reason for budget variation in either income or expenditure.",
+              "is_critical": false,
+              "guideline": "Evidence should exist in the format in which financial statements are produced. Generally, these statements contain a column/section indicating the variance, i.e. under- or over-expenditure. Evidence showing what is done about this variance (especially over-expenditure), should be available, for example, in the minutes of relevant financial management meetings, personnel meetings or memos."
+            },
+            {
+              "id": "1.5.2.4",
+              "category": "",
+              "severity": null,
+              "description": "Capital investment proposals are subject to unanimous agreement among the partners or are agreed according to a voting system acceptable to all partners in the practice.",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided to demonstrate agreement. This criterion will be scored “not applicable” in practices owned by a solo practitioner. 1.6.1. There is an effective system to ensure that equipment and supplies are ordered, stored and distributed. Intent of 1.6.1 A competent person ensures that equipment and supplies are ordered timeously, stored safely and distributed appropriately. Policies and procedures are developed for the various provisioning functions. Such policies should include as a minimum: a) Ordering of and payment for supplies and equipment b) Safe storage of supplies c) Condemning procedures d) Security of order books, prescription pads and other face-value documents The practice needs to ensure that appropriate control measures are in place and that finances are made available for the purchase of those items of equipment and supplies which have been identified as being required by clinical and managerial personnel."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.5.3",
+          "statement": "The practice provides patient services in line with legally and ethically accepted business and financial standards..",
+          "intent_tooltip": "The practice has ethical and legal responsibilities to its patients, personnel and the wider community. The leaders understand these responsibilities as they apply to the business activities of the practice. 1.5.1.1. A designated person is responsible for the implementation and maintenance of a financial strategy. Guideline statement: This requires that an individual in the practice has the officially assigned duties of overseeing and taking responsibility for all aspects of financial management. This may be the practice manager, a financial manager or a shared responsibility between practice manager and a financial officer. 1.5.1.2. This person is suitably qualified and/or experienced in accounting and financial management. Guideline statement: This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ finances. Where a financial manager or financial officer is employed, compliance will be assessed against the requirements set out in the position description. 1.5.1.3. The responsibilities of this person include ensuring that policies and procedures for all financial functions are implemented. Guideline statement: This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ finances. Where a financial manager or financial officer is employed, policies and procedures must guide their functions. 1.5.2.1. There is a current budget for the practice. Guideline statement: For practices that comprise of more than one practitioner there should be an approved budget available in the management documentation. For practices that comprise of a solo practitioner there should be evidence of a practice budget. The budget must demonstrate allocation of resources. The budget will include, for example, salaries, rent, utility costs (water and electricity), consumable stock etc. 1.5.2.2. A report is produced at least annually, setting out the financial position to date. Guideline statement: This criterion requires that at least the most recent financial report that is prepared annually for submission to the Botswana Unified Revenue Service (BURS) must be available during the survey. 1.5.2.3. There is a mechanism for establishing the reason for budget variation in either income or expenditure. Guideline statement: Evidence should exist in the format in which financial statements are produced. Generally, these statements contain a column/section indicating the variance, i.e. under- or over-expenditure. Evidence showing what is done about this variance (especially over-expenditure), should be available, for example, in the minutes of relevant financial management meetings, personnel meetings or memos. 1.5.2.4. Capital investment proposals are subject to unanimous agreement among the partners or are agreed according to a voting system acceptable to all partners in the practice. Guideline statement: Documented evidence must be provided to demonstrate agreement. This criterion will be scored “not applicable” in practices owned by a solo practitioner.",
+          "criteria": [
+            {
+              "id": "1.5.3.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice has documented ethical and legal policies and procedures for the financial management of the practice that are implemented.",
+              "is_critical": false,
+              "guideline": "Examples of compliance with this criterion can be found in the policies and procedures for billing or referral to partners within the practice (for example partners in a poly clinic)."
+            },
+            {
+              "id": "1.5.3.2",
+              "category": "",
+              "severity": null,
+              "description": "Internal and external financial audit systems which meet audit requirements are maintained.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured in accordance with the requirements of the Botswana Companies Act."
+            },
+            {
+              "id": "1.5.3.3",
+              "category": "",
+              "severity": null,
+              "description": "Where required, annual audited financial statements are produced within the required time frame.",
+              "is_critical": true,
+              "guideline": "Compliance will be measured in accordance with the requirements of the Botswana Companies Act."
+            },
+            {
+              "id": "1.5.3.4",
+              "category": "",
+              "severity": null,
+              "description": "There is a capital asset register, which is routinely maintained.",
+              "is_critical": false,
+              "guideline": "Documented evidence will be required."
+            },
+            {
+              "id": "1.5.3.5",
+              "category": "",
+              "severity": null,
+              "description": "Assets are insured.",
+              "is_critical": false,
+              "guideline": "This includes the practice assets and where applicable the physical structure."
+            },
+            {
+              "id": "1.5.3.6",
+              "category": "",
+              "severity": null,
+              "description": "All health professionals provide evidence of professional indemnity insurance.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured during the personnel file audit."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.6",
+      "title": "Supply Chain Management",
+      "standards": [
+        {
+          "standard_id": "1.6.1",
+          "statement": "There is an effective system to ensure that equipment and supplies are ordered, stored and distributed.",
+          "intent_tooltip": "A competent person ensures that equipment and supplies are ordered timeously, stored safely and distributed appropriately. Policies and procedures are developed for the various provisioning functions. Such policies should include as a minimum: a) Ordering of and payment for supplies and equipment b) Safe storage of supplies c) Condemning procedures d) Security of order books, prescription pads and other face-value documents The practice needs to ensure that appropriate control measures are in place and that finances are made available for the purchase of those items of equipment and supplies which have been identified as being required by clinical and managerial personnel.",
+          "criteria": [
+            {
+              "id": "1.6.1.1",
+              "category": "",
+              "severity": null,
+              "description": "An individual is designated to control the ordering, storage, distribution and control of equipment and supplies used in the practice.",
+              "is_critical": false,
+              "guideline": "This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ equipment and supplies. Where a supply chain manager/stock controller is employed or the function is performed by someone other than the solo practice manager, compliance will be assessed against the requirements set out in the position description. 1.7.1. The practice manager and personnel work collaboratively to develop, implement and maintain effective risk management systems in the practice. Intent of 1.7.1 To plan effectively, the practice must be aware of all relevant risks. The goal is to prevent accidents and injuries, maintain safe and secure conditions for patients, families and personnel and reduce and control hazards and risks. A risk management programme includes: • Comprehensive risk assessment of the practice • Designing all aspects of the risk management plan (financial, physical, environmental, medico- legal, operational etc.) • Implementation of the programme • Personnel education • Testing and monitoring the programme • Periodic review and revision of the programme Monitoring of all aspects of the programme provides valuable data to make improvements in the programme and further reduce risks within the practice."
+            },
+            {
+              "id": "1.6.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Policies and procedures relating to all aspects of provisioning/supply chain management are implemented.",
+              "is_critical": false,
+              "guideline": "As a minimum, the policies and procedures discussed in a) – d) in the standard intent above should be available, accessible to personnel and implementation should be monitored."
+            },
+            {
+              "id": "1.6.1.3",
+              "category": "",
+              "severity": null,
+              "description": "Secure storage facilities are available.",
+              "is_critical": false,
+              "guideline": "The store must be lockable and exclude any unauthorised entry."
+            },
+            {
+              "id": "1.6.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Prescription pads, letterheads, investigation request forms, administrative records and other official documents are accessible only to authorised persons.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified by observation and personnel interviews."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.7",
+      "title": "Risk management",
+      "standards": [
+        {
+          "standard_id": "1.7.1",
+          "statement": "The practice manager and personnel work collaboratively to develop, implement and maintain effective risk management systems in the practice.",
+          "intent_tooltip": "To plan effectively, the practice must be aware of all relevant risks. The goal is to prevent accidents and injuries, maintain safe and secure conditions for patients, families and personnel and reduce and control hazards and risks. A risk management programme includes: • Comprehensive risk assessment of the practice • Designing all aspects of the risk management plan (financial, physical, environmental, medico- legal, operational etc.) • Implementation of the programme • Personnel education • Testing and monitoring the programme • Periodic review and revision of the programme Monitoring of all aspects of the programme provides valuable data to make improvements in the programme and further reduce risks within the practice.",
+          "criteria": [
+            {
+              "id": "1.7.1.1",
+              "category": "",
+              "severity": null,
+              "description": "There are documented risk management processes for identifying all risks relating to practice processes and systems, personnel, patients, visitors to the practice and physical facilities.",
+              "is_critical": false,
+              "guideline": "Compliance with this criterion requires documented evidence that the practice personnel have collaboratively identified risks within the practice. This document will be used to develop an action plan to eliminate or minimise risk. The risk management process should include all relevant aspects and services of the practice, for example patient, personnel and visitor related risks; financial, corporate and legal risks; physical facility, security and environmental risks; etc. This does not necessarily require a single integrated document, provided all components are dealt with in documented systems for the relevant operational processes/functions/sections. (NOTE: doing only monthly workplace inspections does not qualify for a compliance rating)."
+            },
+            {
+              "id": "1.7.1.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice manager ensures the development and implementation of written policies and procedures for risk management processes and activities.",
+              "is_critical": false,
+              "guideline": "These policies and procedures must define the routine risk management processes, for example, monthly inspections to monitor risks, and the actions to be taken when risks materialise as adverse events."
+            },
+            {
+              "id": "1.7.1.3",
+              "category": "",
+              "severity": null,
+              "description": "A nominated individual with relevant qualifications, skills and/or experience supervises the implementation of the risk management programme.",
+              "is_critical": false,
+              "guideline": "In small practices, this will usually be the practice manager. Larger practices may have a designated risk manager."
+            },
+            {
+              "id": "1.7.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Ongoing in-service training of all personnel in risk management policies, procedures and principles is documented. 1.7.2. The practice designs and implements a coordinated programme to reduce the risk of infection in patients and healthcare workers. Intent of 1.7.2 For an infection prevention and control programme to be effective, it must be comprehensive, encompassing both patient care and employee health. The programme is appropriate to the size and geographic location of the practice, the services offered by the practice and the patients seen by the practice. Infections can enter the practice via patients, their families, personnel, visitors, other individuals and vectors. All areas of the practice where these individuals or vectors are found must therefore be included in the programme of infection surveillance, prevention and control. Certain infections require patients suffering from these infections to be separated from non-infected patients such as patients with TB or high-risk influenza. These patients are identified when requesting an appointment and appropriately triaged. The programme is managed by a nominated individual within the practice and all practice personnel are informed of the nomination. Their qualifications depend on the activities they will carry out and may be met through education, training and experience. Coordination involves communication with all parts of the practice to ensure that the programme is continuous and proactive. Whatever the mechanism chosen by the practice to coordinate the infection control programme, medical and nursing personnel are represented and engaged in the activities. The individual, committee, or other mechanism must also monitor those support services in the practice which may lead to the spread of infection, for example, cleaning and waste disposal. Hand washing and disinfecting agents are fundamental to infection prevention and control. Soap and disinfectants are located in those areas where handwashing and disinfecting procedures are required. Personnel are educated in proper handwashing and disinfecting procedures.",
+              "is_critical": false,
+              "guideline": "A record must be kept of such training and must include all personnel."
+            },
+            {
+              "id": "1.7.1.5",
+              "category": "",
+              "severity": null,
+              "description": "Risk management systems are reviewed whenever there are changes in practice systems and processes or physical facilities.",
+              "is_critical": false,
+              "guideline": "This will include for example, during building renovations, changing from paper-based to electronic patient records or financial documentation, changing service providers etc."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.7.2",
+          "statement": "The practice designs and implements a coordinated programme to reduce the risk of infection in patients and healthcare workers.",
+          "intent_tooltip": "For an infection prevention and control programme to be effective, it must be comprehensive, encompassing both patient care and employee health. The programme is appropriate to the size and geographic location of the practice, the services offered by the practice and the patients seen by the practice. Infections can enter the practice via patients, their families, personnel, visitors, other individuals and vectors. All areas of the practice where these individuals or vectors are found must therefore be included in the programme of infection surveillance, prevention and control. Certain infections require patients suffering from these infections to be separated from non-infected patients such as patients with TB or high-risk influenza. These patients are identified when requesting an appointment and appropriately triaged. The programme is managed by a nominated individual within the practice and all practice personnel are informed of the nomination. Their qualifications depend on the activities they will carry out and may be met through education, training and experience. Coordination involves communication with all parts of the practice to ensure that the programme is continuous and proactive. Whatever the mechanism chosen by the practice to coordinate the infection control programme, medical and nursing personnel are represented and engaged in the activities. The individual, committee, or other mechanism must also monitor those support services in the practice which may lead to the spread of infection, for example, cleaning and waste disposal. Hand washing and disinfecting agents are fundamental to infection prevention and control. Soap and disinfectants are located in those areas where handwashing and disinfecting procedures are required. Personnel are educated in proper handwashing and disinfecting procedures.",
+          "criteria": [
+            {
+              "id": "1.7.2.1",
+              "category": "",
+              "severity": null,
+              "description": "A nominated individual is responsible for infection control in the practice and practice personnel are aware of the nomination.",
+              "is_critical": false,
+              "guideline": "It is this nominated individual’s responsibility to ensure that infection control policies and procedures are implemented and monitored."
+            },
+            {
+              "id": "1.7.2.2",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+              "is_critical": false,
+              "guideline": "These policies and procedures must be available and accessible in the practice and their implementation monitored. 1.7.3. The practice has a written policy which considers the need for infection control procedures relating to the handling, storing and disposing of waste."
+            },
+            {
+              "id": "1.7.2.3",
+              "category": "",
+              "severity": null,
+              "description": "Regular in-service training is given to all personnel in the field of infection control and is documented.",
+              "is_critical": false,
+              "guideline": "The infection control education programme needs to include policies/guidelines as well as relevant issues as they are identified. All personnel should be included in information sharing and training at regular scheduled meetings or other fora. Documented evidence (for example, minutes of meetings/attendance records) must be provided."
+            },
+            {
+              "id": "1.7.2.4",
+              "category": "",
+              "severity": null,
+              "description": "Infection control is on the agenda of all personnel meetings of the practice and discussion points are documented.",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided."
+            },
+            {
+              "id": "1.7.2.5",
+              "category": "",
+              "severity": null,
+              "description": "All patient and personnel areas of the practice are included in the documented infection control programme.",
+              "is_critical": true,
+              "guideline": "This includes for example, all clinical areas, the waiting area, personnel and patient toilets, kitchen etc."
+            },
+            {
+              "id": "1.7.2.6",
+              "category": "",
+              "severity": null,
+              "description": "Handwashing and disinfecting facilities, including water, soap, paper towels or hand sanitisers are available in all relevant areas.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "1.7.2.7",
+              "category": "",
+              "severity": null,
+              "description": "Personnel are constantly reminded of the importance of effective hand washing.",
+              "is_critical": false,
+              "guideline": "For example, posters are displayed at basins, hand hygiene audits are regularly conducted etc."
+            },
+            {
+              "id": "1.7.2.8",
+              "category": "",
+              "severity": null,
+              "description": "The practice reports on notifiable diseases to appropriate external public health agencies.",
+              "is_critical": true,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "1.7.2.9",
+              "category": "",
+              "severity": null,
+              "description": "A nominated individual has been trained in and is responsible for sterilisation procedures within the practice and can describe the process in detail.",
+              "is_critical": false,
+              "guideline": "Evidence of training is required. This criterion is only applicable to those practices that have on-site sterilisers."
+            },
+            {
+              "id": "1.7.2.10",
+              "category": "",
+              "severity": null,
+              "description": "Relevant personnel members are immunised against Hepatitis B according to practice policy.",
+              "is_critical": false,
+              "guideline": "This requires the practice to formally identify the categories of personnel who are at risk (including cleaning personnel if they handle healthcare related waste) and to ensure that there is a system to track that their Hepatitis B immunisations remain up to date."
+            },
+            {
+              "id": "1.7.2.11",
+              "category": "",
+              "severity": null,
+              "description": "There is a documented policy for the management of exposure to high risk infections and needle-stick injuries.",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided to demonstrate that personnel are aware of the policy and have been trained on its content and implementation. Compliance will further be verified by personnel interviews."
+            },
+            {
+              "id": "1.7.2.12",
+              "category": "",
+              "severity": null,
+              "description": "Post exposure prophylaxis is available to personnel in accordance with national policy and includes the management of the patient from whom the needle was withdrawn.",
+              "is_critical": true,
+              "guideline": "This includes exposure to high risk infections and needle-stick injuries (for example body fluid splashes etc.) The national policy must be available and known to personnel."
+            },
+            {
+              "id": "1.7.2.13",
+              "category": "",
+              "severity": null,
+              "description": "There is a documented policy for the management of body fluid spills.",
+              "is_critical": false,
+              "guideline": "The policy must include as a minimum: • The correct cleaning procedure following a body fluid spill • The correct procedure to follow when sluicing/washing contaminated linen"
+            },
+            {
+              "id": "1.7.2.14",
+              "category": "",
+              "severity": null,
+              "description": "There is a documented policy for the triage of patients with potential communicable diseases.",
+              "is_critical": false,
+              "guideline": "These patients are identified when requesting an appointment and appropriately triaged. If it is necessary for these patients to attend the practice, they are directed to a separate waiting area to prevent transmission of the infection to non-infected patients. Where there is no separate waiting area, the practitioner must attend to the patient immediately. Intent of 1.7.3 Policies need to be developed to guide personnel in ensuring their own safety, the safety of others and the safety of the environment is protected when implementing waste removal systems. Household waste, hazardous wastes (such as chemicals and hazardous gases), pharmaceutical and healthcare waste are identified by the practice and are safely controlled in accordance with a written policy. All healthcare waste is regarded as hazardous or potentially hazardous. The policy is included in the practice's risk management plan. 1.7.4. The practice makes provision for the safety and security of personnel, visitors, patients and facilities. Intent of 1.7.4 Consideration is given to the safety and security of personnel, visitors, patients and facilities during working hours and after hours. Plans are developed and implemented to provide protection from attack, theft or damage to the property."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.7.3",
+          "statement": "The practice has a written policy which considers the need for infection control procedures relating to the handling, storing and disposing of waste. 1.7.2.3. Regular in-service training is given to all personnel in the field of infection control and is documented. Guideline statement: The infection control education programme needs to include policies/guidelines as well as relevant issues as they are identified. All personnel should be included in information sharing and training at regular scheduled meetings or other fora. Documented evidence (for example, minutes of meetings/attendance records) must be provided. 1.7.2.4. Infection control is on the agenda of all personnel meetings of the practice and discussion points are documented. Guideline statement: Documented evidence must be provided. 1.7.2.5. CRITICAL All patient and personnel areas of the practice are included in the documented infection control programme. Guideline statement: This includes for example, all clinical areas, the waiting area, personnel and patient toilets, kitchen etc. 1.7.2.6. Handwashing and disinfecting facilities, including water, soap, paper towels or hand sanitisers are available in all relevant areas. Guideline statement: Compliance will be measured by observation. 1.7.2.7. Personnel are constantly reminded of the importance of effective hand washing. Guideline statement: For example, posters are displayed at basins, hand hygiene audits are regularly conducted etc. 1.7.2.8. CRITICAL The practice reports on notifiable diseases to appropriate external public health agencies. Guideline statement: Documented evidence is required. 1.7.2.9. A nominated individual has been trained in and is responsible for sterilisation procedures within the practice and can describe the process in detail. Guideline statement: Evidence of training is required. This criterion is only applicable to those practices that have on-site sterilisers. 1.7.2.10. Relevant personnel members are immunised against Hepatitis B according to practice policy. Guideline statement: This requires the practice to formally identify the categories of personnel who are at risk (including cleaning personnel if they handle healthcare related waste) and to ensure that there is a system to track that their Hepatitis B immunisations remain up to date. 1.7.2.11. There is a documented policy for the management of exposure to high risk infections and needle-stick injuries. Guideline statement: Documented evidence must be provided to demonstrate that personnel are aware of the policy and have been trained on its content and implementation. Compliance will further be verified by personnel interviews. 1.7.2.12. CRITICAL Post exposure prophylaxis is available to personnel in accordance with national policy and includes the management of the patient from whom the needle was withdrawn. Guideline statement: This includes exposure to high risk infections and needle-stick injuries (for example body fluid splashes etc.) The national policy must be available and known to personnel. 1.7.2.13. There is a documented policy for the management of body fluid spills. Guideline statement: The policy must include as a minimum: • The correct cleaning procedure following a body fluid spill • The correct procedure to follow when sluicing/washing contaminated linen 1.7.2.14. There is a documented policy for the triage of patients with potential communicable diseases. Guideline statement: These patients are identified when requesting an appointment and appropriately triaged. If it is necessary for these patients to attend the practice, they are directed to a separate waiting area to prevent transmission of the infection to non-infected patients. Where there is no separate waiting area, the practitioner must attend to the patient immediately.",
+          "intent_tooltip": "Policies need to be developed to guide personnel in ensuring their own safety, the safety of others and the safety of the environment is protected when implementing waste removal systems. Household waste, hazardous wastes (such as chemicals and hazardous gases), pharmaceutical and healthcare waste are identified by the practice and are safely controlled in accordance with a written policy. All healthcare waste is regarded as hazardous or potentially hazardous. The policy is included in the practice's risk management plan.",
+          "criteria": [
+            {
+              "id": "1.7.3.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice has a waste management policy that is consistent with country-specific laws and regulations and includes the safe handling, storing and disposing of all different types of waste.",
+              "is_critical": false,
+              "guideline": "The policy must include all relevant aspects of waste management, for example, identification, colour coding, handling, storage, disposal of etc. with special reference to clinical/healthcare waste, personal protective equipment (PPE), the management of spills and the reporting and investigation of waste related incidents."
+            },
+            {
+              "id": "1.7.3.2",
+              "category": "",
+              "severity": null,
+              "description": "The policy makes provision for the appropriate management of confidential waste.",
+              "is_critical": true,
+              "guideline": "Confidential waste includes all patient and personnel related documentation and practice-specific documentation for example, financial statements."
+            },
+            {
+              "id": "1.7.3.3",
+              "category": "",
+              "severity": null,
+              "description": "Waste is segregated in accordance with policies, procedures, country-specific laws and regulations.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "1.7.3.4",
+              "category": "",
+              "severity": null,
+              "description": "The colour of bag and type of container appropriate to the type of waste generated are available.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "1.7.3.5",
+              "category": "",
+              "severity": null,
+              "description": "Waste is protected from theft, vandalism or scavenging by animals.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "1.7.3.6",
+              "category": "",
+              "severity": null,
+              "description": "Waste is collected at appropriate times so that hazards are not caused.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation and by documented evidence that demonstrates when and by whom waste is collected."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.7.4",
+          "statement": "The practice makes provision for the safety and security of personnel, visitors, patients and facilities.",
+          "intent_tooltip": "Consideration is given to the safety and security of personnel, visitors, patients and facilities during working hours and after hours. Plans are developed and implemented to provide protection from attack, theft or damage to the property.",
+          "criteria": [
+            {
+              "id": "1.7.4.1",
+              "category": "",
+              "severity": null,
+              "description": "Security systems, including guards if required, provide for internal and external security.",
+              "is_critical": false,
+              "guideline": "If the security system is outsourced (alarms/guards) the service contract must be available during the survey. As a minimum, a practice must be secured with burglar bars and security gates. Compliance will be further measured by observation of the security measures in place and whether they are appropriate for the individual setting."
+            },
+            {
+              "id": "1.7.4.2",
+              "category": "",
+              "severity": null,
+              "description": "Sufficient light sources are available to provide adequate light (no dark areas) in all areas such as the entrance, waiting rooms, halls and offices.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation. 1.7.5. The practice implements structured systems to ensure fire safety. Intent of 1.7.5 Fire is an ever-present risk in a practice. As such the practice needs to plan for: • The prevention of fires through the reduction of risks, such as the safe storage and handling of potentially flammable materials • Safe and unobstructed means of exit in the event of fire • Clearly depicted fire escape routes • Inspection reports from the local fire departments • Suppression mechanisms such as water hoses, chemical suppressants or sprinkler systems These actions when combined, give patients, families, personnel and visitors adequate time to exit the facility safely in the event of a fire or smoke. These actions must be effective irrespective of the age, size or construction of the facility. The fire safety plan for the practice includes: • The frequency of inspection, testing and maintenance of fire protection and safety systems, consistent with requirements • The necessary education of personnel to protect and evacuate patients effectively in the event of fire or smoke • The process for testing the plan for the safe evacuation of the facility in the event of a fire or smoke • A mock evacuation to be carried out at least once a year • The required documentation of all inspection, testing and maintenance systems The practice develops and implements a policy and plan to eliminate smoking in the practice's facilities or to limit smoking to designated non-patient care areas."
+            },
+            {
+              "id": "1.7.4.3",
+              "category": "",
+              "severity": null,
+              "description": "There is effective control of access to clinical areas and store areas.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "1.7.4.4",
+              "category": "",
+              "severity": null,
+              "description": "Alarm systems and signals are tested every month.",
+              "is_critical": false,
+              "guideline": "This criterion will only be applicable to those practices that have alarm systems and signals (for example panic buttons) installed. Documented evidence of testing must be provided."
+            },
+            {
+              "id": "1.7.4.5",
+              "category": "",
+              "severity": null,
+              "description": "A mechanism known to the personnel is available for summoning the assistance of security/police/protection services in the case of an emergency.",
+              "is_critical": false,
+              "guideline": "This can be achieved for example, by including the information in the orientation programme for new personnel and by displaying emergency numbers next to all telephones in the practice."
+            },
+            {
+              "id": "1.7.4.6",
+              "category": "",
+              "severity": null,
+              "description": "Reasonable measures are taken to ensure the safety of lone workers.",
+              "is_critical": false,
+              "guideline": "This criterion is only applicable where practitioners consult with patients after hours. Reasonable measures can include for example, the installation of panic buttons or notifying another person or security company that the practitioner is alone in the practice. Sufficient arrangements should be in in place to ensure that a personnel member who is alone in the practice is safe. These arrangements must be outlined in a policy which all personnel should be aware of. 1.7.6. The practice develops a written plan to respond to emergencies. Intent of 1.7.6 Community emergencies, epidemics and major events such as damage to patient care areas as a result of a natural disasters that affects personnel may directly involve the practice. Practices should also be prepared for bomb threats, fire, flooding, natural disasters, explosions and the consequent loss of vital services, failure of water and electrical supplies and hostage taking. There may be a time when it is necessary to evacuate patients, visitors and personnel. This can only"
+            }
+          ]
+        },
+        {
+          "standard_id": "1.7.5",
+          "statement": "The practice implements structured systems to ensure fire safety.",
+          "intent_tooltip": "Fire is an ever-present risk in a practice. As such the practice needs to plan for: • The prevention of fires through the reduction of risks, such as the safe storage and handling of potentially flammable materials • Safe and unobstructed means of exit in the event of fire • Clearly depicted fire escape routes • Inspection reports from the local fire departments • Suppression mechanisms such as water hoses, chemical suppressants or sprinkler systems These actions when combined, give patients, families, personnel and visitors adequate time to exit the facility safely in the event of a fire or smoke. These actions must be effective irrespective of the age, size or construction of the facility. The fire safety plan for the practice includes: • The frequency of inspection, testing and maintenance of fire protection and safety systems, consistent with requirements • The necessary education of personnel to protect and evacuate patients effectively in the event of fire or smoke • The process for testing the plan for the safe evacuation of the facility in the event of a fire or smoke • A mock evacuation to be carried out at least once a year • The required documentation of all inspection, testing and maintenance systems The practice develops and implements a policy and plan to eliminate smoking in the practice's facilities or to limit smoking to designated non-patient care areas. 1.7.4.3. There is effective control of access to clinical areas and store areas. Guideline statement: Compliance will be measured by observation. 1.7.4.4. Alarm systems and signals are tested every month. Guideline statement: This criterion will only be applicable to those practices that have alarm systems and signals (for example panic buttons) installed. Documented evidence of testing must be provided. 1.7.4.5. A mechanism known to the personnel is available for summoning the assistance of security/police/protection services in the case of an emergency. Guideline statement: This can be achieved for example, by including the information in the orientation programme for new personnel and by displaying emergency numbers next to all telephones in the practice. 1.7.4.6. Reasonable measures are taken to ensure the safety of lone workers. Guideline statement: This criterion is only applicable where practitioners consult with patients after hours. Reasonable measures can include for example, the installation of panic buttons or notifying another person or security company that the practitioner is alone in the practice. Sufficient arrangements should be in in place to ensure that a personnel member who is alone in the practice is safe. These arrangements must be outlined in a policy which all personnel should be aware of.",
+          "criteria": [
+            {
+              "id": "1.7.5.1",
+              "category": "",
+              "severity": null,
+              "description": "There are structured systems and processes in place to ensure that all occupants of the practice’s facilities are safe from fire or smoke.",
+              "is_critical": false,
+              "guideline": "There are documented fire safety systems which include all the relevant aspects of fire safety, for example training, rehearsals, servicing and storage of equipment, escape route signage, storage and handling of flammable materials, etc."
+            },
+            {
+              "id": "1.7.5.2",
+              "category": "",
+              "severity": null,
+              "description": "Documented certification is available from the relevant authority to show that the facility complies with applicable laws and regulations in relation to fire safety (fire clearance certificate).",
+              "is_critical": true,
+              "guideline": "As per the intent statement, compliance with this criterion requires documented evidence of an official inspection to confirm that the building complies with national fire safety requirements. The practice manager must obtain a copy of the documentation from the landlord if the practice does not own the building."
+            },
+            {
+              "id": "1.7.5.3",
+              "category": "",
+              "severity": null,
+              "description": "Firefighting equipment is regularly inspected and serviced at least annually and the date of the service is recorded on the apparatus.",
+              "is_critical": false,
+              "guideline": "Abatement systems as per country specific requirements will be reflected in the certification as required in"
+            },
+            {
+              "id": "1.7.5.4",
+              "category": "",
+              "severity": null,
+              "description": "Flammable materials are clearly labelled and safely stored.",
+              "is_critical": true,
+              "guideline": "Flammable materials are identified by the practice and stored in accordance with the national safety regulations. The storage precautions are applicable to all areas/services/departments where flammable materials are used. The appropriateness of the storage facility will be determined by the quantity and flashpoint of the materials stored. Bulk storage requirements and registration will be determined by country specific regulations."
+            },
+            {
+              "id": "1.7.5.5",
+              "category": "",
+              "severity": null,
+              "description": "Sufficient electrical socket outlets are provided in all areas to avoid overloading of individual outlets and to minimise fire risks.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation."
+            },
+            {
+              "id": "1.7.5.6",
+              "category": "",
+              "severity": null,
+              "description": "Easily recognised and understood signs prohibiting smoking are displayed in areas where flammable materials and combustible gases are stored.",
+              "is_critical": false,
+              "guideline": "Compliance will be assessed during the assessment of the areas where such materials are stored."
+            },
+            {
+              "id": "1.7.5.7",
+              "category": "",
+              "severity": null,
+              "description": "A floor plan showing the location of firefighting equipment, electrical distribution board, evacuation routes and emergency exits is displayed.",
+              "is_critical": false,
+              "guideline": "The display of such plans throughout the practice will be observed during the visit to each area."
+            },
+            {
+              "id": "1.7.5.8",
+              "category": "",
+              "severity": null,
+              "description": "Annual personnel training in fire prevention and evacuation procedures is documented.",
+              "is_critical": false,
+              "guideline": "A fire safety evacuation plan must be developed by the practice. Personnel training must be provided and evacuation exercises held annually. Documented evidence that the plan is physically rehearsed will be required."
+            },
+            {
+              "id": "1.7.5.9",
+              "category": "",
+              "severity": null,
+              "description": "A mechanism known to personnel is available for summoning the fire service.",
+              "is_critical": false,
+              "guideline": "This can be achieved for example, by including the information in the orientation programme for new personnel and by displaying emergency numbers next to all telephones in the practice. be done quickly and effectively if personnel are trained in evacuation procedures. The emergency plan for the practice includes: • The necessary education of personnel to protect and evacuate patients effectively when an emergency occurs • The need for each personnel member to participate in at least one emergency preparedness test per year 1.8.1. The practice has a system to ensure that data and information is made available to meet user needs and the needs of those outside the practice who require data and information from the practice. Intent of 1.8.1 To provide coordinated and integrated services, practices rely on information relating to individual patients, care provided, results of care and their own performance. Every practice seeks to obtain, manage and use information to improve patient outcomes as well as individual and overall practice performance. The information management process makes it possible to combine information from various sources and generate reports to support decision making. The combination of clinical and managerial information supports the leaders of the practice to plan collaboratively. Planning incorporates input from a variety of sources: • The care providers • The administration team • The practice managers • Those inside and outside the practice who require information about the practice's operational and"
+            }
+          ]
+        },
+        {
+          "standard_id": "1.7.6",
+          "statement": "The practice develops a written plan to respond to emergencies.",
+          "intent_tooltip": "Community emergencies, epidemics and major events such as damage to patient care areas as a result of a natural disasters that affects personnel may directly involve the practice. Practices should also be prepared for bomb threats, fire, flooding, natural disasters, explosions and the consequent loss of vital services, failure of water and electrical supplies and hostage taking. There may be a time when it is necessary to evacuate patients, visitors and personnel. This can only 1.7.5.1. There are structured systems and processes in place to ensure that all occupants of the practice’s facilities are safe from fire or smoke. Guideline statement: There are documented fire safety systems which include all the relevant aspects of fire safety, for example training, rehearsals, servicing and storage of equipment, escape route signage, storage and handling of flammable materials, etc. 1.7.5.2. CRITICAL Documented certification is available from the relevant authority to show that the facility complies with applicable laws and regulations in relation to fire safety (fire clearance certificate). Guideline statement: As per the intent statement, compliance with this criterion requires documented evidence of an official inspection to confirm that the building complies with national fire safety requirements. The practice manager must obtain a copy of the documentation from the landlord if the practice does not own the building. 1.7.5.3. Firefighting equipment is regularly inspected and serviced at least annually and the date of the service is recorded on the apparatus. Guideline statement: Abatement systems as per country specific requirements will be reflected in the certification as required in 1.7.6.2. It is essential that the testing and servicing of all fire safety equipment is up to date, automatic abatement systems are regularly tested, fire and smoke detection systems are tested, and automatic abatement doors are not forced to remain open by means of wedging or putting objects against them. Documented evidence of inspection, testing and maintenance of fire safety equipment is required. This may include the fixing of service labels onto the equipment itself. 1.7.5.4. CRITICAL Flammable materials are clearly labelled and safely stored. Guideline statement: Flammable materials are identified by the practice and stored in accordance with the national safety regulations. The storage precautions are applicable to all areas/services/departments where flammable materials are used. The appropriateness of the storage facility will be determined by the quantity and flashpoint of the materials stored. Bulk storage requirements and registration will be determined by country specific regulations. 1.7.5.5. Sufficient electrical socket outlets are provided in all areas to avoid overloading of individual outlets and to minimise fire risks. Guideline statement: Compliance will be measured by observation. 1.7.5.6. Easily recognised and understood signs prohibiting smoking are displayed in areas where flammable materials and combustible gases are stored. Guideline statement: Compliance will be assessed during the assessment of the areas where such materials are stored. 1.7.5.7. A floor plan showing the location of firefighting equipment, electrical distribution board, evacuation routes and emergency exits is displayed. Guideline statement: The display of such plans throughout the practice will be observed during the visit to each area. 1.7.5.8. Annual personnel training in fire prevention and evacuation procedures is documented. Guideline statement: A fire safety evacuation plan must be developed by the practice. Personnel training must be provided and evacuation exercises held annually. Documented evidence that the plan is physically rehearsed will be required. 1.7.5.9. A mechanism known to personnel is available for summoning the fire service. Guideline statement: This can be achieved for example, by including the information in the orientation programme for new personnel and by displaying emergency numbers next to all telephones in the practice. be done quickly and effectively if personnel are trained in evacuation procedures. The emergency plan for the practice includes: • The necessary education of personnel to protect and evacuate patients effectively when an emergency occurs • The need for each personnel member to participate in at least one emergency preparedness test per year",
+          "criteria": [
+            {
+              "id": "1.7.6.1",
+              "category": "",
+              "severity": null,
+              "description": "There is a written plan to deal with emergencies (including bomb threats, flooding, natural disasters, failure of water and electrical supplies).",
+              "is_critical": false,
+              "guideline": "The documented plan is up to date and is available in all areas of the practice."
+            },
+            {
+              "id": "1.7.6.2",
+              "category": "",
+              "severity": null,
+              "description": "There are site and floor plans that depict the locations and layout of the main services (for example, water, sanitation, electricity supply).",
+              "is_critical": false,
+              "guideline": "It is very important that all personnel know where to switch off the main services, for example, water, electricity and, where installed, oxygen supply. Compliance will be measured on documented evidence and personnel interviews."
+            },
+            {
+              "id": "1.7.6.3",
+              "category": "",
+              "severity": null,
+              "description": "Documented evidence is available to show that the personnel participate in a rehearsal of the emergency plan at least annually.",
+              "is_critical": false,
+              "guideline": "The emphasis of this rehearsal must be on the emergency situations mentioned in the standard intent. Documented evidence must be provided."
+            },
+            {
+              "id": "1.7.6.4",
+              "category": "",
+              "severity": null,
+              "description": "First aid kits and materials for healthcare workers are available.",
+              "is_critical": false,
+              "guideline": "Botswana specific occupational health laws and regulations should dictate the contents of the first aid kits. Please note that doctors may stock the required content as part of their regular stock. Other healthcare service providers such as, for example, physiotherapists and radiographers will need to have a dedicated first aid kit. Compliance will be measured on the availability of the required stock. care processes Those individuals in the practice who generate, collect, analyse and use the information are educated and trained to participate effectively in the management of information and to understand the need for security and confidentiality of this information. 1.8.2. There is a system for the analysis of data. Intent of 1.8.2 To reach conclusions and make decisions, data must be aggregated, analysed and transformed into useful information. Data analysis is done by individuals with an understanding of information management who also have skills in data aggregation methods and in the use of various statistical tools. To maximise effectiveness, data analysis involves the individuals responsible for the process or outcome being measured. These individuals may be clinical, managerial, administrative or a"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.8",
+      "title": "Information Management and Quality Improvement",
+      "standards": [
+        {
+          "standard_id": "1.8.1",
+          "statement": "The practice has a system to ensure that data and information is made available to meet user needs and the needs of those outside the practice who require data and information from the practice.",
+          "intent_tooltip": "To provide coordinated and integrated services, practices rely on information relating to individual patients, care provided, results of care and their own performance. Every practice seeks to obtain, manage and use information to improve patient outcomes as well as individual and overall practice performance. The information management process makes it possible to combine information from various sources and generate reports to support decision making. The combination of clinical and managerial information supports the leaders of the practice to plan collaboratively. Planning incorporates input from a variety of sources: • The care providers • The administration team • The practice managers • Those inside and outside the practice who require information about the practice's operational and 1.7.6.1. There is a written plan to deal with emergencies (including bomb threats, flooding, natural disasters, failure of water and electrical supplies). Guideline statement: The documented plan is up to date and is available in all areas of the practice. 1.7.6.2. There are site and floor plans that depict the locations and layout of the main services (for example, water, sanitation, electricity supply). Guideline statement: It is very important that all personnel know where to switch off the main services, for example, water, electricity and, where installed, oxygen supply. Compliance will be measured on documented evidence and personnel interviews. 1.7.6.3. Documented evidence is available to show that the personnel participate in a rehearsal of the emergency plan at least annually. Guideline statement: The emphasis of this rehearsal must be on the emergency situations mentioned in the standard intent. Documented evidence must be provided. 1.7.6.4. First aid kits and materials for healthcare workers are available. Guideline statement: Botswana specific occupational health laws and regulations should dictate the contents of the first aid kits. Please note that doctors may stock the required content as part of their regular stock. Other healthcare service providers such as, for example, physiotherapists and radiographers will need to have a dedicated first aid kit. Compliance will be measured on the availability of the required stock. care processes Those individuals in the practice who generate, collect, analyse and use the information are educated and trained to participate effectively in the management of information and to understand the need for security and confidentiality of this information.",
+          "criteria": [
+            {
+              "id": "1.8.1.1",
+              "category": "",
+              "severity": null,
+              "description": "There is a documented policy for collection, collation, validation and distribution of data which is implemented.",
+              "is_critical": false,
+              "guideline": "The policy must define those permitted access to each category of data and information."
+            },
+            {
+              "id": "1.8.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Clinical, managerial and administrative personnel participate in developing and implementing an information system to support patient care and practice management.",
+              "is_critical": false,
+              "guideline": "This does not have to be a single system nor does it have to be electronic. Paper-based information system/s are also acceptable. The information required by the criteria must encompass at least information relating to individual patients, care provided, results of care and the practice’s own performance."
+            },
+            {
+              "id": "1.8.1.3",
+              "category": "",
+              "severity": null,
+              "description": "Clinical and managerial data and information are integrated as needed to support decision-making.",
+              "is_critical": false,
+              "guideline": "Assessment of compliance is based on the availability of reports on the various types of data as well as documented evidence (for example, minutes of meetings or other form of communication) of discussions on the information and how this is taken into consideration to assist with decision-making processes. This needs to happen at all levels of the practice and not just at management level, as information also needs to be available on departmental operations such as personnel matters, financial aspects, supply management, outcomes of quality improvement programmes, results from clinical and patient record audits, negative incidents, etc."
+            },
+            {
+              "id": "1.8.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Required technology and other resources support the implementation of the data and information management system.",
+              "is_critical": false,
+              "guideline": "Resource requirements may differ vastly between paper-based and computerised systems and the assessment of compliance needs to take these factors into account."
+            },
+            {
+              "id": "1.8.1.5",
+              "category": "",
+              "severity": null,
+              "description": "Security and confidentiality of data and information is maintained.",
+              "is_critical": true,
+              "guideline": "Security relates to access control in terms of passwords, back up processes as well as archiving of paper based records. Up to date anti-virus/anti-malware software is in place. Confidentiality aspects need to be documented as part of the information management processes for the various types of information, whether it be financial data, personal information on personnel, patient information, etc. Where applicable, country-specific legal requirements need to be considered."
+            },
+            {
+              "id": "1.8.1.6",
+              "category": "",
+              "severity": null,
+              "description": "Documented procedures which outline the processes to provide required information to individuals and agencies outside the practice when required by laws or regulations are implemented.",
+              "is_critical": true,
+              "guideline": "Documented evidence of reporting is required. This includes notifiable disease reporting, other statistics required according to country-specific legislation and information provided to healthcare funders."
+            },
+            {
+              "id": "1.8.1.7",
+              "category": "",
+              "severity": null,
+              "description": "The practice manager or delegated person checks the integrity of data leaving the facility for completeness, correctness and consistency.",
+              "is_critical": false,
+              "guideline": "The integrity of data refers to the validation of raw data to ensure accuracy of information. Evidence of quality checks of the data before it leaves the practice and action taken when deficiencies in data quality and timeframes of reporting are identified. This includes for example, ICD 10 codes supplied to healthcare funders, national statistics etc. combination. When implemented in this way, data analysis provides continuous feedback of quality management information to help those individuals make decisions and continuously improve the process under review. The practice determines how often data is aggregated and analysed. The frequency depends on the activity or area being measured, the frequency of measurement, and the practice's priorities. For example, clinical data may be analysed once or twice yearly to monitor care in chronic disease management and the performance of contracted services may be analysed quarterly to ensure on- going adequacy of service provision. Aggregation of data at points in time enables the practice to judge a process's stability or an outcome's predictability in relation to expectations. Computers are a useful tool in this process. The goal of data analysis is to be able to compare a practice in four ways: • With itself over time • With other similar health facilities • With standards • With evidence based practice and guidelines. These comparisons help the practice to understand the source and nature of undesirable change and help to focus improvement efforts. Understanding statistical techniques is helpful in data analysis, especially in interpreting variation and in deciding where improvement is needed. Run charts, control charts, histograms and Pareto charts are examples of statistical tools useful in understanding trends and variations in health care. 1.8.3. The practice appoints an individual or committee which represents all services within the practice to guide the quality improvement process. Intent of 1.8.3"
+            }
+          ]
+        },
+        {
+          "standard_id": "1.8.2",
+          "statement": "There is a system for the analysis of data.",
+          "intent_tooltip": "To reach conclusions and make decisions, data must be aggregated, analysed and transformed into useful information. Data analysis is done by individuals with an understanding of information management who also have skills in data aggregation methods and in the use of various statistical tools. To maximise effectiveness, data analysis involves the individuals responsible for the process or outcome being measured. These individuals may be clinical, managerial, administrative or a 1.8.1.1. There is a documented policy for collection, collation, validation and distribution of data which is implemented. Guideline statement: The policy must define those permitted access to each category of data and information. 1.8.1.2. Clinical, managerial and administrative personnel participate in developing and implementing an information system to support patient care and practice management. Guideline statement: This does not have to be a single system nor does it have to be electronic. Paper-based information system/s are also acceptable. The information required by the criteria must encompass at least information relating to individual patients, care provided, results of care and the practice’s own performance. 1.8.1.3. Clinical and managerial data and information are integrated as needed to support decision-making. Guideline statement: Assessment of compliance is based on the availability of reports on the various types of data as well as documented evidence (for example, minutes of meetings or other form of communication) of discussions on the information and how this is taken into consideration to assist with decision-making processes. This needs to happen at all levels of the practice and not just at management level, as information also needs to be available on departmental operations such as personnel matters, financial aspects, supply management, outcomes of quality improvement programmes, results from clinical and patient record audits, negative incidents, etc. 1.8.1.4. Required technology and other resources support the implementation of the data and information management system. Guideline statement: Resource requirements may differ vastly between paper-based and computerised systems and the assessment of compliance needs to take these factors into account. 1.8.1.5. CRITICAL Security and confidentiality of data and information is maintained. Guideline statement: Security relates to access control in terms of passwords, back up processes as well as archiving of paper based records. Up to date anti-virus/anti-malware software is in place. Confidentiality aspects need to be documented as part of the information management processes for the various types of information, whether it be financial data, personal information on personnel, patient information, etc. Where applicable, country-specific legal requirements need to be considered. 1.8.1.6. CRITICAL Documented procedures which outline the processes to provide required information to individuals and agencies outside the practice when required by laws or regulations are implemented. Guideline statement: Documented evidence of reporting is required. This includes notifiable disease reporting, other statistics required according to country-specific legislation and information provided to healthcare funders. 1.8.1.7. The practice manager or delegated person checks the integrity of data leaving the facility for completeness, correctness and consistency. Guideline statement: The integrity of data refers to the validation of raw data to ensure accuracy of information. Evidence of quality checks of the data before it leaves the practice and action taken when deficiencies in data quality and timeframes of reporting are identified. This includes for example, ICD 10 codes supplied to healthcare funders, national statistics etc. combination. When implemented in this way, data analysis provides continuous feedback of quality management information to help those individuals make decisions and continuously improve the process under review. The practice determines how often data is aggregated and analysed. The frequency depends on the activity or area being measured, the frequency of measurement, and the practice's priorities. For example, clinical data may be analysed once or twice yearly to monitor care in chronic disease management and the performance of contracted services may be analysed quarterly to ensure on- going adequacy of service provision. Aggregation of data at points in time enables the practice to judge a process's stability or an outcome's predictability in relation to expectations. Computers are a useful tool in this process. The goal of data analysis is to be able to compare a practice in four ways: • With itself over time • With other similar health facilities • With standards • With evidence based practice and guidelines. These comparisons help the practice to understand the source and nature of undesirable change and help to focus improvement efforts. Understanding statistical techniques is helpful in data analysis, especially in interpreting variation and in deciding where improvement is needed. Run charts, control charts, histograms and Pareto charts are examples of statistical tools useful in understanding trends and variations in health care.",
+          "criteria": [
+            {
+              "id": "1.8.2.1",
+              "category": "",
+              "severity": null,
+              "description": "Data is aggregated, analysed and transformed into useful, relevant information for monitoring and improving the service.",
+              "is_critical": false,
+              "guideline": "The information generated by data collection tools, for example infection control audit tools, patient satisfaction surveys etc. must be analysed. This criterion will be scored non-compliant where there is only raw data available."
+            },
+            {
+              "id": "1.8.2.2",
+              "category": "",
+              "severity": null,
+              "description": "The frequency of data collection and analysis is appropriate to the process under study.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured on documented evidence that the frequency of data collection is established for each process under study."
+            },
+            {
+              "id": "1.8.2.3",
+              "category": "",
+              "severity": null,
+              "description": "Statistical tools and techniques are used in the analysis process when suitable.",
+              "is_critical": false,
+              "guideline": "Documented evidence will be required for compliance."
+            },
+            {
+              "id": "1.8.2.4",
+              "category": "",
+              "severity": null,
+              "description": "Information relating to the quality of the services delivered by the practice is made available to the patients of the practice and other relevant parties.",
+              "is_critical": false,
+              "guideline": "This can be achieved by displaying the results in the waiting area, on personnel notice boards, on the practice website etc. The method of information sharing and the parties with whom it is shared will depend on the nature of the information. Leadership and planning are essential if a practice is to initiate and maintain improvement. All leaders participate in establishing the practice's commitment and approach to improvement as well as programme management and supervision. Improvement programmes are most effective when they are planned practice-wide. The framework for these is provided in a written plan for the programme, which is inclusive of all services in the practice and of all related quality activities such as infection control and risk management activities. The quality improvement process must: • Be consistent with the practice's mission and strategic plans • Meet the needs of patients, families, personnel and other healthcare team members • Use current clinical practice guidelines and other relevant evidence-based information • Include sound business practices • Incorporate relevant risk management information Practice managers and employees prioritise those critical, high risk, high cost, high volume or problem- prone processes that are most directly related to the quality of care and the safety of the environment. Available data and information are used to identify priority areas. Participation in data collection and analysis and the planning and implementation of quality improvement programmes require knowledge and skills. Personnel receive training consistent with their role in the planned activity. The practice identifies or provides a knowledgeable trainer for this education. Personnel are permitted to attend training as part of their assigned responsibilities. Managerial and clinical personnel participate in the process."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.8.3",
+          "statement": "The practice appoints an individual or committee which represents all services within the practice to guide the quality improvement process.",
+          "intent_tooltip": "1.8.2.1. Data is aggregated, analysed and transformed into useful, relevant information for monitoring and improving the service. Guideline statement: The information generated by data collection tools, for example infection control audit tools, patient satisfaction surveys etc. must be analysed. This criterion will be scored non-compliant where there is only raw data available. 1.8.2.2. The frequency of data collection and analysis is appropriate to the process under study. Guideline statement: Compliance will be measured on documented evidence that the frequency of data collection is established for each process under study. 1.8.2.3. Statistical tools and techniques are used in the analysis process when suitable. Guideline statement: Documented evidence will be required for compliance. 1.8.2.4. Information relating to the quality of the services delivered by the practice is made available to the patients of the practice and other relevant parties. Guideline statement: This can be achieved by displaying the results in the waiting area, on personnel notice boards, on the practice website etc. The method of information sharing and the parties with whom it is shared will depend on the nature of the information. Leadership and planning are essential if a practice is to initiate and maintain improvement. All leaders participate in establishing the practice's commitment and approach to improvement as well as programme management and supervision. Improvement programmes are most effective when they are planned practice-wide. The framework for these is provided in a written plan for the programme, which is inclusive of all services in the practice and of all related quality activities such as infection control and risk management activities. The quality improvement process must: • Be consistent with the practice's mission and strategic plans • Meet the needs of patients, families, personnel and other healthcare team members • Use current clinical practice guidelines and other relevant evidence-based information • Include sound business practices • Incorporate relevant risk management information Practice managers and employees prioritise those critical, high risk, high cost, high volume or problem- prone processes that are most directly related to the quality of care and the safety of the environment. Available data and information are used to identify priority areas. Participation in data collection and analysis and the planning and implementation of quality improvement programmes require knowledge and skills. Personnel receive training consistent with their role in the planned activity. The practice identifies or provides a knowledgeable trainer for this education. Personnel are permitted to attend training as part of their assigned responsibilities. Managerial and clinical personnel participate in the process.",
+          "criteria": [
+            {
+              "id": "1.8.3.1",
+              "category": "",
+              "severity": null,
+              "description": "A designated individual oversees the information and quality management and improvement processes.",
+              "is_critical": false,
+              "guideline": "This requires that an individual has the assigned duty of overseeing and taking responsibility for all aspects of information and quality management and improvement processes. The training and experience required will depend on the level of care provided by the practice and the complexity of the information systems for which the individual is responsible. In some practices this may be the practice manager of the solo practitioner, in other practices a quality manager may be appointed."
+            },
+            {
+              "id": "1.8.3.2",
+              "category": "",
+              "severity": null,
+              "description": "All practice personnel are informed about the function of the information and quality management individual.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured during personnel interviews."
+            },
+            {
+              "id": "1.8.3.3",
+              "category": "",
+              "severity": null,
+              "description": "There are formal systems and processes for quality management and improvement.",
+              "is_critical": false,
+              "guideline": "This includes all aspects of the practice. Such processes may exist in different formats for example, a detailed single document, different documented systems or electronic modules. Whatever format exists, the intention is that the “processes” should be comprehensive and reflect all components of quality management and improvement in the practice."
+            },
+            {
+              "id": "1.8.3.4",
+              "category": "",
+              "severity": null,
+              "description": "Personnel are trained in the implementation of quality management processes.",
+              "is_critical": false,
+              "guideline": "Evidence of compliance could exist in the form of attendance registers at such training sessions, information sharing meetings, availability of training manuals, policies and procedures etc."
+            },
+            {
+              "id": "1.8.3.5",
+              "category": "",
+              "severity": null,
+              "description": "The practice manager provides technology, support and resources (including time) for the assessment and improvement of the practice’s management, clinical and support processes and this is reflected in the strategic plan/business plan for the practice. 1.8.4. Key monitoring, measurement and evaluation processes are planned and implemented. Intent of 1.8.4 A comprehensive approach to quality management and improvement includes the following processes: • Planning for improvement in quality • Monitoring developments regarding best practice and implementing these as appropriate • Monitoring processes through indicator data collection • Analysing the data • Implementing and sustaining changes that result in improvement These processes provide the framework for the practice team to achieve ongoing quality improvement thereby assuring their patients of quality care, reflective of current best practice in the rapidly developing world of health care. The monitoring of clinical and management functions results in the accumulation of data and information. An understanding of how well the practice is doing rests on repeated analysis of the data, information over time and comparison with other practices. The leaders of a practice make the selection of key measures to be included in the practice's monitoring activities.",
+              "is_critical": false,
+              "guideline": "The technology, support and resources required will be determined by the design and complexity of the quality management and improvement framework. This may include aspects such as training in quality methodology, aligning work schedules to allow for time to spend on relevant activities, providing assistance with data management (manually or electronically), etc."
+            },
+            {
+              "id": "1.8.3.6",
+              "category": "",
+              "severity": null,
+              "description": "The leaders set priorities for improvement activities based on high risk, high cost and/or high volume or problem-prone areas.",
+              "is_critical": false,
+              "guideline": "As part of the practice’s quality management and improvement framework, the leaders should play an active role in collaborating with teams and individuals in the practice to decide which activities to include in the formal monitoring for quality improvement purposes."
+            },
+            {
+              "id": "1.8.3.7",
+              "category": "",
+              "severity": null,
+              "description": "Each function within the practice implements relevant quality improvement activities.",
+              "is_critical": false,
+              "guideline": "The practice quality management and improvement framework needs to guide personnel on how to establish quality improvement processes and initiatives with regard to the development of relevant standards for their service, for example, administration, housekeeping, clinical care etc., the development of measurable indicators for monitoring purposes, and the implementation of remedial actions."
+            },
+            {
+              "id": "1.8.3.8",
+              "category": "",
+              "severity": null,
+              "description": "The objectives, scope, implementation and effectiveness of the activities to assess and improve quality are evaluated regularly and revised as necessary.",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided to demonstrate that the quality management and improvement programme is evaluated and revised as necessary."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.8.4",
+          "statement": "Key monitoring, measurement and evaluation processes are planned and implemented.",
+          "intent_tooltip": "A comprehensive approach to quality management and improvement includes the following processes: • Planning for improvement in quality • Monitoring developments regarding best practice and implementing these as appropriate • Monitoring processes through indicator data collection • Analysing the data • Implementing and sustaining changes that result in improvement These processes provide the framework for the practice team to achieve ongoing quality improvement thereby assuring their patients of quality care, reflective of current best practice in the rapidly developing world of health care. The monitoring of clinical and management functions results in the accumulation of data and information. An understanding of how well the practice is doing rests on repeated analysis of the data, information over time and comparison with other practices. The leaders of a practice make the selection of key measures to be included in the practice's monitoring activities.",
+          "criteria": [
+            {
+              "id": "1.8.4.1",
+              "category": "",
+              "severity": null,
+              "description": "Targets (goals) are set for the desired levels of patient care and practice management.",
+              "is_critical": false,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "1.8.4.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice collects data relevant to each identified indicator in the quality improvement programme for the monitoring and improvement of patient care and practice management.",
+              "is_critical": false,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "1.8.4.3",
+              "category": "",
+              "severity": null,
+              "description": "As part of clinical monitoring, structured clinical audits are done to monitor the implementation of clinical guidelines. 1.8.5. Analysed data is used to improve the quality of managerial and clinical services. Intent of 1.8.5 Personnel selected to participate in the management and supervision of improvement programmes are those closest to the activities or processes being monitored, studied or improved. When negative incidents or adverse events occur, the practice and its leaders evaluate the processes that led to the error or event. Faulty processes are redesigned, tested and monitored to ensure that the same or similar errors or events do not occur again. Case reviews are performed for all new diagnoses of significant, life threatening diseases, unexpected deaths and management of emergency cases that present at the practice. The routine review of these cases assists in the identification of what went well and what could have been done better to inform continuous improvement in clinical care and enable sharing of best practice. When the practice detects or suspects an undesirable change from what is expected, it initiates intense analysis to determine where best to focus improvement. In particular, intense analysis is initiated when levels, patterns or trends vary significantly or undesirably from: • What is expected • Those of other practices • Recognised standards Each practice establishes which events are significant and the process for their intense analysis. When undesirable events can be prevented, the practice works to carry out preventive changes.",
+              "is_critical": false,
+              "guideline": "Clinical audit should measure actual performance against current best practice identified in guidelines compiled from evidence-based practices. Indicators of performance should be selected from these guidelines. Measurement of these indicators will provide information on current performance and evidence of change over time following the implementation of quality improvement plans."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.8.5",
+          "statement": "Analysed data is used to improve the quality of managerial and clinical services.",
+          "intent_tooltip": "Personnel selected to participate in the management and supervision of improvement programmes are those closest to the activities or processes being monitored, studied or improved. When negative incidents or adverse events occur, the practice and its leaders evaluate the processes that led to the error or event. Faulty processes are redesigned, tested and monitored to ensure that the same or similar errors or events do not occur again. Case reviews are performed for all new diagnoses of significant, life threatening diseases, unexpected deaths and management of emergency cases that present at the practice. The routine review of these cases assists in the identification of what went well and what could have been done better to inform continuous improvement in clinical care and enable sharing of best practice. When the practice detects or suspects an undesirable change from what is expected, it initiates intense analysis to determine where best to focus improvement. In particular, intense analysis is initiated when levels, patterns or trends vary significantly or undesirably from: • What is expected • Those of other practices • Recognised standards Each practice establishes which events are significant and the process for their intense analysis. When undesirable events can be prevented, the practice works to carry out preventive changes.",
+          "criteria": [
+            {
+              "id": "1.8.5.1",
+              "category": "",
+              "severity": null,
+              "description": "Information from the findings of quality assessment and improvement activities is used to detect trends, patterns and opportunities to improve or prevent potential problems.",
+              "is_critical": false,
+              "guideline": "This requires evidence that areas for improvement are identified from all the data collected during practice activities."
+            },
+            {
+              "id": "1.8.5.2",
+              "category": "",
+              "severity": null,
+              "description": "When appropriate, an improvement plan is developed in collaboration with all relevant team members and an implementation process and acceptable timeframe is agreed to by the team and implemented.",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided."
+            },
+            {
+              "id": "1.8.5.3",
+              "category": "",
+              "severity": null,
+              "description": "A time for repeat data collection and analysis is agreed and completed and the results discussed by the relevant team members.",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided."
+            },
+            {
+              "id": "1.8.5.4",
+              "category": "",
+              "severity": null,
+              "description": "The practice holds regular meetings to discuss significant clinical issues.",
+              "is_critical": false,
+              "guideline": "Evidence of significant clinical issues can be determined from the incident management processes and during patient record audits and personnel interviews. Minutes of meetings and attendance records must be provided as evidence of compliance with this criterion."
+            },
+            {
+              "id": "1.8.5.5",
+              "category": "",
+              "severity": null,
+              "description": "Information from a validated patient/family satisfaction audit tool is used to improve the quality of service delivery. 1.8.6. The practice has a documented policy for formal review of adverse events within the practice. Intent of 1.8.6 As a minimum, the practice should have a system for recording, analysing, discussing and learning from adverse events within the practice. This should include clinical, managerial, administrative and all other adverse events. The data collected, analysis of the data, discussions surrounding the event, decisions based on the discussions and any suggested changes should be documented and retained. A nominated personnel member must be responsible for this process and for the implementation, monitoring and review of the changes. This ensures that the practice learns from its mistakes and prevents recurrence of the same mistakes, thereby providing continuous improvement in service delivery. Lessons learned could be shared with other practices to provide benchmarking. Clinically significant events such as medication errors, for example prescribing a drug to a patient when the records indicate that the patient is allergic to the drug or patient identification errors for example, performing a laboratory or radiological test on the wrong patient should always precipitate intense analysis to understand the cause and prevent recurrence. All records relating to these discussions should be anonymized.",
+              "is_critical": false,
+              "guideline": "This requires that the practice does more than just provide information about the complaints process. Formal patient/family satisfaction surveys must be conducted regularly using an audit tool that is specifically designed to elicit information about the practice and the services that it offers. The tools used to measure patient feedback need to be rigorous and include all areas of the practice (for example waiting times, attitude of personnel, cleanliness of toilets, communication with clinical personnel, education etc.) to ensure the integrity of data subsequently used by practices for quality improvement purposes. The practice must decide on the method, frequency and number of patients to be surveyed but compliance with the criterion requires that it is representative of the size of the practice and the services offered. The practice needs to further provide documented evidence that the information from the survey was used to improve the quality of service delivery."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.8.6",
+          "statement": "The practice has a documented policy for formal review of adverse events within the practice.",
+          "intent_tooltip": "As a minimum, the practice should have a system for recording, analysing, discussing and learning from adverse events within the practice. This should include clinical, managerial, administrative and all other adverse events. The data collected, analysis of the data, discussions surrounding the event, decisions based on the discussions and any suggested changes should be documented and retained. A nominated personnel member must be responsible for this process and for the implementation, monitoring and review of the changes. This ensures that the practice learns from its mistakes and prevents recurrence of the same mistakes, thereby providing continuous improvement in service delivery. Lessons learned could be shared with other practices to provide benchmarking. Clinically significant events such as medication errors, for example prescribing a drug to a patient when the records indicate that the patient is allergic to the drug or patient identification errors for example, performing a laboratory or radiological test on the wrong patient should always precipitate intense analysis to understand the cause and prevent recurrence. All records relating to these discussions should be anonymized.",
+          "criteria": [
+            {
+              "id": "1.8.6.1",
+              "category": "",
+              "severity": null,
+              "description": "A documented procedure for the monitoring of near misses/incidents/adverse (sentinel) events is available, which includes the documentation of interventions, responses and corrective actions taken to recorded incidents.",
+              "is_critical": false,
+              "guideline": "A policy and procedure should be available to all personnel detailing the steps to follow in the event of such an incident occurring. This includes the reporting, recording and investigation of the event as well as the response to the event and the actions taken to prevent recurrence of the event, or minimise harm should the event recur. Personnel will be interviewed to confirm that they are familiar with the contents of these documents."
+            },
+            {
+              "id": "1.8.6.2",
+              "category": "",
+              "severity": null,
+              "description": "Formal significant event analyses are undertaken when necessary.",
+              "is_critical": false,
+              "guideline": "The practice manager/risk manager must identify those events where formal event analyses must be conducted as required by law, regulation and practice policy. All events that meet the definition must be assessed by performing a credible root cause analysis. When the root cause analysis reveals that systems improvement or other actions can prevent or reduce the risk of such events recurring, appropriate action must be taken to achieve this risk reduction."
+            },
+            {
+              "id": "1.8.6.3",
+              "category": "",
+              "severity": null,
+              "description": "Notes are kept regarding the data analysis and actions arising from formal incident reviews.",
+              "is_critical": false,
+              "guideline": "Documented evidence will be required for compliance."
+            },
+            {
+              "id": "1.8.6.4",
+              "category": "",
+              "severity": null,
+              "description": "All changes to policy and procedure that are identified as a result of these formal incident reviews are documented and included in new policies or incorporated into existing policies.",
+              "is_critical": false,
+              "guideline": "Documented evidence will be required for compliance."
+            },
+            {
+              "id": "1.8.6.5",
+              "category": "",
+              "severity": null,
+              "description": "The implementation of these new policies/procedures is delegated to a nominated individual who is responsible for monitoring the effectiveness of the changes and arranging reviews if appropriate. 1.8.7. The practice regularly assesses the quality and the completeness of the patient record content. Intent of 1.8.7 The clinical record of each patient needs to contain sufficient information to support the diagnosis, justify the treatment provided and document the care given. Where carry cards are used, there are summaries of each attendance in the service which will provide this information. A standardised format and content of patient's records will help promote the integration and continuity of care among the various providers of care to the patient. The practice determines the specific data and information recorded in the clinical record. Each service has a process to assess the quality and completeness of patient records. This is a part of the performance improvement activities of the practice and is carried out regularly. This information is used to improve the quality of clinical record keeping. Clinical record review is based on a representative sample of the practitioners providing care and of the types of care provided.",
+              "is_critical": false,
+              "guideline": "Documented evidence will be required for compliance."
+            }
+          ]
+        },
+        {
+          "standard_id": "1.8.7",
+          "statement": "The practice regularly assesses the quality and the completeness of the patient record content.",
+          "intent_tooltip": "The clinical record of each patient needs to contain sufficient information to support the diagnosis, justify the treatment provided and document the care given. Where carry cards are used, there are summaries of each attendance in the service which will provide this information. A standardised format and content of patient's records will help promote the integration and continuity of care among the various providers of care to the patient. The practice determines the specific data and information recorded in the clinical record. Each service has a process to assess the quality and completeness of patient records. This is a part of the performance improvement activities of the practice and is carried out regularly. This information is used to improve the quality of clinical record keeping. Clinical record review is based on a representative sample of the practitioners providing care and of the types of care provided.",
+          "criteria": [
+            {
+              "id": "1.8.7.1",
+              "category": "",
+              "severity": null,
+              "description": "Patient records are reviewed regularly and results analysed as part of the quality improvement process.",
+              "is_critical": false,
+              "guideline": "Documented evidence of such audits must be provided. Evaluation of results and remedial action taken must be documented as well as maintenance of achieved improvements over time."
+            },
+            {
+              "id": "1.8.7.2",
+              "category": "",
+              "severity": null,
+              "description": "The review uses a representative sample.",
+              "is_critical": false,
+              "guideline": "A representative sample is a sufficiently large sample which includes records for all practitioners providing patient care and all types of care provided. The review should be conducted by clinical professionals authorised to make entries in the patient record."
+            },
+            {
+              "id": "1.8.7.3",
+              "category": "",
+              "severity": null,
+              "description": "Records comply with professionally acceptable norms (including legal requirements where applicable) relating to signature, use of abbreviations and legibility.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "1.8.7.4",
+              "category": "",
+              "severity": null,
+              "description": "Standardised diagnosis and procedure codes are used.",
+              "is_critical": false,
+              "guideline": "Compliance will be assessed by comparing the codes used in the practice with country-specific directives. The responsible department should therefore have both the directives and the practice’s coding system available for comparison."
+            },
+            {
+              "id": "1.8.7.5",
+              "category": "",
+              "severity": null,
+              "description": "Symbols, abbreviations and definitions are standardised.",
+              "is_critical": false,
+              "guideline": "The use of abbreviations provides an opportunity for miscommunication and confusion which can result in patient harm. Best practice is therefore not to use them at all. However, where they are permitted, their use must be standardised and all relevant personnel must be made aware of the meaning of each abbreviation. 2.Facilities, Equipment and Contracted Services Overview of Facilities, Equipment and Contracted Services Laws, regulations and inspections by national governmental and local authorities determine in large part how a facility is designed, used and maintained. All practices, regardless of their size and resources, must comply with these requirements as part of their responsibilities to patients, families and personnel. Practices begin by complying with relevant laws and regulations. Over time they become more knowledgeable about the details of the physical facility they occupy. They begin to gather data proactively and carry out strategies to reduce risks and enhance the patient care environment. Buildings, grounds, utilities and equipment are maintained and do not pose hazards to the occupants. The personnel providing the maintenance service are knowledgeable and competent. Buildings, grounds and utilities are provided and maintained to an acceptable standard in order to ensure that they do not present a risk to the safety and wellbeing of the occupants. Ensuring that buildings, grounds and utilities are provided and maintained requires that the relevant personnel member/s is/are knowledgeable and competent. Practices need to have the necessary equipment for comprehensive primary care and emergency resuscitation. To meet the standards, equipment must be in good working order. There is a wide range of equipment that practices may need in order to provide services which meet national and local needs, serve the nature of the practice and support any procedures that the practice performs. Where service contracts/agreements are awarded to outside agencies, the practice must ensure that there is a written contractual agreement outlining the service and standard of service to be delivered. Contracted agencies must undertake to provide services in accordance with infection control and health and safety requirements. Where applicable the contracted personnel receive training with regard to waste disposal and infection control if this has not been undertaken to a satisfactory level by the contracted company. 2.1.1. Measures are in place to ensure that patient access to the practice is facilitated by adequate infrastructural arrangements. 2.1.2. Functional facilities are available to provide safety and comfort for patients, personnel and other visitors. Intent of 2.1.2 In order to provide safe patient care, each unit requires adequate resources. The building is appropriate for a healthcare practice in terms of size and layout. The physical facilities required include adequate office accommodation for personnel, a designated sluice area which is hygienically clean at all times, treatment and dressing rooms. Cleaning equipment is safely stored in a room or cupboard used for this purpose only. There are adequate toilet facilities for the number of patients as determined by country-specific legislation. There is adequate lighting and ventilation. Each consulting room, which may include an attached examination room/area: • Is free from excessive noise • Has adequate lighting • Is maintained at a comfortable ambient temperature • Ensures patient privacy when the patient needs to undress for a clinical examination (for example the use of adequate curtains or screens and gowns or sheets)"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

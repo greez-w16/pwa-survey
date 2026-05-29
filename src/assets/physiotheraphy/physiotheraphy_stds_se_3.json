@@ -1,0 +1,157 @@
+{
+  "se_id": 3,
+  "se_name": "Physiotherapy",
+  "source_file": "physiotherapy.xls",
+  "sections": [
+    {
+      "section_pi_id": "3.1",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "3.1.2",
+          "statement": "The practice respects the rights of patients and their families to refuse or discontinue treatment.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.1.2.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.1.2.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "3.1.3",
+          "statement": "The practice takes measures to protect patient privacy.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.1.3.1",
+              "category": "",
+              "severity": null,
+              "description": "The patient’s need for privacy is protected during all examinations, procedures and treatments.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.1.3.2",
+              "category": "",
+              "severity": null,
+              "description": "Patient privacy is protected when providing personal information.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.1.3.3",
+              "category": "",
+              "severity": null,
+              "description": "The patient’s right to privacy is protected for all forms of counselling.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.1.3.5",
+              "category": "",
+              "severity": null,
+              "description": "When appropriate, patients are permitted to be accompanied by a family member/care-giver during consultations.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "3.1.5",
+          "statement": "The practice informs patients and their families about the processes which it has instituted to receive and act on complaints, conflicts and differences of opinion about patient care and the patient’s right to participate in those processes.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.1.5.2",
+              "category": "",
+              "severity": null,
+              "description": "Patients are aware of their right to voice complaints and the processes by which to do so, internally as well as externally where applicable.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.2",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "3.2.2",
+          "statement": "The practice has an appointment system and a process for recognising cases requiring more urgent attention and providing patients with longer appointments when appropriate.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.2.2.3",
+              "category": "",
+              "severity": null,
+              "description": "Patients who are waiting are advised of any delays that may be experienced in receiving attention.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.4",
+          "statement": "Patients are able to obtain advice or information related to their clinical care by telephone and electronic means.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.2.4.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice implements a policy on telephonic and electronic communication with patients that details at least a) – e) in the standard intent above.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.5",
+          "statement": "Patient and family education promotes the concept of taking responsibility for one’s own health care.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "3.2.5.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice offers relevant health education to its patients in a planned and consistent manner which enables patients to meet their on-going health needs and achieve their health goals.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.2.5.2",
+              "category": "",
+              "severity": null,
+              "description": "Posters and pamphlets regarding high risk and commonly treated conditions relevant to the practice population (e.g. HIV, TB, Diabetes, Hypertension) are visibly displayed and accessible in the waiting room and routinely provided to patients during the consultation when appropriate.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.2.5.6",
+              "category": "",
+              "severity": null,
+              "description": "Information is provided in a manner and language that is understood by those making the care decisions.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
