@@ -1,46 +1,46 @@
 facilityType,seNumber,seCode,seName,dhis2SortOrder,programStageId,sectionUid,dhis2SectionName,active,source
-HOSPITAL,1,SE 1,Management and Leadership,2,hup8BqEe7Mn,SEC00000001,MANAGEMENT AND LEADERSHIP,TRUE,src/assets/hospital_config.json
-HOSPITAL,2,SE 2,Human Resource Management,3,hup8BqEe7Mn,SEC00000002,HUMAN RESOURCE MANAGEMENT,TRUE,src/assets/hospital_config.json
-HOSPITAL,3,SE 3,Administrative Support,4,hup8BqEe7Mn,SEC00000003,ADMINISTRATIVE SUPPORT,TRUE,src/assets/hospital_config.json
-HOSPITAL,4,SE 4,Access to Care,5,hup8BqEe7Mn,SEC00000004,ACCESS TO CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,5,SE 5,Patient and Family Rights,6,hup8BqEe7Mn,SEC00000005,PATIENT AND FAMILY RIGHTS,TRUE,src/assets/hospital_config.json
-HOSPITAL,6,SE 6,Management of Information,7,hup8BqEe7Mn,SEC00000006,MANAGEMENT OF INFORMATION,TRUE,src/assets/hospital_config.json
-HOSPITAL,7,SE 7,Risk Management,8,hup8BqEe7Mn,SEC00000007,RISK MANAGEMENT,TRUE,src/assets/hospital_config.json
-HOSPITAL,8,SE 8,Quality Management and Improvement,9,hup8BqEe7Mn,SEC00000008,QUALITY MANAGEMENT AND IMPROVEMENT,TRUE,src/assets/hospital_config.json
-HOSPITAL,9,SE 9,Prevention and Control of Infection,10,hup8BqEe7Mn,SEC00000009,PREVENTION AND CONTROL OF INFECTION,TRUE,src/assets/hospital_config.json
-HOSPITAL,10,SE 10,General Medical.Surgical.Paediatric and Obstetric Care,11,hup8BqEe7Mn,SEC00000010,GENERAL MEDICAL/SURGICAL/PAEDIATRIC AND OBSTETRIC CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,11,SE 11,Medical Care,12,hup8BqEe7Mn,SEC00000011,MEDICAL CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,12,SE 12,Surgical Care,13,hup8BqEe7Mn,SEC00000012,SURGICAL CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,13,SE 13,Critical Care,14,hup8BqEe7Mn,SEC00000013,CRITICAL CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,14,SE 14,Obstetric and Maternity Care,15,hup8BqEe7Mn,SEC00000014,OBSTETRIC AND MATERNITY CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,15,SE 15,Psychiatric Care,16,hup8BqEe7Mn,SEC00000015,PSYCHIATRIC CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,16,SE 16,Paediatric Care,17,hup8BqEe7Mn,SEC00000016,PAEDIATRIC CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,17,SE 17,Theatre and Anaesthetic Services,18,hup8BqEe7Mn,SEC00000017,THEATRE AND ANAESTHETIC SERVICES,TRUE,src/assets/hospital_config.json
-HOSPITAL,18,SE 18,Nuclear Medicine Service,19,hup8BqEe7Mn,SEC00000018,NUCLEAR MEDICINE SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,19,SE 19,Laboratory Service,20,hup8BqEe7Mn,SEC00000019,LABORATORY SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,20,SE 20,Radiology and Diagnostic Imaging Service,21,hup8BqEe7Mn,SEC00000020,RADIOLOGY AND DIAGNOSTIC IMAGING SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,21,SE 21,Pharmaceutical Service,22,hup8BqEe7Mn,SEC00000021,PHARMACEUTICAL SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,22,SE 22,Emergency Care,23,hup8BqEe7Mn,SEC00000022,EMERGENCY CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,23,SE 23,Outpatient Care,24,hup8BqEe7Mn,SEC00000023,OUTPATIENT CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,24,SE 24,Combined Outpatient and Emergency Service,25,hup8BqEe7Mn,SEC00000024,COMBINED OUTPATIENT AND EMERGENCY SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,25,SE 25,Sterilising And Disinfecting Unit,26,hup8BqEe7Mn,SEC00000025,STERILISING AND DISINFECTING UNIT,TRUE,src/assets/hospital_config.json
-HOSPITAL,26,SE 26,Food Service,27,hup8BqEe7Mn,SEC00000026,FOOD SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,27,SE 27,Linen Management,28,hup8BqEe7Mn,SEC00000027,LINEN MANAGEMENT,TRUE,src/assets/hospital_config.json
-HOSPITAL,28,SE 28,Housekeeping Service,29,hup8BqEe7Mn,SEC00000028,HOUSEKEEPING SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,29,SE 29,Maintenance Service,30,hup8BqEe7Mn,SEC00000029,MAINTENANCE SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,30,SE 30,Resuscitation System,31,hup8BqEe7Mn,SEC00000030,RESUSCITATION SYSTEM,TRUE,src/assets/hospital_config.json
-HOSPITAL,31,SE 31,Medical Equipment Management Service,32,hup8BqEe7Mn,SEC00000031,MEDICAL EQUIPMENT MANAGEMENT SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,32,SE 32,Physiotherapy Service,33,hup8BqEe7Mn,SEC00000032,PHYSIOTHERAPY SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,33,SE 33,Occupational Therapy Service,34,hup8BqEe7Mn,SEC00000033,OCCUPATIONAL THERAPY SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,34,SE 34,Dietetic Service,35,hup8BqEe7Mn,SEC00000034,DIETETIC SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,35,SE 35,Speech Therapy Service,36,hup8BqEe7Mn,SEC00000035,SPEECH THERAPY SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,36,SE 36,Clinical Psychology Service,37,hup8BqEe7Mn,SEC00000036,CLINICAL PSYCHOLOGY SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,37,SE 37,Social Work Service,38,hup8BqEe7Mn,SEC00000037,SOCIAL WORK SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,38,SE 38,Audiology Service,39,hup8BqEe7Mn,SEC00000038,AUDIOLOGY SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,39,SE 39,Psychiatric Service,40,hup8BqEe7Mn,SEC00000039,PSYCHIATRIC ADOLESCENT CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,40,SE 40,Psychiatric Service,41,hup8BqEe7Mn,SEC00000040,PSYCHIATRIC CHILD AND FAMILY CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,41,SE 41,Psychiatric Service,42,hup8BqEe7Mn,SEC00000041,PSYCHIATRIC ELECTRO-CONVULSIVE THERAPY CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,42,SE 42,Psychiatric Service,43,hup8BqEe7Mn,SEC00000042,PSYCHIATRIC FORENSIC SERVICE,TRUE,src/assets/hospital_config.json
-HOSPITAL,43,SE 43,Psychiatric Service,44,hup8BqEe7Mn,SEC00000043,PSYCHIATRIC MENTALLY HANDICAPPED CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,44,SE 44,Psychiatric Service,45,hup8BqEe7Mn,SEC00000044,44. PSYCHIATRIC REHABILITATION CARE,TRUE,src/assets/hospital_config.json
-HOSPITAL,45,SE 45,Psychiatric Service,46,hup8BqEe7Mn,,Psychiatric Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,1,SE 1,Management and Leadership,2,hup8BqEe7Mn,,Management and Leadership,TRUE,src/assets/hospital_config.json
+HOSPITAL,2,SE 2,Human Resource Management,3,hup8BqEe7Mn,,Human Resource Management,TRUE,src/assets/hospital_config.json
+HOSPITAL,3,SE 3,Administrative Support,4,hup8BqEe7Mn,,Administrative Support,TRUE,src/assets/hospital_config.json
+HOSPITAL,4,SE 4,Access to Care,5,hup8BqEe7Mn,,Access to Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,5,SE 5,Patient and Family Rights,6,hup8BqEe7Mn,,Patient and Family Rights,TRUE,src/assets/hospital_config.json
+HOSPITAL,6,SE 6,Management of Information,7,hup8BqEe7Mn,,Management of Information,TRUE,src/assets/hospital_config.json
+HOSPITAL,7,SE 7,Risk Management,8,hup8BqEe7Mn,,Risk Management,TRUE,src/assets/hospital_config.json
+HOSPITAL,8,SE 8,Quality Management and Improvement,9,hup8BqEe7Mn,,Quality Management and Improvement,TRUE,src/assets/hospital_config.json
+HOSPITAL,9,SE 9,Prevention and Control of Infection,10,hup8BqEe7Mn,,Prevention and Control of Infection,TRUE,src/assets/hospital_config.json
+HOSPITAL,10,SE 10,General Medical.Surgical.Paediatric and Obstetric Care,11,hup8BqEe7Mn,,General Medical.Surgical.Paediatric and Obstetric Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,11,SE 11,Medical Care,12,hup8BqEe7Mn,,Medical Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,12,SE 12,Surgical Care,13,hup8BqEe7Mn,,Surgical Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,13,SE 13,Critical Care,14,hup8BqEe7Mn,,Critical Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,14,SE 14,Obstetric and Maternity Care,15,hup8BqEe7Mn,,Obstetric and Maternity Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,15,SE 15,Psychiatric Care,16,hup8BqEe7Mn,,Psychiatric Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,16,SE 16,Paediatric Care,17,hup8BqEe7Mn,,Paediatric Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,17,SE 17,Theatre and Anaesthetic Services,18,hup8BqEe7Mn,,Theatre and Anaesthetic Services,TRUE,src/assets/hospital_config.json
+HOSPITAL,18,SE 18,Nuclear Medicine Service,19,hup8BqEe7Mn,,Nuclear Medicine Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,19,SE 19,Laboratory Service,20,hup8BqEe7Mn,,Laboratory Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,20,SE 20,Radiology and Diagnostic Imaging Service,21,hup8BqEe7Mn,,Radiology and Diagnostic Imaging Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,21,SE 21,Pharmaceutical Service,22,hup8BqEe7Mn,,Pharmaceutical Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,22,SE 22,Emergency Care,23,hup8BqEe7Mn,,Emergency Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,23,SE 23,Outpatient Care,24,hup8BqEe7Mn,,Outpatient Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,24,SE 24,Combined Outpatient and Emergency Service,25,hup8BqEe7Mn,,Combined Outpatient and Emergency Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,25,SE 25,Sterilising And Disinfecting Unit,26,hup8BqEe7Mn,,Sterilising And Disinfecting Unit,TRUE,src/assets/hospital_config.json
+HOSPITAL,26,SE 26,Food Service,27,hup8BqEe7Mn,,Food Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,27,SE 27,Linen Management,28,hup8BqEe7Mn,,Linen Management,TRUE,src/assets/hospital_config.json
+HOSPITAL,28,SE 28,Housekeeping Service,29,hup8BqEe7Mn,,Housekeeping Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,29,SE 29,Maintenance Service,30,hup8BqEe7Mn,,Maintenance Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,30,SE 30,Resuscitation System,31,hup8BqEe7Mn,,Resuscitation System,TRUE,src/assets/hospital_config.json
+HOSPITAL,31,SE 31,Medical Equipment Management Service,32,hup8BqEe7Mn,,Medical Equipment Management Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,32,SE 32,Physiotherapy Service,33,hup8BqEe7Mn,,Physiotherapy Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,33,SE 33,Occupational Therapy Service,34,hup8BqEe7Mn,,Occupational Therapy Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,34,SE 34,Dietetic Service,35,hup8BqEe7Mn,,Dietetic Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,35,SE 35,Speech Therapy Service,36,hup8BqEe7Mn,,Speech Therapy Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,36,SE 36,Clinical Psychology Service,37,hup8BqEe7Mn,,Clinical Psychology Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,37,SE 37,Social Work Service,38,hup8BqEe7Mn,,Social Work Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,38,SE 38,Audiology Service,39,hup8BqEe7Mn,,Audiology Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,39,SE 39,Psychiatric Adolescent Care,40,hup8BqEe7Mn,,Psychiatric Adolescent Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,40,SE 40,Psychiatric Child and Family Care,41,hup8BqEe7Mn,,Psychiatric Child and Family Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,41,SE 41,Psychiatric Electro-Convulsive Therapy Care,42,hup8BqEe7Mn,,Psychiatric Electro-Convulsive Therapy Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,42,SE 42,Psychiatric Forensic Service,43,hup8BqEe7Mn,,Psychiatric Forensic Service,TRUE,src/assets/hospital_config.json
+HOSPITAL,43,SE 43,Psychiatric Mentally Handicapped Care,44,hup8BqEe7Mn,,Psychiatric Mentally Handicapped Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,44,SE 44,Psychiatric Rehabilitation Care,45,hup8BqEe7Mn,,Psychiatric Rehabilitation Care,TRUE,src/assets/hospital_config.json
+HOSPITAL,45,SE 45,Psychiatric Volunteer Services,46,hup8BqEe7Mn,,Psychiatric Volunteer Services,TRUE,src/assets/hospital_config.json

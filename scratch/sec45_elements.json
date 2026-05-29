@@ -1,0 +1,782 @@
+[
+  {
+    "id": "LV0TExzD1I1",
+    "code": "7262-HOSPITAL_40.1",
+    "name": "SURV_HOSP_7262-40.1 Coordination of Patient Care --"
+  },
+  {
+    "id": "LOPrFiE1BCQ",
+    "code": "7263-HOSPITAL_40.1.1",
+    "name": "SURV_HOSP_7263-During all phases of care, there are qualified individuals responsible for the patient's care."
+  },
+  {
+    "id": "KWodkFx4Ldx",
+    "code": "7264-HOSPITAL_40.1.1-comments",
+    "name": "SURV_HOSP_7264-During all phases of care, there are qualified individuals responsible for the patient's care.-comments"
+  },
+  {
+    "id": "vEsmGLF2Jlh",
+    "code": "7265-HOSPITAL_40.1.1.1",
+    "name": "SURV_HOSP_7265-An appropriately qualified individual has clearly defined responsibilities and accountability for all aspects of the service."
+  },
+  {
+    "id": "RfKeYjdvmEa",
+    "code": "7266-HOSPITAL_40.1.1.1-comments",
+    "name": "SURV_HOSP_7266-An appropriately qualified individual has clearly defined responsibilities and accountability for all aspects of the service.-comments"
+  },
+  {
+    "id": "k5WLifCrePo",
+    "code": "7267-HOSPITAL_40.1.1.2",
+    "name": "SURV_HOSP_7267-The individuals responsible for the patient's care are designated."
+  },
+  {
+    "id": "PEfD8bZbNz1",
+    "code": "7268-HOSPITAL_40.1.1.2-comments",
+    "name": "SURV_HOSP_7268-The individuals responsible for the patient's care are designated.-comments"
+  },
+  {
+    "id": "wE4ULa13yVi",
+    "code": "7269-HOSPITAL_40.1.1.3",
+    "name": "SURV_HOSP_7269-The individuals responsible for the patient's care are qualified."
+  },
+  {
+    "id": "cyhDv29ugj8",
+    "code": "7270-HOSPITAL_40.1.1.3-comments",
+    "name": "SURV_HOSP_7270-The individuals responsible for the patient's care are qualified.-comments"
+  },
+  {
+    "id": "ppuWGHXYrGo",
+    "code": "7271-HOSPITAL_40.1.1.4",
+    "name": "SURV_HOSP_7271-The individuals responsible for the patient's care are identified and made known to the patient and other personnel."
+  },
+  {
+    "id": "hrHfjiCpBqK",
+    "code": "7272-HOSPITAL_40.1.1.4-comments",
+    "name": "SURV_HOSP_7272-The individuals responsible for the patient's care are identified and made known to the patient and other personnel.-comments"
+  },
+  {
+    "id": "akK2Gi7gzMg",
+    "code": "7273-HOSPITAL_40.1.2",
+    "name": "SURV_HOSP_7273-Clinical practice guidelines are used to guide patient care and reduce unwanted variation."
+  },
+  {
+    "id": "cQivnm9XiE7",
+    "code": "7274-HOSPITAL_40.1.2-comments",
+    "name": "SURV_HOSP_7274-Clinical practice guidelines are used to guide patient care and reduce unwanted variation.-comments"
+  },
+  {
+    "id": "KiQbi4DWt2Z",
+    "code": "7275-HOSPITAL_40.1.2.1",
+    "name": "SURV_HOSP_7275-Evidence-based clinical practice guidelines relevant to the patients and services of the organisation are available to guide patient care processes."
+  },
+  {
+    "id": "lhNIhCZHQXl",
+    "code": "7276-HOSPITAL_40.1.2.1-comments",
+    "name": "SURV_HOSP_7276-Evidence-based clinical practice guidelines relevant to the patients and services of the organisation are available to guide patient care processes.-comments"
+  },
+  {
+    "id": "H2w2LWjdvVg",
+    "code": "7277-HOSPITAL_40.1.2.2",
+    "name": "SURV_HOSP_7277-Organisational and clinical leaders set criteria to select clinical practice guidelines."
+  },
+  {
+    "id": "SDT0Zsl8PSG",
+    "code": "7278-HOSPITAL_40.1.2.2-comments",
+    "name": "SURV_HOSP_7278-Organisational and clinical leaders set criteria to select clinical practice guidelines.-comments"
+  },
+  {
+    "id": "klUSrNqepEo",
+    "code": "7279-HOSPITAL_40.1.2.3",
+    "name": "SURV_HOSP_7279-Implemented guidelines define and establish admission criteria for the child and family service."
+  },
+  {
+    "id": "ZtKnde1udOL",
+    "code": "7280-HOSPITAL_40.1.2.3-comments",
+    "name": "SURV_HOSP_7280-Implemented guidelines define and establish admission criteria for the child and family service.-comments"
+  },
+  {
+    "id": "lgbmEOLfofO",
+    "code": "7281-HOSPITAL_40.1.2.4",
+    "name": "SURV_HOSP_7281-The implementation of guidelines is monitored as part of a structured clinical audit."
+  },
+  {
+    "id": "kQR6cd3mBCV",
+    "code": "7282-HOSPITAL_40.1.2.4-comments",
+    "name": "SURV_HOSP_7282-The implementation of guidelines is monitored as part of a structured clinical audit.-comments"
+  },
+  {
+    "id": "gdDadTJ6Ar7",
+    "code": "7283-HOSPITAL_40.1.2.5",
+    "name": "SURV_HOSP_7283-Guidelines are reviewed on a regular basis and updated when necessary."
+  },
+  {
+    "id": "AdLQGJ2jtNj",
+    "code": "7284-HOSPITAL_40.1.2.5-comments",
+    "name": "SURV_HOSP_7284-Guidelines are reviewed on a regular basis and updated when necessary.-comments"
+  },
+  {
+    "id": "UK62jfhTyFS",
+    "code": "7285-HOSPITAL_40.1.3",
+    "name": "SURV_HOSP_7285-The delivery of services is integrated and coordinated amongst care providers."
+  },
+  {
+    "id": "A8XoOMpquWm",
+    "code": "7286-HOSPITAL_40.1.3-comments",
+    "name": "SURV_HOSP_7286-The delivery of services is integrated and coordinated amongst care providers.-comments"
+  },
+  {
+    "id": "qR8PAPdLcee",
+    "code": "7287-HOSPITAL_40.1.3.1",
+    "name": "SURV_HOSP_7287-Care planning is integrated and coordinated among all care providers."
+  },
+  {
+    "id": "yc2eYuZgqDi",
+    "code": "7288-HOSPITAL_40.1.3.1-comments",
+    "name": "SURV_HOSP_7288-Care planning is integrated and coordinated among all care providers.-comments"
+  },
+  {
+    "id": "i2r7oH6w27I",
+    "code": "7289-HOSPITAL_40.1.3.2",
+    "name": "SURV_HOSP_7289-The patients' clinical records are completed according to organisation policy."
+  },
+  {
+    "id": "PzvLzg3o3AM",
+    "code": "7290-HOSPITAL_40.1.3.2-comments",
+    "name": "SURV_HOSP_7290-The patients' clinical records are completed according to organisation policy.-comments"
+  },
+  {
+    "id": "SNg9CQeTWrX",
+    "code": "7291-HOSPITAL_40.1.3.3",
+    "name": "SURV_HOSP_7291-The patient's records are up to date to ensure the transfer of the latest information between care providers."
+  },
+  {
+    "id": "Eu0bcLAEtIe",
+    "code": "7292-HOSPITAL_40.1.3.3-comments",
+    "name": "SURV_HOSP_7292-The patient's records are up to date to ensure the transfer of the latest information between care providers.-comments"
+  },
+  {
+    "id": "jN14Fwnm7u2",
+    "code": "7293-HOSPITAL_40.1.3.4",
+    "name": "SURV_HOSP_7293-Information exchanged includes the patient's health status."
+  },
+  {
+    "id": "FMtoh6rXoC5",
+    "code": "7294-HOSPITAL_40.1.3.4-comments",
+    "name": "SURV_HOSP_7294-Information exchanged includes the patient's health status.-comments"
+  },
+  {
+    "id": "MV2mJpwB4tt",
+    "code": "7295-HOSPITAL_40.1.3.5",
+    "name": "SURV_HOSP_7295-Information exchanged includes a summary of the care provided."
+  },
+  {
+    "id": "lN5N2Jbhl71",
+    "code": "7296-HOSPITAL_40.1.3.5-comments",
+    "name": "SURV_HOSP_7296-Information exchanged includes a summary of the care provided.-comments"
+  },
+  {
+    "id": "j428AYK8UoD",
+    "code": "7297-HOSPITAL_40.1.3.6",
+    "name": "SURV_HOSP_7297-Information exchanged includes the patient's progress."
+  },
+  {
+    "id": "fPwzcp86vLZ",
+    "code": "7298-HOSPITAL_40.1.3.6-comments",
+    "name": "SURV_HOSP_7298-Information exchanged includes the patient's progress.-comments"
+  },
+  {
+    "id": "Nd6PA3oMbJj",
+    "code": "7299-HOSPITAL_40.1.3.7",
+    "name": "SURV_HOSP_7299-The author can be identified for each patient record entry."
+  },
+  {
+    "id": "cJHscdQAsvW",
+    "code": "7300-HOSPITAL_40.1.3.7-comments",
+    "name": "SURV_HOSP_7300-The author can be identified for each patient record entry.-comments"
+  },
+  {
+    "id": "F4XUfbgTKmW",
+    "code": "7301-HOSPITAL_40.1.3.8",
+    "name": "SURV_HOSP_7301-The date and time of each patient record entry can be identified."
+  },
+  {
+    "id": "yECyOGmTtw7",
+    "code": "7302-HOSPITAL_40.1.3.8-comments",
+    "name": "SURV_HOSP_7302-The date and time of each patient record entry can be identified.-comments"
+  },
+  {
+    "id": "MrE8of1yuIF",
+    "code": "7303-HOSPITAL_40.2",
+    "name": "SURV_HOSP_7303-40.2 Assessment of Patients --"
+  },
+  {
+    "id": "sr50S4k56Gx",
+    "code": "7304-HOSPITAL_40.2.1",
+    "name": "SURV_HOSP_7304-All patients cared for by the organisation have their healthcare needs identified through an established assessment process within appropriate time frames."
+  },
+  {
+    "id": "dN5GRZrJjLb",
+    "code": "7305-HOSPITAL_40.2.1-comments",
+    "name": "SURV_HOSP_7305-All patients cared for by the organisation have their healthcare needs identified through an established assessment process within appropriate time frames.-comments"
+  },
+  {
+    "id": "Wtp4QMBWnFh",
+    "code": "7306-HOSPITAL_40.2.1.1",
+    "name": "SURV_HOSP_7306-Written policies and procedures for assessing patients and their families on admission and during ongoing care are implemented."
+  },
+  {
+    "id": "AA1Ej93e8QL",
+    "code": "7307-HOSPITAL_40.2.1.1-comments",
+    "name": "SURV_HOSP_7307-Written policies and procedures for assessing patients and their families on admission and during ongoing care are implemented.-comments"
+  },
+  {
+    "id": "vuufUBpnfAt",
+    "code": "7308-HOSPITAL_40.2.1.2",
+    "name": "SURV_HOSP_7308-Only those individuals permitted by applicable laws, regulations and professional registration perform the assessments."
+  },
+  {
+    "id": "VCUnfnl0QfX",
+    "code": "7309-HOSPITAL_40.2.1.2-comments",
+    "name": "SURV_HOSP_7309-Only those individuals permitted by applicable laws, regulations and professional registration perform the assessments.-comments"
+  },
+  {
+    "id": "tjbnSwQlREc",
+    "code": "7310-HOSPITAL_40.2.1.3",
+    "name": "SURV_HOSP_7310-The scope and content of assessment by each discipline is defined."
+  },
+  {
+    "id": "NLgcDJ3ln17",
+    "code": "7311-HOSPITAL_40.2.1.3-comments",
+    "name": "SURV_HOSP_7311-The scope and content of assessment by each discipline is defined.-comments"
+  },
+  {
+    "id": "XaiM7aMUoZk",
+    "code": "7312-HOSPITAL_40.2.1.4",
+    "name": "SURV_HOSP_7312-Assessments are performed within appropriate time frames and are comprehensively documented in the patient's records according to organisation policy."
+  },
+  {
+    "id": "jzxAHk3TRAI",
+    "code": "7313-HOSPITAL_40.2.1.4-comments",
+    "name": "SURV_HOSP_7313-Assessments are performed within appropriate time frames and are comprehensively documented in the patient's records according to organisation policy.-comments"
+  },
+  {
+    "id": "WKGTGeSmI61",
+    "code": "7314-HOSPITAL_40.2.1.5",
+    "name": "SURV_HOSP_7314-The date and time of assessment can be identified."
+  },
+  {
+    "id": "u7JO7KpkgLm",
+    "code": "7315-HOSPITAL_40.2.1.5-comments",
+    "name": "SURV_HOSP_7315-The date and time of assessment can be identified.-comments"
+  },
+  {
+    "id": "iBGh7mb1Qrp",
+    "code": "7316-HOSPITAL_40.2.2",
+    "name": "SURV_HOSP_7316-Each child and family has an initial assessment which complies with current policies, procedures and guidelines."
+  },
+  {
+    "id": "LohVT2TE19p",
+    "code": "7317-HOSPITAL_40.2.2-comments",
+    "name": "SURV_HOSP_7317-Each child and family has an initial assessment which complies with current policies, procedures and guidelines.-comments"
+  },
+  {
+    "id": "INuQmuTdKkE",
+    "code": "7318-HOSPITAL_40.2.2.1",
+    "name": "SURV_HOSP_7318-Each patient admitted has an initial assessment which meets organisation policy."
+  },
+  {
+    "id": "EuDdRebxlSs",
+    "code": "7319-HOSPITAL_40.2.2.1-comments",
+    "name": "SURV_HOSP_7319-Each patient admitted has an initial assessment which meets organisation policy.-comments"
+  },
+  {
+    "id": "YaM3cecvAGa",
+    "code": "7320-HOSPITAL_40.2.2.2",
+    "name": "SURV_HOSP_7320-The initial assessment includes the health history of the child."
+  },
+  {
+    "id": "AKSEHuNyvyw",
+    "code": "7321-HOSPITAL_40.2.2.2-comments",
+    "name": "SURV_HOSP_7321-The initial assessment includes the health history of the child.-comments"
+  },
+  {
+    "id": "P4Tqxv2Lvja",
+    "code": "7322-HOSPITAL_40.2.2.3",
+    "name": "SURV_HOSP_7322-The initial assessment includes a physical examination of the child."
+  },
+  {
+    "id": "MramSWAEIpb",
+    "code": "7323-HOSPITAL_40.2.2.3-comments",
+    "name": "SURV_HOSP_7323-The initial assessment includes a physical examination of the child.-comments"
+  },
+  {
+    "id": "Z2xsTdn1QHY",
+    "code": "7324-HOSPITAL_40.2.2.4",
+    "name": "SURV_HOSP_7324-The initial assessment includes a nutritional assessment of the child."
+  },
+  {
+    "id": "vBjGkEhlM71",
+    "code": "7325-HOSPITAL_40.2.2.4-comments",
+    "name": "SURV_HOSP_7325-The initial assessment includes a nutritional assessment of the child.-comments"
+  },
+  {
+    "id": "V5Kt0xzRADJ",
+    "code": "7326-HOSPITAL_40.2.2.5",
+    "name": "SURV_HOSP_7326-The initial assessment includes a psychological and behavioural assessment of the child."
+  },
+  {
+    "id": "lY02YxAkfoZ",
+    "code": "7327-HOSPITAL_40.2.2.5-comments",
+    "name": "SURV_HOSP_7327-The initial assessment includes a psychological and behavioural assessment of the child.-comments"
+  },
+  {
+    "id": "wQBPzDDC5Va",
+    "code": "7328-HOSPITAL_40.2.2.6",
+    "name": "SURV_HOSP_7328-The initial assessment includes a developmental history and current functional assessment of the child."
+  },
+  {
+    "id": "Zcr4P8voYCh",
+    "code": "7329-HOSPITAL_40.2.2.6-comments",
+    "name": "SURV_HOSP_7329-The initial assessment includes a developmental history and current functional assessment of the child.-comments"
+  },
+  {
+    "id": "wEJgZGN9Ph2",
+    "code": "7330-HOSPITAL_40.2.2.7",
+    "name": "SURV_HOSP_7330-The initial assessment includes a social, cultural and where applicable, economic assessment of the child and family."
+  },
+  {
+    "id": "o6WwOAi5amj",
+    "code": "7331-HOSPITAL_40.2.2.7-comments",
+    "name": "SURV_HOSP_7331-The initial assessment includes a social, cultural and where applicable, economic assessment of the child and family.-comments"
+  },
+  {
+    "id": "VfLCSlOUV2H",
+    "code": "7332-HOSPITAL_40.2.2.8",
+    "name": "SURV_HOSP_7332-The initial assessment includes a genogram of family construction and functional assessment of the family."
+  },
+  {
+    "id": "FdiejWitTPa",
+    "code": "7333-HOSPITAL_40.2.2.8-comments",
+    "name": "SURV_HOSP_7333-The initial assessment includes a genogram of family construction and functional assessment of the family.-comments"
+  },
+  {
+    "id": "ckHB4FKU0VT",
+    "code": "7334-HOSPITAL_40.2.2.9",
+    "name": "SURV_HOSP_7334-The initial assessment results in an understanding of all previous care and the care that the family is presently seeking."
+  },
+  {
+    "id": "kC16a3PYnuv",
+    "code": "7335-HOSPITAL_40.2.2.9-comments",
+    "name": "SURV_HOSP_7335-The initial assessment results in an understanding of all previous care and the care that the family is presently seeking.-comments"
+  },
+  {
+    "id": "YN1JCWdg3D6",
+    "code": "7336-HOSPITAL_40.2.2.10",
+    "name": "SURV_HOSP_7336-The initial assessment results in a diagnosis and the formulation of an individualised plan of care for the child and family."
+  },
+  {
+    "id": "W6840eaZxR8",
+    "code": "7337-HOSPITAL_40.2.2.10-comments",
+    "name": "SURV_HOSP_7337-The initial assessment results in a diagnosis and the formulation of an individualised plan of care for the child and family.-comments"
+  },
+  {
+    "id": "Sfdc64N2ted",
+    "code": "7338-HOSPITAL_40.2.2.11",
+    "name": "SURV_HOSP_7338-The organisation identifies patients in pain during the initial assessment process."
+  },
+  {
+    "id": "jIYciiCSLFy",
+    "code": "7339-HOSPITAL_40.2.2.11-comments",
+    "name": "SURV_HOSP_7339-The organisation identifies patients in pain during the initial assessment process.-comments"
+  },
+  {
+    "id": "QO8iNuMVSJC",
+    "code": "7340-HOSPITAL_40.2.2.12",
+    "name": "SURV_HOSP_7340-The organisation identifies those patient populations and special situations for which the initial assessment process is modified."
+  },
+  {
+    "id": "ry162xhuYSV",
+    "code": "7341-HOSPITAL_40.2.2.12-comments",
+    "name": "SURV_HOSP_7341-The organisation identifies those patient populations and special situations for which the initial assessment process is modified.-comments"
+  },
+  {
+    "id": "J4lteUZSjKi",
+    "code": "7342-HOSPITAL_40.2.2.13",
+    "name": "SURV_HOSP_7342-Those special patient populations receive individualised assessments."
+  },
+  {
+    "id": "NUHi5ySo8GP",
+    "code": "7343-HOSPITAL_40.2.2.13-comments",
+    "name": "SURV_HOSP_7343-Those special patient populations receive individualised assessments.-comments"
+  },
+  {
+    "id": "HyxUq5RdBgA",
+    "code": "7344-HOSPITAL_40.2.2.14",
+    "name": "SURV_HOSP_7344-The findings of assessments performed outside the organisation are verified on admission."
+  },
+  {
+    "id": "iOgNtb7apd8",
+    "code": "7345-HOSPITAL_40.2.2.14-comments",
+    "name": "SURV_HOSP_7345-The findings of assessments performed outside the organisation are verified on admission.-comments"
+  },
+  {
+    "id": "Vfw5xJ6AnbE",
+    "code": "7346-HOSPITAL_40.2.2.15",
+    "name": "SURV_HOSP_7346-Any significant changes in the patient's condition since the assessment performed outside of the organisation are noted in the patient's record."
+  },
+  {
+    "id": "zeOraUGX7ob",
+    "code": "7347-HOSPITAL_40.2.2.15-comments",
+    "name": "SURV_HOSP_7347-Any significant changes in the patient's condition since the assessment performed outside of the organisation are noted in the patient's record.-comments"
+  },
+  {
+    "id": "sCe2HGpEsth",
+    "code": "7348-HOSPITAL_40.2.2.16",
+    "name": "SURV_HOSP_7348-A process is in place to identify needs for discharge planning at the initial assessment."
+  },
+  {
+    "id": "tld2Xx7yJhJ",
+    "code": "7349-HOSPITAL_40.2.2.16-comments",
+    "name": "SURV_HOSP_7349-A process is in place to identify needs for discharge planning at the initial assessment.-comments"
+  },
+  {
+    "id": "vb3HDxa4YNA",
+    "code": "7350-HOSPITAL_40.2.3",
+    "name": "SURV_HOSP_7350-Healthcare professionals responsible for patient care collaborate to analyse and integrate assessment information."
+  },
+  {
+    "id": "Uzm69phM5NT",
+    "code": "7351-HOSPITAL_40.2.3-comments",
+    "name": "SURV_HOSP_7351-Healthcare professionals responsible for patient care collaborate to analyse and integrate assessment information.-comments"
+  },
+  {
+    "id": "AkQuNazLibw",
+    "code": "7352-HOSPITAL_40.2.3.1",
+    "name": "SURV_HOSP_7352-Assessment findings are documented in the patient's record and are readily available to those responsible for the patient's care."
+  },
+  {
+    "id": "oR08g5JJO9V",
+    "code": "7353-HOSPITAL_40.2.3.1-comments",
+    "name": "SURV_HOSP_7353-Assessment findings are documented in the patient's record and are readily available to those responsible for the patient's care.-comments"
+  },
+  {
+    "id": "SW2izpm1Jcq",
+    "code": "7354-HOSPITAL_40.2.3.2",
+    "name": "SURV_HOSP_7354-Patient assessment data and information are analysed and integrated by those responsible for the patient's care."
+  },
+  {
+    "id": "W5V5vAcKNvy",
+    "code": "7355-HOSPITAL_40.2.3.2-comments",
+    "name": "SURV_HOSP_7355-Patient assessment data and information are analysed and integrated by those responsible for the patient's care.-comments"
+  },
+  {
+    "id": "UncOGGYEppt",
+    "code": "7356-HOSPITAL_40.2.3.3",
+    "name": "SURV_HOSP_7356-Patient needs are prioritised based on assessment results."
+  },
+  {
+    "id": "mecGUHY4Ebv",
+    "code": "7357-HOSPITAL_40.2.3.3-comments",
+    "name": "SURV_HOSP_7357-Patient needs are prioritised based on assessment results.-comments"
+  },
+  {
+    "id": "pizoH2cVIwQ",
+    "code": "7358-HOSPITAL_40.2.3.4",
+    "name": "SURV_HOSP_7358-The patient and/or his or her family participate in the decisions regarding the priority needs to be met."
+  },
+  {
+    "id": "V4SgvEgnpo2",
+    "code": "7359-HOSPITAL_40.2.3.4-comments",
+    "name": "SURV_HOSP_7359-The patient and/or his or her family participate in the decisions regarding the priority needs to be met.-comments"
+  },
+  {
+    "id": "TqboaO4KPCC",
+    "code": "7360-HOSPITAL_40.3",
+    "name": "SURV_HOSP_7360-40.3 Patient Care --"
+  },
+  {
+    "id": "L7ftSDvzr7x",
+    "code": "7361-HOSPITAL_40.3.1",
+    "name": "SURV_HOSP_7361-Adequate resources are available for the provision of safe care to patients in the service."
+  },
+  {
+    "id": "E3q0odk5Pp3",
+    "code": "7362-HOSPITAL_40.3.1-comments",
+    "name": "SURV_HOSP_7362-Adequate resources are available for the provision of safe care to patients in the service.-comments"
+  },
+  {
+    "id": "TBH4krJxPwS",
+    "code": "7363-HOSPITAL_40.3.1.1",
+    "name": "SURV_HOSP_7363-Patient and personnel accommodation in the service is adequate to meet patient care needs."
+  },
+  {
+    "id": "cc8zqqZClEB",
+    "code": "7364-HOSPITAL_40.3.1.1-comments",
+    "name": "SURV_HOSP_7364-Patient and personnel accommodation in the service is adequate to meet patient care needs.-comments"
+  },
+  {
+    "id": "epJWZ07bnha",
+    "code": "7365-HOSPITAL_40.3.1.2",
+    "name": "SURV_HOSP_7365-There is evidence that equipment is maintained in accordance with the policies of the organisation."
+  },
+  {
+    "id": "kMSWiXe9aCg",
+    "code": "7366-HOSPITAL_40.3.1.2-comments",
+    "name": "SURV_HOSP_7366-There is evidence that equipment is maintained in accordance with the policies of the organisation.-comments"
+  },
+  {
+    "id": "HPf9SXwr3hD",
+    "code": "7367-HOSPITAL_40.3.1.3",
+    "name": "SURV_HOSP_7367-Resuscitation equipment is available in accordance with the policies of the organisation and includes a) - m) in the standard intent above."
+  },
+  {
+    "id": "r6ump5bhODo",
+    "code": "7368-HOSPITAL_40.3.1.3-comments",
+    "name": "SURV_HOSP_7368-Resuscitation equipment is available in accordance with the policies of the organisation and includes a) - m) in the standard intent above.-comments"
+  },
+  {
+    "id": "GZevrjL7mAw",
+    "code": "7369-HOSPITAL_40.3.1.4",
+    "name": "SURV_HOSP_7369-Each patient has access to a nurse call system at all times."
+  },
+  {
+    "id": "nnIEpgqyIPb",
+    "code": "7370-HOSPITAL_40.3.1.4-comments",
+    "name": "SURV_HOSP_7370-Each patient has access to a nurse call system at all times.-comments"
+  },
+  {
+    "id": "uUibdWtvtNU",
+    "code": "7371-HOSPITAL_40.3.1.5",
+    "name": "SURV_HOSP_7371-Oxygen and vacuum supplies meet patient care requirements."
+  },
+  {
+    "id": "FidjOg8VJmU",
+    "code": "7372-HOSPITAL_40.3.1.5-comments",
+    "name": "SURV_HOSP_7372-Oxygen and vacuum supplies meet patient care requirements.-comments"
+  },
+  {
+    "id": "mpJ5PjzdOWN",
+    "code": "7373-HOSPITAL_40.3.1.6",
+    "name": "SURV_HOSP_7373-When patients receive oxygen from a cylinder, the cylinder pressures are monitored according to organisation policy."
+  },
+  {
+    "id": "TgqXBFa0YHH",
+    "code": "7374-HOSPITAL_40.3.1.6-comments",
+    "name": "SURV_HOSP_7374-When patients receive oxygen from a cylinder, the cylinder pressures are monitored according to organisation policy.-comments"
+  },
+  {
+    "id": "FE3KChomGqU",
+    "code": "7375-HOSPITAL_40.3.1.7",
+    "name": "SURV_HOSP_7375-Electricity and water is available in accordance with the policies and arrangements of the organisation."
+  },
+  {
+    "id": "YW4QtsJTNis",
+    "code": "7376-HOSPITAL_40.3.1.7-comments",
+    "name": "SURV_HOSP_7376-Electricity and water is available in accordance with the policies and arrangements of the organisation.-comments"
+  },
+  {
+    "id": "lngYVX3pzbq",
+    "code": "7377-HOSPITAL_40.3.2",
+    "name": "SURV_HOSP_7377-The care provided to each patient is planned and written in the patient's record."
+  },
+  {
+    "id": "oma11GYnxP5",
+    "code": "7378-HOSPITAL_40.3.2-comments",
+    "name": "SURV_HOSP_7378-The care provided to each patient is planned and written in the patient's record.-comments"
+  },
+  {
+    "id": "a4ESKERr1E5",
+    "code": "7379-HOSPITAL_40.3.2.1",
+    "name": "SURV_HOSP_7379-The care for each patient is planned, provided and noted in the patient's record."
+  },
+  {
+    "id": "HpbhGj1na9i",
+    "code": "7380-HOSPITAL_40.3.2.1-comments",
+    "name": "SURV_HOSP_7380-The care for each patient is planned, provided and noted in the patient's record.-comments"
+  },
+  {
+    "id": "eAE9yYsFtnL",
+    "code": "7381-HOSPITAL_40.3.2.2",
+    "name": "SURV_HOSP_7381-The patient's response to care and therapeutic interventions is documented in the patient record."
+  },
+  {
+    "id": "tkGRfkJCghr",
+    "code": "7382-HOSPITAL_40.3.2.2-comments",
+    "name": "SURV_HOSP_7382-The patient's response to care and therapeutic interventions is documented in the patient record.-comments"
+  },
+  {
+    "id": "vA6uX2ZWORA",
+    "code": "7383-HOSPITAL_40.3.2.3",
+    "name": "SURV_HOSP_7383-Meetings to discuss patient care/treatment regimes are held by the multidisciplinary team at regular intervals as determined by organisational policy and documented in the patient's record."
+  },
+  {
+    "id": "GpynCHaO4Wh",
+    "code": "7384-HOSPITAL_40.3.2.3-comments",
+    "name": "SURV_HOSP_7384-Meetings to discuss patient care/treatment regimes are held by the multidisciplinary team at regular intervals as determined by organisational policy and documented in the patient's record.-comments"
+  },
+  {
+    "id": "HEjyCBouc5E",
+    "code": "7385-HOSPITAL_40.3.2.4",
+    "name": "SURV_HOSP_7385-All procedures and diagnostic tests ordered and performed, are documented in the patient's record."
+  },
+  {
+    "id": "wMq1TXiuXdX",
+    "code": "7386-HOSPITAL_40.3.2.4-comments",
+    "name": "SURV_HOSP_7386-All procedures and diagnostic tests ordered and performed, are documented in the patient's record.-comments"
+  },
+  {
+    "id": "pdsGactIfxX",
+    "code": "7387-HOSPITAL_40.3.2.5",
+    "name": "SURV_HOSP_7387-The results of procedures and diagnostic tests performed are available in the patient's record."
+  },
+  {
+    "id": "h7OMnvDE73x",
+    "code": "7388-HOSPITAL_40.3.2.5-comments",
+    "name": "SURV_HOSP_7388-The results of procedures and diagnostic tests performed are available in the patient's record.-comments"
+  },
+  {
+    "id": "C7LP5H14gKs",
+    "code": "7389-HOSPITAL_40.3.2.6",
+    "name": "SURV_HOSP_7389-Orders are found in a uniform location in patient records."
+  },
+  {
+    "id": "BgHv3LM2Ffc",
+    "code": "7390-HOSPITAL_40.3.2.6-comments",
+    "name": "SURV_HOSP_7390-Orders are found in a uniform location in patient records.-comments"
+  },
+  {
+    "id": "Hz9JzvygfdK",
+    "code": "7391-HOSPITAL_40.3.2.7",
+    "name": "SURV_HOSP_7391-Only those permitted to write orders do so."
+  },
+  {
+    "id": "HacYvTTLidj",
+    "code": "7392-HOSPITAL_40.3.2.7-comments",
+    "name": "SURV_HOSP_7392-Only those permitted to write orders do so.-comments"
+  },
+  {
+    "id": "sImIbAS7iB8",
+    "code": "7393-HOSPITAL_40.3.2.8",
+    "name": "SURV_HOSP_7393-Reassessments are performed at appropriate, regular intervals and following a change in the patient's condition, and documented in the patient's record."
+  },
+  {
+    "id": "OAOcmM8iQou",
+    "code": "7394-HOSPITAL_40.3.2.8-comments",
+    "name": "SURV_HOSP_7394-Reassessments are performed at appropriate, regular intervals and following a change in the patient's condition, and documented in the patient's record.-comments"
+  },
+  {
+    "id": "YtN8xMCxjNG",
+    "code": "7395-HOSPITAL_40.3.2.9",
+    "name": "SURV_HOSP_7395-Care plans are revised when necessary in response to the findings of reassessments."
+  },
+  {
+    "id": "ynPfhPXzzYo",
+    "code": "7396-HOSPITAL_40.3.2.9-comments",
+    "name": "SURV_HOSP_7396-Care plans are revised when necessary in response to the findings of reassessments.-comments"
+  },
+  {
+    "id": "M3YI27ytitx",
+    "code": "7397-HOSPITAL_40.3.3",
+    "name": "SURV_HOSP_7397-Compassionate care is provided to the dying and to those in pain."
+  },
+  {
+    "id": "WHiXcSMrsZc",
+    "code": "7398-HOSPITAL_40.3.3-comments",
+    "name": "SURV_HOSP_7398-Compassionate care is provided to the dying and to those in pain.-comments"
+  },
+  {
+    "id": "WPVpXtSeG1g",
+    "code": "7399-HOSPITAL_40.3.3.1",
+    "name": "SURV_HOSP_7399-The assessment process makes provision for patients in pain to be identified."
+  },
+  {
+    "id": "S0JU0k96USb",
+    "code": "7400-HOSPITAL_40.3.3.1-comments",
+    "name": "SURV_HOSP_7400-The assessment process makes provision for patients in pain to be identified.-comments"
+  },
+  {
+    "id": "OtRIkcsfk8m",
+    "code": "7401-HOSPITAL_40.3.3.2",
+    "name": "SURV_HOSP_7401-Patients in pain receive care according to pain management guidelines."
+  },
+  {
+    "id": "kXsOsyUbOsR",
+    "code": "7402-HOSPITAL_40.3.3.2-comments",
+    "name": "SURV_HOSP_7402-Patients in pain receive care according to pain management guidelines.-comments"
+  },
+  {
+    "id": "zwbAP8c45Oz",
+    "code": "7403-HOSPITAL_40.3.3.3",
+    "name": "SURV_HOSP_7403-There is evidence that the effectiveness of pain and symptom management is monitored."
+  },
+  {
+    "id": "bBYQwgkZmTD",
+    "code": "7404-HOSPITAL_40.3.3.3-comments",
+    "name": "SURV_HOSP_7404-There is evidence that the effectiveness of pain and symptom management is monitored.-comments"
+  },
+  {
+    "id": "XiJ7NmPxRJU",
+    "code": "7405-HOSPITAL_40.3.3.4",
+    "name": "SURV_HOSP_7405-Patients and families are educated about pain and pain management."
+  },
+  {
+    "id": "TAOwq8hXxcq",
+    "code": "7406-HOSPITAL_40.3.3.4-comments",
+    "name": "SURV_HOSP_7406-Patients and families are educated about pain and pain management.-comments"
+  },
+  {
+    "id": "VwiMm9JmFUl",
+    "code": "7407-HOSPITAL_40.3.3.5",
+    "name": "SURV_HOSP_7407-The organisation has processes to educate health professionals in assessing and managing pain."
+  },
+  {
+    "id": "EBu8D1zFOFx",
+    "code": "7408-HOSPITAL_40.3.3.5-comments",
+    "name": "SURV_HOSP_7408-The organisation has processes to educate health professionals in assessing and managing pain.-comments"
+  },
+  {
+    "id": "gEmxe4LbEND",
+    "code": "7409-HOSPITAL_40.3.3.6",
+    "name": "SURV_HOSP_7409-Personnel provide respectful and compassionate care to dying patients."
+  },
+  {
+    "id": "gC4zAljRTlp",
+    "code": "7410-HOSPITAL_40.3.3.6-comments",
+    "name": "SURV_HOSP_7410-Personnel provide respectful and compassionate care to dying patients.-comments"
+  },
+  {
+    "id": "VV1wwnVZyew",
+    "code": "7411-HOSPITAL_40.3.4",
+    "name": "SURV_HOSP_7411-Policies and procedures guide the care of high-risk patients and the provision of high-risk services."
+  },
+  {
+    "id": "m6ktjr4fRI2",
+    "code": "7412-HOSPITAL_40.3.4-comments",
+    "name": "SURV_HOSP_7412-Policies and procedures guide the care of high-risk patients and the provision of high-risk services.-comments"
+  },
+  {
+    "id": "xgVDIsdckF7",
+    "code": "7413-HOSPITAL_40.3.4.1",
+    "name": "SURV_HOSP_7413-Documented policies, clinical guidelines or standard operating procedures for identified high risk patients and procedures, which include items (a)-(h) in the standard intent above as a minimum, are available and re"
+  },
+  {
+    "id": "QvZCJBVSCDC",
+    "code": "7414-HOSPITAL_40.3.4.1-comments",
+    "name": "SURV_HOSP_7414-Documented policies, clinical guidelines or standard operating procedures for identified high risk patients and procedures, which include items (a)-(h) in the standard intent above as a minimum, are available and re"
+  },
+  {
+    "id": "GfKNXeiDDj8",
+    "code": "7415-HOSPITAL_40.3.4.2",
+    "name": "SURV_HOSP_7415-In-service training is provided to personnel to ensure they understand the intent and content of the policies and procedures."
+  },
+  {
+    "id": "HxaNSZX1pVC",
+    "code": "7416-HOSPITAL_40.3.4.2-comments",
+    "name": "SURV_HOSP_7416-In-service training is provided to personnel to ensure they understand the intent and content of the policies and procedures.-comments"
+  },
+  {
+    "id": "L3BhFB16hQ6",
+    "code": "7417-HOSPITAL_40.3.4.3",
+    "name": "SURV_HOSP_7417-Patients receive care consistent with the policies and procedures."
+  }
+]

@@ -5,10 +5,3 @@ questions,3690,Each criterion is exported as a question/data element candidate.
 rootCriteria,385,Generated from hospital_compute_criteria.json.
 criterionLinks,7042,Expanded from hospital_links.json.
 uidColumns,blank,Fill existing DHIS2 UIDs or generate new UIDs before metadata import.
-dhis2SectionsPulled,45,Pulled from DHIS2 programStageSections endpoint.
-dhis2SectionDataElementRefs,8884,Includes headers/comments as well as scored criteria.
-dhis2NonCommentCodeMatches,4630,DHIS2 non-comment data elements with extractable Hospital criterion codes.
-sectionUidMatches,44,ServiceElements rows matched to DHIS2 sections by sortOrder - 1.
-questionUidMatches,3290,3690 Questions rows checked.
-questionUidMissing,400,Rows needing manual UID review or DHIS2 creation.
-uidEnrichmentSource,exports\google-sheets\hospital\dhis2_hospital_metadata.json,Local sanitized DHIS2 metadata pull used for UID enrichment.

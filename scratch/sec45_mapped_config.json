@@ -1,0 +1,314 @@
+{
+  "criteriaMap": {
+    "40.1.1.1": {
+      "code": "45.1.1.1",
+      "label": "A suitably qualified and experienced health professional is identified with clearly defined and documented responsibilities for coordination of the volunteer service."
+    },
+    "40.1.1.2": {
+      "code": "45.1.1.10",
+      "label": "There is a system in place to evaluate the performance of volunteers."
+    },
+    "40.1.1.3": {
+      "code": "45.1.1.11",
+      "label": "There is a system in place to provided acknowledgement and appreciation for services rendered by each volunteer."
+    },
+    "40.1.1.4": {
+      "code": "45.1.1.2",
+      "label": "The manager is represented on the volunteers’ management committee to act as liaison between the organisation and the volunteer service."
+    },
+    "40.1.2.1": {
+      "code": "45.1.1.3",
+      "label": "Recorded meetings between the organisation management and volunteers’ management are held at least monthly."
+    },
+    "40.1.2.2": {
+      "code": "45.1.1.4",
+      "label": "There is a current organisational chart, which clearly states the agreed upon lines of communication, authority, responsibility and accountability."
+    },
+    "40.1.2.3": {
+      "code": "45.1.1.5",
+      "label": "There is evidence that volunteers are selected in accordance with the necessary and appropriate skills to support the objectives of the volunteer service."
+    },
+    "40.1.2.4": {
+      "code": "45.1.1.6",
+      "label": "Volunteers are clearly identified by name badges."
+    },
+    "40.1.2.5": {
+      "code": "45.1.1.7",
+      "label": "Personnel employed in the volunteer service are assigned based on qualification, experience and interest."
+    },
+    "40.1.3.1": {
+      "code": "45.1.1.8",
+      "label": "There is a mechanism to ensure that all volunteers work under the guidance of suitably qualified health professionals in the employ of the organisation."
+    },
+    "40.1.3.2": {
+      "code": "45.1.1.9",
+      "label": "The volunteer service is supported by administrative, auxiliary and secretarial personnel who may themselves be volunteers."
+    },
+    "40.1.3.3": {
+      "code": "45.1.2.1",
+      "label": "The agreement includes indemnity and waiver for injuries sustained on the premises."
+    },
+    "40.1.3.4": {
+      "code": "45.1.2.2",
+      "label": "The agreement includes the maintaining of confidentiality and privacy of information."
+    },
+    "40.1.3.5": {
+      "code": "45.1.2.3",
+      "label": "The agreement includes those functions, which may be carried out by volunteers."
+    },
+    "40.1.3.6": {
+      "code": "45.1.2.4",
+      "label": "The agreement includes access to premises and facilities by volunteers."
+    },
+    "40.1.3.7": {
+      "code": "45.1.2.5",
+      "label": "Agreements are regularly reviewed and amended when required according to organisational policy."
+    },
+    "40.1.3.8": {
+      "code": "45.2.1.1",
+      "label": "There is written, planned orientation and induction programme for all new volunteers to the service."
+    },
+    "40.2.1.1": {
+      "code": "45.2.1.2",
+      "label": "The orientation and induction programme introduces new volunteers to the relevant aspects of the volunteer service."
+    },
+    "40.2.1.2": {
+      "code": "45.2.1.3",
+      "label": "The orientation and induction programme explains the relationship and line of communication between the volunteer service and the organisation."
+    },
+    "40.2.1.3": {
+      "code": "45.2.1.4",
+      "label": "The orientation and induction programme prepares volunteers for their roles and responsibilities."
+    },
+    "40.2.1.4": {
+      "code": "45.2.1.5",
+      "label": "The orientation and induction programme introduces volunteers to the policies and procedures of the volunteer service and the organisation."
+    },
+    "40.2.1.5": {
+      "code": "45.2.1.6",
+      "label": "The orientation and induction programme ensures the new volunteers are fully informed of the conditions of confidentiality and conditions of providing information to the media."
+    },
+    "40.2.2.1": {
+      "code": "45.2.1.7",
+      "label": "All volunteers are trained regarding their role during a fire and emergency evacuation."
+    },
+    "40.2.2.2": {
+      "code": "45.2.1.8",
+      "label": "All volunteers are trained regarding their role in providing a safe and secure patient care facility."
+    },
+    "40.2.2.3": {
+      "code": "45.2.1.9",
+      "label": "The orientation and induction programme is reviewed annually, signed and dated."
+    },
+    "40.2.2.4": {
+      "code": "45.2.2.1",
+      "label": "The volunteer service provides a relevant, written in-service training programme for volunteers."
+    },
+    "40.2.2.5": {
+      "code": "45.2.2.2",
+      "label": "There is a system in place to ensure that all volunteers attend in-service training programmes, and that records are kept."
+    },
+    "40.2.2.6": {
+      "code": "45.2.2.3",
+      "label": "The volunteer service ensures that the volunteers are kept up to date with relevant new information."
+    },
+    "40.2.2.7": {
+      "code": "45.2.2.4",
+      "label": "The volunteer service manager ensures that all volunteers are able to initiate basic life support as necessary."
+    },
+    "40.2.2.8": {
+      "code": "45.2.2.5",
+      "label": "The volunteer service manager ensures that all volunteers are familiar with the organisation’s internal and external fire and emergency evacuation plans and attend rehearsals at least annually."
+    },
+    "40.2.2.9": {
+      "code": "45.2.2.6",
+      "label": "The volunteer service manager ensures that all volunteers are trained in the relevant health and safety policies and infection control policies."
+    },
+    "40.2.2.10": {
+      "code": "45.3.1.1",
+      "label": "The volunteer service has written policies and procedures to guide volunteers in the activities and management of the volunteer service."
+    },
+    "40.2.2.11": {
+      "code": "45.3.1.2",
+      "label": "Volunteers are involved in the formulation of policies and procedures as well as protocols for volunteer service."
+    },
+    "40.2.2.12": {
+      "code": "45.3.1.3",
+      "label": "All policies and procedures are reviewed at appropriate intervals, dated and signed."
+    },
+    "40.2.2.13": {
+      "code": "45.3.1.4",
+      "label": "Policies and procedures are kept in a manual, which is indexed and easily accessible."
+    },
+    "40.2.2.14": {
+      "code": "45.3.1.5",
+      "label": "There is a mechanism to ensure that all policies and procedures are known and implemented by all volunteers working in the volunteer service."
+    },
+    "40.2.2.15": {
+      "code": "45.4.1.1",
+      "label": "The volunteer service management personnel are included in the management committee of the organisation to advise on planning for equipment acquisition, deployment, utilisation and maintenance for the volunteer service."
+    },
+    "40.2.2.16": {
+      "code": "45.4.1.10",
+      "label": "All furnishing and equipment are clean and in good condition to ensure the safety of patients and volunteers."
+    },
+    "40.2.3.1": {
+      "code": "45.4.1.2",
+      "label": "Telephones are available for volunteers and visitors."
+    },
+    "40.2.3.2": {
+      "code": "45.4.1.3",
+      "label": "There is an alarm/alert system in place in case of medical emergencies, which is known to all members of the volunteer service."
+    },
+    "40.2.3.3": {
+      "code": "45.4.1.4",
+      "label": "There is an alarm system in place in case of security threats, which is known to all members of the volunteer service."
+    },
+    "40.2.3.4": {
+      "code": "45.4.1.5",
+      "label": "There is office facility available for the volunteer service manager."
+    },
+    "40.3.1.1": {
+      "code": "45.4.1.6",
+      "label": "There is adequate space for patient/group work by the volunteer service."
+    },
+    "40.3.1.2": {
+      "code": "45.4.1.7",
+      "label": "There is adequate light and ventilation in therapy areas."
+    },
+    "40.3.1.3": {
+      "code": "45.4.1.8",
+      "label": "There is adequate and suitable equipment to provide appropriate stimulation to the patients."
+    },
+    "40.3.1.4": {
+      "code": "45.4.1.9",
+      "label": "There is adequate storage space for all equipment, appliances and tools."
+    },
+    "40.3.1.5": {
+      "code": "45.5.1.1",
+      "label": "The functions of the volunteers relating to patient care are clearly defined and supervised."
+    },
+    "40.3.1.6": {
+      "code": "45.5.1.2",
+      "label": "The volunteer services bring specific matters relating to the health of patients to the attention of the medical and/or nursing personnel."
+    },
+    "40.3.1.7": {
+      "code": "45.5.1.3",
+      "label": "Reports on volunteer involvement in group and individual resident stimulation are provided by volunteers to support further clinical decisions."
+    },
+    "40.3.2.1": {
+      "code": "45.5.1.4",
+      "label": "Reporting on patient progress to the multidisciplinary team is done on a regular basis."
+    },
+    "40.3.2.2": {
+      "code": "45.6.1.1",
+      "label": "There is a written quality improvement programme for the volunteer service that is developed and agreed upon by the personnel of the service."
+    },
+    "40.3.2.3": {
+      "code": "45.6.1.2",
+      "label": "Indicators of performance are identified to evaluate the quality of treatment and patient care."
+    },
+    "40.3.2.4": {
+      "code": "45.6.1.3",
+      "label": "Processes are selected in order of priority for evaluation and improvement in the quality of treatment and care."
+    },
+    "40.3.2.5": {
+      "code": "45.6.1.4",
+      "label": "The quality improvement cycle includes the monitoring and evaluation of the standards set, and remedial action implemented."
+    },
+    "40.3.2.6": {
+      "code": "45.6.1.5",
+      "label": "A documentation audit system is in place."
+    },
+    "40.3.2.7": {
+      "code": "45.6.1.6",
+      "label": "An incident managing system for monitoring near misses/adverse events/sentinel events is implemented, which includes the documentation of responses to recorded incidents and interventions to prevent recurrence of the incident or minimise harm in the event of a recurrence."
+    },
+    "40.3.2.8": {
+      "code": "45.7.1.1",
+      "label": "There are processes that support patient and family rights during volunteer care."
+    },
+    "40.3.2.9": {
+      "code": "45.7.1.2",
+      "label": "There are processes to ensure that volunteer care is respectful of the patient’s personal values and beliefs."
+    },
+    "40.3.3.1": {
+      "code": "45.7.1.3",
+      "label": "Measures are taken to protect the patient’s privacy, person and possessions."
+    },
+    "40.3.3.2": {
+      "code": "45.7.1.4",
+      "label": "Volunteers respect the rights of patients and families to treatment and to refuse treatment."
+    },
+    "40.3.3.3": {
+      "code": "45.8.1.1",
+      "label": "The organisation identifies the procedures and processes associated with the risk of infection during volunteer services and implements strategies to reduce risk."
+    },
+    "40.3.3.4": {
+      "code": "45.8.1.2",
+      "label": "The organisation provides education on infection control practices to volunteers."
+    },
+    "40.3.3.5": {
+      "code": "45.8.1.3",
+      "label": "Volunteers are trained in correct hand washing procedures."
+    },
+    "40.3.3.6": {
+      "code": "45.8.1.4",
+      "label": "Organisational policy on handling, storage and disposal of healthcare waste is implemented."
+    }
+  },
+  "headerMap": {
+    "40.1": {
+      "code": "45.1",
+      "label": "Management and Staffing"
+    },
+    "40.1.1": {
+      "code": "45.1.1",
+      "label": "Management and Staffing"
+    },
+    "40.1.2": {
+      "code": "45.1.2",
+      "label": "Volunteer Agreement"
+    },
+    "40.1.3": {
+      "code": "45.2.1",
+      "label": "Volunteer Orientation and Induction"
+    },
+    "40.2": {
+      "code": "45.2",
+      "label": "Volunteer Development and Education"
+    },
+    "40.2.1": {
+      "code": "45.2.2",
+      "label": "In-service Education and Training"
+    },
+    "40.2.2": {
+      "code": "45.3.1",
+      "label": "Policies and Procedures"
+    },
+    "40.2.3": {
+      "code": "45.4.1",
+      "label": "Facilities and Equipment"
+    },
+    "40.3": {
+      "code": "45.5",
+      "label": "Patient Care"
+    },
+    "40.3.1": {
+      "code": "45.5.1",
+      "label": "Patient Care Activities"
+    },
+    "40.3.2": {
+      "code": "45.6.1",
+      "label": "Quality Improvement"
+    },
+    "40.3.3": {
+      "code": "45.7.1",
+      "label": "Patient Rights"
+    },
+    "40.3.4": {
+      "code": "45.8.1",
+      "label": "Prevention and Control of Infection"
+    }
+  }
+}

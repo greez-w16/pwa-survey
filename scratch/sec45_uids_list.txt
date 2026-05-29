@@ -1,0 +1,156 @@
+40.1                      | LV0TExzD1I1  | 40.1 Coordination of Patient Care --
+40.1.1                    | LOPrFiE1BCQ  | During all phases of care, there are qualified individuals responsible for the patient's care.
+40.1.1-comments           | KWodkFx4Ldx  | During all phases of care, there are qualified individuals responsible for the patient's care.-comments
+40.1.1.1                  | vEsmGLF2Jlh  | An appropriately qualified individual has clearly defined responsibilities and accountability for all aspects of the service.
+40.1.1.1-comments         | RfKeYjdvmEa  | An appropriately qualified individual has clearly defined responsibilities and accountability for all aspects of the service.-comments
+40.1.1.2                  | k5WLifCrePo  | The individuals responsible for the patient's care are designated.
+40.1.1.2-comments         | PEfD8bZbNz1  | The individuals responsible for the patient's care are designated.-comments
+40.1.1.3                  | wE4ULa13yVi  | The individuals responsible for the patient's care are qualified.
+40.1.1.3-comments         | cyhDv29ugj8  | The individuals responsible for the patient's care are qualified.-comments
+40.1.1.4                  | ppuWGHXYrGo  | The individuals responsible for the patient's care are identified and made known to the patient and other personnel.
+40.1.1.4-comments         | hrHfjiCpBqK  | The individuals responsible for the patient's care are identified and made known to the patient and other personnel.-comments
+40.1.2                    | akK2Gi7gzMg  | Clinical practice guidelines are used to guide patient care and reduce unwanted variation.
+40.1.2-comments           | cQivnm9XiE7  | Clinical practice guidelines are used to guide patient care and reduce unwanted variation.-comments
+40.1.2.1                  | KiQbi4DWt2Z  | Evidence-based clinical practice guidelines relevant to the patients and services of the organisation are available to guide patient care processes.
+40.1.2.1-comments         | lhNIhCZHQXl  | Evidence-based clinical practice guidelines relevant to the patients and services of the organisation are available to guide patient care processes.-comments
+40.1.2.2                  | H2w2LWjdvVg  | Organisational and clinical leaders set criteria to select clinical practice guidelines.
+40.1.2.2-comments         | SDT0Zsl8PSG  | Organisational and clinical leaders set criteria to select clinical practice guidelines.-comments
+40.1.2.3                  | klUSrNqepEo  | Implemented guidelines define and establish admission criteria for the child and family service.
+40.1.2.3-comments         | ZtKnde1udOL  | Implemented guidelines define and establish admission criteria for the child and family service.-comments
+40.1.2.4                  | lgbmEOLfofO  | The implementation of guidelines is monitored as part of a structured clinical audit.
+40.1.2.4-comments         | kQR6cd3mBCV  | The implementation of guidelines is monitored as part of a structured clinical audit.-comments
+40.1.2.5                  | gdDadTJ6Ar7  | Guidelines are reviewed on a regular basis and updated when necessary.
+40.1.2.5-comments         | AdLQGJ2jtNj  | Guidelines are reviewed on a regular basis and updated when necessary.-comments
+40.1.3                    | UK62jfhTyFS  | The delivery of services is integrated and coordinated amongst care providers.
+40.1.3-comments           | A8XoOMpquWm  | The delivery of services is integrated and coordinated amongst care providers.-comments
+40.1.3.1                  | qR8PAPdLcee  | Care planning is integrated and coordinated among all care providers.
+40.1.3.1-comments         | yc2eYuZgqDi  | Care planning is integrated and coordinated among all care providers.-comments
+40.1.3.2                  | i2r7oH6w27I  | The patients' clinical records are completed according to organisation policy.
+40.1.3.2-comments         | PzvLzg3o3AM  | The patients' clinical records are completed according to organisation policy.-comments
+40.1.3.3                  | SNg9CQeTWrX  | The patient's records are up to date to ensure the transfer of the latest information between care providers.
+40.1.3.3-comments         | Eu0bcLAEtIe  | The patient's records are up to date to ensure the transfer of the latest information between care providers.-comments
+40.1.3.4                  | jN14Fwnm7u2  | Information exchanged includes the patient's health status.
+40.1.3.4-comments         | FMtoh6rXoC5  | Information exchanged includes the patient's health status.-comments
+40.1.3.5                  | MV2mJpwB4tt  | Information exchanged includes a summary of the care provided.
+40.1.3.5-comments         | lN5N2Jbhl71  | Information exchanged includes a summary of the care provided.-comments
+40.1.3.6                  | j428AYK8UoD  | Information exchanged includes the patient's progress.
+40.1.3.6-comments         | fPwzcp86vLZ  | Information exchanged includes the patient's progress.-comments
+40.1.3.7                  | Nd6PA3oMbJj  | The author can be identified for each patient record entry.
+40.1.3.7-comments         | cJHscdQAsvW  | The author can be identified for each patient record entry.-comments
+40.1.3.8                  | F4XUfbgTKmW  | The date and time of each patient record entry can be identified.
+40.1.3.8-comments         | yECyOGmTtw7  | The date and time of each patient record entry can be identified.-comments
+40.2                      | MrE8of1yuIF  | 40.2 Assessment of Patients --
+40.2.1                    | sr50S4k56Gx  | All patients cared for by the organisation have their healthcare needs identified through an established assessment process within appropriate time frames.
+40.2.1-comments           | dN5GRZrJjLb  | All patients cared for by the organisation have their healthcare needs identified through an established assessment process within appropriate time frames.-comments
+40.2.1.1                  | Wtp4QMBWnFh  | Written policies and procedures for assessing patients and their families on admission and during ongoing care are implemented.
+40.2.1.1-comments         | AA1Ej93e8QL  | Written policies and procedures for assessing patients and their families on admission and during ongoing care are implemented.-comments
+40.2.1.2                  | vuufUBpnfAt  | Only those individuals permitted by applicable laws, regulations and professional registration perform the assessments.
+40.2.1.2-comments         | VCUnfnl0QfX  | Only those individuals permitted by applicable laws, regulations and professional registration perform the assessments.-comments
+40.2.1.3                  | tjbnSwQlREc  | The scope and content of assessment by each discipline is defined.
+40.2.1.3-comments         | NLgcDJ3ln17  | The scope and content of assessment by each discipline is defined.-comments
+40.2.1.4                  | XaiM7aMUoZk  | Assessments are performed within appropriate time frames and are comprehensively documented in the patient's records according to organisation policy.
+40.2.1.4-comments         | jzxAHk3TRAI  | Assessments are performed within appropriate time frames and are comprehensively documented in the patient's records according to organisation policy.-comments
+40.2.1.5                  | WKGTGeSmI61  | The date and time of assessment can be identified.
+40.2.1.5-comments         | u7JO7KpkgLm  | The date and time of assessment can be identified.-comments
+40.2.2                    | iBGh7mb1Qrp  | Each child and family has an initial assessment which complies with current policies, procedures and guidelines.
+40.2.2-comments           | LohVT2TE19p  | Each child and family has an initial assessment which complies with current policies, procedures and guidelines.-comments
+40.2.2.1                  | INuQmuTdKkE  | Each patient admitted has an initial assessment which meets organisation policy.
+40.2.2.1-comments         | EuDdRebxlSs  | Each patient admitted has an initial assessment which meets organisation policy.-comments
+40.2.2.2                  | YaM3cecvAGa  | The initial assessment includes the health history of the child.
+40.2.2.2-comments         | AKSEHuNyvyw  | The initial assessment includes the health history of the child.-comments
+40.2.2.3                  | P4Tqxv2Lvja  | The initial assessment includes a physical examination of the child.
+40.2.2.3-comments         | MramSWAEIpb  | The initial assessment includes a physical examination of the child.-comments
+40.2.2.4                  | Z2xsTdn1QHY  | The initial assessment includes a nutritional assessment of the child.
+40.2.2.4-comments         | vBjGkEhlM71  | The initial assessment includes a nutritional assessment of the child.-comments
+40.2.2.5                  | V5Kt0xzRADJ  | The initial assessment includes a psychological and behavioural assessment of the child.
+40.2.2.5-comments         | lY02YxAkfoZ  | The initial assessment includes a psychological and behavioural assessment of the child.-comments
+40.2.2.6                  | wQBPzDDC5Va  | The initial assessment includes a developmental history and current functional assessment of the child.
+40.2.2.6-comments         | Zcr4P8voYCh  | The initial assessment includes a developmental history and current functional assessment of the child.-comments
+40.2.2.7                  | wEJgZGN9Ph2  | The initial assessment includes a social, cultural and where applicable, economic assessment of the child and family.
+40.2.2.7-comments         | o6WwOAi5amj  | The initial assessment includes a social, cultural and where applicable, economic assessment of the child and family.-comments
+40.2.2.8                  | VfLCSlOUV2H  | The initial assessment includes a genogram of family construction and functional assessment of the family.
+40.2.2.8-comments         | FdiejWitTPa  | The initial assessment includes a genogram of family construction and functional assessment of the family.-comments
+40.2.2.9                  | ckHB4FKU0VT  | The initial assessment results in an understanding of all previous care and the care that the family is presently seeking.
+40.2.2.9-comments         | kC16a3PYnuv  | The initial assessment results in an understanding of all previous care and the care that the family is presently seeking.-comments
+40.2.2.10                 | YN1JCWdg3D6  | The initial assessment results in a diagnosis and the formulation of an individualised plan of care for the child and family.
+40.2.2.10-comments        | W6840eaZxR8  | The initial assessment results in a diagnosis and the formulation of an individualised plan of care for the child and family.-comments
+40.2.2.11                 | Sfdc64N2ted  | The organisation identifies patients in pain during the initial assessment process.
+40.2.2.11-comments        | jIYciiCSLFy  | The organisation identifies patients in pain during the initial assessment process.-comments
+40.2.2.12                 | QO8iNuMVSJC  | The organisation identifies those patient populations and special situations for which the initial assessment process is modified.
+40.2.2.12-comments        | ry162xhuYSV  | The organisation identifies those patient populations and special situations for which the initial assessment process is modified.-comments
+40.2.2.13                 | J4lteUZSjKi  | Those special patient populations receive individualised assessments.
+40.2.2.13-comments        | NUHi5ySo8GP  | Those special patient populations receive individualised assessments.-comments
+40.2.2.14                 | HyxUq5RdBgA  | The findings of assessments performed outside the organisation are verified on admission.
+40.2.2.14-comments        | iOgNtb7apd8  | The findings of assessments performed outside the organisation are verified on admission.-comments
+40.2.2.15                 | Vfw5xJ6AnbE  | Any significant changes in the patient's condition since the assessment performed outside of the organisation are noted in the patient's record.
+40.2.2.15-comments        | zeOraUGX7ob  | Any significant changes in the patient's condition since the assessment performed outside of the organisation are noted in the patient's record.-comments
+40.2.2.16                 | sCe2HGpEsth  | A process is in place to identify needs for discharge planning at the initial assessment.
+40.2.2.16-comments        | tld2Xx7yJhJ  | A process is in place to identify needs for discharge planning at the initial assessment.-comments
+40.2.3                    | vb3HDxa4YNA  | Healthcare professionals responsible for patient care collaborate to analyse and integrate assessment information.
+40.2.3-comments           | Uzm69phM5NT  | Healthcare professionals responsible for patient care collaborate to analyse and integrate assessment information.-comments
+40.2.3.1                  | AkQuNazLibw  | Assessment findings are documented in the patient's record and are readily available to those responsible for the patient's care.
+40.2.3.1-comments         | oR08g5JJO9V  | Assessment findings are documented in the patient's record and are readily available to those responsible for the patient's care.-comments
+40.2.3.2                  | SW2izpm1Jcq  | Patient assessment data and information are analysed and integrated by those responsible for the patient's care.
+40.2.3.2-comments         | W5V5vAcKNvy  | Patient assessment data and information are analysed and integrated by those responsible for the patient's care.-comments
+40.2.3.3                  | UncOGGYEppt  | Patient needs are prioritised based on assessment results.
+40.2.3.3-comments         | mecGUHY4Ebv  | Patient needs are prioritised based on assessment results.-comments
+40.2.3.4                  | pizoH2cVIwQ  | The patient and/or his or her family participate in the decisions regarding the priority needs to be met.
+40.2.3.4-comments         | V4SgvEgnpo2  | The patient and/or his or her family participate in the decisions regarding the priority needs to be met.-comments
+40.3                      | TqboaO4KPCC  | 40.3 Patient Care --
+40.3.1                    | L7ftSDvzr7x  | Adequate resources are available for the provision of safe care to patients in the service.
+40.3.1-comments           | E3q0odk5Pp3  | Adequate resources are available for the provision of safe care to patients in the service.-comments
+40.3.1.1                  | TBH4krJxPwS  | Patient and personnel accommodation in the service is adequate to meet patient care needs.
+40.3.1.1-comments         | cc8zqqZClEB  | Patient and personnel accommodation in the service is adequate to meet patient care needs.-comments
+40.3.1.2                  | epJWZ07bnha  | There is evidence that equipment is maintained in accordance with the policies of the organisation.
+40.3.1.2-comments         | kMSWiXe9aCg  | There is evidence that equipment is maintained in accordance with the policies of the organisation.-comments
+40.3.1.3                  | HPf9SXwr3hD  | Resuscitation equipment is available in accordance with the policies of the organisation and includes a) - m) in the standard intent above.
+40.3.1.3-comments         | r6ump5bhODo  | Resuscitation equipment is available in accordance with the policies of the organisation and includes a) - m) in the standard intent above.-comments
+40.3.1.4                  | GZevrjL7mAw  | Each patient has access to a nurse call system at all times.
+40.3.1.4-comments         | nnIEpgqyIPb  | Each patient has access to a nurse call system at all times.-comments
+40.3.1.5                  | uUibdWtvtNU  | Oxygen and vacuum supplies meet patient care requirements.
+40.3.1.5-comments         | FidjOg8VJmU  | Oxygen and vacuum supplies meet patient care requirements.-comments
+40.3.1.6                  | mpJ5PjzdOWN  | When patients receive oxygen from a cylinder, the cylinder pressures are monitored according to organisation policy.
+40.3.1.6-comments         | TgqXBFa0YHH  | When patients receive oxygen from a cylinder, the cylinder pressures are monitored according to organisation policy.-comments
+40.3.1.7                  | FE3KChomGqU  | Electricity and water is available in accordance with the policies and arrangements of the organisation.
+40.3.1.7-comments         | YW4QtsJTNis  | Electricity and water is available in accordance with the policies and arrangements of the organisation.-comments
+40.3.2                    | lngYVX3pzbq  | The care provided to each patient is planned and written in the patient's record.
+40.3.2-comments           | oma11GYnxP5  | The care provided to each patient is planned and written in the patient's record.-comments
+40.3.2.1                  | a4ESKERr1E5  | The care for each patient is planned, provided and noted in the patient's record.
+40.3.2.1-comments         | HpbhGj1na9i  | The care for each patient is planned, provided and noted in the patient's record.-comments
+40.3.2.2                  | eAE9yYsFtnL  | The patient's response to care and therapeutic interventions is documented in the patient record.
+40.3.2.2-comments         | tkGRfkJCghr  | The patient's response to care and therapeutic interventions is documented in the patient record.-comments
+40.3.2.3                  | vA6uX2ZWORA  | Meetings to discuss patient care/treatment regimes are held by the multidisciplinary team at regular intervals as determined by organisational policy and documented in the patient's record.
+40.3.2.3-comments         | GpynCHaO4Wh  | Meetings to discuss patient care/treatment regimes are held by the multidisciplinary team at regular intervals as determined by organisational policy and documented in the patient's record.-comments
+40.3.2.4                  | HEjyCBouc5E  | All procedures and diagnostic tests ordered and performed, are documented in the patient's record.
+40.3.2.4-comments         | wMq1TXiuXdX  | All procedures and diagnostic tests ordered and performed, are documented in the patient's record.-comments
+40.3.2.5                  | pdsGactIfxX  | The results of procedures and diagnostic tests performed are available in the patient's record.
+40.3.2.5-comments         | h7OMnvDE73x  | The results of procedures and diagnostic tests performed are available in the patient's record.-comments
+40.3.2.6                  | C7LP5H14gKs  | Orders are found in a uniform location in patient records.
+40.3.2.6-comments         | BgHv3LM2Ffc  | Orders are found in a uniform location in patient records.-comments
+40.3.2.7                  | Hz9JzvygfdK  | Only those permitted to write orders do so.
+40.3.2.7-comments         | HacYvTTLidj  | Only those permitted to write orders do so.-comments
+40.3.2.8                  | sImIbAS7iB8  | Reassessments are performed at appropriate, regular intervals and following a change in the patient's condition, and documented in the patient's record.
+40.3.2.8-comments         | OAOcmM8iQou  | Reassessments are performed at appropriate, regular intervals and following a change in the patient's condition, and documented in the patient's record.-comments
+40.3.2.9                  | YtN8xMCxjNG  | Care plans are revised when necessary in response to the findings of reassessments.
+40.3.2.9-comments         | ynPfhPXzzYo  | Care plans are revised when necessary in response to the findings of reassessments.-comments
+40.3.3                    | M3YI27ytitx  | Compassionate care is provided to the dying and to those in pain.
+40.3.3-comments           | WHiXcSMrsZc  | Compassionate care is provided to the dying and to those in pain.-comments
+40.3.3.1                  | WPVpXtSeG1g  | The assessment process makes provision for patients in pain to be identified.
+40.3.3.1-comments         | S0JU0k96USb  | The assessment process makes provision for patients in pain to be identified.-comments
+40.3.3.2                  | OtRIkcsfk8m  | Patients in pain receive care according to pain management guidelines.
+40.3.3.2-comments         | kXsOsyUbOsR  | Patients in pain receive care according to pain management guidelines.-comments
+40.3.3.3                  | zwbAP8c45Oz  | There is evidence that the effectiveness of pain and symptom management is monitored.
+40.3.3.3-comments         | bBYQwgkZmTD  | There is evidence that the effectiveness of pain and symptom management is monitored.-comments
+40.3.3.4                  | XiJ7NmPxRJU  | Patients and families are educated about pain and pain management.
+40.3.3.4-comments         | TAOwq8hXxcq  | Patients and families are educated about pain and pain management.-comments
+40.3.3.5                  | VwiMm9JmFUl  | The organisation has processes to educate health professionals in assessing and managing pain.
+40.3.3.5-comments         | EBu8D1zFOFx  | The organisation has processes to educate health professionals in assessing and managing pain.-comments
+40.3.3.6                  | gEmxe4LbEND  | Personnel provide respectful and compassionate care to dying patients.
+40.3.3.6-comments         | gC4zAljRTlp  | Personnel provide respectful and compassionate care to dying patients.-comments
+40.3.4                    | VV1wwnVZyew  | Policies and procedures guide the care of high-risk patients and the provision of high-risk services.
+40.3.4-comments           | m6ktjr4fRI2  | Policies and procedures guide the care of high-risk patients and the provision of high-risk services.-comments
+40.3.4.1                  | xgVDIsdckF7  | Documented policies, clinical guidelines or standard operating procedures for identified high risk patients and procedures, which include items (a)-(h) in the standard intent above as a minimum, are available and re
+40.3.4.1-comments         | QvZCJBVSCDC  | Documented policies, clinical guidelines or standard operating procedures for identified high risk patients and procedures, which include items (a)-(h) in the standard intent above as a minimum, are available and re
+40.3.4.2                  | GfKNXeiDDj8  | In-service training is provided to personnel to ensure they understand the intent and content of the policies and procedures.
+40.3.4.2-comments         | HxaNSZX1pVC  | In-service training is provided to personnel to ensure they understand the intent and content of the policies and procedures.-comments
+40.3.4.3                  | L3BhFB16hQ6  | Patients receive care consistent with the policies and procedures.

@@ -194,8 +194,8 @@ def parse_text(file_paths):
             if se_match:
                 se_id = int(se_match.group(1))
                 se_name = se_match.group(2).strip()
-                # Hospitals have SE 1..38
-                if 1 <= se_id <= 38 and len(se_name) > 5:
+                # Hospitals have SE 1..45
+                if 1 <= se_id <= 45 and len(se_name) > 5:
                     if se_id not in se_ids_seen:
                         current_se = {
                             "se_id": se_id,

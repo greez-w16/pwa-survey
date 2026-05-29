@@ -1,0 +1,3899 @@
+--- Page 1 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+NAME OF  HEALTHCARE FACILITY:_____________________________________________________
+ 
+TYPE OF SURVEY:___________________________________________________________________
+ 
+DATE OF SURVEY:___________________________________________________________________
+ 
+DOCUMENT COMPLETED BY (Title and Name) 
+___________________________________________________________________________________
+ 
+INTERVIEWEE (Name and Designation) 
+___________________________________________________________________________________
+ 
+This Standard Assessment Manual (SAM) provides a means to record the level of compliance achieved for each
+criterion (NA NC PC C), comments explaining why compliance has not been achieved and actions required to
+achieve compliance. Each criterion has a guideline statement which provides clarification of the requirements for
+compliance.
+ 
+ 
+In summary, criteria are scored as follows:
+ 
+1.Compliant (C) means the condition required is substantially met.Evidence of compliance should be present in
+a tangible and/or observable form, e.g. documentation, physical items, etc.
+ 
+2.Partially Compliant (PC) means the condition required is not totally met, but there is progress towards
+compliance.
+ 
+3.Non-compliant (NC) means there is no observable progress or minimal progress towards complying with the
+requirement specified in the criterion.
+ 
+4.Not applicable (NA) means the criterion will not be scored because the service is either not provided, or not
+required at the particular level of care the criterion is designed to measure.
+ 
+ 
+Please circle the compliance rating assigned to each criterion.  Explanatory comments should be provided for
+each criterion which does not receive a Compliant (C) score.
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Documents Checked
+ Surveyor: ..............................
+ Surveyor: ..............................
+Page 1 of
+ 54 Page 1 of
+ 54 Page 1 of
+ 54 Page 1 of
+ 54 
+--- Page 2 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Page 2 of
+ 54 Page 2 of
+ 54 Page 2 of
+ 54 Page 2 of
+ 54 
+--- Page 3 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+Overview of Psychiatric Forensic Service 
+ Patients with mental health disorders or neuro-development disorders who are liable to be detained
+under country specific legislation and whose risk of harm to others and risk of escape from the
+organisation cannot be managed safely within other mental health settings, require care and treatment
+within a secure mental health service.    
+     
+These patients will typically have complex mental disorders, with co-morbid difficulties of substance
+abuse and/or personality disorder, which are linked to offending or seriously irresponsible behaviour.
+Consequently, most individuals are involved with the criminal justice system, the courts and prison
+system and many have legally enforced restrictions imposed.    
+     
+In order to manage the risks involved, the therapeutic environment is carefully managed through the
+delivery of security measures to ensure effective treatment and care whilst providing for the safety of
+the individual and others including other patients, personnel and the general public.    
+     
+The decision to admit to a secure service will be based on a comprehensive risk assessment and
+detailed consideration of how the risks identified can be safely managed whilst in the organisation.
+Many, but not all of those admitted to secure services, will have been in contact with the criminal
+justice system and will have either been charged with or convicted of a violent criminal offence.
+Forensic Mental Health services play a key role in assessing an individual's ability to participate in
+court proceedings and in providing advice to courts regarding disposal following sentencing.    
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Page 3 of
+ 54 Page 3 of
+ 54 Page 3 of
+ 54 Page 3 of
+ 54 
+--- Page 4 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+Standards
+ 
+ 
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.1 Coordination of patient care
+42.1.1 Standard
+During all phases of care, there are qualified individuals responsible for the patient's
+care.
+Intent of 42.1.1
+ The individuals who bear overall responsibility for the patient's care or a particular phase of
+care are identified in the patient's record or in a manner that is made known to the
+personnel.
+42.1.1 Criteria
+42.1.1.1
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+An appropriately qualified individual
+has clearly defined responsibilities
+and accountability for all aspects of
+the service.
+Comment:
+Guideline statement: The unit manager’s job description and qualifications will be reviewed during the personnel
+record audit.
+42.1.1.2
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+The individuals responsible for the
+patient’s care are designated.
+Comment:
+Guideline statement: The focus is on the core care-givers i.e. medical practitioners and nurses. Evidence is
+required in the form of personnel allocation lists, duty rosters and off-duty lists. It is important to assess the
+availability of medical practitioners, especially after-hours, including weekends and public holidays.
+42.1.1.3
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+The individuals responsible for the
+patient’s care are qualified.
+Comment:
+Guideline statement: The lists mentioned above must be examined for evidence of adequate numbers of the
+various categories of personnel in relation to the type of patients, acuity levels, bed occupancy levels etc. It is
+important that there are sufficient numbers of psychiatric qualified personnel available on each shift – at least one
+per shift.
+Proof of current registration with the relevant authority, where applicable, must be available.
+42.1.1.4
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+The individuals responsible for the
+patient’s care are identified and
+made known to the patient and other
+personnel.
+Comment:
+Guideline statement: Name badges should be worn by all personnel members at all times. The process for
+obtaining informed consent should include informing the patient of the name of the individual who will be
+performing the procedure for which consent is being obtained.
+Patient interviews will reveal whether personnel introduced themselves to patients.
+Page 4 of
+ 54 Page 4 of
+ 54 Page 4 of
+ 54 Page 4 of
+ 54 
+--- Page 5 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+ 
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.1.2 Standard
+Clinical practice guidelines are used to guide patient care and reduce unwanted
+variation.
+Intent of 42.1.2
+ Clinical practice guidelines provide a means for improving quality and assist practitioners in
+making clinical decisions. Consideration should be given to providing guidelines for high
+risk, high volume and high cost conditions as these are the areas that represent the highest
+risk to patients and the organisation. In addition, guidelines should be available for
+conditions which are rarely seen but may have severe consequences for patients if
+misdiagnosed or mismanaged.
+  
+Guidelines are found in the literature under many names including practice parameters,
+practice guidelines, patient care protocols, standards of practice, care pathways, etc.
+Regardless of the source, the scientific basis of guidelines should be reviewed and
+approved by the clinical leaders and clinical practitioners before implementation. This will
+ensure that they meet the criteria established by the leaders and are adapted to the
+community, patient needs and organisation resources. Once adopted, guidelines should be
+reviewed on a regular basis to ensure their continued relevance.
+42.1.2 Criteria
+42.1.2.1
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Evidence-based clinical practice
+guidelines relevant to the patients
+and services of the organisation are
+available to guide patient care
+processes.
+Comment:
+Guideline statement: Sometimes such evidence is available for nursing practices only, in which case this will be
+scored PC.
+In the absence of guidelines this criterion will be scored NC.
+42.1.2.2
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Organisational and clinical leaders
+set criteria to select clinical practice
+guidelines.
+Comment:
+Guideline statement: Every effort should be made to identify and adopt guidelines that have been rigorously and
+scientifically developed, internationally accepted and adapted for local use.
+42.1.2.3
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Implemented guidelines define and
+establish admission criteria for the
+forensic service.
+Comment:
+Guideline statement: Criteria must be defined in reference to legislation controlling admission to the forensic unit.
+Page 5 of
+ 54 Page 5 of
+ 54 Page 5 of
+ 54 Page 5 of
+ 54 
+--- Page 6 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.1.2.4
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+The implementation of guidelines is
+monitored as part of a structured
+clinical audit.
+Comment:
+Guideline statement: Clinical audits cannot be done on ALL guidelines, but evidence must be available that the
+management of high cost, high risk, high volume and problem-prone conditions are considered for auditing. If
+guidelines are available but structured clinical audits are not done, this criterion is scored NC.
+Sometimes such evidence exists for nursing practices only, in which case this will be scored PC.
+42.1.2.5
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+Guidelines are reviewed on a
+regular basis and updated when
+necessary.
+Comment:
+Guideline statement: Organisational policy should define the frequency with which guidelines are to be reviewed
+to ensure they reflect current practice. This should include updating of guidelines following major changes in best
+practice advice as well as routine review.
+42.1.3 Standard
+The delivery of services is integrated and coordinated amongst care providers.
+Intent of 42.1.3
+ The coordination of patient care depends on the exchange of information between the
+multidisciplinary team. This can be through verbal, written or electronic means according to
+appropriate policies determined by the organisation. Clinical leaders should use techniques
+to better integrate and coordinate care for their patients (for example, team-delivered care,
+multi-departmental patient care rounds, combined care planning forums, integrated patient
+records, case managers). The process for working together will be simple and informal
+when the patient's needs are not complex.
+The patient, family and others are included in the decision process when appropriate.
+The patient's record contains a history of all care provided by the multidisciplinary team and
+is made available to all relevant caregivers who are authorised to have access to its content.
+42.1.3 Criteria
+42.1.3.1
+ROOT
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Care planning is integrated and
+coordinated among all care
+providers.
+Comment:
+Guideline statement: Evidence of team-delivered care, multi-departmental patient care rounds, combined care
+planning
+forums, integrated patient records, case managers, etc. will be required.
+42.1.3.2
+ROOT
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The patients' clinical records are
+completed according to organisation
+policy.
+Comment:
+Page 6 of
+ 54 Page 6 of
+ 54 Page 6 of
+ 54 Page 6 of
+ 54 
+--- Page 7 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Guideline statement: This refers to the relevant forms/documents that should be present in the patient’s record,
+as well as the completeness of entries made in the record. For this purpose, the results of patient record audits
+should be taken into account. Therefore, the score of this criterion needs to reflect the aggregated average score
+of all relevant criteria in this document. If the doctors’ (or other private health care practitioners’) clinical notes are
+not available in the patient records, this criterion is scored PC.
+42.1.3.3
+ROOT
+CRITICAL
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+All legal documentation is completed
+in compliance with legislation and
+organisational policy.
+Comment:
+Guideline statement: This refers to the relevant forms/documents that are legally required from admission to
+discharge of a patient in the forensic unit and includes the keeping of required records and the submission of
+reports.
+42.1.3.4
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The patient’s records are up to date
+to ensure the transfer of the latest
+information between care providers.
+Comment:
+Guideline statement: Clinical professionals (medical practitioners, nurses, therapeutic support services, social
+workers, etc.) form part of the multidisciplinary/interdisciplinary team and should all contribute to the patient
+record. Records of multidisciplinary/interdisciplinary team meetings should be documented as evidence of
+integrated care. All patient care information will be obtained from notes made by each member of the above
+team. The clinical involvement of medical practitioners must be measured in all relevant sections of the service.
+The notes in the patient record will indicate whether the patient has been assessed (initial, repeat, follow-up) by
+the relevant care providers at intervals appropriate to the patient’s condition and whether these assessments
+have been recorded satisfactorily. Whether the records are kept at the bedside or some other location, they must
+be available to all care providers to enable them to make the necessary notes and/or check information.
+Compliance will be verified during the patient record audit. If the notes of doctors and other health care
+professionals are not available because they are kept separately in another location, this criterion will be scored
+PC.
+42.1.3.5
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Information exchanged includes the
+patient’s health status.
+Comment:
+Guideline statement: This includes both the patient’s general health status and mental health status.
+Compliance will be verified during the patient record audit.
+42.1.3.6
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Information exchanged includes a
+summary of the care provided.
+Comment:
+Guideline statement: If the doctors’ (and other health care practitioners’) notes are not available in the patient
+record, this criterion is scored PC.
+Compliance will be verified during the patient record audit.
+Page 7 of
+ 54 Page 7 of
+ 54 Page 7 of
+ 54 Page 7 of
+ 54 
+--- Page 8 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.1.3.7
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Information exchanged includes the
+patient’s progress.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.1.3.8
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+The author can be identified for
+each patient record entry.
+Comment:
+Guideline statement: In order to ensure that appropriately qualified individuals provide and record their activities
+related to patient care, names, signatures and designations must be available and the authors must be
+identifiable.
+Methods of verifying signatures and designations could include:
+•	Names and designations printed below signatures
+•	Stamps indicating names and designations
+•	Specimen signature lists in the patient records or in the relevant department
+The specimen signature lists must be up to date and include all relevant signatures and initials. Specimen
+signatures and initials must match the usual signatures and initials used in patient records. If signature lists are
+used, these should be archived for future reference.
+Compliance will be verified during the patient record audit.
+If the signatures and designations cannot be matched to any of the systems mentioned above, this criterion will
+be marked PC or NC based on audit results.
+42.1.3.9
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The date and time of each patient
+record entry can be identified.
+Comment:
+Guideline statement: Records must follow a chronological order to allow for a logical flow of information.
+Compliance will be verified during the patient record audit.
+Page 8 of
+ 54 Page 8 of
+ 54 Page 8 of
+ 54 Page 8 of
+ 54 
+--- Page 9 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.2 Assessment of patients
+42.2.1 Standard
+All patients cared for by the organisation have their healthcare needs identified
+through an established assessment process within appropriate time frames.
+Intent of 42.2.1
+ When a patient enters a ward or department, the specific information required and the
+procedures for obtaining and documenting it depend on the patient's needs and on the
+setting in which care is being provided.
+  
+The organisation defines, in writing, the scope and content of assessments to be performed
+by each clinical discipline within its scope of practice and applicable laws and regulations.
+  
+These findings are used throughout the care process to evaluate patient progress and
+understand the need for reassessment. It is essential that assessments are documented
+well and can be easily retrieved from the patient's record.
+  
+The healthcare organisation determines the time frame for completing assessments. This
+may vary in the different settings within the organisation.
+42.2.1 Criteria
+42.2.1.1
+ROOT
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Written policies and procedures for
+assessing patients and their families
+on admission and during ongoing
+care are implemented.
+Comment:
+Guideline statement: A policy must be available which defines the scope of practice for each discipline, together
+with specific information required, procedures to be carried out and all documentation to be completed during
+the assessment of patients and their families. The provision of specifically designed assessment forms for each
+relevant discipline is considered as evidence of the implementation of such a policy. Where the required
+information, according to the patient’s presenting complaints/condition is not documented, the score will be
+adjusted accordingly.
+Compliance will be verified during the patient record audit.
+42.2.1.2
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+Only those individuals permitted by
+applicable laws, regulations and
+professional registration perform the
+assessments.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit, which will focus on the legibility
+of signatures and the identification of designations/qualifications.
+The absence of notes made by the doctor in the patient record, or other relevant clinical personnel other than
+nursing personnel will affect the outcome of the audit process.
+42.2.1.3
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The scope and content of
+assessment by each discipline is
+defined.
+Comment:
+Guideline statement: It is accepted that the scope and content of assessment for each discipline is defined if the
+organisation makes use of standardised formats of clinical assessment forms for specific use by different
+disciplines. The absence of medical notes or other relevant clinical personnel other than nursing personnel in the
+patient record will affect the outcome of the audit process.
+Compliance will be verified during the patient record audit.
+Page 9 of
+ 54 Page 9 of
+ 54 Page 9 of
+ 54 Page 9 of
+ 54 
+--- Page 10 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.2.1.4
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Assessments are performed within
+appropriate time frames and are
+comprehensively documented in the
+patient's records according to
+organisation policy.
+Comment:
+Guideline statement: Time frames for the assessment of patients should be established for each discipline, for
+example, there should be an indication of which cases are urgent/or not priority cases. It is important to note that
+this criterion does not refer to the length of time that it takes to perform the assessment, but the time within which
+the initial assessment should be commenced and/or completed. These time frames should be stated in the policy
+framework.
+Compliance will be verified during the patient record audit.
+42.2.1.5
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The date and time of assessment
+can be identified.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+Page 10 of
+ 54 Page 10 of
+ 54 Page 10 of
+ 54 Page 10 of
+ 54 
+--- Page 11 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.2.2 Standard
+Each patient has an initial assessment which complies with current policies,
+procedures and guidelines.
+Intent of 42.2.2
+ The initial assessment of a patient is critical for the identification of the needs of the patient
+and initiation of the care process. Patients' social, cultural and family status are important
+factors that can influence their response to illness and care. Families can be of considerable
+assistance in these areas of assessment and in understanding the patient's wishes and
+preferences. Financial factors should be assessed as part of the social assessment,
+particularly when the patient and his/her family will be responsible for the cost of all or a
+portion of the care.
+A functional and nutritional assessment allows for the patient to be referred for specialist
+care if necessary.
+  
+Certain patients may require a modified assessment for example, the frail or elderly, those
+terminally ill or in pain, patients suspected of drug and/or alcohol dependence and victims of
+abuse and neglect. When appropriate, the assessment process should be modified to
+respect local cultural practices.
+  
+The outcome of the patient's initial assessment should result in an understanding of the
+patient's medical and nursing needs so that care and treatment can begin.
+  
+Planning for discharge should be commenced during this initial assessment process.
+  
+When the medical assessment was conducted by a different healthcare organisation, a
+legible copy of the findings should be filed in the patient's record. Any significant changes in
+the patient's condition since this assessment should be recorded.
+42.2.2 Criteria
+42.2.2.1
+ROOT
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Each patient admitted has an initial
+assessment which meets
+organisation policy.
+Comment:
+Guideline statement: Documented evidence in the form of a detailed policy and procedure or guideline is
+provided. To ensure coordination of patient care, all members of the team should be included in the formulation
+of this policy framework, especially doctors and nurses.
+Compliance will be verified during the patient record audit.
+42.2.2.2
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The initial assessment includes a
+health history.
+Comment:
+Guideline statement: The health history must include any history of drug and alcohol use and any history of
+anoxic episodes and/or head injury.
+Compliance is measured in the relevant areas in the patient’s records.
+This criterion will be scored PC if medical practitioners’ notes or notes by relevant clinical personnel, other than
+nurses, are not available.
+Compliance will be verified during the patient record audit.
+Page 11 of
+ 54 Page 11 of
+ 54 Page 11 of
+ 54 Page 11 of
+ 54 
+--- Page 12 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.2.2.3
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The initial assessment includes a
+physical examination.
+Comment:
+Guideline statement: If the doctors’ notes are not available this criterion is scored NC.
+Compliance will be verified during the patient record audit.
+42.2.2.4
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The initial assessment includes a
+functional and nutritional
+examination, where applicable.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.2.2.5
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The initial assessment includes a
+social and economic assessment,
+where applicable.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.2.2.6
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The initial assessment includes a
+psychological assessment, where
+applicable.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.2.2.7
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The initial assessment includes a
+cultural assessment, where
+applicable.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.2.2.8
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The initial assessment results in a
+diagnosis and the formulation of an
+individualised plan of care for the
+patient.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.2.2.9
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The organisation identifies patients
+in pain during the initial assessment
+process.
+Comment:
+Page 12 of
+ 54 Page 12 of
+ 54 Page 12 of
+ 54 Page 12 of
+ 54 
+--- Page 13 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Guideline statement: Compliance will be verified during the patient record audit.
+42.2.2.10
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The organisation identifies those
+patient populations and special
+situations for which the initial
+assessment process is modified.
+Comment:
+Guideline statement: Documented evidence in the form of a detailed policy and procedure or guideline is
+provided. To ensure coordination of patient care, all members of the team should be included in the formulation
+of this policy framework, especially doctors and nurses.
+Compliance will be verified during the patient record audit.
+42.2.2.11
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Those special patient populations
+receive individualised assessments.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.2.2.12
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The findings of assessments
+performed outside the organisation
+are verified on admission.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.2.2.13
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Any significant changes in the
+patient’s condition since the
+assessment performed outside of
+the organisation are noted in the
+patient’s record.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.2.2.14
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+A process is in place to identify
+needs for discharge planning at the
+initial assessment.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+Page 13 of
+ 54 Page 13 of
+ 54 Page 13 of
+ 54 Page 13 of
+ 54 
+--- Page 14 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.2.3 Standard
+Pre-and post-anaesthetic assessments are documented.
+Intent of 42.2.3
+ Psychiatric patients sometimes receive anaesthesia for electroconvulsive therapy.
+The preoperative anaesthesia assessment determines if the patient is a suitable candidate
+for the planned anaesthetic. The clinical assessment and results of investigations must be
+available to the doctor performing the assessment.
+  
+A patient's post-procedural care in recovery and at ward level is related to the procedure.
+42.2.3 Criteria
+42.2.3.1
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The patient's pre-anaesthetic
+medical assessment to determine
+fitness for anaesthesia is
+documented.
+Comment:
+Guideline statement: Organisational policy must define who may perform this assessment and what the pre-
+anaesthetic assessment should include. The results of this assessment must be recorded by the individual who
+performs the assessment. Because the criterion refers to a medical assessment, it is scored NC if the patient
+record does not reflect notes by the person responsible for administering the anaesthetic. If only the nurses’
+assessment notes are available in the patient record, this criterion will be scored NC.
+Compliance will be verified during patient record audit.
+42.2.3.2
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The initial medical assessment of
+patients is documented before
+anaesthesia.
+Comment:
+Guideline statement: Organisational policy must define who may perform this assessment and what the medical
+assessment should include. The results of this assessment must be recorded by the individual who performs the
+assessment. Because the criterion refers to a medical assessment, it is scored NC if the patient record does not
+reflect notes by a medical practitioner. If only the nurses’ assessment notes are available in the patient record,
+this criterion will be scored NC.
+Compliance will be verified during patient record audit.
+42.2.3.3
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients have the results of
+diagnostic tests recorded before
+anaesthesia.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit.
+42.2.3.4
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+The name of the medical practitioner
+responsible for the procedure is
+documented.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit.
+Page 14 of
+ 54 Page 14 of
+ 54 Page 14 of
+ 54 Page 14 of
+ 54 
+--- Page 15 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+ 
+ 
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.2.3.5
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The patient’s physiological status is
+monitored during the post-
+procedural period.
+Comment:
+Guideline statement: This includes monitoring in the recovery room and in the ward following transfer.
+Compliance will be verified during patient record audit.
+42.2.4 Standard
+Healthcare professionals responsible for patient care collaborate to analyse and
+integrate assessment information.
+Intent of 42.2.4
+ Patients benefit most when the personnel responsible for their care work together to
+analyse the assessment findings and to combine this information into a comprehensive
+picture of his or her condition. From this collaboration, the patient's needs are identified, the
+order of their importance is established, and care decisions are made.
+42.2.4 Criteria
+42.2.4.1
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Assessment findings are
+documented in the patient’s record
+and are readily available to those
+responsible for the patient’s care.
+Comment:
+Guideline statement: There must be evidence that all clinical professionals dealing with the patient have
+contributed to the patient’s record. If the doctors' (or other private health care practitioners') clinical notes are not
+available in the patient records, this criterion is scored PC.
+Compliance will be verified during the patient record audit.
+42.2.4.2
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patient assessment data and
+information are analysed and
+integrated by those responsible for
+the patient’s care.
+Comment:
+Guideline statement: Those involved in the patient’s care form the multidisciplinary team. The constitution of the
+team will vary for each patient and may include representatives from the medical, nursing, social work,
+psychology, occupational therapy, physiotherapy and other disciplines, departments or services. Information from
+all disciplines involved in the patient’s care should be considered when developing the treatment plan.
+Compliance will be verified during the patient record audit.
+42.2.4.3
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patient needs are prioritised based
+on assessment results.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit.
+Page 15 of
+ 54 Page 15 of
+ 54 Page 15 of
+ 54 Page 15 of
+ 54 
+--- Page 16 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.2.4.4
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The patient and/or his or her family
+participate in the decisions
+regarding the priority needs to be
+met.
+Comment:
+Guideline statement: Compliance will be verified during patient interviews and/or the patient record audits.
+Page 16 of
+ 54 Page 16 of
+ 54 Page 16 of
+ 54 Page 16 of
+ 54 
+--- Page 17 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3 Patient care
+42.3.1 Standard
+Adequate resources are available for the provision of safe care to patients in the
+service.
+Intent of 42.3.1
+ In order to provide safe patient care, each unit requires adequate resources. The physical
+facilities required include adequate office accommodation for personnel, sluice rooms which
+are hygienically clean, treatment and dressing rooms, and adequate storage space for clean
+linen.
+  
+Counseling and treatment rooms, group rooms, a dining room, an out-door area, structured
+activity programmes and condition-appropriate games should also be available.
+  
+Cleaning equipment is safely stored in a room or cupboard expressly for this purpose. No
+cleaning equipment should be stored in areas where clean linen, medical supplies or food
+are stored. There are adequate toilet and bathing facilities for the number of patients in the
+ward as determined by country specific legislation.
+  
+There is adequate lighting and ventilation. Nurse call systems are available at bedsides and
+in bathrooms and toilets and is connected to the emergency power supply.
+  
+There is at least one oxygen and one vacuum point for every 2 beds. Where there is no
+piped oxygen and vacuum supply, there are mobile oxygen and vacuum pumps. All
+necessary fittings for oxygen and suction are in place and working. Each bed is serviced by
+at least one electrical socket outlet. Each ward is provided with a socket outlet which is
+connected to the emergency power supply.
+  
+Every patient care area must have access to resuscitation equipment within one minute of
+any patient collapsing that includes as a minimum:
+  
+a)      Defibrillator or automated external defibrillator (AED) with adult and paediatric (where
+applicable) paddles/pads available within three minutes of any patient collapsing
+b)      ECG monitor
+c)      CPR board
+d)      Suction apparatus, hard and soft suction catheters and suction tubing
+e)      A bag-mask manual ventilator (Ambubag) or equivalent
+f)       A range of endotracheal tubes and two laryngoscopes, with a range of straight and
+curved blades, spare batteries and spare globes where applicable
+g)      An introducer/stylet for endotracheal intubation
+h)      A syringe to inflate the endotracheal tube cuff
+i)       A laryngeal mask airway
+j)       Oral airways
+k)      Equipment to perform an emergency cricothyroidotomy
+l)       Medication for cardiac and respiratory arrest, coma, fits and states of shock (including
+paediatric doses where applicable)
+m)    Appropriate consumables for intravenous therapy and medication administration and
+volume expanders (including paediatric sizes where applicable)
+42.3.1 Criteria
+42.3.1.1
+ROOT
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patient and personnel
+accommodation in the service is
+adequate to meet patient care
+needs.
+Comment:
+Page 17 of
+ 54 Page 17 of
+ 54 Page 17 of
+ 54 Page 17 of
+ 54 
+--- Page 18 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+  
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Guideline statement: All patient and personnel accommodation in the service must meet the safety and security
+criteria of the service.
+Counselling and treatment rooms, group rooms, a dining room, an out-door area, structured activity and
+condition-appropriate games must be available
+There should be adequate office space for personnel; clean, hygienic sluice rooms, treatment and dressing
+rooms; adequate, tidy linen and equipment storage facilities; suitable lighting and ventilation; adequate, hygienic
+bathroom and toilet facilities for the number of patients, as well as the requirements mentioned below.
+42.3.1.2
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+There is evidence that equipment is
+maintained in accordance with the
+policies of the organisation.
+Comment:
+Guideline statement: This refers to medical equipment and not to furniture such as beds.
+42.3.1.3
+CRITICAL
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Resuscitation equipment is available
+in accordance with the policies of
+the organisation and includes a) –
+m) in the standard intent above.
+Comment:
+Guideline statement: Resuscitation equipment and documented evidence of the checking thereof in the unit,
+according to the organisation’s resuscitation policy must be available. Checking must include the identification of
+expiry dates on consumables such as airways and endotracheal tubes. Documented evidence of this checking is
+required. A resuscitation trolley must be available at the point of need within one minute. In addition, there must
+be access to a defibrillator or automated external defibrillator (AED) within three minutes of any patient
+collapsing.
+The 40/80 rule for compliance will apply.
+42.3.1.4
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Each patient has access to a nurse
+call system at all times.
+Comment:
+Guideline statement: A functional nurse call system must be available at each patient’s bed and in the ablution
+facilities. Random tests can be conducted to assess function and response. Assessment will be made on the
+response from patient interviews and patient complaints.
+This criterion will be scored accordingly, for example, NC if there is no functional call system and PC if nurses do
+not respond.
+42.3.1.5
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Oxygen and vacuum supplies meet
+patient care requirements.
+Comment:
+Guideline statement: There should be either piped oxygen/vacuum or mobile oxygen cylinders and vacuum
+pumps in working order to meet the patients’ needs. This includes the availability of a sufficient number of
+functional flow-meters.
+Any evidence of infection control deficiencies for example, stagnant water in humidifiers/vacuum bottles will be
+linked to Prevention and Control of Infections.
+Page 18 of
+ 54 Page 18 of
+ 54 Page 18 of
+ 54 Page 18 of
+ 54 
+--- Page 19 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3.1.6
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+When patients receive oxygen from
+a cylinder, the cylinder pressures
+are monitored according to
+organisation policy.
+Comment:
+Guideline statement: This applies to situations when patients are given oxygen by cylinder, for example, where
+no piped oxygen is available or in the event that the piped oxygen system fails. The cylinder pressure indicates
+the remaining contents of the cylinder. Monitoring the contents will alert personnel to the need for the cylinder to
+be replaced and prevent the interruption of the patient’s oxygen supply.
+42.3.1.7
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Electricity and water is available in
+accordance with the policies and
+arrangements of the organisation.
+Comment:
+Guideline statement: Ward/unit personnel should have knowledge of routine arrangements and the contingency
+plans.
+42.3.2 Standard
+The care provided to each patient is planned and written in the patient’s record.
+Intent of 42.3.2
+ A single, integrated plan is preferable to the entry of a separate care plan recorded by each
+healthcare professional. The care plan should include the care to be delivered and the
+intended goals of care.
+  
+Collaborative care and treatment team meetings or similar patient discussions are recorded.
+Diagnostic and other procedures must be ordered by individuals qualified to do so. These
+orders must be easily accessible if they are to be acted on in a timely manner. Locating
+orders on a common sheet or in a uniform location in patient records facilitates the correct
+understanding and carrying out of orders. The reason for requesting diagnostic imaging or
+laboratory tests should be recorded if this reason will be required for interpretation of the
+results.
+An organisation decides:
+•       Which orders must be written rather than verbal
+•       Who is permitted to write orders
+•       Where orders are to be located in the patient record
+The method used must respect the confidentiality of patient care information for example,
+order books must not be kept in an area where they can be seen by other patients or visitors
+and verbal orders, including those given over the telephone, should be taken in an area
+where they cannot be overheard.
+42.3.2 Criteria
+42.3.2.1
+ROOT
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The care for each patient is
+planned, provided and noted in the
+patient’s record.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+Page 19 of
+ 54 Page 19 of
+ 54 Page 19 of
+ 54 Page 19 of
+ 54 
+--- Page 20 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3.2.2
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The patient's response to care and
+therapeutic interventions is
+documented in the patient record.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.3.2.3
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Meetings to discuss patient
+care/treatment regimes are held by
+the multidisciplinary team at regular
+intervals as determined by
+organisational policy and
+documented in the patient’s record.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.3.2.4
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+All procedures and diagnostic tests
+ordered and performed, are
+documented in the patient’s record.
+Comment:
+Guideline statement: This documented evidence may include nurses’ and doctors’ notes as well as printed
+reports, which are filed in the patient record.
+Compliance will be verified during the patient record audit.
+42.3.2.5
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The results of procedures and
+diagnostic tests performed are
+available in the patient's record.
+Comment:
+Guideline statement: This criterion will be scored PC if the results are not initialled by the doctor, the treatment
+plan does not indicate action taken, or the nursing notes do not indicate that the doctor was informed.
+Compliance will be verified during the patient record audit.
+42.3.2.6
+Severity:
+Moderate
+Category:
+Patient Care
+NA  NC  PC  C
+Orders are found in a uniform
+location in patient records.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.3.2.7
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Only those permitted to write orders
+do so.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+Page 20 of
+ 54 Page 20 of
+ 54 Page 20 of
+ 54 Page 20 of
+ 54 
+--- Page 21 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+ 
+ 
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3.2.8
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Reassessments are performed at
+appropriate, regular intervals and
+following a change in the patient's
+condition, and documented in the
+patient's record.
+Comment:
+Guideline statement: Patients should be reassessed according to clinical need. This may be continuous, hourly
+or daily (as a minimum), depending on the clinical condition of the patient. Any deterioration in a patient’s
+condition should result in a formal reassessment by an appropriately trained clinician – often a nurse in the first
+instance followed by a doctor if clinically indicated. The nature of these reassessments and the processes to be
+followed should be defined in organisation or departmental policy. If the doctors’ (or other private health care
+practitioners’) clinical notes are not available in the patient’s records, this criterion will be scored PC.
+Compliance will be verified during the patient record audit.
+42.3.2.9
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Care plans are revised when
+necessary in response to the
+findings of reassessments.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.3.3 Standard
+Each patient participates in a structured treatment plan.
+Intent of 42.3.3
+ Each patient has psychotherapeutic interviews with an appropriately qualified person to
+meet his/her needs.
+There is a structured therapeutic environment which allows for group therapy, occupational
+therapy, or music or art therapy as required by individual patients.
+42.3.3 Criteria
+42.3.3.1
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is evidence of regular
+psychotherapeutic interviews as
+indicated by the programme and
+individual patient’s needs.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.3.3.2
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is documented participation in
+a structured therapeutic programme
+six to seven hours per day.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+Page 21 of
+ 54 Page 21 of
+ 54 Page 21 of
+ 54 Page 21 of
+ 54 
+--- Page 22 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3.3.3
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is a range of therapeutic
+activities available, according to the
+identified needs of the patient.
+Comment:
+Guideline statement: The unit should document all therapeutic activities available to patients together with
+relevant information of how to access these activities, for example, schedules of when the activities are available,
+contact details of service providers, activities offered by organisations outside the organisation for example, local
+NGO’s or other service providers, referral documents, etc.
+42.3.3.4
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is documented participation of
+the patient with his or her family or
+significant other(s) in group therapy,
+as appropriate.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.3.3.5
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The patient has the least restrictive
+environment possible, with any
+restrictions placed upon him/her
+written into the treatment plan.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit and the survey visit to the unit.
+42.3.3.6
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Implemented policies and
+procedures guide the freedom of
+movement within the facility and
+weekend or other leave from the
+organisation.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+Page 22 of
+ 54 Page 22 of
+ 54 Page 22 of
+ 54 Page 22 of
+ 54 
+--- Page 23 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3.4 Standard
+Compassionate care is provided to the dying and to those in pain.
+Intent of 42.3.4
+ While pain may be a part of the patient experience, unrelieved pain has adverse physical
+and psychological effects. The patient's right to appropriate assessment and management of
+pain is respected and supported. The organisation has processes to:
+•     Identify patients with pain during initial assessment and reassessment
+•     Communicate with, and provide education for, patients and families about pain
+management in the context of their personal, cultural and religious beliefs
+•     Educate healthcare providers in pain assessment and management.
+  
+Dying patients have unique needs for respectful, compassionate care. Concern for the
+patient's comfort and dignity guides all aspects of care during the final stages of life. To
+accomplish this, all personnel are made aware of the unique needs of patients at the end of
+life. These needs include treatment of primary and secondary symptoms; pain management;
+response to the psychological, social, emotional, religious and cultural concerns of the
+patient and family; and involvement in care decisions.
+42.3.4 Criteria
+42.3.4.1
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The assessment process makes
+provision for patients in pain to be
+identified.
+Comment:
+Guideline statement: This requirement should be included in the assessment policy and procedure for the
+organisation and must include methods for identifying pain in non-communicating and intellectually disabled
+patients.
+Compliance will be verified during patient record audit.
+42.3.4.2
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients in pain receive care
+according to pain management
+guidelines.
+Comment:
+Guideline statement: There must be evidence that all clinical professionals dealing with the patient’s pain
+management have contributed to the patient’s record. Monitoring of the effectiveness of pain management must
+be recorded. Evidence could include the documentation of pain using an individualised assessment form and
+pain scoring charts. Pain management continues with the prescription and administration of medication for pain
+as well as the follow-up assessment after treatment. These records will also be evaluated.
+Compliance will be verified during the patient record audit.
+42.3.4.3
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is evidence that the
+effectiveness of pain and symptom
+management is monitored.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit.
+Page 23 of
+ 54 Page 23 of
+ 54 Page 23 of
+ 54 Page 23 of
+ 54 
+--- Page 24 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3.4.4
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients and families are educated
+about pain and pain management.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit and patient interviews.
+42.3.4.5
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+The organisation has processes to
+educate health professionals in
+assessing and managing pain.
+Comment:
+Guideline statement: Training must include must include the identification of pain in non-communicating and
+intellectually disabled patients.
+Documented evidence of personnel training will be required.
+42.3.4.6
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Personnel provide respectful and
+compassionate care to dying
+patients.
+Comment:
+Guideline statement: This includes the organisation respecting the need of the physically ill or dying patient to be
+transferred to another suitable facility/unit.
+Compliance will be verified during patient record audit and patient interviews.
+Page 24 of
+ 54 Page 24 of
+ 54 Page 24 of
+ 54 Page 24 of
+ 54 
+--- Page 25 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3.5 Standard
+Policies and procedures guide the care of high-risk patients and the provision of
+high-risk services.
+Intent of 42.3.5
+ Patients admitted to the forensic service of a mental health service organisation are
+considered high risk by virtue of their condition.
+  
+Policies and procedures are important for personnel to understand high-risk patients and
+services, and to respond in a thorough, competent and uniform manner. The clinical and
+managerial leaders take responsibility for identifying the patients and services considered
+high-risk, using a collaborative process to develop policies and procedures and to train
+personnel in their implementation.
+Of particular concern is that the policies or procedures identify:
+•     How planning will occur
+•     The documentation required for the care team to work effectively
+•     Special consent considerations
+•     Monitoring requirements
+•     Special qualifications or skills of personnel involved in the care process
+  
+Clinical guidelines and pathways are frequently helpful and may be incorporated in the
+process. Monitoring provides the information needed to ensure that the policies and
+procedures are adequately implemented and followed for all relevant patients and services.
+  
+High risk patients and procedures in the forensic service include (where applicable):
+a)   Care of emergency patients
+b)   The observation of patients referred by the court
+c)   Management of patients requiring restraint (including the handling, storage, use,
+administration and documentation required when a patient is restrained)
+d)   The management of patients requiring chemical restraint (including the handling, storage,
+use, administration and documentation required when a patient is chemically restrained)
+e)   Management of patients who may be a danger to themselves or others
+f)    Management of the violent patient
+g)   Management of the detoxification stage of treatment
+h)   The administration of electroconvulsive therapy
+i)    The management of patients in seclusion (including the documentation required when a
+patient is treated in seclusion)
+j)    Management of patients absconding or attempting to abscond from the forensic unit
+k)   The transfer of patients from the forensic service
+l)    The referral of patient to other health workers/organisations
+m) The granting of patients leave from the forensic service.
+42.3.5 Criteria
+42.3.5.1
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Documented protocols, clinical
+guidelines or standard operating
+procedures for identified high risk
+patients and procedures, which
+include items (a)-(m) in the standard
+intent above as a minimum, are
+available and readily accessible.
+Comment:
+Guideline statement: The clinical and managerial leaders take responsibility for identifying the patients and
+services considered high risk, using a collaborative process to develop policies and procedures and training
+personnel in their implementation.
+Implementation will be verified during the patient record audit.
+The 40/80 rule for compliance will apply.
+Page 25 of
+ 54 Page 25 of
+ 54 Page 25 of
+ 54 Page 25 of
+ 54 
+--- Page 26 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3.5.2
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+In-service training is provided to
+personnel to ensure they
+understand the intent and content of
+the policies and procedures.
+Comment:
+Guideline statement: Where policies and procedures refer to patient care, compliance will be measured against
+the relevant areas in the patients’ records during the record audit process.
+By implication, if the policies are implemented, personnel can be considered to have been trained and this
+criterion will be scored accordingly. This training could take the form of formal in-service training, introduction at
+orientation to policies, discussions at departmental meetings, case studies, etc.
+42.3.5.3
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients receive care consistent with
+the policies and procedures.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit and patient interviews.
+Page 26 of
+ 54 Page 26 of
+ 54 Page 26 of
+ 54 Page 26 of
+ 54 
+--- Page 27 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3.6 Standard
+Adequate information is provided when obtaining informed consent from patients or
+their legal representatives.
+Intent of 42.3.6
+ Patients and their families or decision-makers must receive adequate information to
+participate in care decisions by being informed as to what tests, procedures and treatments
+require consent and how they can give consent, for example verbally, by signing a consent
+form, or through some other mechanism. Patients and families understand who may, in
+addition to the patient, give consent.
+  
+Organisation policy must define the situations under which informed consent is required and
+specify the type of consent required, for example, written or verbal consent.
+  
+The leaders must agree and implement a standardised procedure for obtaining informed
+consent which meets all requirements of country-specific legislation and includes:
+a)   Discussion of the patient's diagnosis and why the procedure is advised
+b)   The identification and designation of the person who is authorised to perform the
+procedure
+c)   A thorough explanation of the proposed procedure in a clear and understandable manner
+d)   The expected benefits of the procedure
+e)   The likelihood of success of the procedure
+f)    The expected course of recovery following the procedure
+g)   The potential risks and complications of the procedure
+h)   A discussion of viable alternative options including risks and benefits
+i)    The potential risks of refusing the proposed procedure
+j)    Confirmation that the patient or their legal representative has understood the information
+provided
+k)   An opportunity for the patient or their legal representative to ask questions
+l)    Comprehensive documentation of the process followed to obtain informed consent.
+m) How to obtain consent if the patient is unable to give consent due to age, diminished
+mental capacity (for example, delirium, learning difficulties, etc.) or by virtue of their physical
+illness (for example, comatose)
+n)   Documentation of the signature of the patient or their legal representative for written
+consent
+o)   Documentation of verbal consent in the patient record
+  
+The procedure for obtaining informed consent should acknowledge and accommodate
+religious, cultural and social needs of patients and their families.
+The leaders must agree and implement a process for the documentation of verbal consent.
+Where written consent is required, it can be useful to include the steps in the process in the
+consent form with space allocated for signature of the patient and the personnel member
+providing the information to confirm that the step has been completed satisfactorily.
+  
+Personnel responsible for obtaining informed consent must receive training on the agreed
+policies and procedures relating to informed consent to ensure that they are fully aware of
+organisation requirements.
+  
+Consent should only be obtained by suitably trained professional personnel who are familiar
+with the procedure and its risks, complications and alternatives. Ideally, the person who will
+perform the procedure should be the one to obtain consent for the procedure. Where this is
+not the case, the patient should be informed of which healthcare professional will be
+performing the procedure.
+  
+Where permissible according to country-specific legislation, organisation personnel who can
+consent on behalf of patients unable to give independent consent should be identified. This
+will require a detailed policy and procedure which should reflect the requirements set out in
+the relevant national legislation. A copy of this legislation should be available to be read in
+conjunction with the policy.
+42.3.6 Criteria
+Page 27 of
+ 54 Page 27 of
+ 54 Page 27 of
+ 54 Page 27 of
+ 54 
+--- Page 28 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.3.6.1
+ROOT
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is a documented process for
+the obtaining of informed consent.
+Comment:
+Guideline statement: The documented process should outline all the steps in a) –o) in the standard intent above
+as a minimum. An assessment will be made of the provision of an organisational consent form and the
+completion of this form when indicated. This section will be scored NC if written consent is indicated but suitable
+forms are not used.
+When 1.3.6.2 is scored PC or NC because the available consent form has not been completed correctly, this
+criterion will be scored PC because the process has not been implemented.
+42.3.6.2
+CRITICAL
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Consent forms are completed
+comprehensively and available in
+the patient records.
+Comment:
+Guideline statement: This section refers to all instances where patients give informed consent. If consent was not
+required for the patient records audited, this criterion becomes NA.
+If there is a correctly completed consent form the implication is that the patient has been provided with the
+information indicated in the relevant criterion above.
+Where the form is not completed in accordance with policy, this criterion will be scored PC or NC, depending on
+the average results of the record audit (40/80 rule will apply). The relevant criteria above will receive the same
+score.
+Compliance will be verified during the patient record audit.
+42.3.6.3
+CRITICAL
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients and their families or
+decision-makers receive adequate
+information in a clear and
+understandable way to enable them
+to participate in care decisions.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit and patient interviews.
+42.3.6.4
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is a written policy guiding the
+consent for HIV testing which is
+specific to patients in mental health
+care organisations.
+Comment:
+Guideline statement: The presence of a mental health disorder does not automatically equal incapacity to
+consent to HIV testing. The policy must therefore address assessment for capacity to consent to HIV testing and
+the process to be followed if the patient is assessed as being incapable of giving informed consent.
+42.3.6.5
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is a documented process for
+obtaining informed consent for the
+transfusion of blood and blood
+products.
+Comment:
+Page 28 of
+ 54 Page 28 of
+ 54 Page 28 of
+ 54 Page 28 of
+ 54 
+--- Page 29 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Guideline statement: The documented process should outline all the steps in a) – n) in the standard intent above
+as a minimum. An assessment will be made of the provision of an organisational consent form for the transfusion
+of blood and blood products and the completion of this form when indicated. This section will be scored NC if
+written consent is indicated but suitable forms are not used.
+When 10.4.3.2 is scored PC or NC because the available consent form has not been completed correctly, this
+criterion will be scored PC because the process has not been implemented.
+42.3.6.6
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is a documented process for
+obtaining informed consent for the
+transfusion of blood and blood
+products.
+Comment:
+Guideline statement: The documented process should outline all the steps in a) – n) in the standard intent above
+as a minimum. An assessment will be made of the provision of an organisational consent form for the transfusion
+of blood and blood products and the completion of this form when indicated. This section will be scored NC if
+written consent is indicated but suitable forms are not used.
+When 10.4.3.2 is scored PC or NC because the available consent form has not been completed correctly, this
+criterion will be scored PC because the process has not been implemented.
+Page 29 of
+ 54 Page 29 of
+ 54 Page 29 of
+ 54 Page 29 of
+ 54 
+--- Page 30 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.4 Medication management
+42.4.1 Standard
+Medication is ordered according to organisational policy and stored in a secure and
+clean environment.
+Intent of 42.4.1
+ Organisational policy on the ordering and storage of medication must be followed in each
+patient care area which stores medication for administration to patients under their care.
+Each organisation must identify those individuals permitted to order medication. These
+individuals must have the knowledge and experience required by law, registration or
+regulations to be permitted to order medication. The organisation must identify any
+additional individuals permitted to order medication in emergency situations.
+  
+Medication must be stored in a clean and secure environment that complies with legislation,
+regulation and professional practice standards.
+  
+Medication must be clearly labelled, correctly stored and protected from heat, light and
+moisture where necessary. Scheduled (controlled) drugs/narcotics/barbiturates and other
+dangerous drugs must be stored according to country-specific requirements. As a minimum,
+these drugs must be stored in a locked cupboard or container of substantial construction.
+"Substantial" construction is interpreted to be a cupboard/container that is mounted to the
+wall or fixed to the floor. Most often, these are steel cabinets, but solid wooden cupboards
+are also acceptable. There must be a registry, log or other system to monitor and account
+for controlled substances, which must be completed at the same time that medication is
+received, administered or returned.
+  
+Refrigeration facilities must be provided for safe storage of certain medication. There must
+be a process to ensure that thermolabile medication has been stored and transported at the
+correct temperature throughout the life of the medication. Refrigerators must be cleaned
+regularly and defrosted when necessary. Doors, hinges and seals must all be functional.
+42.4.1 Criteria
+42.4.1.1
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Medication is ordered according to
+organisational policy.
+Comment:
+Guideline statement: The organisational policy for ordering medication should be readily available to unit
+personnel. Documentation relating to the ordering of medication will be assessed for compliance to the
+organisational policy.
+42.4.1.2
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+All storage areas for medication and
+pharmaceutical supplies comply with
+current pharmaceutical acts and
+regulations and manufacturer
+guidelines (for example, security,
+temperature, light and humidity
+control).
+Comment:
+Guideline statement: Note must be made of provision for medication that should not be exposed to direct
+sunlight. Where the ambient temperature in the cupboard/room cannot be maintained at 20-25 degrees Celsius
+there should be evidence that the environmental temperature is monitored and complies with the manufacturer’s
+requirements for medication storage.
+Page 30 of
+ 54 Page 30 of
+ 54 Page 30 of
+ 54 Page 30 of
+ 54 
+--- Page 31 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.4.1.3
+Severity:
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+Medication is stored in a locked
+storage device or cabinet that is
+accessible only to authorised
+personnel.
+Comment:
+Guideline statement: All medication storage areas (trolleys, cupboards, rooms, refrigerators etc.) will be
+examined for compliance. An unlocked refrigerator will only be accepted if it is in a locked room with access
+limited to relevant personnel only. An unlocked refrigerator in an unlocked room will be scored as NC.
+42.4.1.4
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+Medication identified for special
+control by legislation or
+organisational policy is stored in a
+cabinet of substantial construction,
+for which only authorised personnel
+have the keys.
+Comment:
+Guideline statement: Country-specific laws and regulations or organisational policy will determine the nature of
+such medication.
+42.4.1.5
+CRITICAL
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+Medication identified for special
+control by legislation or organisation
+policy is accurately accounted for.
+Comment:
+Guideline statement: Compliance will be measured against the local medication control regulations. Control
+measures generally include the keeping of registers for these items.
+42.4.1.6
+CRITICAL
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+Medication is securely and legibly
+labelled with relevant information as
+required by legislation and
+organisational policy.
+Comment:
+Guideline statement: Country-specific regulations apply, but must include at least the following:
+•	Name of ward and/or name of patient and patient record number (if applicable)
+•	Proprietary name/approved name or name of each active ingredient
+•	Direction with regard to the manner in which medication must be used
+•	Number of dose units in the container
+•	Date of dispensing
+•	Expiry date and batch number
+•	Additional labels with warnings and storage instructions in accordance with organisation policy
+42.4.1.7
+Severity:
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+Medication is stored in a clean
+environment.
+Comment:
+Guideline statement: This applies to all medication storage areas in the organisation.
+Page 31 of
+ 54 Page 31 of
+ 54 Page 31 of
+ 54 Page 31 of
+ 54 
+--- Page 32 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.4.1.8
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+A dedicated refrigerator is available
+for medication requiring storage at
+low temperatures.
+Comment:
+Guideline statement: There should be a refrigerator designated for the storage of medication only.
+42.4.1.9
+CRITICAL
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+The temperature of the refrigerator
+is monitored and recorded according
+to organisational policy.
+Comment:
+Guideline statement: Documented evidence in the form of daily temperature recording and monitoring of the
+refrigerator/s must be available. The temperature must be maintained within a safe range according to
+manufacturer’s specifications. This is usually 2-8 degrees Celsius.
+42.4.1.10
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+Appropriate action is taken and
+recorded when the temperature of
+the refrigerator is outside the
+recommended range.
+Comment:
+Guideline statement: The actions taken must be documented and kept on file for reference purposes. Monitoring
+logs should demonstrate more frequent temperature checks until it is confirmed that the action taken has been
+successful in restoring maintenance of the required refrigerator temperature range.
+42.4.1.11
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+Expiry dates (including those of
+emergency medication) are checked
+regularly at defined intervals
+according to organisational policy
+and medication is replaced before
+the expiry date.
+Comment:
+Guideline statement: Compliance will be measured against relevant laws and organisation policies.
+Page 32 of
+ 54 Page 32 of
+ 54 Page 32 of
+ 54 Page 32 of
+ 54 
+--- Page 33 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.4.2 Standard
+Medication use throughout the organisation complies with applicable laws and
+regulations.
+Intent of 42.4.2
+ Medication management is not only the responsibility of the pharmaceutical service but also
+of managers and clinical care providers. Medical, nursing, pharmacy and administrative
+personnel should participate in a collaborative process to develop and monitor policies and
+procedures. Each organisation must identify those individuals permitted to prescribe
+medication. These individuals must have the requisite knowledge and experience, and be
+permitted by law, registration or regulations to prescribe medication. The organisation must
+identify any additional individuals permitted to prescribe medication in emergency situations.
+Prescription of medication and verbal medication orders must be issued and documented
+according to organisational policy.
+  
+The safe administration of medication requires a strict and comprehensive policy. The policy
+relating to the administration of medication into catheters and tubing must include steps to
+ensure that the tubing is checked prior to administration to ensure that medication is not
+administered via the wrong route. Only personnel who are suitably trained and experienced
+must be permitted to administer medication to patients and this responsibility must be
+documented.
+  
+The patient, medical practitioner, nurse and other care providers must work together to
+monitor patients on medication. The purpose of monitoring is to evaluate the patient's
+response to medication, adjust the dosage or type of medication when needed and identify,
+record and report any adverse effects the patient may suffer as a result of the medication.
+  
+Doctors, nurses and pharmacists are expected to report adverse reactions that are
+suspected to be related to medication, irrespective of whether the reaction is well
+recognised, potentially serious or clinically insignificant. The organisation must ensure that
+country-specific requirements for the reporting of adverse drug reactions are followed.
+  
+In addition to the reporting of adverse drug reactions, there must be a system for the
+reporting and investigation of medication errors. The system must focus on the prevention of
+medication errors through understanding the types of errors that occur. Each error should be
+investigated to understand why it happened. Where necessary, processes should be
+adapted to incorporate measures which will reduce the likelihood of the error happening
+again. Personnel training, either in existing or adapted medication administration processes,
+can be beneficial in preventing future errors. Pharmacy personnel should participate in such
+training interventions.
+  
+Only personnel who are suitably trained and experienced may administer medication to
+patients. The responsibility of these persons for medication administration is documented.
+42.4.2 Criteria
+42.4.2.1
+ROOT
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Policies and procedures that guide
+the safe prescribing and
+administration of medication are
+implemented.
+Comment:
+Guideline statement: These policies should be developed by all role-players i.e. medical practitioners, nursing
+personnel and pharmacists.
+Country-specific regulations will apply.
+Compliance will be verified during the patient record audit.
+Page 33 of
+ 54 Page 33 of
+ 54 Page 33 of
+ 54 Page 33 of
+ 54 
+--- Page 34 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.4.2.2
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+Only those permitted by the
+organisation and by relevant laws
+and regulations prescribe
+medication.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.4.2.3
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+Only those permitted by the
+organisation and by relevant laws
+and regulations administer
+medication.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.4.2.4
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+There is a process to place limits,
+when appropriate, on the prescribing
+or ordering practices of individuals.
+Comment:
+Guideline statement: This is particularly relevant where certain medication may only be prescribed by designated
+specialists.
+Compliance will be verified with reference to organisational policy and country-specific legislation.
+42.4.2.5
+Severity:
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+Relevant personnel are trained in
+correct prescribing, ordering and
+administration practices.
+Comment:
+Guideline statement: Compliance will be verified during personnel interviews and training records in personnel
+files.
+42.4.2.6
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+On admission, all current medication
+taken by the patient is documented
+in the patient record, including
+herbal and over-the-counter
+medication.
+Comment:
+Guideline statement: Implementation of the organisational policy is required. This includes traditional and
+homeopathic medication. These should be re-prescribed on the prescription sheet if indicated.
+Compliance will be verified during the patient record audit.
+42.4.2.7
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+Verbal and telephonic medication
+prescriptions are documented
+according to organisational policy.
+Comment:
+Guideline statement: The procedure to be followed must be clearly documented in line with current legislation
+and implemented.
+Compliance will be verified during the patient record audit.
+Page 34 of
+ 54 Page 34 of
+ 54 Page 34 of
+ 54 Page 34 of
+ 54 
+--- Page 35 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.4.2.8
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+There is evidence that patients are
+identified before medication is
+administered.
+Comment:
+Guideline statement: This will be assessed in relation to the existing policy framework, including the use of
+patient identification bands when required. Compliance will also be confirmed while observing medication
+administration practices and during personnel interviews.
+42.4.2.9
+CRITICAL
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+Medication is checked against the
+original prescriptions and
+administered as prescribed.
+Comment:
+Guideline statement: Compliance could be assessed by observing the administration of medication while visiting
+the clinical departments.
+During the patient record audit process, check for evidence of transcribing by nurses from the original
+prescription onto the medication administration sheet.
+42.4.2.10
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The medication prescribed for and
+administered to each patient is
+recorded.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.4.2.11
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Healthcare professionals monitor
+medication effects on patients
+collaboratively.
+Comment:
+Guideline statement: Patient record audits should reveal whether the effect of medication was monitored,
+recorded and brought to the attention of the medical practitioner. The incidence and intensity of therapeutic and
+undesirable effects should be monitored. While clinical signs and symptoms are useful measures of drug therapy
+efficacy, additional information may be required, for example, plasma drug concentration may be used in the
+initiation and maintenance of certain medication.
+42.4.2.12
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Therapeutic plasma medication
+concentrations are checked in
+accordance with manufacturers’
+guidelines and organisational policy.
+Comment:
+Guideline statement: While clinical signs and symptoms are useful measures of medication therapy efficacy,
+additional information may be required by utilising plasma medication concentration levels during the initiation
+and maintenance of certain medication.
+The organisational policy, manufacturer’s guidelines and medical practitioner’s orders identify those instances in
+which therapeutic medication levels must be obtained.
+Compliance is verified during the patient record audit.
+Page 35 of
+ 54 Page 35 of
+ 54 Page 35 of
+ 54 Page 35 of
+ 54 
+--- Page 36 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+ 
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.4.2.13
+Severity: Very
+Serious
+Category:
+Legality
+NA  NC  PC  C
+Adverse drug reactions (ADR) are
+observed, recorded and reported
+through a process and within a time
+frame defined by the organisation.
+Comment:
+Guideline statement: An adverse drug reaction (ADR) is an expression that describes harm associated with the
+use of given medication at a normal dose. The meaning of this expression differs from the meaning of “side
+effect", as this last expression might also imply that the effects can be beneficial. The study of ADRs is the
+concern of the field known as pharmacovigilance.
+Compliance is verified during the patient record audit.
+Evidence will be sought of documentation reporting the reaction to the physician and the pharmacist.
+42.4.2.14
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+Medication errors are reported
+through a process and within a time
+frame defined by the organisation.
+Comment:
+Guideline statement: A process must be in place for the recording of medication errors. These include errors in
+relation to prescribing, dispensing and administration of medication.
+42.5 Food and nutrition therapy
+42.5.1 Standard
+Food and nutrition therapy appropriate for the patient and consistent with his or her
+clinical care is regularly available.
+Intent of 42.5.1
+ A qualified caregiver orders appropriate food or other nutrients. The patient participates in
+planning and selecting foods, and the patient's family may, when appropriate, participate in
+providing food. They are educated as to which foods are contraindicated, including
+information about any medication associated with food interactions. When possible, patients
+are offered a variety of food choices consistent with their nutritional status.
+The nutritional status of the patients is monitored.
+42.5.1 Criteria
+42.5.1.1
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Food appropriate to the patient is
+regularly available.
+Comment:
+Guideline statement: Compliance will be verified from interviews with personnel and patients, especially
+regarding times of meals and the availability of special diets. Menus and meal times will be checked.
+42.5.1.2
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Food orders appropriate for the
+patient’s nutritional status and needs
+are documented in the patient’s
+record.
+Comment:
+Page 36 of
+ 54 Page 36 of
+ 54 Page 36 of
+ 54 Page 36 of
+ 54 
+--- Page 37 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Guideline statement: Compliance will be verified during the patient record audit, especially as it relates to the
+patient’s assessment, the care plan and the identification of special diet requirements. Prescribed diets must be
+ordered and delivered to the patient.
+42.5.1.3
+Severity:
+Moderate
+Category:
+Patient Care
+NA  NC  PC  C
+Wherever possible, patient food
+preferences are respected and
+substitutions made available.
+Comment:
+Guideline statement: Compliance will be verified during patient interviews.
+42.5.1.4
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patient food preferences consider
+cultural and religious requirements.
+Comment:
+Guideline statement: Compliance will be verified during patient interviews and with reference to cultural and
+religious requirements identified during the initial assessment of the patient.
+42.5.1.5
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+When families provide food, they are
+educated about the patient’s dietary
+limitations.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.5.1.6
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients assessed as being at
+nutritional risk receive nutrition
+therapy.
+Comment:
+Guideline statement: Such patients could include those unable to take normal meals for example, unable to
+swallow, specific disease processes, etc. This could include the provision of nutritional supplements or
+specialised diets.
+This criterion and those that follow apply only to nutrition therapy.
+Compliance of all these criteria will be verified during the patient record audit.
+42.5.1.7
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+A collaborative process is used to
+plan, deliver and monitor nutrition
+therapy.
+Comment:
+Guideline statement: This should include the involvement of a dietician if available.
+Compliance will be verified during the patient record audit.
+42.5.1.8
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Nutrition therapy provided, whether
+oral, enteral or parenteral, is
+documented in the patient’s record.
+Comment:
+Page 37 of
+ 54 Page 37 of
+ 54 Page 37 of
+ 54 Page 37 of
+ 54 
+--- Page 38 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+ 
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Guideline statement: Compliance will be verified during the patient record audit.
+42.5.1.9
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Response to nutrition therapy is
+monitored and recorded.
+Comment:
+Guideline statement: This may take the form of weight/mass checks, laboratory tests for protein and/or lipid
+levels etc.
+42.6 Patient and family education
+42.6.1 Standard
+Each patient’s educational needs are assessed and written in their record.
+Intent of 42.6.1
+ Education is focused on the specific knowledge and skills the patient and his or her family
+will need to make care decisions, participate in care, and continue care at home. Variables
+like educational literacy, beliefs and limitations are taken into account.
+  
+The organisation decides the placement and format for educational assessment, planning
+and delivery of information in the patient's record.
+  
+Education is provided to support care decisions of patients and families. In addition, when a
+patient or family directly participate in providing care, for example changing dressings,
+feeding and administration of medication, they need to be educated.
+  
+Education in areas that carry high risk to patients is routinely provided by the organisation,
+for instance safe and effective use of medications and medical equipment.
+  
+Education must include orientation of the patient and family to the forensic service and a
+discussion of the aims of the service and the expectations of both the patient and the
+personnel.
+  
+Community organisations that support health promotion and disease prevention education
+are identified, and, when possible, ongoing relationships are established.
+42.6.1 Criteria
+42.6.1.1
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients and families’ educational
+needs are assessed and recorded.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.6.1.2
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is a uniform process for the
+recording of patient education
+information.
+Comment:
+Page 38 of
+ 54 Page 38 of
+ 54 Page 38 of
+ 54 Page 38 of
+ 54 
+--- Page 39 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Guideline statement: Compliance will be verified during the patient record audit.
+42.6.1.3
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients and families are educated
+about participation in the care
+process.
+Comment:
+Guideline statement: Compliance will be verified during patient interviews and patient record audits.
+42.6.1.4
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+An implemented patient introduction
+and orientation policy details patient
+and family education that is given on
+admission.
+Comment:
+Guideline statement: The policy includes as a minimum:
+•	A clear description of the aims of the service
+•	The current programme and modes of treatment
+•	The service team personnel
+•	Personal safety
+•	The expected conduct during admission
+•	Service facilities and layout
+•	What practical items can and cannot be brought in
+•	Clear guidance on the smoking policy
+•	Resources to meet spiritual, cultural and gender needs
+•	How to access advocacy and interpretation services
+•	The complaints and compliments process
+42.6.1.5
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients and their families (when
+required) are educated about their
+diagnosis and relevant health risks.
+Comment:
+Guideline statement: For example, safe use of medication and medical equipment, medication and food
+interaction, therapeutic diet and food interactions, defaulting on medication use, etc.
+Compliance will be verified during patient interviews and patient record audits.
+42.6.1.6
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The organisation identifies and
+establishes relationships with
+community resources that support
+continuing mental and physical
+health promotion and disease
+prevention education.
+Comment:
+Guideline statement: Evidence of meetings will be required.
+42.6.1.7
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients and families are referred to
+these organisations as appropriate.
+Comment:
+Guideline statement: Compliance will be verified during patient interviews and patient record audits.
+Page 39 of
+ 54 Page 39 of
+ 54 Page 39 of
+ 54 Page 39 of
+ 54 
+--- Page 40 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+  
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.6.2 Standard
+Education methods consider the patient’s and family’s values and preferences.
+Intent of 42.6.2
+ Learning occurs when attention is paid to the methods used to educate patients and
+families. The organisation selects appropriate educational methods and people to provide
+the education.
+Personnel collaboration helps to ensure that the information patients and families receive is
+comprehensive, consistent, and as effective as possible.
+42.6.2 Criteria
+42.6.2.1
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The patient and family are taught in
+a language and format that they can
+understand.
+Comment:
+Guideline statement: Compliance will be verified during patient interviews and patient record audits.
+42.6.2.2
+Severity:
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+Those who provide education have
+the knowledge and communication
+skills for effective education.
+Comment:
+Guideline statement: Compliance will be verified during patient interviews and personnel training records.
+42.6.2.3
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Health professionals caring for the
+patient work collaboratively when
+appropriate.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.6.2.4
+Severity:
+Moderate
+Category:
+Patient Care
+NA  NC  PC  C
+Interaction between personnel, the
+patient and family is noted in the
+patient's record.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+Page 40 of
+ 54 Page 40 of
+ 54 Page 40 of
+ 54 Page 40 of
+ 54 
+--- Page 41 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.7 Continuity of care
+42.7.1 Standard
+The organisation designs and implements processes to provide continuity of patient
+care services within the organisation and coordination among health professionals.
+Intent of 42.7.1
+ As patients move through a healthcare organisation from admission to discharge or
+transfer, several departments, services and healthcare providers may be involved in
+providing care. Without coordination and effective transfer of information and
+responsibilities, errors of omission and commission are more likely to occur, exposing the
+patient to avoidable risks. The organisation should therefore document and implement
+procedures to minimise the likelihood of these errors occurring.
+42.7.1 Criteria
+42.7.1.1
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Policies and procedures that guide
+the movement of patients within the
+organisation are implemented.
+Comment:
+Guideline statement: This refers to transfers between departments within the organisation as well as admissions
+from the out-patient department. Please take note that a transfer to theatre/procedure room is also regarded as
+an internal transfer.
+Compliance will be verified during the patient record audit.
+42.7.1.2
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Individuals responsible for the
+patient's care and its coordination
+are identified for all phases of
+patient care.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.7.1.3
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Continuity and coordination are
+evident throughout all phases of
+patient care.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.7.1.4
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+When a patient is transferred within
+the organisation, they are
+accompanied by their patient record.
+Comment:
+Guideline statement: Compliance will be verified during the patient record audit.
+42.7.1.5
+Severity:
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+Patient handover between
+healthcare professionals is
+standardised according to
+organisational policy.
+Comment:
+Page 41 of
+ 54 Page 41 of
+ 54 Page 41 of
+ 54 Page 41 of
+ 54 
+--- Page 42 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+ 
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Guideline statement: The complexity and comprehensiveness of the content of handover information required to
+achieve continuity of care will differ for different types of handover situations. The details to be included in each
+situation should be agreed upon by all stakeholders and formalised in the organisational policy framework to
+ensure a standardised approach at all times. The transfer of information can be verbal for low risk situations, but
+should be documented, preferably by the use of forms, for high risk situations.
+Compliance will be verified during patient record audit.
+42.7.2 Standard
+There is a process known to personnel to refer patients for specialised consultation,
+investigations and/or treatment at other healthcare organisations.
+Intent of 42.7.2
+ Medical practitioners may need to refer patients to other facilities for a secondary
+consultation to confirm an opinion, access more extensive diagnostic evaluations than may
+be available locally, or access specialised treatment that the referring organisation may be
+unable to provide.
+  
+This standard refers to the process by which a patient is referred to another healthcare
+organisation only to access services not offered by the referring organisation and then
+returns to the referring organisation to receive ongoing care, either as part of their care as
+an inpatient (in which case they will return to the organisation following their review at the
+referral organisation) or while under the care of the outpatient department. Organisational
+policy must clearly describe this referral process.
+42.7.2 Criteria
+42.7.2.1
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Policies and procedures that guide
+the movement of patients for
+referral to another organisation are
+implemented.
+Comment:
+Guideline statement: The organisation must clearly describe the referral process, especially where patients are
+sent to another healthcare organisation for specialist consultation or special investigations and then return to the
+referring organisation.
+Note that this criterion does not refer to the transfer of a patient to another healthcare organisation to take over
+the care of the patient.
+Compliance will be verified during the patient record audit.
+42.7.2.2
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients are accompanied and
+monitored by an appropriately
+qualified person during the process.
+Comment:
+Guideline statement: This should include the cadre of personnel suitable for the level of care required by the
+patient to be transported.
+42.7.2.3
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+A copy of the referral note is
+available in the patient record.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit.
+Page 42 of
+ 54 Page 42 of
+ 54 Page 42 of
+ 54 Page 42 of
+ 54 
+--- Page 43 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+ 
+ 
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.7.2.4
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Follow-up care based on the
+findings of investigations and/or
+consultations performed outside the
+referring organisation is documented
+in the patient record.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit.
+42.7.3 Standard
+There is a process to transfer patients to another organisation to meet their
+continuing needs.
+Intent of 42.7.3
+ This standard refers to the process by which a patient is discharged from the transferring
+organisation and handed over to receive ongoing care at another healthcare organisation.
+  
+Transfer may be to a higher level of care for specialised consultation and/or treatment, or for
+less intensive services such as sub-acute care or long-term rehabilitation. To ensure
+continuity of care, adequate information must accompany the patient.
+  
+Transfer may be an uncomplicated process with the patient alert and talking, or may involve
+continuous nursing or medical supervision. The qualifications of the individual
+accompanying the patient must be appropriate to the level of care required during transfer.
+The process for transferring the patient must consider transportation needs as well as
+clinical needs.
+42.7.3 Criteria
+42.7.3.1
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+There is a documented process for
+transferring patients to other
+organisations.
+Comment:
+Guideline statement: The documented process should be available in the unit and readily accessible to unit
+personnel.
+The process must include:
+•	Guidance on how to make the necessary transport arrangements
+•	The qualifications required in the clinical personnel accompanying the patient for various levels of clinical care
+42.7.3.2
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+When a patient is transferred to
+another organisation, the receiving
+organisation is given a written
+summary of the patient's clinical
+condition and the interventions
+performed by the referring
+organisation.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit.
+Page 43 of
+ 54 Page 43 of
+ 54 Page 43 of
+ 54 Page 43 of
+ 54 
+--- Page 44 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.7.3.3
+CRITICAL
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+A copy of the transfer summary is
+available in the patient record.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit.
+42.7.3.4
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The transferring organisation
+documents the transfer in the
+organisation’s patient record.
+Comment:
+Guideline statement: •	Documentation must include as a minimum:
+•	The reason(s) for the transfer
+•	Any special conditions related to transfer
+•	The condition of the patient before transfer
+•	The name of the healthcare organisation receiving the patient
+Compliance will be verified during patient record audit.
+42.7.3.5
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The referring organisation
+determines that the receiving
+organisation can meet the patient’s
+continuing care needs, and
+establishes arrangements to ensure
+continuity.
+Comment:
+Guideline statement: This should be done by the departmental management team when referral pathways for the
+unit are established. These pathways should be documented along with all relevant details, for example,
+transport arrangements and contact details. The documented pathway should be readily available to personnel
+who will be responsible for making the decision to transfer patients to another organisation.
+42.7.3.6
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients are accompanied and
+monitored by an appropriately
+qualified person during transfer.
+Comment:
+Guideline statement: This should include the cadre of personnel suitable for the level of care required by the
+patient to be transferred.
+Page 44 of
+ 54 Page 44 of
+ 54 Page 44 of
+ 54 Page 44 of
+ 54 
+--- Page 45 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.7.4 Standard
+There is an organised process to discharge patients.
+Intent of 42.7.4
+ Care planning should include arrangements to meet the patients' continuing needs after
+discharge as early in the care process as possible. Instructions for discharge and follow-up
+visits must be clear and provided in writing.
+  
+The discharge summary is one of the most important documents for ensuring continuity of
+care and facilitating correct management at subsequent visits. Information provided by the
+organisation may include when to resume daily activities, preventive practices relevant to
+the patient's condition and, when appropriate, information on coping with disease or
+disability. At discharge, patients should be alerted to symptoms and signs related to their
+diagnosis which require urgent medical attention and how to access healthcare services
+should they develop such symptoms or signs. This process is referred to as "safety-netting".
+  
+The discharge summary must contain the following content as a minimum:
+a)   The diagnosis of main and significant illnesses and reason for admission
+b)   The results of investigations that will influence further management
+c)   All procedures performed
+d)   All significant findings
+e)   The patient's condition at discharge
+f)    Discharge medication
+g)   Follow-up arrangements where appropriate, including emergency review
+42.7.4 Criteria
+42.7.4.1
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There is an implemented policy that
+details the process to discharge
+patients from the forensic unit.
+Comment:
+Guideline statement: The process must detail the specific, legal criteria that must be met when a patient is
+discharged from a forensic unit.
+The process must be available in the unit and readily accessible to, and known by organisational personnel.
+42.7.4.2
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Where the initial assessment
+indicates that discharge planning will
+be required, planning requirements
+are included in the patient's care
+plan and completed as scheduled.
+Comment:
+Guideline statement: Compliance will be verified during patient record audits.
+42.7.4.3
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+The organisation works with the
+family, caregivers, healthcare
+practitioners and agencies outside
+the organisation to ensure timely
+and appropriate discharge and
+continuity of care.
+Comment:
+Guideline statement: Compliance will be verified during patient record audits.
+Page 45 of
+ 54 Page 45 of
+ 54 Page 45 of
+ 54 Page 45 of
+ 54 
+--- Page 46 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.7.4.4
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients and where appropriate their
+families or caregivers are given
+understandable follow-up
+instructions which are documented
+in the patient's record.
+Comment:
+Guideline statement: The follow-up instructions may be provided to the patient by the medical practitioner, or by
+the nurse following instructions from the doctor.
+The instructions must include as a minimum:
+•	Medication information
+•	Possible complications
+•	Return for follow-up care
+•	When and where to obtain urgent care
+Compliance will be verified through patient record audits and patient interviews.
+42.7.4.5
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+A discharge summary, which
+includes (a)-(g) in the standard
+intent above as a minimum, is
+written by the medical practitioner
+when each patient is discharged.
+Comment:
+Guideline statement: This criterion and the next apply to the discharge summary completed by the medical
+practitioner and not to the nurses' discharge note. Where a discharge summary has only been partially completed
+i.e. does not include all items (a)-(f) it will be scored PC. A nurse's discharge note is not acceptable and is scored
+NC.
+The 40/80 rule for compliance will apply.
+Compliance will be verified during patient record audit.
+42.7.4.6
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Each record contains a copy of the
+discharge summary.
+Comment:
+Guideline statement: This will ensure that the discharge summary is available for follow-up visits.
+Compliance will be verified during patient record audit.
+42.7.4.7
+Severity:
+Moderate
+Category:
+Patient Care
+NA  NC  PC  C
+When appropriate the patient is
+given a copy of the discharge
+summary.
+Comment:
+Guideline statement: This could be appropriate if the patient’s care will be continued outside of the country.
+Page 46 of
+ 54 Page 46 of
+ 54 Page 46 of
+ 54 Page 46 of
+ 54 
+--- Page 47 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.8 Quality improvement
+42.8.1 Standard
+A formalised proactive quality improvement approach is maintained in the forensic
+service.
+Intent of 42.8.1
+ The senior management team is responsible for ensuring that standards are set throughout
+the organisation. Within each department or service, unit managers should ensure that
+standards are set for the particular unit. Departmental or service managers should use
+available data and information to identify priority areas for quality monitoring and
+improvement. This should be done in collaboration with the organisation's central quality
+management structures to ensure coordinated quality improvement activities throughout the
+organisation.
+  
+Quality monitoring is typically applied to high risk, high volume or high cost activities, or
+areas of concern identified by personnel, patients or visitors. Some examples of activities
+that may benefit from quality monitoring include:
+•       Patient assessment
+•       Procedures carried out
+•       The use of medication
+•       Medication errors
+•       Patient and family expectations and satisfaction
+  
+The following will be evaluated:
+•       The manner in which problems were identified and prioritised in this service for which
+quality improvement activities were initiated
+•       The processes put in place to resolve the problems
+•       The identification of indicators to measure improvement
+•       The tool(s) used to evaluate these indicators
+•       The monitoring of these indicators and corrective steps taken when goals were not
+achieved
+•       Graphed and/or tabled results, as appropriate
+  
+A once-off project such as acquiring a specific item of equipment will be scored NC.
+Quality improvement processes not related to the clinical quality of patient care but to the
+environment within which care is provided, for example, monitoring the checking of the
+emergency trolley over time, will be scored PC.
+42.8.1 Criteria
+42.8.1.1
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+There is a written quality
+improvement programme for the
+forensic service that is developed
+and agreed upon by the personnel
+of the service.
+Comment:
+Guideline statement: The minimum requirement for compliance will be the availability of evidence of:
+•	At least one clinical audit
+•	Participation in documentation (patient record) audits
+•	Participation in the monitoring of near misses, adverse events and sentinel events
+42.8.1.2
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+Indicators of performance are
+identified to evaluate the quality of
+treatment and patient care.
+Comment:
+Page 47 of
+ 54 Page 47 of
+ 54 Page 47 of
+ 54 Page 47 of
+ 54 
+--- Page 48 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Guideline statement: As the emphasis is on the quality of patient care, this cannot be compliant if there is no
+evidence of clinical audits.
+These could take the form of evaluation of the implementation of clinical guidelines, case discussions, reports on
+negative incidents, etc. An indicator, in this context, is a measure used to determine improvements in clinical care
+over time. The information gained must be used to identify and implement improvement processes. Statistical
+reports without documented evidence of continuous quality improvement will be scored PC.
+42.8.1.3
+Severity:
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+Processes are selected in order of
+priority for evaluation and
+improvement in the quality of
+treatment and care.
+Comment:
+Guideline statement: Quality monitoring is typically applied to high risk, high volume or high cost activities, or
+areas of concern identified by personnel, patients or visitors.
+42.8.1.4
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+The quality improvement cycle
+includes the monitoring and
+evaluation of the standards set, and
+remedial action implemented.
+Comment:
+Guideline statement: The quality improvement cycle does not stop with the implementation of a quality
+improvement plan. Ongoing monitoring of the process or procedure under consideration is required, with
+evaluation of the monitoring data collected to ensure that the plan has achieved its intended aim. If not, the
+quality improvement cycle should be repeated, incorporating the learning from previous attempts, until the
+desired aim is achieved.
+42.8.1.5
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+A documentation audit system is in
+place.
+Comment:
+Guideline statement: Documented evidence of such audits must be provided at departmental level. Where the
+documentation (patient record) audit is an organisation-wide multidisciplinary process, which includes all clinical
+departments, this criterion will be scored according to the findings of the involvement of each department in the
+process. Evaluation of results and remedial action taken must be documented as well as maintenance of
+achieved improvements over time.
+42.8.1.6
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+An incident managing system for
+monitoring near misses/adverse
+events/sentinel events is
+implemented, which includes the
+documentation of responses to
+recorded incidents and interventions
+to prevent recurrence of the incident
+or minimise harm in the event of a
+recurrence.
+Comment:
+Guideline statement: Participation at department level in the organisation’s overall system of the monitoring of
+near misses/adverse events/sentinel events will be evaluated. Analysed data, with responses/remedial action
+related to departmental incidents are required.
+Page 48 of
+ 54 Page 48 of
+ 54 Page 48 of
+ 54 Page 48 of
+ 54 
+--- Page 49 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.9 Patient rights
+42.9.1 Standard
+The organisation is responsible for providing processes that support patient and
+family rights during care.
+Intent of 42.9.1
+ This refers to the implementation of organisational policy on patient and family rights.
+Compliance will be verified during observation of patient care processes, patient record
+audits and patient interviews.
+42.9.1 Criteria
+42.9.1.1
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There are processes that support
+patient and family rights during
+care.
+Comment:
+Guideline statement: The organisation’s policies will be evaluated against country-specific legislation, where
+applicable. The implementation thereof will be evaluated during the auditing of patient records, patient
+interviews and observation during a walk-about in the department. This applies to all the relevant criteria below.
+42.9.1.2
+Severity:
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+There are processes to ensure that
+care is respectful of the patient’s
+personal values and beliefs.
+Comment:
+Guideline statement: Implementation will be evaluated during the auditing of patient records, patient interviews
+and observation during a walk-about in the department.
+42.9.1.3
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Measures are taken to protect the
+patient’s privacy, person and
+possessions.
+Comment:
+Guideline statement: Confidentiality of patient information and patient privacy must be protected at all times.
+Standard operating procedures specific to the conditions and processes in the unit must be in place, known to
+relevant personnel and implemented. Likewise, security measures specific to the unit must be in place to
+safeguard the patients’ person and possessions.
+These specific measures include as a minimum:
+•	Measures to ensure that patients can wash and use the toilet in private
+•	Measures to ensure that patients are modestly and safely clothed
+•	The use of locks and observation panels (operated by patients and over-ridden by personnel when required)
+•	Measures to ensure that patients can make and receive telephone calls in private
+42.9.1.4
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Personnel respect the rights of
+patients and families to treatment
+and to refuse treatment.
+Comment:
+Guideline statement: Compliance will be verified during patient record audit and patient interviews.
+Page 49 of
+ 54 Page 49 of
+ 54 Page 49 of
+ 54 Page 49 of
+ 54 
+--- Page 50 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+ 
+ 
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.9.1.5
+Severity: Very
+Serious
+Category:
+Patient Care
+NA  NC  PC  C
+Patients are informed of their right
+not to donate human tissue or to
+participate in research.
+Comment:
+Guideline statement: It is very important to ensure that this internationally accepted right is implemented in the
+mental health patient population.
+42.10 Prevention and control of infection
+42.10.1 Standard
+There is a comprehensive infection prevention and control programme
+encompassing patient care and employee health.
+Intent of 42.10.1
+ This standard measures the implementation of the organisational policy for infection
+prevention and control at unit level as well as the identification of unit-specific infection
+control risks. Personnel must be aware of the policy and there must be evidence that it is
+implemented throughout the organisation.
+42.10.1 Criteria
+42.10.1.1
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+There is a programme, which is
+implemented, to reduce the risks of
+healthcare associated infections in
+patients and healthcare workers.
+Comment:
+Guideline statement: •	The programme must include as a minimum:
+•	Prevention of the spread of respiratory tract infections
+•	Prevention of the spread of urinary catheter related infections
+•	Prevention of the spread of infection through surgical wounds
+•	Prevention of the spread of infection through intravascular/invasive devices
+•	Safe injection practices, including single-use injection devices
+•	Care of the infected patient
+•	The wearing of personal protective equipment
+•	The disinfection of equipment
+•	Management of infected/soiled linen
+•	Management of hazardous waste
+42.10.1.2
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+The department participates in the
+overall programme for quality
+management and improvement of
+infection control.
+Comment:
+Guideline statement: Compliance will be measured by evidence of departmental representation at organisational
+infection control meetings and activities and by the departmental contribution of data to the organisational
+infection control data collection systems.
+Page 50 of
+ 54 Page 50 of
+ 54 Page 50 of
+ 54 Page 50 of
+ 54 
+--- Page 51 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+  
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.10.1.3
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+The department identifies the
+procedures and processes
+associated with the risk of infection,
+and implements strategies to reduce
+risk.
+Comment:
+Guideline statement: The department participates in, and has documented evidence of, the identification of risks
+in their department. The strategies to reduce risk should be defined in policies and procedures and include the
+risks listed in this standard as a minimum. Such documentation must form part of the organisation-wide infection
+control processes.
+42.10.1.4
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+Personnel are trained in correct
+hand washing procedures.
+Comment:
+Guideline statement: Documented evidence of personnel training will be required, together with evidence of
+monitoring of implementation, for example, hand washing audits performed regularly according to organisational
+policy.
+42.10.1.5
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+Organisational policy on handling,
+storage and disposal of healthcare
+waste is implemented.
+Comment:
+Guideline statement: The implementation of the organisation’s master policy will be evaluated in the department.
+The processes must include handling at source, collection, storage and disposal of healthcare waste.
+42.10.1.6
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+Individuals who collect specimens
+are trained in the proper collection
+and handling of microbiological
+specimens.
+Comment:
+Guideline statement: Documented evidence of personnel training will be required.
+42.10.1.7
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+The department provides education
+on infection control practices to
+personnel, doctors, patients and, as
+appropriate, family and other
+caregivers.
+Comment:
+Guideline statement: Documented evidence of personnel training will be required. Information pamphlets,
+posters, individualised education etc. will provide evidence of patient, family and other caregiver education
+Page 51 of
+ 54 Page 51 of
+ 54 Page 51 of
+ 54 Page 51 of
+ 54 
+--- Page 52 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+ 
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.11 Occupational health and safety and risk management
+42.11.1 Standard
+The organisation directs and controls risk management programmes, which include
+health and safety programmes that comply with legislation.
+Intent of 42.11.1
+ This standard measures the implementation of the organisational policy for occupational
+health and safety and risk management at unit level as well as the identification of unit-
+specific risks. Personnel must be aware of the policy and there must be evidence that it is
+implemented throughout the organisation.
+42.11.1 Criteria
+42.11.1.1
+Severity: Very
+Serious
+Category:
+Efficiency
+NA  NC  PC  C
+A designated security manager has
+responsibility for security within the
+forensic service.
+Comment:
+Guideline statement: Documented evidence is required.
+42.11.1.2
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+The department conducts ongoing
+monitoring of risks through
+documented assessments as part of
+organisation’s risk management
+processes.
+Comment:
+Guideline statement: The department participates in and has documented evidence of the identification of risks in
+their department. Such documentation must form part of the organisation-wide risk management processes. All
+relevant aspects and services of the department, for example, patient, personnel and visitor related risks,
+financial and legal risks, physical facilities, security and environmental risks, etc. should be included.
+42.11.1.3
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+There is an implemented policy on
+fire safety and evacuation which is
+specifically adapted for the forensic
+service.
+Comment:
+Guideline statement: The policy must include as a minimum:
+•	The safety of patients and personnel during a fire
+•	Who has access to the fire alarm system and fire-fighting equipment
+•	The evacuation process and location of a secure area
+The department’s participation in the organisation’s overall fire safety processes will also be evaluated.
+42.11.1.4
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+An implemented policy on the
+physical security of the forensic
+service ensures the safety of
+patients, personnel and visitors.
+Comment:
+Page 52 of
+ 54 Page 52 of
+ 54 Page 52 of
+ 54 Page 52 of
+ 54 
+--- Page 53 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+Guideline statement: This must include as a minimum:
+•	Inner and outer security of the building and how they relate to each other
+•	Inspections of the inner and outer security of the building
+•	Controlled access systems through all doors and gates that form part of the secured area
+•	Line of sight and measures to address blind spots (staff placement, use of CCTV, mirrors etc.)
+•	How furniture, fixtures and equipment are secured to prevent using them as climbing aids, weapons, barriers,
+ligatures points etc.
+•	The security of windows and window frames (how they are set in the masonry, how they open etc.)
+•	The monitoring of security personnel to ensure that they are providing effective access control and security.
+The department's participation in the organisation’s overall security plan for personnel and visitors must also be
+evaluated.
+42.11.1.5
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+Adequate security measures are
+maintained in patient
+accommodation areas.
+Comment:
+Guideline statement: These include as a minimum:
+•	Patient bedroom and bathroom doors are designed to prevent holding, barring or blocking
+•	The use of locks and over-riding of locks
+•	The safety of ventilation measures
+•	The standard of clothing provided to patients
+•	The control of cutlery and crockery
+•	The safety of light switches and electrical access points
+•	The use of observation panels
+42.11.1.6
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+Implemented policies and
+procedures guide the procedural
+security of patients in the forensic
+service.
+Comment:
+Guideline statement: These policies must include as a minimum:
+•	Conducting searches of patients and their personal property
+•	The monitoring of prohibited, restricted and patient accessible items (including the risk associated with patient’s
+personal property)
+•	Anti-bullying (for those who are bullying and those who are being bullied)
+•	Managing mass violence in the forensic unit
+•	Liaison with law enforcement regarding incidents of criminal activity/harassment/violence
+•	Management of the patient’s use of electronic equipment and internet access (including appropriate use of
+social networking sites)
+•	Prohibited items and restrictive practices
+42.11.1.7
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+An implemented policy guides visitor
+access to patients in the forensic
+unit.
+Comment:
+Guideline statement: This policy must include as a minimum:
+•	Documentation of the identity of visitors
+•	Searching of visitors
+•	Management of restricted items that may not be taken into the forensic unit by visitors (including secure storage
+facilities for personal items)
+•	Management of items brought by visitors intended for patient use and consumption
+•	Management of child visitors, unwanted visitors and visitors who pose a threat to patients and personnel
+•	The location and security of the visitor’s room/area
+Page 53 of
+ 54 Page 53 of
+ 54 Page 53 of
+ 54 Page 53 of
+ 54 
+--- Page 54 ---
+ Assessment Instrument Document 
+ Date generated: 10/04/2019
+ 
+  
+  
+  
+ 
+ 
+BOTSWANA NATIONAL HEALTH QUALITY
+STANDARDS FOR HOSPITALS
+42.Psychiatric Forensic Service
+42.11.1.8
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+A policy on key/electronic pass
+management is implemented.
+Comment:
+Guideline statement: The policy must include as a minimum:
+•	The process for issuing all keys/passes in the forensic service (identification checks, security checks etc.)
+•	The replacement of lost keys/passes
+•	The security of spare keys/passes
+•	How keys/passes are secured to the personnel’s clothing
+42.11.1.9
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+There are clear and effective
+systems for communication and
+handover of all security related
+issues.
+Comment:
+Guideline statement: Documented evidence of training required.
+42.11.1.10
+Severity: Very
+Serious
+Category: Pat
+& Staff Safety
+NA  NC  PC  C
+All personnel are trained regarding
+their role in providing a safe and
+secure patient care facility.
+Comment:
+Guideline statement: Documented evidence of training required.
+Page 54 of
+ 54 Page 54 of
+ 54 Page 54 of
+ 54 Page 54 of
+ 54 

@@ -630,7 +630,7 @@
                         if (!codeSrc) continue;
                         // Look for something like 9.1.1 or 9.1.1.1 and reduce it
                         // to the PI level (9.1).
-                        const codeMatch = codeSrc.match(/\b\d+\.\d+(?:\.\d+){1,2}\b/);
+                        const codeMatch = codeSrc.match(/\d+\.\d+(?:\.\d+){1,2}\b/);
                         if (!codeMatch) continue;
                         const parts = codeMatch[0].split('.');
                         if (parts.length >= 2) {
@@ -1535,6 +1535,39 @@
                                 break;
                             }
                         }
+
+                        // Fallback: If no explicit 3-segment standard code was found in the fields (common for missing standard rows),
+                        // derive it from any 4-segment criterion code.
+                        if (!standardCode) {
+                            for (const field of subFields) {
+                                if (!field) continue;
+                                const isCommentField =
+                                    field.isComment ||
+                                    field.label === 'Comment' ||
+                                    !!field.questionFieldId ||
+                                    (typeof field.label === 'string' && /-comments\b/i.test(field.label)) ||
+                                    field.id?.endsWith('-comments') ||
+                                    field.id?.endsWith('-comment');
+                                if (isCommentField) continue;
+
+                                const rawLabel = field.label || '';
+                                let norm = normalizeCriterionCode(field.code);
+                                if (!norm || !/\d/.test(norm)) {
+                                    const labelMatch = rawLabel.match(/\b\d+(?:\.\d+){2,3}\b/);
+                                    if (labelMatch) {
+                                        norm = labelMatch[0];
+                                    }
+                                }
+
+                                if (norm && /^\d+(?:\.\d+){3}$/.test(norm)) {
+                                    const parts = norm.split('.');
+                                    standardCode = `${parts[0]}.${parts[1]}.${parts[2]}`;
+                                    const info = criterionIndex[standardCode];
+                                    standardTitle = (info?.statement || rawLabel || '').trim();
+                                    break;
+                                }
+                            }
+                        }
             
                         if (!standardCode) {
                             return;
@@ -1599,6 +1632,37 @@
                             if (norm && /^\d+(?:\.\d+){2}$/.test(norm)) {
                                 standardCode = norm;
                                 break;
+                            }
+                        }
+
+                        // Fallback: If no explicit 3-segment standard code was found in the fields (common for missing standard rows),
+                        // derive it from any 4-segment criterion code.
+                        if (!standardCode) {
+                            for (const field of subFields) {
+                                if (!field) continue;
+                                const isCommentField =
+                                    field.isComment ||
+                                    field.label === 'Comment' ||
+                                    !!field.questionFieldId ||
+                                    (typeof field.label === 'string' && /-comments\b/i.test(field.label)) ||
+                                    field.id?.endsWith('-comments') ||
+                                    field.id?.endsWith('-comment');
+                                if (isCommentField) continue;
+
+                                const rawLabel = field.label || '';
+                                let norm = normalizeCriterionCode(field.code);
+                                if (!norm || !/\d/.test(norm)) {
+                                    const labelMatch = rawLabel.match(/\b\d+(?:\.\d+){2,3}\b/);
+                                    if (labelMatch) {
+                                        norm = labelMatch[0];
+                                    }
+                                }
+
+                                if (norm && /^\d+(?:\.\d+){3}$/.test(norm)) {
+                                    const parts = norm.split('.');
+                                    standardCode = `${parts[0]}.${parts[1]}.${parts[2]}`;
+                                    break;
+                                }
                             }
                         }
             

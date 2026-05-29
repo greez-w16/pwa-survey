@@ -470,6 +470,10 @@ const PrivateRoute = ({ children }) => {
 	    const groupText =
 	      stateAssignment?.preloadDataValues?.[FACILITY_GROUP_DE_ID] ||
 	      stateAssignment?.parentGroupId ||
+	      stateAssignment?.facilityGroup ||
+	      stateAssignment?.schedule?.facilityGroup ||
+	      searchParams.get('parentGroupId') ||
+	      searchParams.get('facilityGroup') ||
 	      formData?.[FACILITY_GROUP_DE_ID] ||
 	      '';
 		    const groupStageId = getSurveyProgramStageIdForGroupText(groupText);
@@ -505,6 +509,10 @@ const PrivateRoute = ({ children }) => {
 		      const preloadedGroupText =
 		        stateAssignment?.preloadDataValues?.[FACILITY_GROUP_DE_ID] ||
 		        stateAssignment?.parentGroupId ||
+		        stateAssignment?.facilityGroup ||
+		        stateAssignment?.schedule?.facilityGroup ||
+		        searchParams.get('parentGroupId') ||
+		        searchParams.get('facilityGroup') ||
 		        '';
 		      const targetGroupId = resolveGroupIdFromText(preloadedGroupText);
 			      if (targetGroupId && Array.isArray(groups) && groups.length > 0) {
@@ -603,7 +611,7 @@ const PrivateRoute = ({ children }) => {
 
       // If a preloaded Facility Assessment Group is present, switch the active
       // group immediately so the correct forms render even before formData updates.
-      const preloadedGroupText = preload[FACILITY_GROUP_DE_ID];
+      const preloadedGroupText = preload?.[FACILITY_GROUP_DE_ID] || selectedFacility?.parentGroupId || selectedFacility?.facilityGroup || searchParams.get('parentGroupId') || searchParams.get('facilityGroup');
       if (preloadedGroupText && groups && groups.length > 0) {
         const targetId = resolveGroupIdFromText(preloadedGroupText);
         if (targetId && activeGroup?.id !== targetId) {
@@ -703,7 +711,7 @@ const PrivateRoute = ({ children }) => {
 	        saveField(programStageField.id, selectedFacility.programStageId);
 	      }
       // Avoid overwriting a preloaded group value from a clicked event.
-      const preloadedGroupText = preload && preload[FACILITY_GROUP_DE_ID];
+      const preloadedGroupText = (preload && preload[FACILITY_GROUP_DE_ID]) || searchParams.get('parentGroupId') || searchParams.get('facilityGroup');
       // If we didn't preload from a clicked event, resolve the facility's
       // Baseline Assessment Group from DHIS2. This both fills an empty field and
       // corrects a mismatched saved draft (e.g. defaulted Mortuary).

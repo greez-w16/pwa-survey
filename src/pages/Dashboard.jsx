@@ -105,6 +105,7 @@ export function Dashboard() {
     const [initSeOptions, setInitSeOptions] = useState([]); // [{id, label}]
     const [initAssignments, setInitAssignments] = useState({}); // { [seId]: [userIds] }
 	    const [initMetadataLoading, setInitMetadataLoading] = useState(false);
+		    const [initProgramStageMetadata, setInitProgramStageMetadata] = useState(null);
     const [initPlanLoading, setInitPlanLoading] = useState(false);
     const [initMode, setInitMode] = useState('BASELINE'); // BASELINE | FOLLOWUP
     const [forceSelfOnly, setForceSelfOnly] = useState(false);
@@ -176,32 +177,57 @@ export function Dashboard() {
         return value === undefined || value === null || String(value).trim() === '' ? null : value;
     };
 
-    // Resolve the DataElement ID for "Type of Assessment" from loaded metadata
-    const surveyTypeDeId = useMemo(() => {
-        const ps = configuration?.programStage;
-        if (!ps) return null;
-        const candidates = (ps.programStageDataElements || []).map(psde => psde.dataElement || psde);
-        const match = candidates.find(de => {
-            const n = (de?.displayName || de?.formName || de?.name || '').toLowerCase();
-            return n.includes('type of assessment') || (n.includes('assessment type') && !n.includes('facility assessment'));
-        });
-        return match?.id || null;
-    }, [configuration]);
+	    const getProgramStageDataElementDefinitions = React.useCallback((programStage) => {
+	        const fromStage = (programStage?.programStageDataElements || []).map(psde => psde?.dataElement || psde).filter(Boolean);
+	        const fromSections = (programStage?.programStageSections || [])
+	            .flatMap(section => section?.dataElements || section?.programStageDataElements || [])
+	            .map(raw => raw?.dataElement || raw)
+	            .filter(Boolean);
+	        const byId = new Map();
+	        [...fromStage, ...fromSections].forEach(de => {
+	            const id = de?.id;
+	            if (!id) return;
+	            const existing = byId.get(id);
+	            byId.set(id, existing?.optionSet && !de?.optionSet ? existing : de);
+	        });
+	        return Array.from(byId.values());
+	    }, []);
 
-    const surveyTypeOptions = useMemo(() => {
-        try {
-            const ps = configuration?.programStage;
-            const all = (ps?.programStageDataElements || []).map(psde => psde.dataElement || psde);
-            const de = all.find(d => (d?.id || '') === surveyTypeDeId);
-            const opts = de?.optionSet?.options || [];
-            return opts
-                .map(o => ({ value: o.code || o.displayName || o.name, label: o.displayName || o.name || o.code }))
-                .filter(o => {
-                    const text = `${o.value || ''} ${o.label || ''}`.toLowerCase().replace(/[_-]+/g, ' ');
-                    return !(text.includes('supportive') || (text.includes('support') && text.includes('visit')));
-                });
-        } catch (_) { return []; }
-    }, [configuration, surveyTypeDeId]);
+	    const findSurveyTypeDataElement = React.useCallback((programStage) => {
+	        const candidates = getProgramStageDataElementDefinitions(programStage);
+	        return candidates.find(de => {
+	            const n = (de?.displayName || de?.displayFormName || de?.formName || de?.name || de?.shortName || '').toLowerCase();
+	            const code = String(de?.code || '').toLowerCase();
+	            return n.includes('type of assessment')
+	                || (n.includes('assessment type') && !n.includes('facility assessment'))
+	                || code.includes('type_of_assessment')
+	                || code.includes('assessment_type_selected');
+	        }) || null;
+	    }, [getProgramStageDataElementDefinitions]);
+
+	    const getSurveyTypeOptionsFromMetadata = React.useCallback((programStage) => {
+	        try {
+	            const de = findSurveyTypeDataElement(programStage);
+	            const opts = de?.optionSet?.options || [];
+	            return opts
+	                .map(o => ({ value: o.code || o.displayName || o.name, label: o.displayName || o.name || o.code }))
+	                .filter(o => {
+	                    const text = `${o.value || ''} ${o.label || ''}`.toLowerCase().replace(/[_-]+/g, ' ');
+	                    return !(text.includes('supportive') || (text.includes('support') && text.includes('visit')));
+	                });
+	        } catch (_) { return []; }
+	    }, [findSurveyTypeDataElement]);
+
+	    // Resolve the DataElement ID for "Type of Assessment" from loaded metadata
+	    const surveyTypeDeId = useMemo(
+	        () => findSurveyTypeDataElement(configuration?.programStage)?.id || null,
+	        [configuration, findSurveyTypeDataElement]
+	    );
+
+	    const surveyTypeOptions = useMemo(
+	        () => getSurveyTypeOptionsFromMetadata(configuration?.programStage),
+	        [configuration, getSurveyTypeOptionsFromMetadata]
+	    );
 
     const isSupportiveSurveyType = React.useCallback((val) => {
         const text = String(val || '').toLowerCase().replace(/[_-]+/g, ' ');
@@ -228,6 +254,16 @@ export function Dashboard() {
         () => (surveyTypeOptions || []).filter(opt => isBaselineSurveyType(opt.label || opt.value)),
         [surveyTypeOptions, isBaselineSurveyType]
     );
+
+	    const initSurveyTypeOptions = useMemo(() => {
+	        const initOptions = getSurveyTypeOptionsFromMetadata(initProgramStageMetadata);
+	        return initOptions.length > 0 ? initOptions : surveyTypeOptions;
+	    }, [getSurveyTypeOptionsFromMetadata, initProgramStageMetadata, surveyTypeOptions]);
+
+	    const initBaselineSurveyTypeOptions = useMemo(
+	        () => (initSurveyTypeOptions || []).filter(opt => isBaselineSurveyType(opt.label || opt.value)),
+	        [initSurveyTypeOptions, isBaselineSurveyType]
+	    );
 
     // Resolve the DataElement ID for "Assessment Group" from loaded metadata
     const surveyGroupDeId = useMemo(() => {
@@ -1387,7 +1423,7 @@ export function Dashboard() {
 		        const clickedFacilityGroup = getAssociatedAssessmentGroupValue(ev);
 	        const resolvedFacilityGroup = clickedFacilityGroup && clickedFacilityGroup !== '-'
 	            ? clickedFacilityGroup
-	            : (assessment?.parentGroupId || assessment?.facilityGroup || '');
+	            : (assessment?.parentGroupId || assessment?.facilityGroup || getAssessmentFacilityGroupKey(assessment) || '');
 		        let resolvedProgramStageId = ev.programStage
 	            || ev.programStageId
 	            || getSurveyProgramStageIdForGroup(resolvedFacilityGroup)
@@ -1516,12 +1552,27 @@ export function Dashboard() {
         // Carry TEI so PUT can include trackedEntityInstance if needed
         if (primaryEvent.trackedEntityInstance || ev.trackedEntityInstance) preload['teiId_internal'] = primaryEvent.trackedEntityInstance || ev.trackedEntityInstance;
 
-	        const selected = { ...withBaseline, enrollment: clickedEnrollmentId || withBaseline.enrollment, baselineEventId: primaryEvent.event, programStageId: resolvedProgramStageId, preloadDataValues: preload, hydrateAll: true, preloadMode: 'REPLACE' };
+        const groupKey = toFacilityGroupKey(resolvedFacilityGroup);
+        if (groupKey && !preload['pzenrgsSny3']) {
+            preload['pzenrgsSny3'] = groupKey;
+        }
+
+	        const selected = {
+	            ...withBaseline,
+	            enrollment: clickedEnrollmentId || withBaseline.enrollment,
+	            baselineEventId: primaryEvent.event,
+	            programStageId: resolvedProgramStageId,
+	            parentGroupId: groupKey,
+	            facilityGroup: groupKey,
+	            preloadDataValues: preload,
+	            hydrateAll: true,
+	            preloadMode: 'REPLACE'
+	        };
         // Use the clicked enrollment/event as the form identity. Using the parent
         // assignment id here can reopen an older local draft bucket.
         const urlId = clickedEnrollmentId || primaryEvent.event || ev.event;
         const teiForUrl = primaryEvent.trackedEntityInstance || ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
-	        navigate(`/form?assessmentId=${encodeURIComponent(urlId || '')}&baselineId=${encodeURIComponent(primaryEvent.event || ev.event || '')}&draftKey=${encodeURIComponent(urlId || '')}&assessmentTeiId=${encodeURIComponent(teiForUrl)}${clickedEnrollmentId ? `&enrollmentId=${encodeURIComponent(clickedEnrollmentId)}` : ''}${resolvedProgramStageId ? `&programStageId=${encodeURIComponent(resolvedProgramStageId)}` : ''}`, { state: { selectedAssignment: selected } });
+	        navigate(`/form?assessmentId=${encodeURIComponent(urlId || '')}&baselineId=${encodeURIComponent(primaryEvent.event || ev.event || '')}&draftKey=${encodeURIComponent(urlId || '')}&assessmentTeiId=${encodeURIComponent(teiForUrl)}${clickedEnrollmentId ? `&enrollmentId=${encodeURIComponent(clickedEnrollmentId)}` : ''}${resolvedProgramStageId ? `&programStageId=${encodeURIComponent(resolvedProgramStageId)}` : ''}${groupKey ? `&parentGroupId=${encodeURIComponent(groupKey)}&facilityGroup=${encodeURIComponent(groupKey)}` : ''}`, { state: { selectedAssignment: selected } });
     };
 
     const resolveOrgUnitForAssessment = (assessment) => {
@@ -1792,18 +1843,27 @@ export function Dashboard() {
                 });
                 setInitTeamOptions(resolved);
             } catch (_) { setInitTeamOptions([]); }
-	            const hasExistingBaseline = await assessmentHasBaselineSurvey(assessment);
-	            const baselineOpt = (baselineSurveyTypeOptions || [])[0];
-	            const scheduledTypeValue = getAssignmentTypeValue(assessment);
-	            const scheduledGroupKey = toFacilityGroupKey(resolvedFacilityGroup || getAssignmentFacilityGroupValue(assessment));
-	            const firstSurveyType = baselineOpt?.value
-	                || (isBaselineSurveyType(scheduledTypeValue) ? scheduledTypeValue : '');
+		            const hasExistingBaseline = await assessmentHasBaselineSurvey(assessment);
+		            const scheduledTypeValue = getAssignmentTypeValue(assessment);
+		            const scheduledGroupKey = toFacilityGroupKey(resolvedFacilityGroup || getAssignmentFacilityGroupValue(assessment));
+		            let selectedMetadata = null;
+		            if (scheduledGroupKey) {
+		                selectedMetadata = await ensureSurveyMetadataForGroup(scheduledGroupKey);
+		                setInitProgramStageMetadata(selectedMetadata);
+		            } else {
+		                setInitProgramStageMetadata(null);
+		            }
+		            const effectiveTypeOptions = getSurveyTypeOptionsFromMetadata(selectedMetadata).length > 0
+		                ? getSurveyTypeOptionsFromMetadata(selectedMetadata)
+		                : surveyTypeOptions;
+		            const baselineOpt = (effectiveTypeOptions || []).find(opt => isBaselineSurveyType(opt.label || opt.value));
+		            const firstSurveyType = baselineOpt?.value
+		                || (isBaselineSurveyType(scheduledTypeValue) ? scheduledTypeValue : '');
 	            setInitHasExistingBaseline(hasExistingBaseline);
 	            setInitSurveyType(!hasExistingBaseline ? firstSurveyType : '');
 	            setInitFacilityGroup(scheduledGroupKey || '');
 	            if (scheduledGroupKey) {
-	                const metadata = await ensureSurveyMetadataForGroup(scheduledGroupKey);
-	                setInitSeOptions(buildSeOptions(scheduledGroupKey, metadata));
+		                setInitSeOptions(buildSeOptions(scheduledGroupKey, selectedMetadata));
 	            } else {
 	                setInitSeOptions([]);
 	            }
@@ -1909,15 +1969,23 @@ export function Dashboard() {
 		            const grp = toGroupKey(baselineGroupText)
 		                || getAssessmentFacilityGroupKey(assessment)
 		                || toFacilityGroupKey(getAssignmentFacilityGroupValue(assessment));
+	            let selectedMetadata = null;
             if (grp) {
                 setInitFacilityGroup(grp);
-	                const metadata = await ensureSurveyMetadataForGroup(grp);
-	                setInitSeOptions(buildSeOptions(grp, metadata));
+		                selectedMetadata = await ensureSurveyMetadataForGroup(grp);
+		                setInitProgramStageMetadata(selectedMetadata);
+		                setInitSeOptions(buildSeOptions(grp, selectedMetadata));
                 setLockGroup(true);
+	            } else {
+	                setInitProgramStageMetadata(null);
             }
 
             if (selfOnly) {
-                const selfOpt = (surveyTypeOptions || []).find(o => isSelfSurveyType(o.label || o.value) ) || (surveyTypeOptions || [])[0];
+		                const loadedTypeOptions = getSurveyTypeOptionsFromMetadata(selectedMetadata);
+		                const effectiveTypeOptions = loadedTypeOptions.length > 0
+		                    ? loadedTypeOptions
+	                    : surveyTypeOptions;
+	                const selfOpt = (effectiveTypeOptions || []).find(o => isSelfSurveyType(o.label || o.value) ) || (effectiveTypeOptions || [])[0];
                 if (selfOpt) setInitSurveyType(selfOpt.value);
                 await loadSelfAssessmentAssessors(assessment);
                 setLockType(true);
@@ -1967,16 +2035,19 @@ export function Dashboard() {
             // Set survey details
             const grp = String(found.facilityGroup || nsHit || '').toUpperCase();
             setInitFacilityGroup(grp);
-	            const metadata = await ensureSurveyMetadataForGroup(grp);
+		            const metadata = await ensureSurveyMetadataForGroup(grp);
+		            setInitProgramStageMetadata(metadata);
 	            const seOpts = buildSeOptions(grp, metadata);
             setInitSeOptions(seOpts);
-            const toCode = (val) => {
-                const m = (surveyTypeOptions || []).find(o => o.value === val || o.label === val);
+	            const loadedTypeOptions = getSurveyTypeOptionsFromMetadata(metadata);
+	            const effectiveTypeOptions = loadedTypeOptions.length > 0 ? loadedTypeOptions : surveyTypeOptions;
+	            const toCode = (val) => {
+	                const m = (effectiveTypeOptions || []).find(o => o.value === val || o.label === val);
                 return m ? m.value : val;
             };
             const previousType = toCode(found.typeOfAssessment || '');
             if (initMode === 'BASELINE' && !initHasExistingBaseline && !isBaselineSurveyType(previousType)) {
-                const baselineOpt = (baselineSurveyTypeOptions || [])[0];
+	                const baselineOpt = (effectiveTypeOptions || []).find(opt => isBaselineSurveyType(opt.label || opt.value));
                 setInitSurveyType(baselineOpt?.value || '');
                 showToast?.('No Baseline exists yet, so only Baseline Assessment can be used for first-time initiation.', 'warning');
             } else if (isSupportiveSurveyType(previousType)) {
@@ -2082,14 +2153,16 @@ export function Dashboard() {
             setInitMode('EDIT_ASSIGNMENTS');
             setInitEditAssignmentsOnly(true);
             setInitHasExistingBaseline(false);
-            const toSurveyTypeCode = (val) => {
-                if (!val || val === '-') return '';
-                const m = (surveyTypeOptions || []).find(o => o.value === val || o.label === val);
-                return m ? m.value : val;
-            };
-
             setInitFacilityGroup(groupKey);
-	            const metadata = await ensureSurveyMetadataForGroup(groupKey);
+		            const metadata = await ensureSurveyMetadataForGroup(groupKey);
+		            setInitProgramStageMetadata(metadata);
+	            const loadedTypeOptions = getSurveyTypeOptionsFromMetadata(metadata);
+	            const effectiveTypeOptions = loadedTypeOptions.length > 0 ? loadedTypeOptions : surveyTypeOptions;
+	            const toSurveyTypeCode = (val) => {
+	                if (!val || val === '-') return '';
+	                const m = (effectiveTypeOptions || []).find(o => o.value === val || o.label === val);
+	                return m ? m.value : val;
+	            };
 	            setInitSeOptions(buildSeOptions(groupKey, metadata));
             setInitSurveyType(toSurveyTypeCode(plan?.typeOfAssessment || surveyTypeValue || ''));
             setInitAssignments(plan?.seAssignments || {});
@@ -2218,7 +2291,7 @@ export function Dashboard() {
                 return;
             }
 
-            const selectedTypeMeta = (surveyTypeOptions || []).find(o => o.value === initSurveyType);
+	            const selectedTypeMeta = (initSurveyTypeOptions || []).find(o => o.value === initSurveyType);
             if (initMode === 'BASELINE' && !initHasExistingBaseline && !isBaselineSurveyType(selectedTypeMeta?.label || selectedTypeMeta?.value || initSurveyType)) {
                 showToast?.('First-time survey initiation must use Baseline Assessment.', 'error');
                 setIsBaselineCreating(false);
@@ -2665,6 +2738,7 @@ export function Dashboard() {
         setInitTeamLoading(false);
         setInitAssessorLookupInfo(null);
         setInitSeOptions([]);
+	        setInitProgramStageMetadata(null);
         setInitAssignments({});
     };
 
@@ -4059,7 +4133,7 @@ export function Dashboard() {
 	                                            );
 	                                        })}
 	                                    </div>
-	                                    <p className="settings-subtitle" style={{ marginTop: '1rem' }}>Hospital Standards (SE 1 - SE 38)</p>
+	                                    <p className="settings-subtitle" style={{ marginTop: '1rem' }}>Hospital Standards (SE 1 - SE 45)</p>
 	                                    <div className="se-config-list">
 	                                        {(hospitalConfig.hospital_full_configuration || []).map(se => {
 	                                            const activeList = currentConfig.hospital_full_configuration || [];
@@ -4548,7 +4622,7 @@ export function Dashboard() {
                             value={initSurveyType}
 	                            onChange={async e => {
                                 const next = e.target.value;
-                                const opt = (surveyTypeOptions || []).find(o => o.value === next);
+	                                const opt = (initSurveyTypeOptions || []).find(o => o.value === next);
 	                                if (isSupportiveSurveyType(opt?.label || opt?.value || next)) {
 	                                    showToast?.('Supportive is no longer available as a Type of Survey. Please choose another Type of Survey.', 'error');
 	                                    return;
@@ -4568,8 +4642,8 @@ export function Dashboard() {
 	                            {(() => {
 	                                const baselineOnly = initMode === 'BASELINE' && !initHasExistingBaseline;
 		                                const optionsForTypeBase = forceSelfOnly
-		                                    ? surveyTypeOptions.filter(opt => isSelfSurveyType(opt.label || opt.value))
-		                                    : (baselineOnly ? baselineSurveyTypeOptions : surveyTypeOptions);
+		                                    ? initSurveyTypeOptions.filter(opt => isSelfSurveyType(opt.label || opt.value))
+		                                    : (baselineOnly ? initBaselineSurveyTypeOptions : initSurveyTypeOptions);
 		                                const optionsForType = initSurveyType && !optionsForTypeBase.some(opt => opt.value === initSurveyType)
 		                                    ? [{ value: initSurveyType, label: initSurveyType }, ...optionsForTypeBase]
 		                                    : optionsForTypeBase;
@@ -4597,15 +4671,17 @@ export function Dashboard() {
 	                                setInitAssignments({});
 	                                setInitMetadataLoading(true);
 	                                try {
-	                                    const metadata = await ensureSurveyMetadataForGroup(v);
-	                                    setInitSeOptions(buildSeOptions(v, metadata));
+		                                    const metadata = await ensureSurveyMetadataForGroup(v);
+		                                    setInitProgramStageMetadata(metadata);
+		                                    setInitSeOptions(buildSeOptions(v, metadata));
 	                                    if (configSource === 'datastore' && isOnline) {
 	                                        loadRemoteConfig();
 	                                    }
 	                                } catch (err) {
 	                                    console.error('Failed to load metadata for selected facility type', err);
-	                                    showToast?.('Failed to load survey questions for the selected Facility Type.', 'error');
-	                                    setInitSeOptions(buildSeOptions(v));
+		                                    showToast?.('Failed to load survey questions for the selected Facility Type.', 'error');
+		                                    setInitProgramStageMetadata(null);
+		                                    setInitSeOptions(buildSeOptions(v));
 	                                } finally {
 	                                    setInitMetadataLoading(false);
 	                                }
