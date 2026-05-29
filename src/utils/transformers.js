@@ -191,10 +191,15 @@ export const transformMetadata = (metadata) => {
         
         // Only trust explicit SE/EMS/SEC markers here. Bare numeric section
         // names/codes like "151" are internal metadata, not SE numbers.
-        const seMatch = String(sectionName).match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)/i)
-            || String(sectionCode).match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)/i);
+        const seMatch = String(sectionName).match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)(?=$|[_\s:-])/i)
+            || String(sectionCode).match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)(?=$|[_\s:-])/i)
+            || String(section.id || '').match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)(?=$|[_\s:-])/i);
 
-        let seId = seMatch ? seMatch[2] : null;
+        const normalizeSeId = (value) => {
+            const parsed = parseInt(String(value || '').trim(), 10);
+            return Number.isFinite(parsed) ? String(parsed) : null;
+        };
+        let seId = seMatch ? normalizeSeId(seMatch[2]) : null;
 
         let elements = section.dataElements || section.programStageDataElements || [];
         elements = [...elements].sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
@@ -250,9 +255,11 @@ export const transformMetadata = (metadata) => {
             const fieldTexts = fields.flatMap(f => [f?.code, f?.label]).filter(Boolean).map(v => String(v));
             for (const txt of fieldTexts) {
                 let m = txt.match(/(?:SE|SEC|SECTION|EMS)\s*([0-9]+)/i);
-                if (m) { seId = m[1]; break; }
+                if (m) { seId = normalizeSeId(m[1]); break; }
+                m = txt.match(/(?:HOSP(?:ITAL)?|CLINICS?|MORTUARY|SURV)[_\s-]+(?:SE[_\s-]*)?([0-9]+)(?=$|[_.\s:-])/i);
+                if (m) { seId = normalizeSeId(m[1]); break; }
                 m = txt.match(/(?:^|[^0-9])([0-9]+)\.[0-9]+\.[0-9]+\.[0-9]+/);
-                if (m) { seId = m[1]; break; }
+                if (m) { seId = normalizeSeId(m[1]); break; }
             }
         }
 
@@ -279,9 +286,9 @@ export const transformMetadata = (metadata) => {
 	        // The dedicated Hospital program stage does not consistently prefix all
 	        // sections, so treat every non-Assessment-Details section from that stage
 	        // as Hospital instead of falling back to Mortuary/GENERAL.
-	        const groupKey = isDedicatedHospitalStage && !isAD
-	            ? 'HOSPITAL'
-	            : (prefix === 'SE' || (prefix && prefix.startsWith('SE'))) ? 'SE' :
+		        const groupKey = isDedicatedHospitalStage && !isAD
+		            ? 'HOSPITAL'
+		            : (prefix === 'SE' || prefix === 'EMS' || (prefix && (prefix.startsWith('SE') || prefix.startsWith('EMS')))) ? 'SE' :
 	            (prefix === 'CLINICS' || prefix === 'CLINIC' ? 'CLINICS' :
 	            (prefix === 'HOSPITAL' || prefix === 'HOSP') ? 'HOSPITAL' : null);
 
@@ -318,8 +325,15 @@ export const transformMetadata = (metadata) => {
 	    const hospitalGroupSections = prefixSectionsByPrefix['HOSPITAL'] || [];
 
     const sortSections = (secs) => [...secs].sort((a, b) => {
-        const ex = (s) => (s && s.match(/\d+/) ? parseInt(s.match(/\d+/)[0], 10) : 0);
-        return ex(a.code || a.name) - ex(b.code || b.name);
+        const ex = (sec) => {
+            const direct = sec?.se_id ?? sec?.seId ?? sec?.sectionNumber;
+            if (direct !== null && direct !== undefined && String(direct).trim() !== '') {
+                return parseInt(String(direct).trim(), 10);
+            }
+            const text = sec?.code || sec?.name || '';
+            return text.match(/\d+/) ? parseInt(text.match(/\d+/)[0], 10) : 999;
+        };
+        return ex(a) - ex(b);
     });
 
 	    const sortedEmsSections = sortSections(emsGroupSections);

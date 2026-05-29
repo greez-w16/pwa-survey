@@ -43,9 +43,13 @@ import EventAvailableIcon from '@mui/icons-material/EventAvailable';
 import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import './Dashboard.css';
 
+const SURVEY_ASSESSMENTS_PROGRAM_ID = 'G2gULe4jsfs';
 const DEFAULT_SURVEY_PROGRAM_STAGE_ID = 'HpHD6u6MV37';
 const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     HOSPITAL: 'hup8BqEe7Mn',
+    CLINICS: 'cliStageU11',
+    EMS: 'emsStageU11',
+    MORTUARY: 'morStageU11',
 };
 
 export function Dashboard() {
@@ -179,7 +183,7 @@ export function Dashboard() {
         const candidates = (ps.programStageDataElements || []).map(psde => psde.dataElement || psde);
         const match = candidates.find(de => {
             const n = (de?.displayName || de?.formName || de?.name || '').toLowerCase();
-            return n.includes('type of assessment') || n.includes('assessment type');
+            return n.includes('type of assessment') || (n.includes('assessment type') && !n.includes('facility assessment'));
         });
         return match?.id || null;
     }, [configuration]);
@@ -232,7 +236,7 @@ export function Dashboard() {
         const candidates = (ps.programStageDataElements || []).map(psde => psde.dataElement || psde);
         const byName = candidates.find(de => {
             const n = (de?.displayName || de?.formName || de?.name || '').toLowerCase();
-            return n.includes('assessment group') || n.includes('facility assessment group');
+            return n.includes('assessment group') || n.includes('facility assessment group') || n.includes('facility assessment type');
         });
         const byKnownId = candidates.find(de => (de?.id || '') === 'pzenrgsSny3');
         return byName?.id || byKnownId?.id || null;
@@ -255,25 +259,34 @@ export function Dashboard() {
 	        return text.includes('assessment details') || text.includes('assessment_details') || text.includes('facility details') || text.includes('facility_details');
 	    };
 
+	    const isDedicatedHospitalProgramStage = (programStage) => {
+	        return programStage?.id === 'hup8BqEe7Mn';
+	    };
+
 	    const extractStageSectionSeId = (section) => {
-	        const candidates = [section?.displayName, section?.name, section?.code, section?.id]
+	        const fieldCandidates = (section?.dataElements || section?.programStageDataElements || [])
+	            .flatMap(raw => {
+	                const de = raw?.dataElement || raw;
+	                return [de?.code, de?.displayName, de?.name];
+	            });
+	        const candidates = [section?.displayName, section?.name, section?.code, section?.id, ...fieldCandidates]
 	            .filter(Boolean)
 	            .map(v => String(v));
 	        for (const candidate of candidates) {
 	            const match = candidate.match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)(?=$|[_\s:-])/i);
 	            if (match) return String(parseInt(match[2], 10));
-	            const prefixedNumberMatch = candidate.match(/(?:HOSP(?:ITAL)?|CLINICS?|MORTUARY|SURV)[_\s-]+(?:SE[_\s-]*)?([0-9]+)(?=$|[_\s:-])/i);
+	            const prefixedNumberMatch = candidate.match(/(?:HOSP(?:ITAL)?|CLINICS?|MORTUARY|SURV)[_\s-]+(?:SE[_\s-]*)?([0-9]+)(?=$|[_.\s:-])/i);
 	            if (prefixedNumberMatch) return String(parseInt(prefixedNumberMatch[1], 10));
 	        }
 	        return null;
 	    };
 
-	    const stageSectionMatchesFacilityGroup = (section, groupKey) => {
+	    const stageSectionMatchesFacilityGroup = (section, groupKey, programStage = null) => {
 	        const rawNs = String(groupKey || '').toUpperCase();
 	        const ns = rawNs === 'SE' ? 'EMS' : (rawNs === 'GENERAL' ? 'MORTUARY' : rawNs);
 	        const text = `${section?.displayName || ''} ${section?.name || ''} ${section?.code || ''}`.toUpperCase();
 	        if (isAssessmentDetailsStageSection(section)) return false;
-	        if (ns === 'HOSPITAL') return text.includes('HOSP') || text.includes('HOSPITAL');
+	        if (ns === 'HOSPITAL') return isDedicatedHospitalProgramStage(programStage) || text.includes('HOSP') || text.includes('HOSPITAL');
 	        if (ns === 'CLINICS') return text.includes('CLINIC') || text.includes('CLINICS');
 	        if (ns === 'EMS') return text.includes('SURV_EMS') || text.includes('SURV-EMS') || /^\s*(EMS|SE)([_\s-]|$)/.test(text);
 	        if (ns === 'MORTUARY') return text.includes('MORTUARY') || text.includes('SURV_MORTUARY') || text.includes('SURV-MORTUARY');
@@ -281,10 +294,11 @@ export function Dashboard() {
 	    };
 
 		    const buildMetadataSeOptions = (groupKey, programStageOverride = null) => {
-		        const sections = (programStageOverride || configuration?.programStage)?.programStageSections || [];
+		        const programStage = programStageOverride || configuration?.programStage;
+		        const sections = programStage?.programStageSections || [];
 	        const optionsById = new Map();
 	        sections.forEach(section => {
-	            if (!stageSectionMatchesFacilityGroup(section, groupKey)) return;
+	            if (!stageSectionMatchesFacilityGroup(section, groupKey, programStage)) return;
 	            const seId = extractStageSectionSeId(section);
 	            if (!seId || optionsById.has(seId)) return;
 	            const rawName = section?.displayName || section?.name || section?.code || '';
@@ -344,7 +358,8 @@ export function Dashboard() {
 	    const ensureSurveyMetadataForGroup = React.useCallback(async (facilityGroupKey) => {
 	        const targetStageId = getSurveyProgramStageIdForGroup(facilityGroupKey);
 	        if (!targetStageId) return configuration?.programStage || null;
-	        if (configuration?.programStage?.id === targetStageId) return configuration.programStage;
+		        const shouldRefreshDedicatedStageMetadata = Object.values(SURVEY_PROGRAM_STAGE_BY_GROUP).includes(targetStageId);
+		        if (!shouldRefreshDedicatedStageMetadata && configuration?.programStage?.id === targetStageId) return configuration.programStage;
 
 	        const metadata = await api.getFormMetadata(targetStageId);
 	        setConfiguration?.({
@@ -386,13 +401,38 @@ export function Dashboard() {
         facilityGroupKey = '',
 	        programStageId = null,
         assessorUserId = null,
+	        allowedDataElementIds = null,
+		        excludedDataElementIds = [],
+	        programStageMetadata = null,
     } = {}) => {
-        if (!assessmentDetailsFields.length) return [];
+	        const detailFields = (() => {
+	            if (!programStageMetadata) return assessmentDetailsFields;
+	            const sections = Array.isArray(programStageMetadata?.programStageSections) ? programStageMetadata.programStageSections : [];
+	            const seen = new Set();
+	            const fields = [];
+	            sections.forEach(section => {
+	                const name = String(section?.displayName || section?.name || '').toLowerCase().trim();
+	                if (!(name.includes('assessment details') || name.includes('assessment_details') || name.includes('facility details') || name.includes('facility_details'))) return;
+	                (section?.dataElements || section?.programStageDataElements || []).forEach(raw => {
+	                    const de = raw?.dataElement || raw;
+	                    if (de?.id && !seen.has(de.id)) {
+	                        seen.add(de.id);
+	                        fields.push(de);
+	                    }
+	                });
+	            });
+	            return fields;
+	        })();
+	        if (!detailFields.length) return [];
 
-        const detailFieldIds = new Set(assessmentDetailsFields.map(field => field.id).filter(Boolean));
+	        const detailFieldIds = new Set(detailFields.map(field => field.id).filter(Boolean));
+	        const allowedIds = allowedDataElementIds ? new Set(allowedDataElementIds) : null;
+	        const excludedIds = new Set(excludedDataElementIds || []);
         const valuesByDe = new Map();
         const setValue = (dataElement, value) => {
             if (!dataElement || !detailFieldIds.has(dataElement)) return;
+	            if (allowedIds && !allowedIds.has(dataElement)) return;
+		            if (excludedIds.has(dataElement)) return;
             if (value === undefined || value === null) return;
             const text = String(value).trim();
             if (text === '') return;
@@ -404,16 +444,24 @@ export function Dashboard() {
         setupDataValues.forEach(dv => setValue(dv?.dataElement, dv?.value));
 
         const facilityGroupLabel = getFacilityGroupLabel(facilityGroupKey);
-        assessmentDetailsFields.forEach(field => {
+	        detailFields.forEach(field => {
             const fieldId = field?.id;
             const label = String(field?.displayName || field?.formName || field?.name || field?.shortName || '').toLowerCase();
             const code = String(field?.code || '').toUpperCase();
 
-            if (fieldId === surveyTypeDeId || label.includes('type of assessment') || label.includes('assessment type')) {
+            const isTypeOfAssessmentField = fieldId === surveyTypeDeId
+                || label.includes('type of assessment')
+                || (label.includes('assessment type') && !label.includes('facility assessment'));
+            const isFacilityAssessmentTypeField = fieldId === surveyGroupDeId
+                || label.includes('assessment group')
+                || label.includes('facility assessment group')
+                || label.includes('facility assessment type');
+
+            if (isTypeOfAssessmentField) {
                 if (!hasValue(fieldId)) setValue(fieldId, surveyTypeValue);
                 return;
             }
-            if (fieldId === surveyGroupDeId || label.includes('assessment group') || label.includes('facility assessment group')) {
+            if (isFacilityAssessmentTypeField) {
                 if (!hasValue(fieldId)) setValue(fieldId, facilityGroupLabel);
                 return;
             }
@@ -451,7 +499,7 @@ export function Dashboard() {
         });
 
         return Array.from(valuesByDe.values());
-	    }, [assessmentDetailsFields, getFacilityGroupLabel, surveyGroupDeId, surveyTypeDeId]);
+		    }, [assessmentDetailsFields, getFacilityGroupLabel, surveyGroupDeId, surveyTypeDeId]);
 
     const findAssessmentPlanForTei = React.useCallback(async ({ teiId, preferredNs = null }) => {
         if (!teiId) return { plan: null, nsKey: null };
@@ -550,9 +598,8 @@ export function Dashboard() {
         );
 	    }, [getFacilityGroupLabel, getSurveyProgramStageIdForGroup, navigate, surveyGroupDeId, surveyTypeDeId]);
 
-    const repairAssessmentBundle = React.useCallback(async ({ assessment, teiId, orgUnitId, enrollmentId = null, facilityGroup, surveyType, expectedTags = null, logLine = null }) => {
+		    const repairAssessmentBundle = React.useCallback(async ({ assessment, teiId, orgUnitId, enrollmentId = null, facilityGroup, surveyType, expectedTags = null, logLine = null, programStageMetadata = null, allowedDataElementIds = null, excludedDataElementIds = [] }) => {
         if (!teiId || !orgUnitId) throw new Error('Assessment TEI or org unit is missing for repair.');
-		            const programId = configuration?.program?.id || 'G2gULe4jsfs';
 		            const scheduleFacilityGroup =
 		                assessment?.schedule?.facilityGroup ||
 		                assessment?.schedule?.parentGroupId ||
@@ -564,14 +611,26 @@ export function Dashboard() {
 		                assessment?.facilityGroup ||
 		                scheduleFacilityGroup ||
 		                '';
+			            const groupStageId = resolvedFacilityGroup
+			                ? getSurveyProgramStageIdForGroup(resolvedFacilityGroup)
+			                : '';
 		            const stageId =
-		                assessment?.programStageId ||
-		                getSurveyProgramStageIdForGroup(resolvedFacilityGroup) ||
+			                programStageMetadata?.id ||
+			                groupStageId ||
+			                assessment?.programStageId ||
 		                configuration?.programStage?.id ||
 		                DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+			    const programId = programStageMetadata?.program?.id || getSurveyEventProgramIdForStage(stageId, assessment);
         const planInfo = await findAssessmentPlanForTei({ teiId, preferredNs: facilityGroup });
         const resolvedGroup = toFacilityGroupKey(facilityGroup || planInfo?.plan?.facilityGroup || assessment?.parentGroupId || '');
         const resolvedType = surveyType || planInfo?.plan?.typeOfAssessment || '';
+	        const effectiveProgramStageMetadata = programStageMetadata || (configuration?.programStage?.id === stageId ? configuration.programStage : null);
+	        const effectiveAllowedDataElementIds = allowedDataElementIds || (() => {
+	            const ids = (effectiveProgramStageMetadata?.programStageDataElements || [])
+	                .map(psde => psde?.dataElement?.id || psde?.id)
+	                .filter(Boolean);
+	            return ids.length > 0 ? ids : null;
+	        })();
         const detailsDataValues = buildAssessmentDetailsDataValues(assessment, {
             teiId,
             enrollmentId: enrollmentId || null,
@@ -579,6 +638,9 @@ export function Dashboard() {
             facilityGroupKey: resolvedGroup,
 	            programStageId: stageId,
             assessorUserId: user?.id || null,
+	            allowedDataElementIds: effectiveAllowedDataElementIds,
+	            excludedDataElementIds,
+	            programStageMetadata: effectiveProgramStageMetadata,
         });
         const tagsToExpect = Array.isArray(expectedTags) && expectedTags.length > 0 ? expectedTags : getExpectedTagsForGroup(resolvedGroup);
         if (!resolvedGroup || tagsToExpect.length <= 1) throw new Error('Could not determine the expected SE list for this assessment.');
@@ -746,26 +808,20 @@ export function Dashboard() {
     const loadAssociatedEvents = async (assessment) => {
         const assocKey = getAssocKey(assessment);
         setAssociatedByEnrollment(prev => ({ ...prev, [assocKey]: { ...(prev[assocKey]||{}), loading: true } }));
-		        try {
-		            const programId = configuration?.program?.id || 'G2gULe4jsfs';
-		            const scheduleFacilityGroup =
-		                assessment?.schedule?.facilityGroup ||
-		                assessment?.schedule?.parentGroupId ||
-		                assessment?.schedule?.attributes?.find?.(attr => attr?.attribute === SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType)?.value ||
-		                '';
-		            const resolvedFacilityGroup =
-		                assessment?.parentGroupId ||
-		                assessment?.facilityGroup ||
-		                scheduleFacilityGroup ||
-		                '';
-		            const stageId =
-		                assessment?.programStageId ||
-		                getSurveyProgramStageIdForGroup(resolvedFacilityGroup) ||
-		                configuration?.programStage?.id ||
-		                DEFAULT_SURVEY_PROGRAM_STAGE_ID;
-            const teiId = assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
+				        try {
+				            const stageId = getAssignmentProgramStageId(assessment);
+				            const programId = SURVEY_ASSESSMENTS_PROGRAM_ID;
             // Prefer facility orgUnit id for event lookup; fall back to program OU
-            const orgUnitId = assessment.orgUnitId || assessment.programOrgUnitId || null;
+	            const orgUnitId = resolveOrgUnitForAssessment(assessment);
+
+	            if (!orgUnitId) {
+	                showToast?.('Could not resolve the facility org unit for associated assessments.', 'warning');
+	                setAssociatedByEnrollment(prev => ({
+	                    ...prev,
+	                    [assocKey]: { loading: false, survey: [] }
+	                }));
+	                return;
+	            }
 
             // fetch all survey events for this Org Unit (regardless of TEI) to capture both 
             // scheduled and self-initiated assessments in the history table.
@@ -830,23 +886,9 @@ export function Dashboard() {
 	            [assocKey]: { ...(prev[assocKey] || {}), loading: true }
 	        }));
 
-	        try {
-		            const programId = configuration?.program?.id || 'G2gULe4jsfs';
-		            const scheduleFacilityGroup =
-		                assessment?.schedule?.facilityGroup ||
-		                assessment?.schedule?.parentGroupId ||
-		                assessment?.schedule?.attributes?.find?.(attr => attr?.attribute === SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType)?.value ||
-		                '';
-		            const resolvedFacilityGroup =
-		                assessment?.parentGroupId ||
-		                assessment?.facilityGroup ||
-		                scheduleFacilityGroup ||
-		                '';
-		            const stageId =
-		                assessment?.programStageId ||
-		                getSurveyProgramStageIdForGroup(resolvedFacilityGroup) ||
-		                configuration?.programStage?.id ||
-		                DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+				        try {
+				            const stageId = getAssignmentProgramStageId(assessment);
+				            const programId = getSurveyEventProgramIdForStage(stageId, assessment);
 	            // Intentionally check by authorised TEI only. The purpose here is
 	            // not to hydrate the row, but to know whether an assessment event
 	            // already exists for this authorised assessment TEI.
@@ -887,7 +929,13 @@ export function Dashboard() {
 	        });
 		    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, assessmentEventPresenceByKey, checkAssessmentEventPresence]);
 
-    const toggleExpandAssessment = async (assessment) => {
+	    const toggleExpandAssessment = async (assessment) => {
+	        if (!supportsAssociatedAssessments(assessment)) {
+	            if (typeof showToast === 'function') {
+		                showToast('Could not resolve the facility org unit for associated assessments.', 'warning');
+	            }
+	            return;
+	        }
         const k = getAssocKey(assessment);
         setExpandedAssignments(prev => ({ ...prev, [k]: !prev[k] }));
         const alreadyLoaded = associatedByEnrollment[k] && !associatedByEnrollment[k].loading && Array.isArray(associatedByEnrollment[k].survey);
@@ -951,17 +999,39 @@ export function Dashboard() {
 	    };
 	};
 
-		const getAssignmentFacilityGroupValue = (assessment) => {
-		    const raw = assessment?.parentGroupId
-		        || assessment?.facilityGroup
-		        || assessment?.schedule?.parentGroupId
-		        || assessment?.schedule?.facilityGroup
-		        || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
-		        || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
-		        || '';
-		    const key = toFacilityGroupKey(raw);
-		    return key ? getFacilityGroupLabel(key) : (raw || '-');
-		};
+			const getFacilityGroupKeyFromProgramStageId = (stageId) => {
+			    const id = String(stageId || '').trim();
+			    if (!id) return '';
+			    const entry = Object.entries(SURVEY_PROGRAM_STAGE_BY_GROUP).find(([, value]) => value === id);
+			    return entry?.[0] || '';
+			};
+
+			const getAssignmentFacilityGroupRawValue = (assessment) => (
+			    assessment?.parentGroupId
+			    || assessment?.facilityGroup
+			    || assessment?.schedule?.parentGroupId
+			    || assessment?.schedule?.facilityGroup
+			    || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
+			    || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
+			    || ''
+			);
+
+			const getAssessmentFacilityGroupKey = (assessment) => {
+			    const raw = getAssignmentFacilityGroupRawValue(assessment);
+			    const key = toFacilityGroupKey(raw);
+			    if (key && key !== '-') return key;
+			    return getFacilityGroupKeyFromProgramStageId(
+			        assessment?.programStageId
+			        || assessment?.schedule?.programStageId
+			        || assessment?.schedule?.enrollments?.[0]?.programStage
+			    );
+			};
+
+			const getAssignmentFacilityGroupValue = (assessment) => {
+			    const raw = getAssignmentFacilityGroupRawValue(assessment);
+			    const key = getAssessmentFacilityGroupKey(assessment);
+			    return key ? getFacilityGroupLabel(key) : (raw || '-');
+			};
 
 		const getAssignmentTypeValue = (assessment) => (
 		    assessment?.typeOfAssessment
@@ -974,19 +1044,31 @@ export function Dashboard() {
 
 		const getAssignmentProgramId = (assessment) => (
 		    assessment?.program
+		    || assessment?.programId
 		    || assessment?.schedule?.enrollments?.[0]?.program
-		    || configuration?.program?.id
-		    || 'G2gULe4jsfs'
+			    || configuration?.program?.id
+			    || SURVEY_ASSESSMENTS_PROGRAM_ID
 		);
 
-		const getAssignmentProgramStageId = (assessment) => {
-		    const facilityGroup = getAssignmentFacilityGroupValue(assessment);
+				const ASSOCIATED_ASSESSMENTS_PROGRAM_ID = SURVEY_ASSESSMENTS_PROGRAM_ID;
+			const supportsAssociatedAssessments = (assessment) => Boolean(resolveOrgUnitForAssessment(assessment));
+
+			const getAssignmentProgramStageId = (assessment) => {
+			    const facilityGroup = getAssessmentFacilityGroupKey(assessment) || getAssignmentFacilityGroupValue(assessment);
 		    return assessment?.programStageId
 		        || getSurveyProgramStageIdForGroup(facilityGroup)
 		        || configuration?.programStage?.id
 		        || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
 		};
 
+			const getSurveyEventProgramIdForStage = (stageId, assessment = null) => {
+			    const normalizedStageId = String(stageId || '').trim();
+			    const isSurveyStage = normalizedStageId === DEFAULT_SURVEY_PROGRAM_STAGE_ID
+			        || Object.values(SURVEY_PROGRAM_STAGE_BY_GROUP).includes(normalizedStageId);
+			    return isSurveyStage
+			        ? SURVEY_ASSESSMENTS_PROGRAM_ID
+			        : (configuration?.program?.id || getAssignmentProgramId(assessment) || SURVEY_ASSESSMENTS_PROGRAM_ID);
+			};
 		const formatAssignmentStatusLabel = (value) => {
 		    const raw = String(value || '').trim();
 		    const map = {
@@ -1192,7 +1274,7 @@ export function Dashboard() {
 	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.start || 'N/A'}</td>
 	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.end || 'N/A'}</td>
 	                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
-	                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getGroupValue(ev)}</td>
+		                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getAssociatedAssessmentGroupValue(ev)}</td>
 	                            <td style={{ padding: '6px 8px' }}>{getStatusValue(ev)}</td>
 	                            <td style={{ padding: '6px 8px' }}>
 	                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -1203,12 +1285,12 @@ export function Dashboard() {
 	                                            const baselineDate = ev._baselineDate || null;
 	                                            const ou = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || '';
 	                                            const tei = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
-		                                            const facilityGroup = getGroupValue(ev);
+			                                            const facilityGroup = getAssociatedAssessmentGroupValue(ev);
 		                                            const reportProgramStageId = ev.programStage || ev.programStageId || getSurveyProgramStageIdForGroup(facilityGroup);
 	                                            const q = new URLSearchParams({
 	                                                facilityId: ou || '',
 	                                                teiId: tei || '',
-		                                                programId: ev.programId || configuration?.program?.id || 'G2gULe4jsfs',
+		                                                programId: ev.programId || getSurveyEventProgramIdForStage(reportProgramStageId, assessment),
 		                                                programStageId: reportProgramStageId || '',
 		                                                facilityGroup: facilityGroup || '',
 	                                                start: baselineDate || '',
@@ -1224,7 +1306,7 @@ export function Dashboard() {
 	                                        className="btn btn-secondary btn-xs"
 	                                        onClick={(e) => {
 	                                            e.stopPropagation();
-	                                            openEditSeAssignments(assessment, ev, getGroupValue(ev), getTypeValue(ev));
+		                                            openEditSeAssignments(assessment, ev, getAssociatedAssessmentGroupValue(ev), getTypeValue(ev));
 	                                        }}
 	                                    >
 	                                        Edit SE Assignments
@@ -1278,6 +1360,22 @@ export function Dashboard() {
     }
   };
 
+	    const getAssociatedAssessmentGroupValue = (ev) => {
+	        if (ev?._type === 'Enrollment') {
+	            return getAttributeValue(
+	                ev.attributes,
+	                SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType,
+	                ['assessment facility type']
+	            ) || '-';
+	        }
+	        if (!surveyGroupDeId) return '-';
+	        const sourceEvents = Array.isArray(ev?._bundleEvents) ? ev._bundleEvents : [ev];
+	        const dv = sourceEvents
+	            .flatMap(src => src?.dataValues || [])
+	            .find(d => d.dataElement === surveyGroupDeId && d.value !== undefined && String(d.value).trim() !== '');
+	        return dv?.value || '-';
+	    };
+
     // Open a specific main-survey event from the associated-events table for editing
     const openAssociatedSurvey = async (assessment, ev) => {
         if (!ev?.event) return;
@@ -1285,35 +1383,41 @@ export function Dashboard() {
 
         const assocKey = getAssocKey(assessment);
         let relatedEvents = [];
-        const clickedEnrollmentId = ev.enrollmentId || ev.enrollment || (ev._type === 'Enrollment' ? ev.event : null);
-	        const clickedFacilityGroup = getGroupValue(ev);
+	        const clickedEnrollmentId = ev.enrollmentId || ev.enrollment || (ev._type === 'Enrollment' ? ev.event : null);
+		        const clickedFacilityGroup = getAssociatedAssessmentGroupValue(ev);
 	        const resolvedFacilityGroup = clickedFacilityGroup && clickedFacilityGroup !== '-'
 	            ? clickedFacilityGroup
 	            : (assessment?.parentGroupId || assessment?.facilityGroup || '');
-	        const resolvedProgramStageId = ev.programStage
+		        let resolvedProgramStageId = ev.programStage
 	            || ev.programStageId
+	            || getSurveyProgramStageIdForGroup(resolvedFacilityGroup)
 	            || assessment?.programStageId
-	            || getSurveyProgramStageIdForGroup(resolvedFacilityGroup);
+	            || configuration?.programStage?.id
+	            || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
 
         // The table now loads enrollments, which lack dataValues. Treat the clicked
         // enrollment as the pointer to the assessment bundle and fetch its actual
         // survey events only when the row is opened.
         const isEnrollmentRow = ev._type === 'Enrollment' || !Array.isArray(ev.dataValues);
-        if (isEnrollmentRow) {
+	        if (isEnrollmentRow) {
             const teiId = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
             const orgUnitId = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || null;
-            const programId = configuration?.program?.id || 'G2gULe4jsfs';
+	            const programId = ev.programId || getSurveyEventProgramIdForStage(resolvedProgramStageId, assessment);
 	            const stageId = resolvedProgramStageId || configuration?.programStage?.id || 'HpHD6u6MV37';
 
             if (clickedEnrollmentId) {
                 try {
                     const fetched = await api.getEventsList({
                         programId,
-                        stageId,
                         enrollmentId: clickedEnrollmentId,
-                        fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
+	                        fields: 'event,eventDate,status,program,programStage,orgUnit,trackedEntityInstance,enrollment,notes[note,value],dataValues[dataElement,value]'
                     });
                     relatedEvents = Array.isArray(fetched) ? fetched : [];
+	                    const eventWithStage = relatedEvents.find(e => getSysTag(e) === 'FINAL' && e?.programStage)
+	                        || relatedEvents.find(e => e?.programStage);
+	                    if (eventWithStage?.programStage) {
+	                        resolvedProgramStageId = eventWithStage.programStage;
+	                    }
                 } catch (e) {
                     console.warn('[openAssociatedSurvey] Failed to fetch events for clicked enrollment', clickedEnrollmentId, e);
                 }
@@ -1385,7 +1489,7 @@ export function Dashboard() {
         } else {
             // Fallback: resolve baseline Assessment Group from earliest event for this TEI
             try {
-                const programId = configuration?.program?.id || 'G2gULe4jsfs';
+	                const programId = getSurveyEventProgramIdForStage(resolvedProgramStageId, assessment);
 	                const stageId = resolvedProgramStageId || configuration?.programStage?.id || 'HpHD6u6MV37';
                 // Prefer TEI from the clicked event row; fall back to assignment
                 const teiId = primaryEvent.trackedEntityInstance || ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
@@ -1434,10 +1538,10 @@ export function Dashboard() {
         return assessment?.trackedEntityInstance || assessment?.scheduleTeiId || null;
     };
 
-    const assessmentHasBaselineSurvey = React.useCallback(async (assessment) => {
-        if (!assessment || !surveyTypeDeId) return false;
-        const programId = configuration?.program?.id || 'G2gULe4jsfs';
-        const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+		const assessmentHasBaselineSurvey = React.useCallback(async (assessment) => {
+	        if (!assessment || !surveyTypeDeId) return false;
+		    const stageId = getAssignmentProgramStageId(assessment);
+	        const programId = getSurveyEventProgramIdForStage(stageId, assessment);
         const facilityOrgUnitId =
             assessment?.orgUnitId ||
             (typeof assessment?.orgUnit === 'string' ? assessment.orgUnit : assessment?.orgUnit?.id) ||
@@ -1559,24 +1663,12 @@ export function Dashboard() {
         }
     }, [showToast]);
 
-    const handleOpenAssessment = async (assessment) => {
-        try {
-            const programId = configuration?.program?.id || 'G2gULe4jsfs';
-	            const scheduleFacilityGroup =
-	                assessment?.schedule?.facilityGroup ||
-	                assessment?.schedule?.parentGroupId ||
-	                assessment?.schedule?.attributes?.find?.(attr => attr?.attribute === SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType)?.value ||
-	                '';
-	            const resolvedFacilityGroup =
-	                assessment?.parentGroupId ||
-	                assessment?.facilityGroup ||
-	                scheduleFacilityGroup ||
-	                '';
-	            const stageId =
-	                assessment?.programStageId ||
-	                getSurveyProgramStageIdForGroup(resolvedFacilityGroup) ||
-	                configuration?.programStage?.id ||
-	                DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+			    const handleOpenAssessment = async (assessment) => {
+		        try {
+		            const resolvedFacilityGroup = getAssessmentFacilityGroupKey(assessment)
+		                || toFacilityGroupKey(getAssignmentFacilityGroupValue(assessment));
+		            const stageId = getAssignmentProgramStageId(assessment);
+			            const programId = getSurveyEventProgramIdForStage(stageId, assessment);
             const orgUnitId = resolveOrgUnitForAssessment(assessment);
             const teiId = resolveTeiForAssessment(assessment);
 
@@ -1700,12 +1792,21 @@ export function Dashboard() {
                 });
                 setInitTeamOptions(resolved);
             } catch (_) { setInitTeamOptions([]); }
-            const hasExistingBaseline = await assessmentHasBaselineSurvey(assessment);
-            const baselineOpt = (baselineSurveyTypeOptions || [])[0];
-            setInitHasExistingBaseline(hasExistingBaseline);
-            setInitSurveyType(!hasExistingBaseline && baselineOpt ? baselineOpt.value : '');
-            setInitFacilityGroup('');
-            setInitSeOptions([]);
+	            const hasExistingBaseline = await assessmentHasBaselineSurvey(assessment);
+	            const baselineOpt = (baselineSurveyTypeOptions || [])[0];
+	            const scheduledTypeValue = getAssignmentTypeValue(assessment);
+	            const scheduledGroupKey = toFacilityGroupKey(resolvedFacilityGroup || getAssignmentFacilityGroupValue(assessment));
+	            const firstSurveyType = baselineOpt?.value
+	                || (isBaselineSurveyType(scheduledTypeValue) ? scheduledTypeValue : '');
+	            setInitHasExistingBaseline(hasExistingBaseline);
+	            setInitSurveyType(!hasExistingBaseline ? firstSurveyType : '');
+	            setInitFacilityGroup(scheduledGroupKey || '');
+	            if (scheduledGroupKey) {
+	                const metadata = await ensureSurveyMetadataForGroup(scheduledGroupKey);
+	                setInitSeOptions(buildSeOptions(scheduledGroupKey, metadata));
+	            } else {
+	                setInitSeOptions([]);
+	            }
             setInitAssignments({});
             setInitTeamLoading(false);
             setInitAssessorLookupInfo(null);
@@ -1738,9 +1839,9 @@ export function Dashboard() {
             setInitiatingAssessmentKey(null);
             return;
         }
-        try {
-            const programId = configuration?.program?.id || 'G2gULe4jsfs';
-            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+			        try {
+			            const stageId = getAssignmentProgramStageId(assessment);
+			            const programId = getSurveyEventProgramIdForStage(stageId, assessment);
             const orgUnitId = resolveOrgUnitForAssessment(assessment);
             const teiId = resolveTeiForAssessment(assessment);
             let latestEventId = null;
@@ -1791,8 +1892,8 @@ export function Dashboard() {
             setInitHasExistingBaseline(hasExistingBaseline);
 
             // Determine baseline facility group and lock it
-            const programId = configuration?.program?.id || 'G2gULe4jsfs';
-            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+		            const stageId = getAssignmentProgramStageId(assessment);
+		            const programId = getSurveyEventProgramIdForStage(stageId, assessment);
             const orgUnitId = resolveOrgUnitForAssessment(assessment);
             const teiId = resolveTeiForAssessment(assessment);
             let baselineGroupText = null;
@@ -1805,7 +1906,9 @@ export function Dashboard() {
                 if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
                 return '';
             };
-            const grp = toGroupKey(baselineGroupText) || (assessment.parentGroupId || '');
+		            const grp = toGroupKey(baselineGroupText)
+		                || getAssessmentFacilityGroupKey(assessment)
+		                || toFacilityGroupKey(getAssignmentFacilityGroupValue(assessment));
             if (grp) {
                 setInitFacilityGroup(grp);
 	                const metadata = await ensureSurveyMetadataForGroup(grp);
@@ -2007,8 +2110,8 @@ export function Dashboard() {
         if (!pendingOpenAssessment) { setShowCreateBaselineDialog(false); return; }
         try {
             setIsBaselineCreating(true);
-            const programId = configuration?.program?.id || 'G2gULe4jsfs';
-            const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+	            const stageId = getSurveyProgramStageIdForGroup(initFacilityGroup) || configuration?.programStage?.id || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+	            const programId = getSurveyEventProgramIdForStage(stageId, pendingOpenAssessment);
             const orgUnitId = resolveOrgUnitForAssessment(pendingOpenAssessment);
             const teiId = resolveTeiForAssessment(pendingOpenAssessment);
             const ns = toFacilityGroupKey(initFacilityGroup);
@@ -2059,7 +2162,7 @@ export function Dashboard() {
             setCreateErrorInfo(null);
             setCreateDetails([]);
             setPendingProvisionedBundle(null);
-	            let programId = configuration?.program?.id || 'G2gULe4jsfs';
+		            let programId = SURVEY_ASSESSMENTS_PROGRAM_ID;
 	            let stageId = configuration?.programStage?.id || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
 	            let trackedEntityTypeId = configuration?.program?.trackedEntityType?.id || 'uTTDt3fuXZK';
             const orgUnitId = resolveOrgUnitForAssessment(pendingOpenAssessment);
@@ -2084,6 +2187,15 @@ export function Dashboard() {
 		            programId = selectedStageMetadata?.program?.id || programId;
 		            stageId = selectedStageMetadata?.id || getSurveyProgramStageIdForGroup(initFacilityGroup);
 		            trackedEntityTypeId = selectedStageMetadata?.program?.trackedEntityType?.id || trackedEntityTypeId;
+			            const selectedStageDataElementIds = (selectedStageMetadata?.programStageDataElements || [])
+			                .map(psde => psde?.dataElement?.id || psde?.id)
+			                .filter(Boolean);
+			            const allowedAssessmentDetailDataElementIds = selectedStageDataElementIds.length > 0
+			                ? selectedStageDataElementIds
+			                : null;
+			            const excludedAssessmentDetailDataElementIds = stageId === 'hup8BqEe7Mn'
+			                ? ['pzenrgsSny3']
+			                : [];
 		            const provisioningSeOptions = buildSeOptions(initFacilityGroup, selectedStageMetadata);
 	            if (provisioningSeOptions.length === 0) {
 	                showToast?.('No SE sections were found for this Facility Type. Survey initialization was blocked.', 'error');
@@ -2235,6 +2347,9 @@ export function Dashboard() {
                 facilityGroupKey: initFacilityGroup,
 	                programStageId: stageId,
                 assessorUserId: user?.id || null,
+	                allowedDataElementIds: allowedAssessmentDetailDataElementIds,
+		                excludedDataElementIds: excludedAssessmentDetailDataElementIds,
+	                programStageMetadata: selectedStageMetadata,
             });
 
             const eventsPayload = [];
@@ -2335,7 +2450,10 @@ export function Dashboard() {
 							facilityGroup: ns,
 							surveyType: initSurveyType,
 							expectedTags,
-							logLine: (line) => setCreateDetails(prev => [...prev, line])
+								logLine: (line) => setCreateDetails(prev => [...prev, line]),
+								programStageMetadata: selectedStageMetadata,
+								allowedDataElementIds: allowedAssessmentDetailDataElementIds,
+								excludedDataElementIds: excludedAssessmentDetailDataElementIds
 						});
 						const repairedEventIdMap = { ...responseEventIdMap, ...readbackTagMap, ...(repaired.tagMap || {}) };
 						try {
@@ -2371,6 +2489,8 @@ export function Dashboard() {
 							surveyType: initSurveyType,
 								programStageId: stageId,
 							eventIdMap: readbackTagMap,
+								allowedDataElementIds: allowedAssessmentDetailDataElementIds,
+								excludedDataElementIds: excludedAssessmentDetailDataElementIds,
 						};
 						setPendingProvisionedBundle(manualRepairBundle);
 						const failureInfo = {
@@ -2463,7 +2583,9 @@ export function Dashboard() {
                 facilityGroup: pendingProvisionedBundle.facilityGroup,
                 surveyType: pendingProvisionedBundle.surveyType,
                 expectedTags: getExpectedTagsForGroup(pendingProvisionedBundle.facilityGroup),
-                logLine: (line) => setCreateDetails(prev => [...prev, line])
+		                logLine: (line) => setCreateDetails(prev => [...prev, line]),
+		                allowedDataElementIds: pendingProvisionedBundle.allowedDataElementIds || null,
+		                excludedDataElementIds: pendingProvisionedBundle.excludedDataElementIds || []
             });
             const repairedEventMap = { ...(pendingProvisionedBundle.eventIdMap || {}), ...(repaired.tagMap || {}) };
             setPendingProvisionedBundle(null);
@@ -2482,6 +2604,8 @@ export function Dashboard() {
                     facilityGroupKey: repaired.facilityGroup || pendingProvisionedBundle.facilityGroup,
 	                    programStageId: pendingProvisionedBundle.programStageId || getSurveyProgramStageIdForGroup(repaired.facilityGroup || pendingProvisionedBundle.facilityGroup),
                     assessorUserId: user?.id || null,
+	                    allowedDataElementIds: pendingProvisionedBundle.allowedDataElementIds || null,
+		                    excludedDataElementIds: pendingProvisionedBundle.excludedDataElementIds || [],
                 }),
             });
         } catch (err) {
@@ -3369,19 +3493,20 @@ export function Dashboard() {
 		                                                                    </div>
 		                                                                );
 		                                                            })}
-				                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-				                                                                <button
-				                                                                    type="button"
-				                                                                    className="btn btn-secondary btn-sm"
-				                                                                    onClick={(e) => {
-				                                                                        e.stopPropagation();
-				                                                                        toggleExpandAssessment(assessment);
-				                                                                    }}
-				                                                                >
+			                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+			                                                                <button
+			                                                                    type="button"
+			                                                                    className="btn btn-secondary btn-sm"
+				                                                                    title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
+			                                                                    onClick={(e) => {
+			                                                                        e.stopPropagation();
+			                                                                        toggleExpandAssessment(assessment);
+			                                                                    }}
+			                                                                >
 			                                                                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
 			                                                                </button>
 			                                                            </div>
-			                                                            {expandedAssignments[getAssocKey(assessment)] && (
+			                                                            {supportsAssociatedAssessments(assessment) && expandedAssignments[getAssocKey(assessment)] && (
 				                                                                <div
 				                                                                    className="associated-assessments-panel"
 				                                                                    onClick={(e) => e.stopPropagation()}
@@ -3407,12 +3532,16 @@ export function Dashboard() {
 				                                                {' '}| Status: {formatAssignmentStatusLabel(assessment.statusCode || assessment.status)}
 				                                                {' '}| OU: {assessment.orgUnit || '-'}
 				                                            </p>
-                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-	                <button className="btn btn-secondary btn-sm" onClick={(e) => { e.stopPropagation(); toggleExpandAssessment(assessment); }}>
-                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
-                </button>
-            </div>
-            {expandedAssignments[getAssocKey(assessment)] && (
+	                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+	                                                <button
+	                                                    className="btn btn-secondary btn-sm"
+		                                                    title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
+	                                                    onClick={(e) => { e.stopPropagation(); toggleExpandAssessment(assessment); }}
+	                                                >
+	                                                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
+	                                                </button>
+	                                            </div>
+	            {supportsAssociatedAssessments(assessment) && expandedAssignments[getAssocKey(assessment)] && (
 	                <div onClick={(e) => e.stopPropagation()} style={{ marginTop: '10px', width: '100%', background: '#f8f9fa', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
                     {assessment._duplicates && assessment._duplicates.length > 1 && (
                         <div style={{ marginBottom: '10px', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
@@ -3583,7 +3712,7 @@ export function Dashboard() {
                                             <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.start || 'N/A'}</td>
                                             <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.end || 'N/A'}</td>
                                                                                 <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
-                                                                                <td style={{ padding: '6px 8px', color: '#334155' }}>{getGroupValue(ev)}</td>
+	                                                                                <td style={{ padding: '6px 8px', color: '#334155' }}>{getAssociatedAssessmentGroupValue(ev)}</td>
                                                                                 <td style={{ padding: '6px 8px' }}>{getStatusValue(ev)}</td>
                                                                                 <td style={{ padding: '6px 8px' }}>
                                                                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -3594,12 +3723,12 @@ export function Dashboard() {
                                                                                                 const baselineDate = ev._baselineDate || null;
                                                                                                 const ou = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || '';
                                                                                                 const tei = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
-	                                                                                                const facilityGroup = getGroupValue(ev);
+		                                                                                                const facilityGroup = getAssociatedAssessmentGroupValue(ev);
 	                                                                                                const reportProgramStageId = ev.programStage || ev.programStageId || getSurveyProgramStageIdForGroup(facilityGroup);
                                                                                                 const q = new URLSearchParams({
                                                                                                     facilityId: ou || '',
                                                                                                     teiId: tei || '',
-	                                                                                                    programId: ev.programId || configuration?.program?.id || 'G2gULe4jsfs',
+	                                                                                                    programId: ev.programId || getSurveyEventProgramIdForStage(reportProgramStageId, assessment),
 	                                                                                                    programStageId: reportProgramStageId || '',
 	                                                                                                    facilityGroup: facilityGroup || '',
                                                                                                     start: baselineDate || '',
@@ -3615,7 +3744,7 @@ export function Dashboard() {
                                                                                             className="btn btn-secondary btn-xs"
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
-                                                                                                openEditSeAssignments(assessment, ev, getGroupValue(ev), getTypeValue(ev));
+	                                                                                                openEditSeAssignments(assessment, ev, getAssociatedAssessmentGroupValue(ev), getTypeValue(ev));
                                                                                             }}
                                                                                         >
                                                                                             Edit SE Assignments
@@ -4438,9 +4567,12 @@ export function Dashboard() {
                         >
 	                            {(() => {
 	                                const baselineOnly = initMode === 'BASELINE' && !initHasExistingBaseline;
-	                                const optionsForType = forceSelfOnly
-	                                    ? surveyTypeOptions.filter(opt => isSelfSurveyType(opt.label || opt.value))
-	                                    : (baselineOnly ? baselineSurveyTypeOptions : surveyTypeOptions);
+		                                const optionsForTypeBase = forceSelfOnly
+		                                    ? surveyTypeOptions.filter(opt => isSelfSurveyType(opt.label || opt.value))
+		                                    : (baselineOnly ? baselineSurveyTypeOptions : surveyTypeOptions);
+		                                const optionsForType = initSurveyType && !optionsForTypeBase.some(opt => opt.value === initSurveyType)
+		                                    ? [{ value: initSurveyType, label: initSurveyType }, ...optionsForTypeBase]
+		                                    : optionsForTypeBase;
 	                                const menuItems = optionsForType.map(opt => {
 	                                    const blockedBaseline = initHasExistingBaseline && isBaselineSurveyType(opt.label || opt.value);
 	                                    return (

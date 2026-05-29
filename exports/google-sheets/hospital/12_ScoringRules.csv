@@ -1,0 +1,2 @@
+facilityType,ruleName,appliesTo,threshold,operator,outputScore,active
+HOSPITAL,normalize_80_to_100,criterion,80,>=,100,TRUE

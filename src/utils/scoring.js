@@ -257,15 +257,19 @@ export const computeGraphScores = (criteriaMap) => {
                 }
             }
 
-	                const usesHospitalAverageFormula = hasConfiguredSubs;
+		                // Use the Hospital root-average behaviour for every facility
+		                // type. Programme-specific configs still provide their own
+		                // links/severity/critical flags, but all roots now calculate
+		                // with the same live average model.
+		                const usesSharedRootAverageFormula = effectiveIsRoot;
 
                 // If any critical child is non-C, force this root's categorical
                 // result to the worst critical child's label and bypass numeric
-                // aggregation. Hospital roots with configured sub-criteria are an
-                // exception: they use the rounded linked/sub-criteria average formula.
+	                // aggregation. Shared Hospital-style roots use the rounded
+	                // linked/sub-criteria average formula instead.
                 let forcedByCriticalChild = false;
                 let forcedRootNa = false;
-                if (!usesHospitalAverageFormula && criticalChildStatuses.length > 0) {
+	                if (!usesSharedRootAverageFormula && criticalChildStatuses.length > 0) {
                     let forced = null;
                     if (criticalChildStatuses.includes('NC')) forced = 'NC';
                     else if (criticalChildStatuses.includes('PC')) forced = 'PC';
@@ -292,9 +296,9 @@ export const computeGraphScores = (criteriaMap) => {
                 }
 
 	                if (!forcedByCriticalChild && effectiveIsRoot) {
-	                    // Non-Hospital graph roots with no effective links remain
-	                    // pending. Hospital configured roots can still compute from
-	                    // available configured sub-criteria.
+		                    // Graph roots with no effective links remain pending.
+		                    // Configured roots can still compute from available
+		                    // configured sub-criteria.
 	                    if (!hasConfiguredSubs && effectiveLinkCount === 0) {
 	                        isDraft = true;
 	                    }
@@ -305,10 +309,10 @@ export const computeGraphScores = (criteriaMap) => {
 	                    isScored = !isDraft;
 	                }
 	
-	                // Compute a draft average over scored linked criteria (if any)
-	                // and then apply the majority rule override and Hospital
-	                // sub-criteria combination to derive a candidate numeric
-	                // score for this root.
+		                // Compute a draft average over scored linked criteria (if any)
+		                // and then apply the majority rule override and configured
+		                // sub-criteria combination to derive a candidate numeric
+		                // score for this root.
                 let linkedAvgForCombination = null;
 	                if (countScoredLinks > 0) {
                         const draftAvg = sumLinkedPoints / countScoredLinks;
@@ -334,14 +338,14 @@ export const computeGraphScores = (criteriaMap) => {
 	                    rootDraftPoints = majorityAdjusted;
 	                }
 	
-		                // --- Hospital computation rule: for configured roots, set the
+			                // --- Shared root computation rule: for roots, set the
 		                // root's numeric score from the available scoring inputs:
 		                //   (a) qualifying linked-criteria average (non -G/-B links), and
 		                //   (b) configured sub-criteria average, when scored.
 	                // If both sides are available, average them together. If only one
 	                // side is available, use that side by itself. Missing sides are not
 	                // treated as zero.
-                if (!forcedByCriticalChild && usesHospitalAverageFormula) {
+	                if (!forcedByCriticalChild && usesSharedRootAverageFormula) {
 	                    let cfgSum = 0;
 	                    let cfgCount = 0;
 	                    configuredSubs.forEach(subRaw => {
@@ -381,11 +385,11 @@ export const computeGraphScores = (criteriaMap) => {
 	                    points = rootDraftPoints;
 	                }
 
-	            // Safety override. Do not apply this to configured Hospital roots:
-	            // they must use the live formula
+		            // Safety override. Do not apply this to shared Hospital-style roots:
+		            // they must use the live formula
 	            //   (sub-criteria average + linked-criteria average) / 2
 	            // even when one linked child is critical/NC.
-	            if (anyChildCriticalFail && !usesHospitalAverageFormula) {
+		            if (anyChildCriticalFail && !usesSharedRootAverageFormula) {
                 criticalFail = true;
                 points = 0;
                 isScored = true;

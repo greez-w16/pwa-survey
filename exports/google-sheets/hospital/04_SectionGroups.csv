@@ -1,0 +1,394 @@
+facilityType,seNumber,sectionPiId,sectionTitle,sortOrder,active
+HOSPITAL,1,1.1,Governance of the Organisation,1,TRUE
+HOSPITAL,1,1.2,Management of the Organisation,2,TRUE
+HOSPITAL,1,1.3,Management of Departments and Services,3,TRUE
+HOSPITAL,2,2.1,Human Resource Management Support,1,TRUE
+HOSPITAL,2,2.2,Staff Planning,2,TRUE
+HOSPITAL,2,2.3,Personnel Management,3,TRUE
+HOSPITAL,2,2.4,Staff Orientation and Education,4,TRUE
+HOSPITAL,2,2.5,Credentialing of Staff Members,5,TRUE
+HOSPITAL,2,2.6,Quality Improvement,6,TRUE
+HOSPITAL,3,3.1,Financial Management Support,1,TRUE
+HOSPITAL,3,3.2,Health Record Management,2,TRUE
+HOSPITAL,3,3.3,Procurement and Provisioning of Supplies,3,TRUE
+HOSPITAL,3,3.4,Use of Motor Vehicles,4,TRUE
+HOSPITAL,4,4.1,Access to Care,1,TRUE
+HOSPITAL,4,4.2,Admission Processes,2,TRUE
+HOSPITAL,5,5.1,Implementation of Patient Rights,1,TRUE
+HOSPITAL,5,5.2,"Protection of Privacy, Person and Possessions",2,TRUE
+HOSPITAL,5,5.3,Right to Health Education,3,TRUE
+HOSPITAL,5,5.4,Right to Treatment and to Refuse Treatment,4,TRUE
+HOSPITAL,5,5.5,Right  to Voice Complaints,5,TRUE
+HOSPITAL,5,5.6,Informed Consent,6,TRUE
+HOSPITAL,6,6.1,Planning,1,TRUE
+HOSPITAL,6,6.2,Information Management Support,2,TRUE
+HOSPITAL,6,6.3,Data Processing and Information Management,3,TRUE
+HOSPITAL,7,7.1,Risk Management,1,TRUE
+HOSPITAL,7,7.2,Patient Safety,2,TRUE
+HOSPITAL,7,7.3,Occupational Health and Safety,3,TRUE
+HOSPITAL,7,7.4,Security,4,TRUE
+HOSPITAL,7,7.5,Fire Safety,5,TRUE
+HOSPITAL,7,7.6,Emergency Planning,6,TRUE
+HOSPITAL,7,7.7,Waste Management,7,TRUE
+HOSPITAL,8,8.1,Quality Leadership and Design,1,TRUE
+HOSPITAL,8,8.2,Clinical and Managerial Quality Monitoring,2,TRUE
+HOSPITAL,8,8.3,Use of Analysed Data,3,TRUE
+HOSPITAL,8,8.4,Achieving and Sustaining Quality,4,TRUE
+HOSPITAL,9,9.1,Infection Control Management,1,TRUE
+HOSPITAL,9,9.2,Infection Control Processes,2,TRUE
+HOSPITAL,9,9.3,Obtaining Of Laboratory Cultures,3,TRUE
+HOSPITAL,9,9.4,Infection Control Quality Management,4,TRUE
+HOSPITAL,9,9.5,Infection Control Education For The Staff,5,TRUE
+HOSPITAL,10,10.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,10,10.2,Facilities and Equipment,2,TRUE
+HOSPITAL,10,10.3,Clinical Practice Guidelines,3,TRUE
+HOSPITAL,10,10.4,Assessment of Patients,4,TRUE
+HOSPITAL,10,10.5,Patient Care,5,TRUE
+HOSPITAL,10,10.6,Medication,6,TRUE
+HOSPITAL,10,10.7,Food and Nutrition Therapy,7,TRUE
+HOSPITAL,10,10.8,Patient and Family Education,8,TRUE
+HOSPITAL,10,10.9,Continuity of Care,9,TRUE
+HOSPITAL,10,10.10,Quality Improvement,10,TRUE
+HOSPITAL,10,10.11,Patient Rights,11,TRUE
+HOSPITAL,10,10.12,Prevention and Control of Infection,12,TRUE
+HOSPITAL,10,10.13,Risk Management,13,TRUE
+HOSPITAL,11,11.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,11,11.2,Facilities and Equipment,2,TRUE
+HOSPITAL,11,11.3,Clinical Practice Guidelines,3,TRUE
+HOSPITAL,11,11.4,Assessment of Patients,4,TRUE
+HOSPITAL,11,11.5,Patient Care,5,TRUE
+HOSPITAL,11,11.6,Medication,6,TRUE
+HOSPITAL,11,11.7,Food and Nutrition Therapy,7,TRUE
+HOSPITAL,11,11.8,Patient and Family Education,8,TRUE
+HOSPITAL,11,11.9,Continuity of Care,9,TRUE
+HOSPITAL,11,11.10,Quality Improvement,10,TRUE
+HOSPITAL,11,11.11,Patient Rights,11,TRUE
+HOSPITAL,11,11.12,Prevention and Control of Infection,12,TRUE
+HOSPITAL,11,11.13,Risk Management,13,TRUE
+HOSPITAL,12,12.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,12,12.2,Facilities and Equipment,2,TRUE
+HOSPITAL,12,12.3,Clinical Practice Guidelines,3,TRUE
+HOSPITAL,12,12.4,Assessment of Patients,4,TRUE
+HOSPITAL,12,12.5,Patient Care,5,TRUE
+HOSPITAL,12,12.6,Medication,6,TRUE
+HOSPITAL,12,12.7,Food and Nutrition Therapy,7,TRUE
+HOSPITAL,12,12.8,Patient and Family Education,8,TRUE
+HOSPITAL,12,12.9,Continuity of Care,9,TRUE
+HOSPITAL,12,12.10,Quality Improvement,10,TRUE
+HOSPITAL,12,12.11,Patient Rights,11,TRUE
+HOSPITAL,12,12.12,Prevention and Control of Infection,12,TRUE
+HOSPITAL,12,12.13,Risk Management,13,TRUE
+HOSPITAL,13,13.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,13,13.2,Facilities and Equipment,2,TRUE
+HOSPITAL,13,13.3,Clinical Practice Guidelines,3,TRUE
+HOSPITAL,13,13.4,Assessment of Patients,4,TRUE
+HOSPITAL,13,13.5,Patient Care,5,TRUE
+HOSPITAL,13,13.6,Medication,6,TRUE
+HOSPITAL,13,13.7,Food and Nutrition Therapy,7,TRUE
+HOSPITAL,13,13.8,Patient and Family Education,8,TRUE
+HOSPITAL,13,13.9,Continuity of Care,9,TRUE
+HOSPITAL,13,13.10,Quality Improvement,10,TRUE
+HOSPITAL,13,13.11,Patient Rights,11,TRUE
+HOSPITAL,13,13.12,Prevention and Control of Infection,12,TRUE
+HOSPITAL,13,13.13,Risk Management,13,TRUE
+HOSPITAL,14,14.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,14,14.2,Facilities and Equipment,2,TRUE
+HOSPITAL,14,14.3,Clinical Practice Guidelines,3,TRUE
+HOSPITAL,14,14.4,Assessment of Patients,4,TRUE
+HOSPITAL,14,14.5,Patient Care,5,TRUE
+HOSPITAL,14,14.6,Medication,6,TRUE
+HOSPITAL,14,14.7,Food and Nutrition Therapy,7,TRUE
+HOSPITAL,14,14.8,Patient and Family Education,8,TRUE
+HOSPITAL,14,14.9,Continuity of Care,9,TRUE
+HOSPITAL,14,14.10,Quality Improvement,10,TRUE
+HOSPITAL,14,14.11,Patient Rights,11,TRUE
+HOSPITAL,14,14.12,Prevention and Control of Infection,12,TRUE
+HOSPITAL,14,14.13,Risk Management,13,TRUE
+HOSPITAL,15,15.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,15,15.2,Facilities and Equipment,2,TRUE
+HOSPITAL,15,15.3,Clinical Practice Guidelines,3,TRUE
+HOSPITAL,15,15.4,Assessment of Patients,4,TRUE
+HOSPITAL,15,15.5,Patient Care,5,TRUE
+HOSPITAL,15,15.6,Medication,6,TRUE
+HOSPITAL,15,15.7,Food and Nutrition Therapy,7,TRUE
+HOSPITAL,15,15.8,Patient and Family Education,8,TRUE
+HOSPITAL,15,15.9,Continuity of Care,9,TRUE
+HOSPITAL,15,15.10,Special Psychiatric Services,10,TRUE
+HOSPITAL,15,15.11,Quality Improvement,11,TRUE
+HOSPITAL,15,15.12,Patient Rights,12,TRUE
+HOSPITAL,15,15.13,Prevention and Control of Infection,13,TRUE
+HOSPITAL,15,15.14,Risk Management,14,TRUE
+HOSPITAL,16,16.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,16,16.2,Facilities and Equipment,2,TRUE
+HOSPITAL,16,16.3,Clinical Practice Guidelines,3,TRUE
+HOSPITAL,16,16.4,Assessment of Patients,4,TRUE
+HOSPITAL,16,16.5,Patient Care,5,TRUE
+HOSPITAL,16,16.6,Medication,6,TRUE
+HOSPITAL,16,16.7,Food and Nutrition Therapy,7,TRUE
+HOSPITAL,16,16.8,Patient and Family Education,8,TRUE
+HOSPITAL,16,16.9,Continuity of Care,9,TRUE
+HOSPITAL,16,16.10,Quality Improvement,10,TRUE
+HOSPITAL,16,16.11,Patient Rights,11,TRUE
+HOSPITAL,16,16.12,Prevention and Control of Infection,12,TRUE
+HOSPITAL,16,16.13,Risk Management,13,TRUE
+HOSPITAL,17,17.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,17,17.2,"Facilities, Equipment, Supplies and Medication",2,TRUE
+HOSPITAL,17,17.3,Clinical Practice Guidelines,3,TRUE
+HOSPITAL,17,17.4,Policies and Procedures,4,TRUE
+HOSPITAL,17,17.5,Anaesthetic Care,5,TRUE
+HOSPITAL,17,17.6,Quality improvement,6,TRUE
+HOSPITAL,17,17.7,Patient Rights,7,TRUE
+HOSPITAL,17,17.8,Prevention and Control of Infection,8,TRUE
+HOSPITAL,17,17.9,Risk Management,9,TRUE
+HOSPITAL,18,18.1,Management of the Service,1,TRUE
+HOSPITAL,18,18.2,Referral Services,2,TRUE
+HOSPITAL,18,18.3,Radiation Safety,3,TRUE
+HOSPITAL,18,18.4,Administration of Tests,4,TRUE
+HOSPITAL,18,18.5,Quality Improvement,5,TRUE
+HOSPITAL,18,18.6,Patient Rights,6,TRUE
+HOSPITAL,18,18.7,Prevention and Control of Infection,7,TRUE
+HOSPITAL,18,18.8,Risk Management,8,TRUE
+HOSPITAL,19,19.1,Management  of the Service,1,TRUE
+HOSPITAL,19,19.2,Management of Specimens and Results,2,TRUE
+HOSPITAL,19,19.3,Quality Improvement,3,TRUE
+HOSPITAL,19,19.4,Patient Rights,4,TRUE
+HOSPITAL,19,19.5,Prevention and Control of Infection,5,TRUE
+HOSPITAL,19,19.6,Risk Management,6,TRUE
+HOSPITAL,20,20.1,Management of the Service,1,TRUE
+HOSPITAL,20,20.2,Reporting and Recording,2,TRUE
+HOSPITAL,20,20.3,Quality Improvement,3,TRUE
+HOSPITAL,20,20.4,Patient Rights,4,TRUE
+HOSPITAL,20,20.5,Prevention and Control of Infection,5,TRUE
+HOSPITAL,20,20.6,Risk Management,6,TRUE
+HOSPITAL,21,21.1,Management of the Service,1,TRUE
+HOSPITAL,21,21.2,Access to Appropriate Medication,2,TRUE
+HOSPITAL,21,21.3,Policies and Procedures,3,TRUE
+HOSPITAL,21,21.4,Dispensing of Medicines,4,TRUE
+HOSPITAL,21,21.5,Control and Storage of Medication,5,TRUE
+HOSPITAL,21,21.6,Quality Improvement,6,TRUE
+HOSPITAL,21,21.7,Patient Rights,7,TRUE
+HOSPITAL,21,21.8,Prevention and Control of Infection,8,TRUE
+HOSPITAL,21,21.9,Risk Management,9,TRUE
+HOSPITAL,22,22.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,22,22.2,Facilities And Equipment,2,TRUE
+HOSPITAL,22,22.3,Visitor Control,3,TRUE
+HOSPITAL,22,22.4,Patient Registers,4,TRUE
+HOSPITAL,22,22.5,Clinical Practice Guidelines,5,TRUE
+HOSPITAL,22,22.6,Assessment of Patients,6,TRUE
+HOSPITAL,22,22.7,Diagnostic Services,7,TRUE
+HOSPITAL,22,22.8,Patient Care,8,TRUE
+HOSPITAL,22,22.9,Medication,9,TRUE
+HOSPITAL,22,22.10,Patient and Family Education,10,TRUE
+HOSPITAL,22,22.11,Continuity of Care,11,TRUE
+HOSPITAL,22,22.12,Quality Improvement,12,TRUE
+HOSPITAL,22,22.13,Patient Rights,13,TRUE
+HOSPITAL,22,22.14,Prevention and Control of Infection,14,TRUE
+HOSPITAL,22,22.15,Risk Management,15,TRUE
+HOSPITAL,23,23.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,23,23.2,Facilities and Equipment,2,TRUE
+HOSPITAL,23,23.3,Clinical Practice Guidelines,3,TRUE
+HOSPITAL,23,23.4,Assessment of Patients,4,TRUE
+HOSPITAL,23,23.5,Diagnostic Services,5,TRUE
+HOSPITAL,23,23.6,Patient Care,6,TRUE
+HOSPITAL,23,23.7,Medication,7,TRUE
+HOSPITAL,23,23.8,Patient and Family Education,8,TRUE
+HOSPITAL,23,23.9,Continuity of Care,9,TRUE
+HOSPITAL,23,23.10,Quality Improvement,10,TRUE
+HOSPITAL,23,23.11,Patient Rights,11,TRUE
+HOSPITAL,23,23.12,Prevention and Control of Infection,12,TRUE
+HOSPITAL,23,23.13,Risk Management,13,TRUE
+HOSPITAL,24,24.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,24,24.2,Facilities and Equipment,2,TRUE
+HOSPITAL,24,24.3,Visitor Control,3,TRUE
+HOSPITAL,24,24.4,Patient Registers,4,TRUE
+HOSPITAL,24,24.5,Clinical Practice Guidelines,5,TRUE
+HOSPITAL,24,24.6,Assessment  of Patients,6,TRUE
+HOSPITAL,24,24.7,Diagnostic Services,7,TRUE
+HOSPITAL,24,24.8,Patient Care,8,TRUE
+HOSPITAL,24,24.9,Medication,9,TRUE
+HOSPITAL,24,24.10,Patient and Family Education,10,TRUE
+HOSPITAL,24,24.11,Continuity of Care,11,TRUE
+HOSPITAL,24,24.12,Quality Improvement,12,TRUE
+HOSPITAL,24,24.13,Patient Rights,13,TRUE
+HOSPITAL,24,24.14,Prevention and Control of Infection,14,TRUE
+HOSPITAL,24,24.15,Risk Management,15,TRUE
+HOSPITAL,25,25.1,Management,1,TRUE
+HOSPITAL,25,25.2,Facilities and Equipment,2,TRUE
+HOSPITAL,25,25.3,Quality Improvement,3,TRUE
+HOSPITAL,25,25.4,Prevention and Control of Infection,4,TRUE
+HOSPITAL,25,25.5,Risk Management,5,TRUE
+HOSPITAL,26,26.1,Management of the Service,1,TRUE
+HOSPITAL,26,26.2,Facilities and Equipment,2,TRUE
+HOSPITAL,26,26.3,Policies and Procedures,3,TRUE
+HOSPITAL,26,26.4,Menu Planning,4,TRUE
+HOSPITAL,26,26.5,Maintenance of Food Hygiene,5,TRUE
+HOSPITAL,26,26.6,Quality Improvement,6,TRUE
+HOSPITAL,26,26.7,Patient Rights,7,TRUE
+HOSPITAL,26,26.8,Prevention and Control of Infection,8,TRUE
+HOSPITAL,26,26.9,Risk Management,9,TRUE
+HOSPITAL,27,27.1,Management,1,TRUE
+HOSPITAL,27,27.2,Facilities and Equipment,2,TRUE
+HOSPITAL,27,27.3,Policies and Procedures,3,TRUE
+HOSPITAL,27,27.4,Quality Improvement,4,TRUE
+HOSPITAL,27,27.5,Patient Rights,5,TRUE
+HOSPITAL,27,27.6,Prevention and Control of Infection,6,TRUE
+HOSPITAL,27,27.7,Risk Management,7,TRUE
+HOSPITAL,28,28.1,Management of the Service,1,TRUE
+HOSPITAL,28,28.2,Facilities and Equipment,2,TRUE
+HOSPITAL,28,28.3,Policies and Procedures,3,TRUE
+HOSPITAL,28,28.4,Waste Disposal,4,TRUE
+HOSPITAL,28,28.5,Quality Improvement,5,TRUE
+HOSPITAL,28,28.6,Patient Rights,6,TRUE
+HOSPITAL,28,28.7,Prevention and Control of Infection,7,TRUE
+HOSPITAL,28,28.8,Risk Management,8,TRUE
+HOSPITAL,29,29.1,Management of the Service,1,TRUE
+HOSPITAL,29,29.2,Facility Management,2,TRUE
+HOSPITAL,29,29.3,Emergency Preparedness,3,TRUE
+HOSPITAL,29,29.4,Quality Improvement,4,TRUE
+HOSPITAL,29,29.5,Prevention and Control of Infection,5,TRUE
+HOSPITAL,29,29.6,Risk Management,6,TRUE
+HOSPITAL,30,30.1,Resuscitation Committee,1,TRUE
+HOSPITAL,30,30.2,Equipment and Medications,2,TRUE
+HOSPITAL,30,30.3,Education and Training,3,TRUE
+HOSPITAL,30,30.4,Quality Improvement,4,TRUE
+HOSPITAL,31,31.1,Medical Equipment Support,1,TRUE
+HOSPITAL,31,31.2,Medical Equipment Management,2,TRUE
+HOSPITAL,31,31.3,Personnel Training,3,TRUE
+HOSPITAL,31,31.4,Equipment Safety,4,TRUE
+HOSPITAL,31,31.5,Quality Improvement,5,TRUE
+HOSPITAL,31,31.6,Prevention and Control of Infection,6,TRUE
+HOSPITAL,31,31.7,Risk Management,7,TRUE
+HOSPITAL,32,32.1,Management of the Service,1,TRUE
+HOSPITAL,32,32.2,Facilities and Equipment,2,TRUE
+HOSPITAL,32,32.3,Policies and Procedures,3,TRUE
+HOSPITAL,32,32.4,Coordination of Patient Care,4,TRUE
+HOSPITAL,32,32.5,Patient and Family Education,5,TRUE
+HOSPITAL,32,32.6,Quality Improvement,6,TRUE
+HOSPITAL,32,32.7,Patient Rights,7,TRUE
+HOSPITAL,32,32.8,Prevention and Control of Infection,8,TRUE
+HOSPITAL,32,32.9,Risk Management,9,TRUE
+HOSPITAL,33,33.1,Management of the Service,1,TRUE
+HOSPITAL,33,33.2,Facilities and Equipment,2,TRUE
+HOSPITAL,33,33.3,Policies and Procedures,3,TRUE
+HOSPITAL,33,33.4,Coordination of Patient Care,4,TRUE
+HOSPITAL,33,33.5,Patient and Family Education,5,TRUE
+HOSPITAL,33,33.6,Quality Improvement,6,TRUE
+HOSPITAL,33,33.7,Patient Rights,7,TRUE
+HOSPITAL,33,33.8,Prevention and Control of Infection,8,TRUE
+HOSPITAL,33,33.9,Risk Management,9,TRUE
+HOSPITAL,34,34.1,Management of the Service,1,TRUE
+HOSPITAL,34,34.2,Facilities and Equipment,2,TRUE
+HOSPITAL,34,34.3,Policies and Procedures,3,TRUE
+HOSPITAL,34,34.4,Coordination of Patient Care,4,TRUE
+HOSPITAL,34,34.5,Patient and Family Education,5,TRUE
+HOSPITAL,34,34.6,Quality Improvement,6,TRUE
+HOSPITAL,34,34.7,Patient Rights,7,TRUE
+HOSPITAL,34,34.8,Prevention and Control of Infection,8,TRUE
+HOSPITAL,34,34.9,Risk Management,9,TRUE
+HOSPITAL,35,35.1,Management of the Service,1,TRUE
+HOSPITAL,35,35.2,Facilities and Equipment,2,TRUE
+HOSPITAL,35,35.3,Policies and Procedures,3,TRUE
+HOSPITAL,35,35.4,Coordination of Patient Care,4,TRUE
+HOSPITAL,35,35.5,Patient and Family Education,5,TRUE
+HOSPITAL,35,35.6,Quality Improvement,6,TRUE
+HOSPITAL,35,35.7,Patient Rights,7,TRUE
+HOSPITAL,35,35.8,Prevention and Control of Infection,8,TRUE
+HOSPITAL,35,35.9,Risk Management,9,TRUE
+HOSPITAL,36,36.1,Management of the Service,1,TRUE
+HOSPITAL,36,36.2,Facilities and Equipment,2,TRUE
+HOSPITAL,36,36.3,Policies and Procedures,3,TRUE
+HOSPITAL,36,36.4,Coordination of Patient Care,4,TRUE
+HOSPITAL,36,36.5,Patient and Family Education,5,TRUE
+HOSPITAL,36,36.6,Quality Improvement,6,TRUE
+HOSPITAL,36,36.7,Patient Rights,7,TRUE
+HOSPITAL,36,36.8,Prevention and Control of Infection,8,TRUE
+HOSPITAL,36,36.9,Risk Management,9,TRUE
+HOSPITAL,37,37.1,Management of the Service,1,TRUE
+HOSPITAL,37,37.2,Facilities and Equipment,2,TRUE
+HOSPITAL,37,37.3,Policies and Procedures,3,TRUE
+HOSPITAL,37,37.4,Coordination of Patient Care,4,TRUE
+HOSPITAL,37,37.5,Patient and Family Education,5,TRUE
+HOSPITAL,37,37.6,Quality Improvement,6,TRUE
+HOSPITAL,37,37.7,Patient Rights,7,TRUE
+HOSPITAL,37,37.8,Prevention and Control of Infection,8,TRUE
+HOSPITAL,37,37.9,Risk Management,9,TRUE
+HOSPITAL,38,38.1,Management of the Service,1,TRUE
+HOSPITAL,38,38.2,Facilities and Equipment,2,TRUE
+HOSPITAL,38,38.3,Policies and Procedures,3,TRUE
+HOSPITAL,38,38.4,Coordination of Patient Care,4,TRUE
+HOSPITAL,38,38.5,Patient and Family Education,5,TRUE
+HOSPITAL,38,38.6,Quality improvement,6,TRUE
+HOSPITAL,38,38.7,Patient Rights,7,TRUE
+HOSPITAL,38,38.8,Prevention and Control of Infection,8,TRUE
+HOSPITAL,38,38.9,Risk Management,9,TRUE
+HOSPITAL,39,39.1,Coordination of patient care,1,TRUE
+HOSPITAL,39,39.2,Assessment of patients,2,TRUE
+HOSPITAL,39,39.3,Patient care,3,TRUE
+HOSPITAL,39,39.4,Medication management,4,TRUE
+HOSPITAL,39,39.5,Food and nutrition therapy,5,TRUE
+HOSPITAL,39,39.6,Patient and family education,6,TRUE
+HOSPITAL,39,39.7,Continuity of care,7,TRUE
+HOSPITAL,39,39.8,Quality improvement,8,TRUE
+HOSPITAL,39,39.9,Patient rights,9,TRUE
+HOSPITAL,39,39.10,Prevention and control of infection,10,TRUE
+HOSPITAL,39,39.11,Occupational health and safety and risk management,11,TRUE
+HOSPITAL,40,40.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,40,40.2,Assessement of Patients,2,TRUE
+HOSPITAL,40,40.3,Patient Care,3,TRUE
+HOSPITAL,40,40.4,Medication Management,4,TRUE
+HOSPITAL,40,40.5,Food and Nutrition Therapy,5,TRUE
+HOSPITAL,40,40.6,Patient and Family Education,6,TRUE
+HOSPITAL,40,40.7,Continuity of Care,7,TRUE
+HOSPITAL,40,40.8,Quality Improvement,8,TRUE
+HOSPITAL,40,40.9,Patient Rights,9,TRUE
+HOSPITAL,40,40.10,Prevention and Control of Infection,10,TRUE
+HOSPITAL,40,40.11,Occupational Health and Safety and Risk Management,11,TRUE
+HOSPITAL,41,41.1,Management of the Electro-Convulsive Therapy Service,1,TRUE
+HOSPITAL,41,41.2,Assessment of Patients,2,TRUE
+HOSPITAL,41,41.3,Anaesthetic Care,3,TRUE
+HOSPITAL,41,41.4,"Facilities, Equipment, Supplies and Medication",4,TRUE
+HOSPITAL,41,41.5,Quality Improvement,5,TRUE
+HOSPITAL,41,41.6,Patient Rights,6,TRUE
+HOSPITAL,41,41.7,Prevention and Control of Infection,7,TRUE
+HOSPITAL,41,41.8,Occupational Health and Safety and Risk Management,8,TRUE
+HOSPITAL,42,42.1,Coordination of patient care,1,TRUE
+HOSPITAL,42,42.2,Assessment of patients,2,TRUE
+HOSPITAL,42,42.3,Patient care,3,TRUE
+HOSPITAL,42,42.4,Medication management,4,TRUE
+HOSPITAL,42,42.5,Food and nutrition therapy,5,TRUE
+HOSPITAL,42,42.6,Patient and family education,6,TRUE
+HOSPITAL,42,42.7,Continuity of care,7,TRUE
+HOSPITAL,42,42.8,Quality improvement,8,TRUE
+HOSPITAL,42,42.9,Patient rights,9,TRUE
+HOSPITAL,42,42.10,Prevention and control of infection,10,TRUE
+HOSPITAL,42,42.11,Occupational health and safety and risk management,11,TRUE
+HOSPITAL,43,43.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,43,43.2,Assessment of Patients,2,TRUE
+HOSPITAL,43,43.3,Patient Care,3,TRUE
+HOSPITAL,43,43.4,Medication Management,4,TRUE
+HOSPITAL,43,43.5,Food and Nutrition Therapy,5,TRUE
+HOSPITAL,43,43.6,Patient and Family Education,6,TRUE
+HOSPITAL,43,43.7,Continuity of Care,7,TRUE
+HOSPITAL,43,43.8,Quality Improvement,8,TRUE
+HOSPITAL,43,43.9,Patient Rights,9,TRUE
+HOSPITAL,43,43.10,Prevention and control of infection,10,TRUE
+HOSPITAL,43,43.11,Occupational Health and Safety and Risk Management,11,TRUE
+HOSPITAL,44,44.1,Coordination of Patient Care,1,TRUE
+HOSPITAL,44,44.2,Assessment of Patients,2,TRUE
+HOSPITAL,44,44.3,Patient Care,3,TRUE
+HOSPITAL,44,44.4,Medication Management,4,TRUE
+HOSPITAL,44,44.5,Food and Nutrition Therapy,5,TRUE
+HOSPITAL,44,44.6,Patient and Family Education,6,TRUE
+HOSPITAL,44,44.7,Continuity of Care,7,TRUE
+HOSPITAL,44,44.8,Quality Improvement,8,TRUE
+HOSPITAL,44,44.9,Patient Rights,9,TRUE
+HOSPITAL,44,44.10,Prevention and Control of Infection,10,TRUE
+HOSPITAL,44,44.11,Occupational Health and Safety and Risk Management,11,TRUE
+HOSPITAL,45,45.1,Management and staffing,1,TRUE
+HOSPITAL,45,45.2,Volunteer development and education,2,TRUE
+HOSPITAL,45,45.3,Policies and procedures,3,TRUE
+HOSPITAL,45,45.4,Facilities and equipment,4,TRUE
+HOSPITAL,45,45.5,Patient care,5,TRUE
+HOSPITAL,45,45.6,Quality improvement,6,TRUE
+HOSPITAL,45,45.7,Patient rights,7,TRUE
+HOSPITAL,45,45.8,Prevention and control of infection,8,TRUE

@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>DHIS2 Live Hospital Stage Check V3</title>
+</head>
+<body>
+  <h1>DHIS2 Live Hospital Stage Check V3</h1>
+  <p id="status">Fetching live metadata from DHIS2...</p>
+  <pre id="out"></pre>
+  <script>
+    (async () => {
+      const status = document.getElementById('status');
+      const out = document.getElementById('out');
+      try {
+        const url = '/qims/api/programStages/hup8BqEe7Mn.json?fields=id,name,displayName,programStageSections[id,name,displayName,code,sortOrder,dataElements[id,code,name,displayName]]';
+        const resp = await fetch(url);
+        if (!resp.ok) throw new Error('HTTP ' + resp.status);
+        const json = await resp.json();
+        const sections = json.programStageSections || [];
+        const rows = sections.map(s => {
+          const els = s.dataElements || [];
+          const first = els[0] || {};
+          return {
+            sortOrder: s.sortOrder,
+            expectedSe: s.sortOrder - 1,
+            sectionUid: s.id,
+            sectionCode: s.code || '',
+            sectionName: s.displayName || s.name || '',
+            firstDeUid: first.id || '',
+            firstDeCode: first.code || first.name || ''
+          };
+        }).sort((a, b) => a.sortOrder - b.sortOrder);
+        const payload = JSON.stringify({ ok: true, stageId: json.id, sectionCount: sections.length, rows }, null, 2);
+        out.textContent = payload;
+        status.textContent = 'Fetched ' + sections.length + ' sections. Posting to local receiver...';
+        await fetch('http://127.0.0.1:8790/dhis2-live-result', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: payload
+        });
+        status.textContent = 'Done. You can close this tab.';
+      } catch (e) {
+        status.textContent = 'Error: ' + e.message;
+        out.textContent = e.stack;
+      }
+    })();
+  </script>
+</body>
+</html>

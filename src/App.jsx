@@ -27,11 +27,17 @@ import Admin from './pages/Admin';
 const DEFAULT_SURVEY_PROGRAM_STAGE_ID = 'HpHD6u6MV37';
 const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   HOSPITAL: 'hup8BqEe7Mn',
+  CLINICS: 'cliStageU11',
+  EMS: 'emsStageU11',
+  MORTUARY: 'morStageU11',
 };
 
 const getSurveyProgramStageIdForGroupText = (text) => {
   const value = String(text || '').toLowerCase();
   if (value.includes('hosp')) return SURVEY_PROGRAM_STAGE_BY_GROUP.HOSPITAL;
+  if (value.includes('clinic')) return SURVEY_PROGRAM_STAGE_BY_GROUP.CLINICS;
+  if (value.includes('ems') || value.startsWith('se') || value.includes(' se')) return SURVEY_PROGRAM_STAGE_BY_GROUP.EMS;
+  if (value.includes('mortu') || value.includes('general')) return SURVEY_PROGRAM_STAGE_BY_GROUP.MORTUARY;
   return DEFAULT_SURVEY_PROGRAM_STAGE_ID;
 };
 
@@ -411,32 +417,52 @@ const PrivateRoute = ({ children }) => {
     }
   };
 
-	  const loadProgramStageMetadata = React.useCallback(async (programStageId, preferredGroupText = '') => {
+			  const groupHasNonAssessmentSections = React.useCallback((group) => (
+			    Array.isArray(group?.sections) && group.sections.some(section => !isAssessmentDetailsName(section?.name || section?.code || section?.id))
+			  ), []);
+
+			  const selectBestGroup = React.useCallback((transformedGroups, preferredGroupText = '') => {
+			    const preferredGroupId = resolveGroupIdFromText(preferredGroupText);
+			    const preferred = transformedGroups.find(g => g.id === preferredGroupId) || null;
+			    if (preferred && groupHasNonAssessmentSections(preferred)) return preferred;
+			    return transformedGroups.find(groupHasNonAssessmentSections) || preferred || transformedGroups[0] || null;
+			  }, [groupHasNonAssessmentSections, resolveGroupIdFromText]);
+
+			  const applyMetadataToNavigation = React.useCallback((metadata, preferredGroupText = '') => {
+		    const transformedGroups = transformMetadata(metadata);
+		    setGroups(transformedGroups);
+
+			    const nextGroup = selectBestGroup(transformedGroups, preferredGroupText);
+		    setActiveGroup(nextGroup);
+		    setActiveSection(nextGroup?.sections?.[0] || null);
+		    return transformedGroups;
+			  }, [selectBestGroup]);
+
+			  const formMetadataLoadRef = React.useRef('');
+
+			  const loadProgramStageMetadata = React.useCallback(async (programStageId, preferredGroupText = '', forceRefresh = false) => {
 	    const targetStageId = programStageId || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
-	    if (configuration?.programStage?.id === targetStageId && groups.length > 0) return;
+			    if (!forceRefresh && configuration?.programStage?.id === targetStageId && Array.isArray(configuration?.programStage?.programStageSections)) {
+		      applyMetadataToNavigation(configuration.programStage, preferredGroupText);
+		      return;
+		    }
 
 	    setIsFormLoading(true);
 	    try {
 	      const metadata = await api.getFormMetadata(targetStageId);
-	      const transformedGroups = transformMetadata(metadata);
-	      setGroups(transformedGroups);
+		      applyMetadataToNavigation(metadata, preferredGroupText);
 	      setConfiguration({
 	        programStage: metadata,
 	        program: metadata.program || configuration?.program || { id: 'G2gULe4jsfs', displayName: 'MOH Survey Dashboard' },
 	        organisationUnits: assignments.map(a => a.orgUnit)
 	      });
-
-	      const preferredGroupId = resolveGroupIdFromText(preferredGroupText);
-	      const nextGroup = transformedGroups.find(g => g.id === preferredGroupId) || transformedGroups[0] || null;
-	      setActiveGroup(nextGroup);
-	      setActiveSection(nextGroup?.sections?.[0] || null);
 	    } catch (err) {
 	      console.error('Failed to load form metadata for program stage', targetStageId, err);
 	      showToast?.('Failed to load survey questions for this facility type.', 'error');
 	    } finally {
 	      setIsFormLoading(false);
 	    }
-	  }, [assignments, configuration, groups.length, resolveGroupIdFromText, setConfiguration, showToast]);
+		  }, [applyMetadataToNavigation, assignments, configuration, setConfiguration, showToast]);
 
 	  useEffect(() => {
 	    if (location.pathname !== '/form') return;
@@ -446,14 +472,30 @@ const PrivateRoute = ({ children }) => {
 	      stateAssignment?.parentGroupId ||
 	      formData?.[FACILITY_GROUP_DE_ID] ||
 	      '';
-	    const targetStageId =
-	      searchParams.get('programStageId') ||
-	      stateAssignment?.programStageId ||
-	      getSurveyProgramStageIdForGroupText(groupText);
+		    const groupStageId = getSurveyProgramStageIdForGroupText(groupText);
+		    const explicitStageId = searchParams.get('programStageId') || stateAssignment?.programStageId || '';
+		    const targetStageId =
+		      groupStageId !== DEFAULT_SURVEY_PROGRAM_STAGE_ID
+		        ? groupStageId
+		        : (explicitStageId || groupStageId);
 
-	    if (!targetStageId || configuration?.programStage?.id === targetStageId) return;
-	    loadProgramStageMetadata(targetStageId, groupText);
-	  }, [location.pathname, location.state, searchParams, configuration?.programStage?.id, formData?.[FACILITY_GROUP_DE_ID], loadProgramStageMetadata]);
+			    if (!targetStageId) return;
+			    const metadataLoadKey = `${location.key || location.pathname}|${targetStageId}|${groupText || ''}`;
+			    const shouldRefreshDedicatedStageMetadata = Object.values(SURVEY_PROGRAM_STAGE_BY_GROUP).includes(targetStageId) && formMetadataLoadRef.current !== metadataLoadKey;
+			    if (configuration?.programStage?.id === targetStageId) {
+			      if (shouldRefreshDedicatedStageMetadata) {
+			        formMetadataLoadRef.current = metadataLoadKey;
+			        loadProgramStageMetadata(targetStageId, groupText, true);
+			        return;
+			      }
+		      if (Array.isArray(configuration?.programStage?.programStageSections)) {
+		        applyMetadataToNavigation(configuration.programStage, groupText);
+		      }
+		      return;
+		    }
+			    formMetadataLoadRef.current = metadataLoadKey;
+		    loadProgramStageMetadata(targetStageId, groupText);
+			  }, [location.key, location.pathname, location.state, searchParams, configuration?.programStage, formData?.[FACILITY_GROUP_DE_ID], applyMetadataToNavigation, loadProgramStageMetadata]);
 
 	  // Auto-select facility based on navigation state or URL parameter
 	  useEffect(() => {
@@ -465,9 +507,9 @@ const PrivateRoute = ({ children }) => {
 		        stateAssignment?.parentGroupId ||
 		        '';
 		      const targetGroupId = resolveGroupIdFromText(preloadedGroupText);
-		      if (targetGroupId && Array.isArray(groups) && groups.length > 0 && activeGroup?.id !== targetGroupId) {
-		        const found = groups.find(g => g.id === targetGroupId);
-		        if (found) {
+			      if (targetGroupId && Array.isArray(groups) && groups.length > 0) {
+			        const found = selectBestGroup(groups, preloadedGroupText);
+			        if (found && activeGroup?.id !== found.id) {
 		          console.log('🎯 App: Preselecting group from navigation state →', found.name || found.id);
 		          setActiveGroup(found);
 		          if (found.sections && found.sections.length > 0) setActiveSection(found.sections[0]);
@@ -510,7 +552,7 @@ const PrivateRoute = ({ children }) => {
 	        setSelectedFacility(restored);
 	      }
 	    }
-		  }, [location.state, searchParams, assignments, groups, activeGroup?.id, resolveGroupIdFromText]);
+		  }, [location.state, searchParams, assignments, groups, activeGroup?.id, resolveGroupIdFromText, selectBestGroup]);
 
   // Track whether we've applied navigation preloads for the current selection
   const preloadAppliedRef = React.useRef(null);
@@ -610,6 +652,12 @@ const PrivateRoute = ({ children }) => {
             .toLowerCase()
 	            .match(/facility assessment (group|type)/)
       );
+	      const typeField = adFields.find(f => {
+	        const label = (f.label || '').toLowerCase();
+	        return f.id === typeOfAssessmentDeId
+	          || label.includes('type of assessment')
+	          || (label.includes('assessment type') && !label.includes('facility assessment'));
+	      });
       const assessorField = adFields.find(f => {
         const label = (f.label || '').toUpperCase();
         return (
@@ -639,6 +687,17 @@ const PrivateRoute = ({ children }) => {
         );
         saveField(enrField.id, enrollmentId);
       }
+	      if (typeField && !formData[typeField.id]) {
+	        const typeValue = selectedFacility?.typeOfAssessment
+	          || selectedFacility?.assessmentType
+	          || selectedFacility?.preloadDataValues?.[typeField.id]
+	          || selectedFacility?.preloadDataValues?.[TYPE_OF_ASSESSMENT_DE_ID]
+	          || '';
+	        if (String(typeValue).trim() !== '') {
+	          console.log('📝 App: Auto-populating Type of Assessment:', typeValue);
+	          saveField(typeField.id, typeValue);
+	        }
+	      }
 	      if (programStageField && selectedFacility?.programStageId && !formData[programStageField.id]) {
 	        console.log(`📝 App: Auto-populating Program Stage ID: ${selectedFacility.programStageId}`);
 	        saveField(programStageField.id, selectedFacility.programStageId);
@@ -648,7 +707,30 @@ const PrivateRoute = ({ children }) => {
       // If we didn't preload from a clicked event, resolve the facility's
       // Baseline Assessment Group from DHIS2. This both fills an empty field and
       // corrects a mismatched saved draft (e.g. defaulted Mortuary).
-      if (groupField && !preloadedGroupText) {
+	      if (groupField && !formData[groupField.id]) {
+		        const selectedGroupText = selectedFacility?.parentGroupId
+		          || selectedFacility?.facilityGroup
+		          || preloadedGroupText
+		          || '';
+		        const selectedGroupId = resolveGroupIdFromText(selectedGroupText);
+		        const selectedGroupLabel = {
+		          HOSPITAL: 'Hospital',
+		          CLINICS: 'Clinics',
+		          SE: 'EMS',
+		          EMS: 'EMS',
+		          GENERAL: 'Mortuary',
+		          MORTUARY: 'Mortuary',
+		        }[selectedGroupId] || selectedGroupText;
+		        const groupValue = selectedFacility?.preloadDataValues?.[groupField.id]
+		          || selectedGroupLabel
+		          || getGroupLabelForStorage(activeGroup)
+		          || '';
+	        if (String(groupValue).trim() !== '') {
+	          console.log('📝 App: Auto-populating Facility Assessment Type:', groupValue);
+	          saveField(groupField.id, groupValue);
+	        }
+	      }
+	      if (groupField && !preloadedGroupText) {
         const programId = configuration?.program?.id || 'G2gULe4jsfs';
         const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
         const orgUnitId =
@@ -705,7 +787,7 @@ const PrivateRoute = ({ children }) => {
 	        saveField(sysTagField.id, 'FINAL');
 	      }
     }
-  }, [selectedFacility, activeSection, activeGroup, saveField, formData, user?.id, assessmentIdParam, groups, hasLoadedDraft, activeEventId]);
+	  }, [selectedFacility, activeSection, activeGroup, saveField, formData, user?.id, assessmentIdParam, groups, hasLoadedDraft, activeEventId, typeOfAssessmentDeId, resolveGroupIdFromText]);
 
   // Keep activeGroup in sync with the Facility Assessment Group field value so
   // that when opening an existing event (e.g., Hospital), the Hospital forms
@@ -1023,7 +1105,7 @@ const PrivateRoute = ({ children }) => {
 	        }]
 	      }))
 	    };
-	  }, [activeGroup, groups, scoringDeps, location.pathname]);
+		  }, [activeGroup, groups, scoringDeps, location.pathname, programmeScoringMeta]);
 
 		  const scoringResults = useAssessmentScoring(assessmentDetailsForScoring);
 

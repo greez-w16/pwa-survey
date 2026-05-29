@@ -1,0 +1,2 @@
+facilityType,facilityName,programStageId,programStageName,programId,active,notes
+HOSPITAL,Hospital,hup8BqEe7Mn,Hospital Assessment,,TRUE,Program ID must be filled before creating a new stage.

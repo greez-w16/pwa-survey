@@ -1,7 +1,12 @@
-			import React from 'react';
+				import React from 'react';
 			import './Sidebar.css';
 			
 					const Sidebar = ({ groups, activeGroup, onSelectGroup, activeSection, onSelectSection, isADComplete, collapsed, onToggleCollapsed, scoringResults, selectedFacility, formData, scoringEventIdMap }) => {
+					  const isAssessmentDetailsSection = React.useCallback((sec) => {
+					    const name = String(sec?.name || sec?.code || sec?.id || '').toLowerCase().trim();
+					    return name === 'ad' || name === 'assessment_details' || name === 'assessment-details' || name.includes('assessment details');
+					  }, []);
+
 				  const assessmentTeiId = formData?.teiId_internal
 				    || selectedFacility?.preloadDataValues?.teiId_internal
 				    || selectedFacility?.trackedEntityInstance
@@ -15,10 +20,29 @@
 				  const assessmentProgramStageId = selectedFacility?.programStageId
 				    || selectedFacility?.programStage?.id
 				    || null;
+					  const assessmentDetailsAveragePercent = React.useMemo(() => {
+					    const visibleSectionIds = new Set(
+					      (activeGroup?.sections || [])
+					        .filter(sec => !isAssessmentDetailsSection(sec))
+					        .map(sec => sec.id)
+					        .filter(Boolean)
+					    );
+
+					    const sectionScores = (scoringResults?.sections || [])
+					      .filter(section => visibleSectionIds.has(section?.id));
+
+					    if (!sectionScores.length) return null;
+
+					    const total = sectionScores.reduce((sum, section) => {
+					      const percent = Number(section?.percent);
+					      return sum + (Number.isFinite(percent) ? percent : 0);
+					    }, 0);
+
+					    return total / sectionScores.length;
+					  }, [activeGroup?.sections, isAssessmentDetailsSection, scoringResults?.sections]);
 					  const effectiveEventIdMap = scoringEventIdMap || {};
 					  const getSectionSysTag = (sec) => {
-					    const nameLower = (sec?.name || '').toLowerCase().trim();
-					    if (nameLower === 'assessment details' || nameLower === 'assessment_details') {
+						    if (isAssessmentDetailsSection(sec)) {
 					      return 'FINAL';
 					    }
 
@@ -35,7 +59,7 @@
 					      let match = candidate.match(/(?:^|[_\s-])(SE|SEC|SECTION|EMS)\s*([0-9]+)(?=$|[_\s:-])/i);
 					      if (match) return match[2];
 
-					      match = candidate.match(/(?:HOSP(?:ITAL)?|CLINICS?|MORTUARY|SURV)[_\s-]+(?:SE[_\s-]*)?([0-9]+)(?=$|[_\s:-])/i);
+						      match = candidate.match(/(?:HOSP(?:ITAL)?|CLINICS?|MORTUARY|SURV)[_\s-]+(?:SE[_\s-]*)?([0-9]+)(?=$|[_.\s:-])/i);
 					      if (match) return match[1];
 					    }
 
@@ -47,6 +71,9 @@
 					    for (const candidate of fieldCandidates) {
 					      let match = candidate.match(/(?:SE|SEC|SECTION|EMS)\s*([0-9]+)/i);
 					      if (match) return match[1];
+
+						      match = candidate.match(/(?:HOSP(?:ITAL)?|CLINICS?|MORTUARY|SURV)[_\s-]+(?:SE[_\s-]*)?([0-9]+)(?=$|[_.\s:-])/i);
+						      if (match) return match[1];
 
 					      match = candidate.match(/(?:^|[^0-9])([0-9]+)\.[0-9]+\.[0-9]+\.[0-9]+/);
 					      if (match) return match[1];
@@ -87,9 +114,8 @@
 		        <h4>Sections</h4>
 		      </div>
 			      <ul className="section-list">
-			        {activeGroup?.sections?.map((sec, index) => {
-		          const nameLower = (sec.name || '').toLowerCase().trim();
-		          const isADSection = nameLower === "assessment details" || nameLower === "assessment_details";
+				        {activeGroup?.sections?.map((sec, index) => {
+			          const isADSection = isAssessmentDetailsSection(sec);
 		          // When Assessment Details is incomplete, all other sections are
 		          // visually locked and cannot be selected.
 		          const isSectionLocked = !isADSection && !isADComplete;
@@ -155,11 +181,12 @@
 		              <span className="status">
                         {(() => {
                           const sectionScoring = (scoringResults?.sections || []).find(s => s.id === sec.id);
-                          const nameLower = (sec.name || '').toLowerCase().trim();
-                          const isADSection = nameLower === "assessment details" || nameLower === "assessment_details";
+	                          const isADSection = isAssessmentDetailsSection(sec);
                           
                           if (isADSection) {
-                            return scoringResults?.overall ? `${Math.round(scoringResults.overall.percent)}%` : '-';
+	                            return assessmentDetailsAveragePercent !== null
+	                              ? `${Math.round(assessmentDetailsAveragePercent)}%`
+	                              : (scoringResults?.overall ? `${Math.round(scoringResults.overall.percent)}%` : '-');
                           }
                           return sectionScoring ? `${Math.round(sectionScoring.percent)}%` : '-';
                         })()}

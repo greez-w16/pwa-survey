@@ -33,7 +33,30 @@ export default function Admin() {
   const [inspectResult, setInspectResult] = useState(null);
 
   const schedulingProgramId = 'K9O5fdoBmKf';
+	  const SURVEY_PROGRAM_ATTRIBUTE_IDS = {
+	    assessmentTypeSelected: 'qrTQdWKRYMB',
+	    assessmentType: 'Bw4PZ8NsYFd',
+	  };
   const assignmentOrgUnitIds = Array.from(new Set((userAssignments || []).map(a => (typeof a.orgUnit === 'string' ? a.orgUnit : a.orgUnit?.id || a.orgUnitId)).filter(Boolean)));
+
+	  const getAttributeValue = (attributes, attributeId, displayNameIncludes = []) => {
+	    const normalizedNames = displayNameIncludes.map(name => String(name || '').replace(/\s+/g, ' ').toLowerCase());
+	    const attr = (attributes || []).find(item => {
+	      if (item?.attribute === attributeId) return true;
+	      const displayName = String(item?.displayName || '').replace(/\s+/g, ' ').toLowerCase();
+	      return normalizedNames.some(name => displayName.includes(name));
+	    });
+	    const value = attr?.value;
+	    return value === undefined || value === null || String(value).trim() === '' ? null : value;
+	  };
+
+	  const getActiveAssessmentTypeValue = (item) => (
+	    item?.typeOfAssessment
+	    || item?.assessmentType
+	    || getAttributeValue(item?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
+	    || getAttributeValue(item?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentType, ['assessment type'])
+	    || '-'
+	  );
 
   const runDryRun = async () => {
     try {
@@ -342,6 +365,7 @@ export default function Admin() {
                         <tr style={{ background: '#f9fafb', textAlign: 'left' }}>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Facility</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Program</th>
+	                            <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Type of Assessment</th>
 	                            <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Status</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>TEI UID</th>
                             <th style={{ padding: 8, borderBottom: '1px solid #ddd' }}>Enrollment ID</th>
@@ -358,6 +382,7 @@ export default function Admin() {
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>
                                     {item.programId === configuration?.program?.id ? (configuration?.program?.name || item.programId) : item.programId}
                                 </td>
+	                                <td style={{ padding: 8, borderBottom: '1px solid #eee' }}>{getActiveAssessmentTypeValue(item)}</td>
 	                                <td style={{ padding: 8, borderBottom: '1px solid #eee', fontWeight: 600 }}>{item.status || 'N/A'}</td>
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}><code>{item.teiId}</code></td>
                                 <td style={{ padding: 8, borderBottom: '1px solid #eee' }}><code>{item.enrollmentId || 'N/A'}</code></td>

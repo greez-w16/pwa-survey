@@ -1,0 +1,7 @@
+tab,column,description,required
+FacilityTypes,facilityType,Facility type key used by the app and importer,TRUE
+ProgramStages,programStageId,DHIS2 program stage UID,TRUE
+ServiceElements,sectionUid,DHIS2 programStageSection UID; fill or generate before DHIS2 import,FALSE
+Questions,dataElementUid,DHIS2 dataElement UID; fill or generate before DHIS2 import,FALSE
+RootCriteria,subCriteriaCodes,Pipe-separated criteria contributing to the root score,TRUE
+CriterionLinks,targetCriterionCode,Criterion linked to the source criterion,TRUE

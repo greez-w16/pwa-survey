@@ -702,7 +702,7 @@
         const list = (ps.programStageDataElements || []).map(psde => psde.dataElement || psde);
         const match = list.find(de => {
         const n = (de?.displayName || de?.formName || de?.name || '').toLowerCase();
-        return n.includes('type of assessment');
+	        return n.includes('type of assessment') || (n.includes('assessment type') && !n.includes('facility assessment'));
         });
         // Known fallback if present in your environment
         return match?.id || 'LNszX9xHx8s';
@@ -3426,7 +3426,7 @@
                             <div><strong>Expected SYS_TAG:</strong> <code>{activeExpectedSysTag || 'N/A'}</code></div>
                             <div><strong>Mapped Event ID:</strong> <code>{activeSectionEventId || 'Not mapped'}</code></div>
                         </div>
-                        <details open style={{ marginTop: '10px' }}>
+	                        <details style={{ marginTop: '10px' }}>
                             <summary style={{ cursor: 'pointer', fontWeight: 700 }}>Expected data JSON</summary>
                             <pre style={{
                                 marginTop: '10px',

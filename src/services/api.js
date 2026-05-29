@@ -691,8 +691,9 @@ export const api = {
             'programStageDataElements[id,displayName,sortOrder,compulsory,allowProvidedElsewhere,dataElement[id,formName,displayFormName,name,displayName,shortName,code,description,valueType,aggregationType,lastUpdated,optionSet[id,displayName,options[id,displayName,code,sortOrder]]]]'
         ].join(',');
 
-        const response = await fetch(`${BASE_URL}/api/programStages/${programStageId}?${params}`, {
-            headers: getHeaders()
+        const response = await fetch(`${BASE_URL}/api/programStages/${programStageId}?${params}&_=${Date.now()}`, {
+            headers: { ...getHeaders(), 'Cache-Control': 'no-cache', Pragma: 'no-cache' },
+            cache: 'no-store'
         });
         if (!response.ok) throw new Error('Failed to load metadata');
         const metadata = await response.json();
@@ -728,8 +729,8 @@ export const api = {
                 console.log(`[API] Fetching ${missingIds.size} missing data elements for section hydration...`);
                 const deFields = 'id,formName,displayFormName,name,displayName,shortName,code,description,valueType,aggregationType,lastUpdated,optionSet[id,displayName,options[id,displayName,code,sortOrder]]';
                 const deResponse = await fetch(
-                    `${BASE_URL}/api/dataElements?paging=false&filter=id:in:[${[...missingIds].join(',')}]&fields=${deFields}`,
-                    { headers: getHeaders() }
+                    `${BASE_URL}/api/dataElements?paging=false&filter=id:in:[${[...missingIds].join(',')}]&fields=${deFields}&_=${Date.now()}`,
+                    { headers: { ...getHeaders(), 'Cache-Control': 'no-cache', Pragma: 'no-cache' }, cache: 'no-store' }
                 );
 
                 if (deResponse.ok) {
