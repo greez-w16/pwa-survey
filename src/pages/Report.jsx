@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
 import { Button, TextField, MenuItem, FormControl, InputLabel, Select, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
@@ -35,9 +35,11 @@ import {
 	  Radar
 } from 'recharts';
 
-const DEFAULT_SURVEY_PROGRAM_STAGE_ID = 'HpHD6u6MV37';
 const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   HOSPITAL: 'hup8BqEe7Mn',
+  CLINICS: 'cliStageU11',
+  EMS: 'emsStageU11',
+  MORTUARY: 'morStageU11',
 };
 
 const toFacilityGroupKey = (value) => {
@@ -45,15 +47,22 @@ const toFacilityGroupKey = (value) => {
   if (!t || t === '-') return '';
   if (t.includes('hosp')) return 'HOSPITAL';
   if (t.includes('clinic')) return 'CLINICS';
-  if (t.includes('ems') || t === 'se' || t.includes(' se')) return 'SE';
-  if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
+  if (t.includes('ems') || t === 'se' || t.includes(' se')) return 'EMS';
+  if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
   return String(value || '').trim().toUpperCase();
 };
 
 const getSurveyProgramStageIdForGroup = (facilityGroupKey) => {
   const normalized = toFacilityGroupKey(facilityGroupKey);
   if (!normalized) return '';
-  return SURVEY_PROGRAM_STAGE_BY_GROUP[normalized] || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+  return SURVEY_PROGRAM_STAGE_BY_GROUP[normalized] || '';
+};
+
+const getFacilityGroupKeyFromProgramStageId = (stageId) => {
+  const id = String(stageId || '').trim();
+  if (!id) return '';
+  const entry = Object.entries(SURVEY_PROGRAM_STAGE_BY_GROUP).find(([, value]) => value === id);
+  return entry?.[0] || '';
 };
 
 export default function Report() {
@@ -112,7 +121,7 @@ export default function Report() {
   const queryFacilityGroupKey = useMemo(() => toFacilityGroupKey(reportQueryParams.facilityGroup), [reportQueryParams.facilityGroup]);
   const programId = reportQueryParams.programId || configuration?.program?.id || 'G2gULe4jsfs';
   const stageIdFromGroup = queryFacilityGroupKey ? getSurveyProgramStageIdForGroup(queryFacilityGroupKey) : '';
-  const stageId = reportQueryParams.programStageId || stageIdFromGroup || configuration?.programStage?.id || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+  const stageId = reportQueryParams.programStageId || stageIdFromGroup || configuration?.programStage?.id || '';
   const metadataReadyForStage = !stageId || configuration?.programStage?.id === stageId;
 
   useEffect(() => {
@@ -250,8 +259,8 @@ export default function Report() {
     const t = String(text).toLowerCase();
     if (t.includes('hosp')) return 'HOSPITAL';
     if (t.includes('clinic')) return 'CLINICS';
-    if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
-    if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
+    if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
+    if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
     return null;
   };
 
@@ -364,40 +373,41 @@ export default function Report() {
 	            effectiveStageId,
 	            stageIdFromGroup,
 	            configuration?.programStage?.id,
-	            DEFAULT_SURVEY_PROGRAM_STAGE_ID,
 	            SURVEY_PROGRAM_STAGE_BY_GROUP.HOSPITAL,
+	            SURVEY_PROGRAM_STAGE_BY_GROUP.CLINICS,
+	            SURVEY_PROGRAM_STAGE_BY_GROUP.EMS,
+	            SURVEY_PROGRAM_STAGE_BY_GROUP.MORTUARY,
 	          ].filter(Boolean)));
 
 	          for (const candidateStageId of candidateStages) {
 	            const teiEvents = await api.getSurveyEventsForTei({
 	              teiId: reportQueryParams.teiId,
-	              orgUnitId: all.length > 0 ? undefined : selectedFacilityId,
+	              orgUnitId: selectedFacilityId,
 	              programId,
 	              stageId: candidateStageId,
 	              fields: eventFields,
 	            }).catch(() => []);
 	            if (Array.isArray(teiEvents) && teiEvents.length > 0) {
 	              all = mergeEvents(all, teiEvents);
-	              effectiveStageId = candidateStageId;
-	              break;
 	            }
 	          }
 	        }
 
-	        if (all.length > 0) {
-	          const firstEventStage = all.find(ev => ev?.programStage)?.programStage;
-	          if (firstEventStage) effectiveStageId = firstEventStage;
-	        } else {
-	          // Fetch all events for this facility OU, including descendants, to ensure we catch
-	          // both scheduled and self-initiated assessments when no specific TEI was supplied.
-	          const events = await api.getSurveyEventsForOrgUnit({
-	            orgUnitId: selectedFacilityId,
-	            programId,
-	            stageId: effectiveStageId,
-	            fields: eventFields
-	          });
-	          all = Array.isArray(events) ? events : [];
-	        }
+		        if (all.length > 0) {
+		          const firstEventStage = all.find(ev => ev?.programStage)?.programStage;
+		          if (firstEventStage) effectiveStageId = firstEventStage;
+		        }
+	
+		        // Always load all facility events so the true baseline can be found,
+		        // even when a specific TEI/event was targeted from the dashboard.
+		        const facilityEvents = await api.getSurveyEventsForOrgUnit({
+		          orgUnitId: selectedFacilityId,
+		          programId,
+		          stageId: effectiveStageId,
+		          fields: eventFields
+		        }).catch(() => []);
+		        all = mergeEvents(all, facilityEvents);
+	
 
         if (all.length === 0) {
           showToast?.('No assessments found for this facility.', 'info');
@@ -509,7 +519,7 @@ export default function Report() {
         }
 
 	        const groupText = baselineBundle.groupText || latestBundle.groupText || '';
-	        const groupId = resolveGroupIdFromText(groupText) || 'GENERAL';
+	        const groupId = resolveGroupIdFromText(groupText) || getFacilityGroupKeyFromProgramStageId(effectiveStageId) || 'GENERAL';
 	        let reportGroups = groups;
 	        if (effectiveStageId && configuration?.programStage?.id !== effectiveStageId) {
 	          try {
@@ -524,6 +534,31 @@ export default function Report() {
 	            console.warn('Report: failed to load metadata for resolved event stage; using current metadata', metadataErr);
 	          }
 	        }
+
+		        // Fallback: when an event was saved under the generic/default stage but
+		        // belongs to a dedicated facility group (e.g. HOSPITAL), the generic metadata
+		        // won't have the group's sections. Load the group-specific stage metadata.
+		        const preliminaryGroupObj = reportGroups.find(g => g.id === groupId) || null;
+		        if (!((preliminaryGroupObj?.sections || []).some(s => !isAssessmentDetailsSection(s))) && groupId && groupId !== 'GENERAL') {
+		          const groupStageId = getSurveyProgramStageIdForGroup(groupId);
+		          if (groupStageId && groupStageId !== effectiveStageId && groupStageId !== configuration?.programStage?.id) {
+		            try {
+		              const fallbackMetadata = await api.getFormMetadata(groupStageId);
+		              const fallbackGroups = transformMetadata(fallbackMetadata) || [];
+		              const fallbackGroupObj = fallbackGroups.find(g => g.id === groupId) || null;
+		              if ((fallbackGroupObj?.sections || []).some(s => !isAssessmentDetailsSection(s))) {
+		                reportGroups = fallbackGroups;
+		                setConfiguration?.({
+		                  programStage: fallbackMetadata,
+		                  program: fallbackMetadata?.program || configuration?.program || { id: programId, displayName: 'MOH Survey Dashboard' },
+		                  organisationUnits: configuration?.organisationUnits || []
+		                });
+		              }
+		            } catch (fallbackErr) {
+		              console.warn('Report: failed to load group-specific metadata fallback', fallbackErr);
+		            }
+		          }
+		        }
 	        const directGroupObj = reportGroups.find(g => g.id === groupId) || null;
 	        const hasServiceSections = (sections = []) => sections.some(s => !isAssessmentDetailsSection(s));
 	        const uniqueSections = (sections = []) => {
@@ -535,7 +570,7 @@ export default function Report() {
 	          return Array.from(byId.values());
 	        };
 	        const directSections = directGroupObj?.sections || [];
-	        const stageIsDedicatedToGroup = effectiveStageId && effectiveStageId !== DEFAULT_SURVEY_PROGRAM_STAGE_ID && effectiveStageId === getSurveyProgramStageIdForGroup(groupId);
+	        const stageIsDedicatedToGroup = !!effectiveStageId && effectiveStageId === getSurveyProgramStageIdForGroup(groupId);
 	        const fallbackStageSections = stageIsDedicatedToGroup
 	          ? uniqueSections(reportGroups.flatMap(g => g.sections || []))
 	          : [];
@@ -547,7 +582,7 @@ export default function Report() {
 	        } : null);
 
         // Build assessment structure for scoring based on facility group
-        const programmeType = (groupId === 'HOSPITAL') ? 'hospital' : (groupId === 'CLINICS') ? 'clinics' : (groupId === 'SE') ? 'ems' : 'mortuary';
+        const programmeType = (groupId === 'HOSPITAL') ? 'hospital' : (groupId === 'CLINICS') ? 'clinics' : (groupId === 'EMS') ? 'ems' : (groupId === 'MORTUARY') ? 'mortuary' : 'mortuary';
         const { linksDataLookup, severityLookup } = programmeScoringMeta[programmeType] || programmeScoringMeta.ems;
 
         // Under the new model, each SE lives in its own event tagged as SYS_TAG:<seNum>
@@ -574,9 +609,20 @@ export default function Report() {
               criteria: (section.fields || [])
                 .filter(f => f.type === 'select')
                 .map(f => {
+                  const tagEvent = pickLatest(bundle.byTag?.[sectionTagMap[section.id] || resolveSectionTag(section, idx)] || []);
                   const sectionEvent = isAssessmentDetailsSection(section)
                     ? bundle.metaEvent
-                    : pickLatest(bundle.byTag?.[sectionTagMap[section.id] || resolveSectionTag(section, idx)] || []);
+                    : tagEvent || (() => {
+                        // Mixed-model fallback: old-model assessments stored all criteria
+                        // in a single meta event without SYS_TAG. Find the latest meta event
+                        // that actually contains data values for this section's fields.
+                        if (!section.fields?.length || !Array.isArray(bundle.metaEvents)) return bundle.metaEvent || null;
+                        const fieldIds = new Set(section.fields.map(field => field.id));
+                        const candidates = bundle.metaEvents.filter(ev =>
+                          (ev.dataValues || []).some(dv => fieldIds.has(dv.dataElement))
+                        );
+                        return candidates.sort((a, b) => new Date(b.eventDate || 0) - new Date(a.eventDate || 0))[0] || bundle.metaEvent || null;
+                      })();
                   const formDataForSection = Object.fromEntries((((sectionEvent || {}).dataValues) || []).map(dv => [dv.dataElement, dv.value]));
                   const code = f.code || f.id;
                   const normalizedCode = normalizeCriterionCode(code);
@@ -709,7 +755,7 @@ export default function Report() {
             teamMembers.forEach(member => {
               const uId = member.userId;
               const resolved = userMap[uId] || { displayName: uId, username: uId };
-              
+
               // Find SEs assigned to this member
               const assignedSeNums = Object.entries(seAssignments)
                 .filter(([_, ids]) => Array.isArray(ids) && ids.includes(uId))
@@ -728,21 +774,21 @@ export default function Report() {
                 }
 
                 // Match against fields in the section
-                const section = targetSections.find(s => {
-                   const m = (s.name || s.code || '').match(/se\s*(\d+)/i);
-                   return m && m[1] === num;
+                const section = targetSections.find((s, idx) => {
+                   const tag = sectionTagMap[s.id] || resolveSectionTag(s, idx);
+                   return tag === num;
                 });
 
                 if (section) {
                   (section.fields || []).forEach(f => {
                     if (f.type === 'select') {
                       const val = data.values[f.id];
-                      if (val) {
+                      if (val !== undefined && val !== null && String(val).trim() !== '') {
                         const s = String(val).trim().toLowerCase();
-                        if (s === 'c' || s === 'compliant') stats.C++;
-                        else if (s === 'pc' || s === 'partial' || s === 'partially compliant') stats.PC++;
-                        else if (s === 'nc' || s === 'non compliant' || s === 'non-compliant') stats.NC++;
-                        else if (s === 'na') stats.NA++;
+                        if (s === '2' || s === 'yes' || s === 'y' || s === 'compliant' || s === 'c') stats.C++;
+                        else if (s === '1' || s === 'partial' || s === 'partially compliant' || s === 'pc') stats.PC++;
+                        else if (s === '0' || s === 'no' || s === 'n' || s === 'non compliant' || s === 'non-compliant' || s === 'nc') stats.NC++;
+                        else if (s === 'na' || s === 'not applicable' || s === 'not_applicable') stats.NA++;
                         stats.criteriaCount++;
                       }
                     }
@@ -828,14 +874,14 @@ export default function Report() {
     return d.toLocaleDateString('en-GB');
   };
 
-  const getDaysSinceDate = (value) => {
+  const getMonthsSinceDate = (value) => {
     if (!value) return null;
     const d = new Date(value);
     if (Number.isNaN(d.getTime())) return null;
     const today = new Date();
-    const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
-    const valueUtc = Date.UTC(d.getFullYear(), d.getMonth(), d.getDate());
-    return Math.max(0, Math.floor((todayUtc - valueUtc) / 86400000));
+    let months = (today.getFullYear() - d.getFullYear()) * 12 + (today.getMonth() - d.getMonth());
+    if (today.getDate() < d.getDate()) months--;
+    return Math.max(0, months);
   };
 
   const buildOverviewDeltaMeta = (baselineValue, latestValue) => {
@@ -845,7 +891,7 @@ export default function Report() {
     const value = Math.round(latestValue - baselineValue);
     return {
       value,
-      display: `${value > 0 ? '+' : ''}${value} pts`,
+      display: `${value > 0 ? '+' : ''}${value}%`,
       category: value > 0 ? 'success' : value < 0 ? 'risk' : 'neutral',
     };
   };
@@ -862,24 +908,24 @@ export default function Report() {
     };
   };
 
-  const buildOverviewAgeMeta = (dateValue) => {
-    const value = getDaysSinceDate(dateValue);
+  const buildOverviewAgeMeta = useCallback((dateValue) => {
+    const value = getMonthsSinceDate(dateValue);
     if (!Number.isFinite(value)) return { value: null, display: '—', category: 'muted' };
     return {
       value,
-      display: `${value} ${value === 1 ? 'day' : 'days'}`,
-      category: value <= 30 ? 'success' : value <= 90 ? 'warning' : 'risk',
+      display: `${value} ${value === 1 ? 'month' : 'months'}`,
+      category: value <= 1 ? 'success' : value <= 3 ? 'warning' : 'risk',
     };
-  };
+  }, []);
 
   const buildOverviewStatusMeta = ({ criticalRemainingNC = 0, criticalRemainingTotal = 0, remainingNC = 0, scoreDelta = null } = {}) => {
     if (Number(criticalRemainingNC) > 0 || (Number.isFinite(scoreDelta) && scoreDelta <= -15)) {
-      return { display: 'Critical', category: 'risk' };
+      return { display: 'Critical', category: 'risk', tooltip: 'Critical non-compliant criteria remain or score declined by 15+ percentage points. Immediate action required.' };
     }
     if (Number(criticalRemainingTotal) > 0 || Number(remainingNC) > 0 || (Number.isFinite(scoreDelta) && scoreDelta <= -5)) {
-      return { display: 'Warning', category: 'warning' };
+      return { display: 'Warning', category: 'warning', tooltip: 'Some critical or non-compliant criteria remain, or score declined by 5+ percentage points. Attention needed.' };
     }
-    return { display: 'On Track', category: 'success' };
+    return { display: 'On Track', category: 'success', tooltip: 'All criteria are on track with no significant decline in score.' };
   };
 
   // Build Facility Overview rows (per SE)
@@ -930,7 +976,7 @@ export default function Report() {
 
       // Critical criteria counts
       // Try to detect programme type from reportInfo.groupId
-      const programmeType = (reportInfo.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo.groupId === 'CLINICS') ? 'clinics' : (reportInfo.groupId === 'SE') ? 'ems' : 'mortuary';
+      const programmeType = (reportInfo.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo.groupId === 'CLINICS') ? 'clinics' : (reportInfo.groupId === 'EMS') ? 'ems' : (reportInfo.groupId === 'MORTUARY') ? 'mortuary' : 'mortuary';
       const criticalLookup = (programmeScoringMeta[programmeType] && programmeScoringMeta[programmeType].criticalLookup) || {};
       const getCritical = (list) => list.filter(c => {
         const code = String(c.code || '').trim();
@@ -971,7 +1017,7 @@ export default function Report() {
         qiCompliance: 'N/A',
       };
     });
-  }, [reportAssessment, baselineAssessment, baselineScoring, scoring, sectionLabels, reportInfo, programmeScoringMeta]);
+  }, [reportAssessment, baselineAssessment, baselineScoring, scoring, sectionLabels, reportInfo, programmeScoringMeta, buildOverviewAgeMeta]);
 
   const canDownloadPdf = useMemo(() => {
     if (!reportInfo || !reportAssessment || !baselineAssessment) return false;
@@ -1105,19 +1151,22 @@ export default function Report() {
   const renderOverviewMetaBadge = (meta) => {
     const palette = overviewPalette[meta?.category] || overviewPalette.muted;
     return (
-      <span style={{
-        display: 'inline-flex',
-        minWidth: 48,
-        justifyContent: 'center',
-        padding: '2px 7px',
-        borderRadius: 999,
-        fontWeight: 700,
-        fontSize: '0.76rem',
-        color: palette.color,
-        background: palette.background,
-        border: `1px solid ${palette.border}`,
-        whiteSpace: 'nowrap',
-      }}>
+      <span
+        title={meta?.tooltip || ''}
+        style={{
+          display: 'inline-flex',
+          minWidth: 48,
+          justifyContent: 'center',
+          padding: '2px 7px',
+          borderRadius: 999,
+          fontWeight: 700,
+          fontSize: '0.76rem',
+          color: palette.color,
+          background: palette.background,
+          border: `1px solid ${palette.border}`,
+          whiteSpace: 'nowrap',
+        }}
+      >
         {meta?.display || '—'}
       </span>
     );
@@ -2230,7 +2279,7 @@ export default function Report() {
                 <tr>
                   <th class="fo-insight">Δ<br />Change</th>
                   <th class="fo-insight">Closure<br />Rate</th>
-                  <th class="fo-insight">Days<br />Since</th>
+                  <th class="fo-insight">Months<br />Since</th>
                   <th class="fo-status">Status</th>
                   <th>Total</th><th>NC</th><th>PC</th>
                   <th>Total</th><th>NC</th><th>PC</th>
@@ -2496,7 +2545,7 @@ export default function Report() {
                     <tr>
                       <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })}>Δ Change</th>
                       <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')}>Closure Rate</th>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })}>Days Since</th>
+                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })}>Months Since</th>
                       <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')}>Status</th>
                       <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>Total</th>
                       <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>NC</th>

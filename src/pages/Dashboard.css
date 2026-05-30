@@ -1046,3 +1046,76 @@
         justify-content: center;
     }
 }
+
+
+.associated-assessment-row {
+    transition: background-color 0.15s ease;
+}
+
+.associated-assessment-row:hover {
+    background-color: rgba(37, 99, 235, 0.06);
+}
+
+.associated-assessment-row:active {
+    background-color: rgba(37, 99, 235, 0.18);
+}
+
+.associated-assessment-row.loading {
+    background-color: rgba(37, 99, 235, 0.14) !important;
+    cursor: wait !important;
+    animation: survey-row-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes survey-row-pulse {
+    0%, 100% { background-color: rgba(37, 99, 235, 0.14); }
+    50% { background-color: rgba(37, 99, 235, 0.26); }
+}
+
+/* ── Dashboard survey-loading overlay ── */
+.dashboard-loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    animation: fadeIn 0.2s ease;
+}
+
+.dashboard-loading-card {
+    background: #ffffff;
+    border-radius: 0.75rem;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.18);
+    text-align: center;
+    min-width: 240px;
+}
+
+.dashboard-loading-spinner {
+    width: 42px;
+    height: 42px;
+    border: 3px solid #e2e8f0;
+    border-top-color: #2563eb;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 1rem;
+}
+
+.dashboard-loading-message {
+    color: #1e293b;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}

@@ -156,10 +156,10 @@
                     if (!normalized) return '';
                     const info = index[normalized];
                     if (!info) return '';
-                
+
                     const isStandardCode = /^\d+(\.\d+){2}$/.test(normalized); // x.x.x display-only rows
                     const isCriterionCode = /^\d+(\.\d+){3}$/.test(normalized); // x.x.x.x question rows
-                
+
                     const compareCodes = (aCode, bCode) => {
                         const aParts = normalizeCriterionCode(aCode).split('.').map(n => parseInt(n, 10));
                         const bParts = normalizeCriterionCode(bCode).split('.').map(n => parseInt(n, 10));
@@ -171,7 +171,7 @@
                         }
                         return 0;
                     };
-                
+
                         const parts = [];
                     // For criterion (x.x.x.x) rows we no longer include the textual
                     // Standard / Intent / Overview blocks in the tooltip. Those remain
@@ -179,7 +179,7 @@
                     if (!isStandardCode && !isCriterionCode && info.statement) {
                         parts.push(`Standard:\n${info.statement.trim().replace(/^Standard\s*/i, '')}`);
                     }
-            
+
                     if (!isCriterionCode && info.intent) {
                         const { primaryIntent, overviewText } = splitIntentText(info.intent);
                         if (primaryIntent) {
@@ -247,7 +247,7 @@
                         }
                     }
                 }
-            
+
                 // Add Score Traceability (sorted by criterion code for consistency)
                 if (scoreResult && scoreResult.isRoot && scoreResult.rootSources && scoreResult.rootSources.length > 0) {
                     const sortedSources = [...scoreResult.rootSources].sort((a, b) => compareCodes(a.code, b.code));
@@ -329,7 +329,7 @@
 
             const RootCalculationModal = ({ isOpen, onClose, rootCode, scoreResult }) => {
                 if (!isOpen || !scoreResult) return null;
-        
+
                 const sources = (scoreResult.rootSources || []).slice().sort((a, b) => {
                     const norm = (code) => normalizeCriterionCode(code).split('.').map(n => parseInt(n, 10));
                     const aParts = norm(a.code);
@@ -575,9 +575,9 @@
                 const links = configuration?.links || {};
                 return links[programmeType] || [];
             })();
-            
+
             const criterionIndex = React.useMemo(() => buildCriterionIndex(activeConfigArray), [activeConfigArray]);
-            
+
             // Resolve Hospital compute criteria from configuration
             const HOSPITAL_SUBCRITERIA_MAP = React.useMemo(() => {
                 const map = {};
@@ -610,10 +610,10 @@
                 if (!activeSection || !Array.isArray(activeConfigArray) || activeConfigArray.length === 0) {
                     return null;
                 }
-        
+
                 const rawName = (activeSection._originalName || activeSection.name || '').trim();
                 const rawCode = (activeSection.code || '').trim();
-        
+
                 // Try to pull out a numeric PI id like "9.1" from the metadata
                 // name/code so we can match it to section_pi_id in the
                 // *_full_configuration arrays. If that fails (e.g. section name is
@@ -639,27 +639,27 @@
                         }
                     }
                 }
-        
+
                 let matchedSe = null;
                 let matchedSection = null;
-        
+
                 outer: for (const se of activeConfigArray) {
                     const seSections = se.sections || [];
                     for (const sec of seSections) {
                         const secPi = (sec.section_pi_id || '').trim();
                         const secTitle = (sec.title || '').trim();
-        
+
                         const numberMatches =
                             !!secPi && (
                                 secPi === hintedPiId ||
                                 rawName.includes(secPi) ||
                                 rawCode.includes(secPi)
                             );
-        
+
                         const titleLc = secTitle.toLowerCase();
                         const nameLc = rawName.toLowerCase();
                         const titleMatches = titleLc && (nameLc.includes(titleLc) || titleLc.includes(nameLc));
-        
+
                         if (numberMatches || titleMatches) {
                             matchedSe = se;
                             matchedSection = sec;
@@ -667,12 +667,12 @@
                         }
                     }
                 }
-        
+
                 if (!matchedSe || !matchedSection) return null;
-        
+
                 const standards = matchedSection.standards || [];
                 if (!standards.length) return null;
-        
+
                 return {
                     seId: matchedSe.se_id,
                     seName: matchedSe.se_name,
@@ -681,7 +681,7 @@
                     standards,
                 };
             }, [activeSection, activeConfigArray]);
-            
+
         // DEBUG: Validate props on render
         React.useEffect(() => {
             if (!activeSection) console.warn("FormArea: No active section provided");
@@ -934,6 +934,110 @@
             React.useEffect(() => {
                 hydratedServerFieldIdsRef.current = new Set();
             }, [activeEventId]);
+
+        React.useEffect(() => {
+            if (!scoringResults?.sections || !activeSection?.fields) return;
+
+            const currentSectionScores = scoringResults.sections.find(s => s.id === activeSection.id);
+            if (!currentSectionScores?.standards) return;
+
+            let hasUpdates = false;
+            const updates = {};
+
+            for (const field of activeSection.fields) {
+                if (field.type !== 'select' || !field.commentFieldId) continue;
+
+                let calculatedScore = null;
+                for (const standard of currentSectionScores.standards) {
+                    if (standard.criteriaScores && standard.criteriaScores[field.id]) {
+                        calculatedScore = standard.criteriaScores[field.id];
+                        break;
+                    }
+                }
+
+                if (!calculatedScore) continue;
+
+                const commentFieldId = field.commentFieldId;
+                const currentComment = formData[commentFieldId] || '';
+
+                if (typeof document !== 'undefined') {
+                    const activeEl = document.activeElement;
+                    if (activeEl && typeof activeEl.id === 'string') {
+                        const id = activeEl.id;
+                        const isEditingThisComment =
+                            id === `field-${commentFieldId}` ||
+                            id === `field-${commentFieldId}-comments` ||
+                            id === `field-${commentFieldId}-recs` ||
+                            id.startsWith(`field-${commentFieldId}-`);
+                        if (isEditingThisComment) {
+                            continue;
+                        }
+                    }
+                }
+
+                const isRoot = calculatedScore.isRoot || false;
+                const isDraft = calculatedScore.isDraft || false;
+
+                const displayScorePoints = (calculatedScore.displayPoints !== null && calculatedScore.displayPoints !== undefined)
+                    ? calculatedScore.displayPoints
+                    : calculatedScore.points;
+                const statusText = calculatedScore.displayResponse || calculatedScore.normalizedValue || calculatedScore.response || 'NA';
+                const pointsText = displayScorePoints !== null ? `${parseFloat(displayScorePoints).toFixed(0)} pts` : '0 pts';
+
+                const allRootCodes = (calculatedScore.rootSources || []).map(s => typeof s === 'string' ? s : s.code);
+                const effectiveRootCodes = allRootCodes.filter(c => !String(c || '').match(/-(G|B)$/i));
+                const isPureVisualOnlyRoot = isRoot && effectiveRootCodes.length === 0;
+
+                if (isPureVisualOnlyRoot) {
+                    const cleaned = currentComment
+                        .replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '')
+                        .replace(/\[object Object\](\)]*)?/g, '')
+                        .trim();
+                    if (cleaned !== currentComment) {
+                        updates[commentFieldId] = cleaned;
+                        hasUpdates = true;
+                    }
+                    continue;
+                }
+
+                const rootSuffix = isRoot && effectiveRootCodes.length > 0 ? ` -root(${effectiveRootCodes.join(',')})` : '';
+
+                let scoreTag = `[SCORE: ${pointsText} - ${statusText}${rootSuffix}]`;
+                if (isRoot) {
+                    scoreTag = isDraft
+                        ? `[INCOMPLETE ROOT SCORE: ${pointsText} - ${statusText}${rootSuffix}]`
+                        : `[ROOT SCORE: ${pointsText} - ${statusText}${rootSuffix}]`;
+                }
+
+                const hasResponse = (isRoot && effectiveRootCodes.length > 0) || (formData[field.id] && formData[field.id] !== '' && formData[field.id] !== 'NA');
+
+                if (hasResponse) {
+                    let newComment = currentComment
+                        .replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '')
+                        .replace(/\[object Object\](\)]*)?/g, '')
+                        .trim();
+                    newComment = newComment ? `${newComment} ${scoreTag}` : scoreTag;
+
+                    if (newComment !== currentComment) {
+                        updates[commentFieldId] = newComment;
+                        hasUpdates = true;
+                    }
+                } else if (currentComment.match(/\[((ROOT )?SCORE|SEVERITY)[^\]]*\]/)) {
+                    let newComment = currentComment.replace(/\s*\[((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '').trim();
+                    if (newComment !== currentComment) {
+                        updates[commentFieldId] = newComment;
+                        hasUpdates = true;
+                    }
+                }
+            }
+
+            if (hasUpdates) {
+                Object.entries(updates).forEach(([key, val]) => {
+                    saveField(key, val);
+                });
+            }
+        }, [scoringResults, activeSection, saveField]);
+
 
         const extractSeNum = React.useCallback((sec) => {
             const direct = sec?.se_id ?? sec?.seId ?? sec?.sectionNumber ?? null;
@@ -1345,11 +1449,11 @@
                     //     fall back to header-based grouping.
             const subsections = useMemo(() => {
                         if (!activeSection?.fields) return [];
-                
+
                     const groups = [];
                     let currentGroup = [];
                     let hasStandardInCurrentGroup = false;
-            
+
                     // Helper: detect if a field is a display-only x.x.x standard row.
                     const isStandardRow = (field) => {
                         if (!field || !field.code) return false;
@@ -1366,15 +1470,15 @@
                             // Exactly three numeric segments, e.g. "7.2.2".
                             return /^\d+(?:\.\d+){2}$/.test(normalized);
                         };
-                
+
                         // First check whether this section actually has any standard rows.
                         const hasStandardRows = activeSection.fields.some((field) => isStandardRow(field));
-                
+
                         activeSection.fields.forEach((field, index) => {
                             if (!field) return;
-                
+
                             const isHeader = field.type === 'header';
-                
+
                             if (!hasStandardRows) {
                                 // Fallback: original header-based grouping when there
                                 // are no coded standards in this section.
@@ -1388,9 +1492,9 @@
                                 }
                                 return;
                             }
-                
+
                             const isStd = isStandardRow(field);
-                
+
                             if (hasStandardRows) {
                                 // Coded sections:
                                 // - If we see a header *after* a standard has already
@@ -1403,7 +1507,7 @@
                                     currentGroup = [];
                                     hasStandardInCurrentGroup = false;
                                 }
-                
+
                                 // When we hit a standard row:
                                 // - if the current group already has a standard, this
                                 //   is the *next* x.x.x → start a new page;
@@ -1417,17 +1521,17 @@
                                     hasStandardInCurrentGroup = true;
                                 }
                             }
-                
+
                             currentGroup.push(field);
                         });
-                
+
                         if (currentGroup.length > 0) {
                             groups.push(currentGroup);
                         }
-                
+
                             return groups;
                         }, [activeSection?.fields]);
-        
+
             // For each subsection (page), pre-compute a draft standard-level score
             // and metadata (x.x.x code + title). This powers both the inline
             // "x.x.x % Score (Not Saved)" pill next to the standard row and the
@@ -1436,28 +1540,28 @@
                     if (!scoringResults?.sections || !activeSection || !Array.isArray(subsections) || subsections.length === 0) {
                         return {};
                     }
-            
+
                     const sectionScore = scoringResults.sections.find((s) => s.id === activeSection.id);
                     const standardResults = sectionScore?.standards?.[0];
                     if (!standardResults) return {};
-            
+
                     const criteriaScores = standardResults.criteriaScores || {};
                     const result = {};
-            
+
                     subsections.forEach((subFields, subsectionIndex) => {
                         if (!Array.isArray(subFields) || subFields.length === 0) return;
-            
+
 	                        const selectFields = subFields
 	                            .filter((f) => f && f.type === 'select');
 	                        const selectIds = selectFields.map((f) => f.id);
 	                        if (!selectIds.length) return;
-            
+
                 let totalPoints = 0;
                 let scoredCount = 0;
                 let hasCriticalFail = false;
                 // Track worst scored CRITICAL status within this x.x.x group for capping
                 let worstCritical = null; // 'NC' | 'PC' | null
-            
+
 	                const contributions = [];
 	                selectFields.forEach((field) => {
 	                    const id = field.id;
@@ -1491,7 +1595,7 @@
                         }
                     }
                 });
-            
+
                             // Compute raw average first so we can show it in tooltips
                             const rawPercent = scoredCount ? totalPoints / scoredCount : 0;
                             let avgPercent = rawPercent;
@@ -1503,7 +1607,7 @@
                     const cap = worstCritical === 'NC' ? 20 : 60;
                     if (avgPercent > cap) avgPercent = cap;
                 }
-            
+
                         // Find the first x.x.x Standard row in this subsection so we can
                         // attach the draft score (and label) to a specific Standard.
                         let standardCode = null;
@@ -1518,7 +1622,7 @@
                                 field.id?.endsWith('-comments') ||
                                 field.id?.endsWith('-comment');
                             if (isCommentField) continue;
-            
+
                             const rawLabel = field.label || '';
                             let norm = normalizeCriterionCode(field.code);
                             if (!norm || !/\d/.test(norm)) {
@@ -1527,7 +1631,7 @@
                                     norm = labelMatch[0];
                                 }
                             }
-            
+
                             if (norm && /^\d+(?:\.\d+){2}$/.test(norm)) {
                                 standardCode = norm;
                                 const info = criterionIndex[norm];
@@ -1568,11 +1672,11 @@
                                 }
                             }
                         }
-            
+
                         if (!standardCode) {
                             return;
                         }
-            
+
 	                            const maxScore = scoredCount * 100;
 	                            const displayedTotalScore = maxScore > 0
 	                                ? Math.round(((avgPercent / 100) * maxScore) * 10) / 10
@@ -1590,10 +1694,10 @@
 	                    ...(worstCritical ? { cappedByCritical: worstCritical } : {}),
 	                        };
                     });
-            
+
                     return result;
                 }, [scoringResults, activeSection, subsections, criterionIndex]);
-            
+
                 // For each subsection, derive the PI (x.x) overview from its Standard
                 // code (x.x.x) so that sections like SE 9 correctly switch between 9.1
                 // and 9.2 depending on which subsection the user is viewing.
@@ -1602,10 +1706,10 @@
                         return [];
                     }
                     const result = [];
-            
+
                     subsections.forEach((subFields, subsectionIndex) => {
                         if (!Array.isArray(subFields) || subFields.length === 0) return;
-            
+
                         // Reuse the same detection as above to find the x.x.x Standard
                         // code for this subsection.
                         let standardCode = null;
@@ -1619,7 +1723,7 @@
                                 field.id?.endsWith('-comments') ||
                                 field.id?.endsWith('-comment');
                             if (isCommentField) continue;
-            
+
                             const rawLabel = field.label || '';
                             let norm = normalizeCriterionCode(field.code);
                             if (!norm || !/\d/.test(norm)) {
@@ -1628,7 +1732,7 @@
                                     norm = labelMatch[0];
                                 }
                             }
-            
+
                             if (norm && /^\d+(?:\.\d+){2}$/.test(norm)) {
                                 standardCode = norm;
                                 break;
@@ -1665,13 +1769,13 @@
                                 }
                             }
                         }
-            
+
                         if (!standardCode) return;
-            
+
                         const parts = standardCode.split('.');
                         if (parts.length < 2) return;
                         const piCode = `${parts[0]}.${parts[1]}`;
-            
+
                         let matched = null;
                         outer: for (const se of activeConfigArray) {
                             const seSections = se.sections || [];
@@ -1689,22 +1793,22 @@
                                 }
                             }
                         }
-            
+
                         if (matched) {
                             result[subsectionIndex] = matched;
                         }
                     });
-            
+
                     return result;
                 }, [subsections, activeConfigArray]);
-                
+
                         // Draft PI score for the whole section: simple average of the
                         // per-subsection Standard (x.x.x) draft scores that exist. This
                         // powers the high-level "PI summary" header value.
                         const sectionPiDraftScore = useMemo(() => {
                             const entries = Object.values(standardDraftScores || {}).filter(Boolean);
                             if (!entries.length) return 0;
-                        
+
                             let total = 0;
                             let count = 0;
                             entries.forEach((entry) => {
@@ -1715,11 +1819,11 @@
                                 total += value;
                                 count += 1;
                             });
-                        
+
                             if (!count) return 0;
                             return total / count;
                         }, [standardDraftScores]);
-                
+
                         // PI-level critical fail: if any Standard within any PI has a
                         // criticalFail flag, we treat the section as having a critical
                         // failure for summary purposes.
@@ -1727,20 +1831,20 @@
                             const entries = Object.values(standardDraftScores || {}).filter(Boolean);
                             return entries.some((entry) => entry.criticalFail);
                         }, [standardDraftScores]);
-                
+
                 // Build a nested PI → Standards structure so the PI summary can show
                 // each Performance Indicator (e.g. 7.1) with its contributing
                 // standards (7.1.1, 7.1.2, ...) listed underneath.
                 const piSummaryEntries = useMemo(() => {
                     if (!Array.isArray(subsections) || subsections.length === 0) return [];
-                
+
                     const buckets = {};
-                
+
                     subsections.forEach((subFields, idx) => {
                         const overview = subsectionPiOverviews[idx] || seOverview;
                         const piCode = overview?.sectionPiId;
                         if (!piCode) return;
-                
+
                         if (!buckets[piCode]) {
                             buckets[piCode] = {
                                 code: piCode,
@@ -1751,7 +1855,7 @@
                                 standards: [],
                             };
                         }
-                
+
                         const stdEntry = standardDraftScores[idx];
                         let value = 0;
                         if (stdEntry) {
@@ -1760,7 +1864,7 @@
                                 : parseFloat(stdEntry.percent);
                             if (Number.isFinite(raw)) value = raw;
                             if (stdEntry.criticalFail) buckets[piCode].criticalFail = true;
-                
+
                 buckets[piCode].standards.push({
                     code: stdEntry.code,
                     title: stdEntry.title,
@@ -1770,11 +1874,11 @@
                     subsectionIndex: idx,
                 });
                         }
-                
+
                         buckets[piCode].total += value;
                         buckets[piCode].count += 1;
                     });
-                
+
                     return Object.values(buckets).map((b) => ({
                         code: b.code,
                         title: b.title,
@@ -1785,7 +1889,7 @@
                         ),
                     })).sort((a, b) => a.code.localeCompare(b.code, undefined, { numeric: true }));
                 }, [subsections, subsectionPiOverviews, standardDraftScores, seOverview]);
-            
+
                 const activeSubsectionFields = subsections[currentSubsectionIndex] || [];
                 const currentPiOverview = subsectionPiOverviews[currentSubsectionIndex] || seOverview;
         const isLastSubsection = currentSubsectionIndex === subsections.length - 1 || subsections.length === 0;
@@ -1815,8 +1919,8 @@
                 // scoringResults object that powers the per-criterion score badges
                 // and are also surfaced in the floating summary panel.
                 const subsectionStandardScore = standardDraftScores[currentSubsectionIndex] || null;
-            
-            
+
+
             return activeSubsectionFields.map((field) => {
                 // Safety check for field
                 if (!field || !field.id) {
@@ -1842,7 +1946,7 @@
                                 }
                                 const cleaned = kept.join(' ').trim();
                                 const baseLabel = cleaned || raw.trim();
-            
+
                                 const piInfo = currentPiOverview || seOverview;
                                 if (piInfo?.sectionPiId && piInfo?.sectionTitle) {
                                     const normaliseTitle = (str) =>
@@ -1851,10 +1955,10 @@
                                             .replace(/[^A-Z0-9]+/g, ' ')
                                             .replace(/\s+/g, ' ')
                                             .trim();
-            
+
                                     const headerNorm = normaliseTitle(baseLabel);
                                     const titleNorm = normaliseTitle(piInfo.sectionTitle);
-            
+
                                     // If the header text essentially matches the PI title, use
                                     // the canonical config title in nice case.
                                     if (headerNorm && titleNorm && (headerNorm === titleNorm ||
@@ -1863,7 +1967,7 @@
                                         const cleanTitle = piInfo.sectionTitle.replace(/[.\s]+$/g, '');
                                         return `${piInfo.sectionPiId} ${cleanTitle}`;
                                     }
-            
+
                                     // Otherwise still prefix the existing header label with
                                     // the PI id so sections like EMS SE8 also show "8.1 ...".
                                     const alreadyHasCode = /^\d+(?:\.\d+)*\s/.test(baseLabel);
@@ -1871,7 +1975,7 @@
                                         return `${piInfo.sectionPiId} ${baseLabel}`;
                                     }
                                 }
-            
+
                                 return baseLabel;
                             })();
                             return (
@@ -1894,7 +1998,7 @@
                         }
                     }
                 }
-                    
+
                     const isRoot = calculatedFieldScore?.isRoot || false;
                         // Root score manual override toggle (stored per criterion id)
                         const overrideRaw = formData[`override_${field.id}`];
@@ -1904,12 +2008,12 @@
                             ? calculatedFieldScore.rootDraftPoints
                             : null)
                         : null;
-            
+
                         // Precompute the raw label once so we can reuse it for
                         // multiple checks (severity, display label, code fallback).
                         const rawLabel = field.label || '';
                         const rawLabelLower = typeof rawLabel === 'string' ? rawLabel.toLowerCase() : '';
-            
+
                         // In the Assessment Details section, hide the technical
                         // manifest/version field entirely so it does not appear in the
                         // UI. The DHIS2 label for this is typically something like
@@ -1918,7 +2022,7 @@
                         if (isADSection && rawLabelLower.includes('data manifest version')) {
                             return null;
                         }
-            
+
                         // Normalise the criterion code early so we can also use it to
                         // detect comment-style data elements whose codes end with
                         // "-comments" (a common DHIS2 pattern).
@@ -1936,7 +2040,7 @@
                                 normalizedCode = labelMatch[0];
                             }
                         }
-            
+
                         const isCommentField =
                             field.isComment ||
                             field.label === 'Comment' ||
@@ -1948,7 +2052,7 @@
                             (typeof normalizedCode === 'string' && /-comments?$/i.test(normalizedCode)) ||
                             field.id?.endsWith('-comments') ||
                             field.id?.endsWith('-comment');
-            
+
                         const associatedCommentId = field.commentFieldId;
                         const currentCommentValue = associatedCommentId ? (formData[associatedCommentId] || '') : '';
                         // Standards (x.x.x) should be display-only in the UI: no
@@ -2019,7 +2123,7 @@
                     // Always compute a value; when none are scored yet, show 0 pts (0/x)
                     subCriteriaAvgPoints = subCriteriaAvgCount > 0 ? (sum / subCriteriaAvgCount) : 0;
                         }
-            
+
                         // Compute a simple average over all linked criteria in the
                         // scoring graph for this root, using the rootSources array
                         // provided by the scoring engine. This reflects how the
@@ -2106,9 +2210,8 @@
 	                );
 	                const isTypeOfAssessmentField = Boolean(
 	                    isADSection &&
-	                    typeOfAssessmentDeId &&
 	                    (
-	                        field.id === typeOfAssessmentDeId ||
+	                        (typeOfAssessmentDeId && field.id === typeOfAssessmentDeId) ||
 	                        (labelLower.includes('type of assessment') && !isHospitalAssessmentTypeField) ||
 	                        (
 	                            labelLower.includes('assessment type') &&
@@ -2140,14 +2243,14 @@
 	                        const criterionTooltip = (!isCommentField && field.code) ? getCriterionTooltip(field.code, activeLinks, criterionIndex, calculatedFieldScore, HOSPITAL_SUBCRITERIA_MAP) : '';
 	                        const criterionGuideline = String(configEntry.guideline || '').trim();
 	                        const hasCriterionInfo = Boolean(criterionTooltip || criterionGuideline);
-            
+
                         // For Standard (x.x.x) rows, locate the hidden comment field we
                         // want to reuse as the backing store for the "Standard
                         // summary" text icon.
                         const standardSummaryCommentId = isStandardCriterion ? field.commentFieldId : null;
                         const standardSummaryValue = standardSummaryCommentId ? (formData[standardSummaryCommentId] || '') : '';
                         const isStandardSummaryOpen = isStandardCriterion && !!openStandardSummaries[field.id];
-            
+
                         // Compute the human-friendly label once, so we can reuse it
                         // for both normal and standard (display-only) rows.
                         const displayLabel = (() => {
@@ -2159,7 +2262,7 @@
                             const cleanedCode = field.code ? normalizeCriterionCode(field.code) : '';
                             const shouldShowCode = !!cleanedCode && /\d/.test(cleanedCode) && !cleanedCode.includes('_');
                             const isLabelComment = typeof rawLabel === 'string' && /-comments\b/i.test(rawLabel);
-            
+
                             // DEBUG: log what the app thinks for the specific Hospital
                             // SE7 comment label so we can see why it isn't collapsing.
                             if (
@@ -2175,7 +2278,7 @@
                                     shouldShowCode,
                                 });
                             }
-            
+
                             if (isCommentField || isLabelComment) {
                                 // Many DHIS2 comment data elements repeat the full
                                 // criterion statement in the label, e.g.
@@ -2221,10 +2324,10 @@
                     // does not affect how scores are computed or stored.
                     const commentScorePillText = (() => {
                         if (!commentScoreForDisplay) return null;
-        
+
                         const isRootScore = commentScoreForDisplay.isRoot || false;
                         const isDraftScore = commentScoreForDisplay.isDraft || false;
-        
+
 	                        const displayPoints = (commentScoreForDisplay.displayPoints !== null && commentScoreForDisplay.displayPoints !== undefined)
 	                            ? commentScoreForDisplay.displayPoints
 	                            : commentScoreForDisplay.points;
@@ -2234,14 +2337,14 @@
 	                                : displayPoints.toFixed(1))
                             : null;
 	                        const status = commentScoreForDisplay.displayResponse || commentScoreForDisplay.normalizedValue || commentScoreForDisplay.response || '';
-        
+
                         if (!pts && !status) return null;
-        
+
                         if (isRootScore) {
                             const prefix = isDraftScore ? 'Incomplete Root Score' : 'Root Score';
                             return `${prefix}: ${pts ? `${pts} pts ` : ''}${status}`.trim();
                         }
-        
+
                         return `Score: ${pts ? `${pts} pts ` : ''}${status}`.trim();
                     })();
 
@@ -2507,7 +2610,7 @@
                                         )}
                                     </div>
                                 )}
-	                                {isTypeOfAssessmentField ? (
+	                                {(isTypeOfAssessmentField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))))) ? (
 	                                    <div
 	                                        className="form-control"
 	                                        id={`field-${field.id}`}
@@ -2533,7 +2636,7 @@
                                         : (formData[field.id] || '')}
                                     onChange={(e) => handleInputChange(e, field.id)}
                                     id={`field-${field.id}`} // Helper for testing
-                                    disabled={isSectionLocked || (isRoot && !overrideOn) || (!isParentAnswered && isCommentField) || isTechnicalField}
+                                    disabled={isSectionLocked || (isRoot && !overrideOn) || (!isParentAnswered && isCommentField) || isTechnicalField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))))}
                                 >
                                     <option value="">
                                         {isRoot
@@ -2628,7 +2731,7 @@
 	                                            const stripTags = (txt) => (txt || '').replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '');
 
                                             const parts = splitCommentValue(formData[field.id] || '');
-                                            const disabled = isSectionLocked || (!isParentAnswered && isCommentField) || isTechnicalField;
+                                            const disabled = isSectionLocked || (!isParentAnswered && isCommentField) || isTechnicalField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))));
                                             const baseClass = `form-control ${formData[`is_critical_${field.id}`] && (!questionValue || questionValue === '') ? 'mandatory-warning' : ''}`;
 
                                             const handlePartChange = (which, newVal) => {
@@ -2676,7 +2779,7 @@
                                             value={formData[field.id] || ''}
                                             onChange={(e) => handleInputChange(e, field.id)}
                                             id={`field-${field.id}`}
-                                            disabled={isSectionLocked || isTechnicalField}
+                                            disabled={isSectionLocked || isTechnicalField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))))}
                                         />
                                     )
                                 ))}
@@ -2945,30 +3048,30 @@
                     return;
                 }
             }
-        
+
                 const field = activeSection?.fields?.find(f => f.id === fieldId);
 		                if (field?.type === 'select' && typeof onCriterionChange === 'function') {
 		                    onCriterionChange(fieldId, value);
                 }
-        
+
                 saveField(fieldId, value);
             };
 
-            React.useEffect(() => {
+            if (false) { /* MOVED ABOVE to fix hook-order violation */
                 if (!scoringResults?.sections || !activeSection?.fields) return;
-        
+
                 const currentSectionScores = scoringResults.sections.find(s => s.id === activeSection.id);
                 if (!currentSectionScores?.standards) return;
-        
+
                 let hasUpdates = false;
                 const updates = {};
-        
+
                 // Keep comment score tags in sync with the latest scoring results,
                 // but avoid touching a comment field while the user is actively
                 // typing in it.
                 for (const field of activeSection.fields) {
                     if (field.type !== 'select' || !field.commentFieldId) continue;
-        
+
                     // Find calculated score for this criterion
                     let calculatedScore = null;
                     for (const standard of currentSectionScores.standards) {
@@ -2977,12 +3080,12 @@
                             break;
                         }
                     }
-        
+
                     if (!calculatedScore) continue;
-        
+
                     const commentFieldId = field.commentFieldId;
                     const currentComment = formData[commentFieldId] || '';
-        
+
                     // If the assessor currently has focus in this comment field,
                     // don't auto-rewrite the value underneath them.
                 if (typeof document !== 'undefined') {
@@ -3005,10 +3108,10 @@
                         }
                     }
                 }
-        
+
                     const isRoot = calculatedScore.isRoot || false;
                     const isDraft = calculatedScore.isDraft || false;
-        
+
 	                // Use the live display score for roots so configured Hospital roots
 	                // tag the same real-time value shown in the form header panel.
 	                const displayScorePoints = (calculatedScore.displayPoints !== null && calculatedScore.displayPoints !== undefined)
@@ -3047,7 +3150,7 @@
                 // Only update if there's an actual response value (not empty)
                 // or if it's an auto-calculated Root score with at least one effective linked criterion
                 const hasResponse = (isRoot && effectiveRootCodes.length > 0) || (formData[field.id] && formData[field.id] !== '' && formData[field.id] !== 'NA');
-        
+
                     if (hasResponse) {
                         // Remove any old score/severity tags and also common junk like [object Object]
                         let newComment = currentComment
@@ -3070,13 +3173,13 @@
                         }
                     }
                 }
-        
+
                 if (hasUpdates) {
                     Object.entries(updates).forEach(([key, val]) => {
                         saveField(key, val);
                     });
                 }
-            }, [scoringResults, activeSection, saveField]);
+            }
 
 
 
@@ -3242,7 +3345,7 @@
                         // Add point-in-time scoring snapshot for auditing
                         scoringSnapshot: createAssessmentSnapshot(scoringResults)
                         };
-            
+
                 console.log('🚀 Starting Event PUT workflow...', {
                     submitOrgUnit: orgUnit,
                     assignmentOrgUnitId: selectedFacility?.orgUnitId,
@@ -3290,7 +3393,7 @@
                     if (activeEventId) {
                         await indexedDBService.markAsSynced(activeEventId, dhis2EventId || 'synced');
                     }
-        
+
                 if (result && result.chunks) {
                     setSubmitResult({ success: true, message: `✅ Saved successfully in ${result.chunks} batches.` });
                 } else {
@@ -3559,13 +3662,13 @@
                                     disabled={currentSubsectionIndex === 0}
                                     style={{ opacity: currentSubsectionIndex === 0 ? 0.5 : 1 }}
                                 >
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
-                                    
+
+
+
+
+
+
+
                                     ← Previous Page
                                 </button>
                                 <span
@@ -3625,7 +3728,7 @@
                                             </div>
                                         )}
                                     </div>
-            
+
                                     {/* 2. PI (x.x) aggregate summary for this section */}
                                     <div className="standard-summary-panel">
                                         <button

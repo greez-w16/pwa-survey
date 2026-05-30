@@ -641,7 +641,7 @@ export const api = {
       event: eventId,
       orgUnit: orgUnitId,
       program: programId || 'G2gULe4jsfs',
-      programStage: stageId || 'HpHD6u6MV37',
+      programStage: stageId || '',
       status: 'ACTIVE',
       ...(teiId ? { trackedEntityInstance: teiId } : {}),
       dataValues: (dataValues || []).map(dv => ({ ...dv, providedElsewhere: false })),
@@ -682,7 +682,7 @@ export const api = {
         return await response.json();
     },
 
-    getFormMetadata: async (programStageId = 'HpHD6u6MV37') => {
+    getFormMetadata: async (programStageId = '') => {
         const params = [
             // Include program + its trackedEntityType so we can use them when
             // submitting tracker payloads (TEI + enrollment + event).
@@ -1400,6 +1400,7 @@ export const api = {
         teiId,
         enrollmentId,
         orgUnitId,
+        eventIds,
         ouMode = 'SELECTED',
         order = 'eventDate:desc',
         fields = 'event,eventDate,status,program,programStage,orgUnit,trackedEntityInstance'
@@ -1411,12 +1412,16 @@ export const api = {
             teiId ? 'trackedEntityInstance' : null,
             enrollmentId ? 'enrollment' : null,
         ]);
+        const eventIdsParam = (Array.isArray(eventIds) && eventIds.length)
+            ? `event=${eventIds.map(encodeURIComponent).join(',')}`
+            : null;
         const params = [
             'paging=false',
             enrollmentId ? null : (programId ? `program=${programId}` : null),
             enrollmentId ? null : (stageId ? `programStage=${stageId}` : null),
             enrollmentId ? null : (teiId ? `trackedEntityInstance=${teiId}` : null),
             enrollmentId ? `enrollment=${enrollmentId}` : null,
+            eventIdsParam,
             enrollmentId ? null : (orgUnitId ? `orgUnit=${orgUnitId}` : null),
             enrollmentId ? null : (orgUnitId ? `ouMode=${ouMode}` : null),
             order ? `order=${order}` : null,
@@ -1564,7 +1569,7 @@ export const api = {
     },
 
     // Fetch main survey events for a TEI in the target program/stage
-    getSurveyEventsForTei: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37',
+    getSurveyEventsForTei: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = '',
         fields = 'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]' }) => {
         if (!teiId) return [];
         return await api.getEventsList({
@@ -1579,7 +1584,7 @@ export const api = {
     },
 
     // Fetch all survey events for an Org Unit (all TEIs) in the target program/stage
-    getSurveyEventsForOrgUnit: async ({ orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37',
+    getSurveyEventsForOrgUnit: async ({ orgUnitId, programId = 'G2gULe4jsfs', stageId = '',
         fields = 'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]' }) => {
         if (!orgUnitId) return [];
         
@@ -1630,7 +1635,7 @@ export const api = {
         return events;
     },
 
-	    getSurveyEventsForTeiPage: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37',
+	    getSurveyEventsForTeiPage: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = '',
 	        fields = 'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]', page = 1, pageSize = 10 }) => {
 	        if (!teiId) return { events: [], pager: null };
 	        return await api.getEventsListPage({
@@ -1648,13 +1653,35 @@ export const api = {
 
 	    getEventById: async (eventId, fields = 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]') => {
 	        if (!eventId) return null;
+	        // Try legacy API first
 	        const url = `${BASE_URL}/api/events/${encodeURIComponent(eventId)}?fields=${fields}`;
 	        const resp = await fetch(url, { headers: getHeaders() });
-	        if (!resp.ok) throw new Error(`Failed to fetch event ${eventId}: ${resp.status}`);
-	        return await resp.json();
+	        if (resp.ok) return await resp.json();
+
+	        // Fallback: tracker API for detached/tracker-only events
+	        try {
+	            const trackerFields = fields.replace('eventDate', 'occurredAt').replace('trackedEntityInstance', 'trackedEntity');
+	            const trackerUrl = `${BASE_URL}/api/tracker/events/${encodeURIComponent(eventId)}?fields=${trackerFields}`;
+	            const trackerResp = await fetch(trackerUrl, { headers: getHeaders() });
+	            if (trackerResp.ok) {
+	                const trackerData = await trackerResp.json();
+	                if (trackerData) {
+	                    return {
+	                        ...trackerData,
+	                        event: trackerData.event || trackerData.instance,
+	                        eventDate: trackerData.occurredAt || trackerData.eventDate,
+	                        trackedEntityInstance: trackerData.trackedEntity || trackerData.trackedEntityInstance
+	                    };
+	                }
+	            }
+	        } catch (trackerErr) {
+	            console.warn(`[getEventById] Tracker fallback failed for ${eventId}:`, trackerErr);
+	        }
+
+	        throw new Error(`Failed to fetch event ${eventId}: ${resp.status}`);
 	    },
 
-	    getSurveyEventIdsForTei: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37', pageSize = 50 }) => {
+	    getSurveyEventIdsForTei: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = '', pageSize = 50 }) => {
 	        if (!teiId) return [];
 	        const ids = [];
 	        let page = 1;
@@ -1685,7 +1712,7 @@ export const api = {
 	        teiId,
 	        orgUnitId,
 	        programId = 'G2gULe4jsfs',
-	        stageId = 'HpHD6u6MV37',
+	        stageId = '',
 	        fields = 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]',
 	        listPageSize = 50,
 	        detailBatchSize = 5
@@ -1723,7 +1750,7 @@ export const api = {
 
     // Resolve the baseline Assessment Group value (DE pzenrgsSny3) from the earliest
     // event for this TEI/program/stage (scoped to orgUnit when provided).
-    getBaselineAssessmentGroup: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37' }) => {
+    getBaselineAssessmentGroup: async ({ teiId, orgUnitId, programId = 'G2gULe4jsfs', stageId = '' }) => {
         if (!teiId) return null;
         try {
             const events = await api.getEventsList({
@@ -1771,7 +1798,7 @@ export const api = {
      * Find the latest event ID for a TEI in a given program/stage (optionally constrained to orgUnit).
      * Returns the newest event's UID or null if none found.
      */
-    getLatestSurveyEventId: async ({ programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37', teiId, orgUnitId }) => {
+    getLatestSurveyEventId: async ({ programId = 'G2gULe4jsfs', stageId = '', teiId, orgUnitId }) => {
         const fields = 'event,eventDate,lastUpdated,status,program,programStage,orgUnit,trackedEntityInstance';
         const params = [
             `paging=false`,
@@ -1820,7 +1847,7 @@ export const api = {
    */
   submitEventPutBatched: async (formData, configuration, orgUnitId, opts = {}) => {
     const PROGRAM_ID = configuration?.program?.id || 'G2gULe4jsfs';
-    const STAGE_ID = configuration?.programStage?.id || 'HpHD6u6MV37';
+    const STAGE_ID = configuration?.programStage?.id || '';
     const DE_FACILITY_TEI_ID = 'BKs2OwTxyYa';
     const batchSize = Math.max(50, Math.min(400, Number(opts.batchSize || 150))); // sane bounds
     const interDelay = Math.max(0, Number(opts.interChunkDelayMs || 50));
@@ -2042,7 +2069,7 @@ export const api = {
      * Create a complete assessment bundle (TEI, Enrollment, and all Events) in ONE request.
      * Used for Self Assessments to ensure atomic creation.
      */
-    createAssessmentBundle: async ({ programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37', orgUnitId, teiId = null, enrollmentId = null, trackedEntityTypeId = 'uTTDt3fuXZK', extraAttributes = [], events = [] }) => {
+    createAssessmentBundle: async ({ programId = 'G2gULe4jsfs', stageId = '', orgUnitId, teiId = null, enrollmentId = null, trackedEntityTypeId = 'uTTDt3fuXZK', extraAttributes = [], events = [] }) => {
         if (!orgUnitId) throw new Error('createAssessmentBundle: orgUnitId is required');
 
         const now = new Date().toISOString().slice(0, 10);
@@ -2123,7 +2150,7 @@ export const api = {
      * Create a new survey Event in the target program/stage for a TEI/orgUnit.
      * Returns the created event UID.
      */
-    createSurveyEvent: async ({ programId = 'G2gULe4jsfs', stageId = 'HpHD6u6MV37', orgUnitId, teiId, status = 'ACTIVE', eventDate = null, enrollmentId = null, notes = [], dataValues = [] }) => {
+    createSurveyEvent: async ({ programId = 'G2gULe4jsfs', stageId = '', orgUnitId, teiId, status = 'ACTIVE', eventDate = null, enrollmentId = null, notes = [], dataValues = [] }) => {
         if (!orgUnitId) throw new Error('createSurveyEvent: orgUnitId is required');
         if (!teiId) throw new Error('createSurveyEvent: teiId is required');
 
@@ -2166,7 +2193,7 @@ export const api = {
      */
 	    submitTrackerAssessment: async (formData, configuration, orgUnitId, onIdGenerated) => {
 		        const PROGRAM_ID = configuration?.program?.id || 'G2gULe4jsfs';
-		        const STAGE_ID = configuration?.programStage?.id || 'HpHD6u6MV37';
+		        const STAGE_ID = configuration?.programStage?.id || '';
 		        const TE_TYPE = configuration?.program?.trackedEntityType?.id || 'uTTDt3fuXZK';
         const ATTR_ID = 'Bw4PZ8NsYFd';
         const ATTR_VALUE = 'FAC_ASS_TYPE_INTERNAL';
@@ -2387,5 +2414,38 @@ export const api = {
     },
     // Aliases for Survey Initiation Flow
     qimsTrackerEvents: async (params) => api.getSelfAssessmentAssessorUserIds(params),
-    resolveUsers: async (identifiers) => api.resolveAdminUserDisplayNames(identifiers)
+    resolveUsers: async (identifiers) => api.resolveAdminUserDisplayNames(identifiers),
+
+    // Direct option-set lookup (e.g. survey type options)
+    getOptionSetOptions: async (optionSetId) => {
+        try {
+            const response = await fetch(`${BASE_URL}/api/optionSets/${optionSetId}.json?fields=options[id,code,name]`, { headers: getHeaders() });
+            if (!response.ok) return [];
+            const data = await response.json();
+            return (data.options || []).map(o => ({ value: o.code || o.name, label: o.name }));
+        } catch (e) {
+            console.warn('getOptionSetOptions failed (non-fatal)', e);
+            return [];
+        }
+    },
+
+    // Query TEIs by org-unit to look up enrollment attribute values (e.g. baseline check)
+    // Uses trackedEntityInstances.json (structured) instead of query.json (grid) for reliable attribute parsing
+    getTeisByOrgUnitForBaselineCheck: async ({ orgUnitId, programId = 'G2gULe4jsfs' }) => {
+        try {
+            const params = new URLSearchParams({
+                ou: orgUnitId,
+                ouMode: 'DESCENDANTS',
+                program: programId,
+                pageSize: '500',
+                page: '1'
+            });
+            const response = await fetch(`${BASE_URL}/api/trackedEntityInstances.json?${params.toString()}`, { headers: getHeaders() });
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (e) {
+            console.warn('getTeisByOrgUnitForBaselineCheck failed (non-fatal)', e);
+            return null;
+        }
+    }
 };

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, useLocation, useSearchParams } from 'react-router-dom';
 import Login from './pages/Login/Login';
 import Layout from './components/Layout/Layout';
@@ -24,7 +24,6 @@ import './App.css';
 import Report from './pages/Report';
 import Admin from './pages/Admin';
 
-const DEFAULT_SURVEY_PROGRAM_STAGE_ID = 'HpHD6u6MV37';
 const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   HOSPITAL: 'hup8BqEe7Mn',
   CLINICS: 'cliStageU11',
@@ -38,7 +37,7 @@ const getSurveyProgramStageIdForGroupText = (text) => {
   if (value.includes('clinic')) return SURVEY_PROGRAM_STAGE_BY_GROUP.CLINICS;
   if (value.includes('ems') || value.startsWith('se') || value.includes(' se')) return SURVEY_PROGRAM_STAGE_BY_GROUP.EMS;
   if (value.includes('mortu') || value.includes('general')) return SURVEY_PROGRAM_STAGE_BY_GROUP.MORTUARY;
-  return DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+  return '';
 };
 
 const isAssessmentDetailsName = (value) => {
@@ -109,7 +108,11 @@ const PrivateRoute = ({ children }) => {
 	  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
   const [initialDataLoaded, setInitialDataLoaded] = useState(false);
-  const [isFormLoading, setIsFormLoading] = useState(false);
+  const [formLoadingDepth, setFormLoadingDepth] = useState(0);
+  const [formLoadingMessage, setFormLoadingMessage] = useState('Loading survey…');
+
+  const enterFormLoading = React.useCallback(() => setFormLoadingDepth(d => d + 1), []);
+  const leaveFormLoading = React.useCallback(() => setFormLoadingDepth(d => Math.max(0, d - 1)), []);
 
   // Navigation State
   const [groups, setGroups] = useState([]);
@@ -119,7 +122,7 @@ const PrivateRoute = ({ children }) => {
 	  // Data State
 		  const [assignments, setAssignments] = useState([]);
 	  const [selectedFacility, setSelectedFacility] = useState(null);
-	
+
 	  // Data element ID for "SURV-Facility Assessment Group"
 		  const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
 		  const TYPE_OF_ASSESSMENT_DE_ID = 'LNszX9xHx8s';
@@ -134,7 +137,7 @@ const PrivateRoute = ({ children }) => {
 		    });
 		    return match?.id || TYPE_OF_ASSESSMENT_DE_ID;
 		  }, [configuration]);
-	
+
 	  const getGroupLabelForStorage = (group) => {
 	    if (!group) return '';
 	    // Prefer human-readable name for clarity in the Assessment Details section
@@ -160,16 +163,16 @@ const PrivateRoute = ({ children }) => {
 	    if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
 	    return String(text || '').toUpperCase().trim() || null;
 	  }, []);
-	
+
 	  // Generate Event ID safely - unique per assessment *and group*
 	  // so each (assessment, group) gets its own draft/event.
 	  const activeEventId = React.useMemo(() => {
 	    const assessmentId = searchParams.get('assessmentId');
 	    const draftKey = searchParams.get('draftKey');
 	    const groupKey = activeGroup?.id || 'no-group';
-	
+
 	    if (draftKey || assessmentId) return `draft-assessment-${draftKey || assessmentId}-group-${groupKey}`;
-	
+
 	    if (!selectedFacility || (!selectedFacility.trackedEntityInstance && !selectedFacility.orgUnit)) return null;
 	    const identifier = selectedFacility.trackedEntityInstance || selectedFacility.orgUnit;
 	    return `draft-facility-${identifier}-group-${groupKey}`;
@@ -190,7 +193,7 @@ const PrivateRoute = ({ children }) => {
 	    onSaveError: (error) => {
 	      console.error('❌ App: Save failed:', error);
 	      if (!error) return;
-	
+
 	      // Friendly messaging for local storage limits / draft limits.
 	      if (error.code === 'DRAFT_LIMIT_EXCEEDED') {
 	        showToast(
@@ -293,17 +296,18 @@ const PrivateRoute = ({ children }) => {
     preloadAppliedRef.current = null;
     (async () => {
       try {
-        setIsFormLoading(true);
+        enterFormLoading();
+        setFormLoadingMessage('Restoring saved answers…');
         await loadFormData();
       } finally {
         if (!cancelled) {
-            setIsFormLoading(false);
+            leaveFormLoading();
             setHasLoadedDraft(true);
         }
       }
     })();
     return () => { cancelled = true; };
-  }, [activeEventId, loadFormData]);
+  }, [activeEventId, loadFormData, enterFormLoading, leaveFormLoading]);
 
 		  const location = useLocation();
 	  const assessmentIdParam = searchParams.get('assessmentId');
@@ -375,32 +379,20 @@ const PrivateRoute = ({ children }) => {
   const loadInitialData = async () => {
     setIsLoading(true);
     try {
-	      const [metadata, msgAssignments] = await Promise.all([
-	        api.getFormMetadata(DEFAULT_SURVEY_PROGRAM_STAGE_ID),
-        api.getAssignments()
-      ]);
-
-      const transformedGroups = transformMetadata(metadata);
-      setGroups(transformedGroups);
-
-      // Prefer the program object returned by metadata so that we have the
-      // correct program id and trackedEntityType id for tracker submission.
-      const programFromMetadata = metadata.program || { id: 'G2gULe4jsfs', displayName: 'MOH Survey Dashboard' };
+      // Legacy default stage HpHD6u6MV37 is no longer used; metadata is loaded
+      // on-demand per group. Only fetch assignments initially.
+      const msgAssignments = await api.getAssignments();
+      setAssignments(msgAssignments || []);
+      setGroups([]); // no default stage groups; loaded per-stage when needed
 
       setConfiguration({
-        programStage: metadata,
-        program: programFromMetadata,
+        programStage: null,
+        program: { id: 'G2gULe4jsfs', displayName: 'MOH Survey Dashboard' },
         organisationUnits: msgAssignments.map(a => a.orgUnit)
       });
 
-      // Set Defaults
-      if (transformedGroups.length > 0) {
-        const firstGroup = transformedGroups[0];
-        setActiveGroup(firstGroup);
-        if (firstGroup.sections.length > 0) {
-          setActiveSection(firstGroup.sections[0]);
-        }
-      }
+      // No default stage metadata loaded on boot; groups are set when a
+      // specific stage is selected via loadProgramStageMetadata.
 
       setAssignments(msgAssignments);
       setUserAssignments(msgAssignments); // Update context
@@ -430,26 +422,31 @@ const PrivateRoute = ({ children }) => {
 
 			  const applyMetadataToNavigation = React.useCallback((metadata, preferredGroupText = '') => {
 		    const transformedGroups = transformMetadata(metadata);
+
 		    setGroups(transformedGroups);
 
 			    const nextGroup = selectBestGroup(transformedGroups, preferredGroupText);
+
 		    setActiveGroup(nextGroup);
 		    setActiveSection(nextGroup?.sections?.[0] || null);
 		    return transformedGroups;
 			  }, [selectBestGroup]);
 
 			  const formMetadataLoadRef = React.useRef('');
+  const lastInferredAssessmentRef = useRef('');
 
 			  const loadProgramStageMetadata = React.useCallback(async (programStageId, preferredGroupText = '', forceRefresh = false) => {
-	    const targetStageId = programStageId || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+	    const targetStageId = programStageId || '';
 			    if (!forceRefresh && configuration?.programStage?.id === targetStageId && Array.isArray(configuration?.programStage?.programStageSections)) {
 		      applyMetadataToNavigation(configuration.programStage, preferredGroupText);
 		      return;
 		    }
 
-	    setIsFormLoading(true);
+	    enterFormLoading();
+	    setFormLoadingMessage('Loading assessment metadata…');
 	    try {
 	      const metadata = await api.getFormMetadata(targetStageId);
+	      setFormLoadingMessage('Preparing assessment sections…');
 		      applyMetadataToNavigation(metadata, preferredGroupText);
 	      setConfiguration({
 	        programStage: metadata,
@@ -460,12 +457,13 @@ const PrivateRoute = ({ children }) => {
 	      console.error('Failed to load form metadata for program stage', targetStageId, err);
 	      showToast?.('Failed to load survey questions for this facility type.', 'error');
 	    } finally {
-	      setIsFormLoading(false);
+	      leaveFormLoading();
 	    }
-		  }, [applyMetadataToNavigation, assignments, configuration, setConfiguration, showToast]);
+		  }, [applyMetadataToNavigation, assignments, configuration, setConfiguration, showToast, enterFormLoading, leaveFormLoading]);
 
 	  useEffect(() => {
 	    if (location.pathname !== '/form') return;
+
 	    const stateAssignment = location.state && location.state.selectedAssignment;
 	    const groupText =
 	      stateAssignment?.preloadDataValues?.[FACILITY_GROUP_DE_ID] ||
@@ -479,11 +477,28 @@ const PrivateRoute = ({ children }) => {
 		    const groupStageId = getSurveyProgramStageIdForGroupText(groupText);
 		    const explicitStageId = searchParams.get('programStageId') || stateAssignment?.programStageId || '';
 		    const targetStageId =
-		      groupStageId !== DEFAULT_SURVEY_PROGRAM_STAGE_ID
+		      groupStageId !== ''
 		        ? groupStageId
 		        : (explicitStageId || groupStageId);
 
-			    if (!targetStageId) return;
+
+			    // When the URL lacks stage/group info (e.g. after refresh), try to infer
+			    // the correct stage by fetching the assessment event.
+			    if (!targetStageId) {
+			      const assessmentId = searchParams.get('assessmentId');
+			      if (assessmentId && lastInferredAssessmentRef.current !== assessmentId) {
+			        lastInferredAssessmentRef.current = assessmentId;
+			        api.getEventById(assessmentId, 'event,programStage')
+			          .then(ev => {
+			            const inferredStage = ev?.programStage || '';
+			            if (inferredStage) {
+			              loadProgramStageMetadata(inferredStage, groupText, true);
+			            }
+			          })
+			          .catch(() => {});
+			      }
+			      return;
+			    }
 			    const metadataLoadKey = `${location.key || location.pathname}|${targetStageId}|${groupText || ''}`;
 			    const shouldRefreshDedicatedStageMetadata = Object.values(SURVEY_PROGRAM_STAGE_BY_GROUP).includes(targetStageId) && formMetadataLoadRef.current !== metadataLoadKey;
 			    if (configuration?.programStage?.id === targetStageId) {
@@ -536,6 +551,13 @@ const PrivateRoute = ({ children }) => {
 	      // Fallback: match against locally loaded assignments (older workflow)
 	      const matched = assignments.find(a => (a.eventId || a.enrollment) === assessmentId);
 	      if (matched) {
+	        const matchedId = matched.eventId || matched.enrollment;
+	        const currentId = selectedFacility?.eventId || selectedFacility?.enrollment;
+	        if (matchedId === currentId && selectedFacility?.hydrateAll) {
+	          // Already auto-selected and hydrated; avoid creating a new object
+	          // reference that triggers cascading re-renders / effects.
+	          return;
+	        }
 	        const restored = { ...matched };
             // Restore baselineId if provided in URL (handles F5 reloads)
 	        if (baselineIdParam && !restored.baselineEventId) {
@@ -560,7 +582,7 @@ const PrivateRoute = ({ children }) => {
 	        setSelectedFacility(restored);
 	      }
 	    }
-		  }, [location.state, searchParams, assignments, groups, activeGroup?.id, resolveGroupIdFromText, selectBestGroup]);
+		  }, [location.state, searchParams, assignments, groups, activeGroup?.id, resolveGroupIdFromText, selectBestGroup, selectedFacility]);
 
   // Track whether we've applied navigation preloads for the current selection
   const preloadAppliedRef = React.useRef(null);
@@ -740,7 +762,7 @@ const PrivateRoute = ({ children }) => {
 	      }
 	      if (groupField && !preloadedGroupText) {
         const programId = configuration?.program?.id || 'G2gULe4jsfs';
-        const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+        const stageId = configuration?.programStage?.id || '';
         const orgUnitId =
           selectedFacility?.orgUnitId ||
           (typeof selectedFacility?.orgUnit === 'string' ? selectedFacility.orgUnit : selectedFacility?.orgUnit?.id) ||
@@ -898,15 +920,23 @@ const PrivateRoute = ({ children }) => {
 	    (async () => {
 	      try {
 	        setIsScoringPending(true);
-	        const loadedEvents = [];
-	        const batchSize = 5;
-	        for (let i = 0; i < scoringEventIds.length; i += batchSize) {
-	          const batch = scoringEventIds.slice(i, i + batchSize);
-	          const loaded = await Promise.all(batch.map(eventId => api.getEventById(
-	            eventId,
-	            'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]'
-	          ).catch(() => null)));
-	          loaded.forEach(ev => { if (ev?.event) loadedEvents.push(ev); });
+	        let loadedEvents = [];
+	        try {
+	          loadedEvents = await api.getEventsList({
+	            eventIds: scoringEventIds,
+	            fields: 'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]'
+	          });
+	        } catch (bulkErr) {
+	          console.warn('App: Bulk scoring fetch failed, falling back to individual fetches', bulkErr);
+	          const batchSize = 5;
+	          for (let i = 0; i < scoringEventIds.length; i += batchSize) {
+	            const batch = scoringEventIds.slice(i, i + batchSize);
+	            const loaded = await Promise.all(batch.map(eventId => api.getEventById(
+	              eventId,
+	              'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]'
+	            ).catch(() => null)));
+	            loaded.forEach(ev => { if (ev?.event) loadedEvents.push(ev); });
+	          }
 	        }
 
 	        if (cancelled) return;
@@ -972,9 +1002,9 @@ const PrivateRoute = ({ children }) => {
 	      return isAssessmentDetailsName(s.name || s.code || s.id);
     });
     if (!adSection) return true; // If AD section doesn't exist, don't block anything
-	
+
 	    const fields = adSection.fields || [];
-	
+
 	    // Only require a minimal, critical subset in Assessment Details before
 	    // unlocking other sections:
 	    // - TEI ID
@@ -994,10 +1024,10 @@ const PrivateRoute = ({ children }) => {
 	        label.includes('ASSESSOR USER ID')
 	      );
 	    });
-	
+
 	    const requiredFields = [teiField, groupField, assessorField].filter(Boolean);
 	    if (requiredFields.length === 0) return true; // nothing to enforce
-	
+
 	    return requiredFields.every(f => {
 		      const val = displayFormData[f.id];
 	      return val !== undefined && val !== null && String(val).trim() !== '';
@@ -1084,7 +1114,7 @@ const PrivateRoute = ({ children }) => {
                   const hasEffectiveLinks = effectiveLinks.length > 0;
                   const isRoot = hasEffectiveLinks;
 	              const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
-	
+
                   return {
 	                id: f.id,
 	                code: code,
@@ -1158,11 +1188,11 @@ const PrivateRoute = ({ children }) => {
               <div className="loading-screen">Loading Configuration...</div>
             ) : (
               <>
-                {isFormLoading && (
+                {formLoadingDepth > 0 && (
                   <div className="form-loader-overlay">
                     <div className="form-loader-card">
                       <div className="form-loader-spinner" />
-                      <div className="form-loader-text">Loading survey…</div>
+                      <div className="form-loader-text">{formLoadingMessage}</div>
                     </div>
                   </div>
                 )}

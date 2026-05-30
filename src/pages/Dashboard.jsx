@@ -44,7 +44,6 @@ import NotificationsActiveIcon from '@mui/icons-material/NotificationsActive';
 import './Dashboard.css';
 
 const SURVEY_ASSESSMENTS_PROGRAM_ID = 'G2gULe4jsfs';
-const DEFAULT_SURVEY_PROGRAM_STAGE_ID = 'HpHD6u6MV37';
 const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     HOSPITAL: 'hup8BqEe7Mn',
     CLINICS: 'cliStageU11',
@@ -114,6 +113,8 @@ export function Dashboard() {
     const [initHasExistingBaseline, setInitHasExistingBaseline] = useState(false);
     const [initEditAssignmentsOnly, setInitEditAssignmentsOnly] = useState(false);
     const [initiatingAssessmentKey, setInitiatingAssessmentKey] = useState(null);
+    const [loadingSurveyRow, setLoadingSurveyRow] = useState(null);
+    const [loadingSurveyInfo, setLoadingSurveyInfo] = useState(null);
 
     const allSeAssigned = React.useMemo(() => {
         if (!initFacilityGroup || !initSeOptions || initSeOptions.length === 0) return false;
@@ -200,23 +201,49 @@ export function Dashboard() {
 	            const code = String(de?.code || '').toLowerCase();
 	            return n.includes('type of assessment')
 	                || (n.includes('assessment type') && !n.includes('facility assessment'))
+	                || n.includes('survey type')
+	                || n.includes('type of survey')
 	                || code.includes('type_of_assessment')
 	                || code.includes('assessment_type_selected');
 	        }) || null;
 	    }, [getProgramStageDataElementDefinitions]);
 
+	    // Prefer API-loaded option-set options; fall back to metadata extraction
+	    const [surveyTypeOptionsList, setSurveyTypeOptionsList] = React.useState([]);
+
+	    React.useEffect(() => {
+	        let cancelled = false;
+	        api.getOptionSetOptions('whOJTh1cKwX')
+	            .then(opts => { if (!cancelled) setSurveyTypeOptionsList(opts || []); })
+	            .catch(() => { if (!cancelled) setSurveyTypeOptionsList([]); });
+	        return () => { cancelled = true; };
+	    }, []);
+
 	    const getSurveyTypeOptionsFromMetadata = React.useCallback((programStage) => {
+	        const apiOpts = (surveyTypeOptionsList || [])
+	            .filter(o => {
+	                const text = `${o.value || ''} ${o.label || ''}`.toLowerCase().replace(/[_-]+/g, ' ');
+	                return !(text.includes('supportive') || (text.includes('support') && text.includes('visit')));
+	            });
+	        let metaOpts = [];
 	        try {
 	            const de = findSurveyTypeDataElement(programStage);
 	            const opts = de?.optionSet?.options || [];
-	            return opts
+	            metaOpts = opts
 	                .map(o => ({ value: o.code || o.displayName || o.name, label: o.displayName || o.name || o.code }))
 	                .filter(o => {
 	                    const text = `${o.value || ''} ${o.label || ''}`.toLowerCase().replace(/[_-]+/g, ' ');
 	                    return !(text.includes('supportive') || (text.includes('support') && text.includes('visit')));
 	                });
-	        } catch (_) { return []; }
-	    }, [findSurveyTypeDataElement]);
+	        } catch (_) { /* ignore */ }
+	        // Merge both sources and deduplicate by label (prefer API value if conflict)
+	        const mergedMap = new Map();
+	        [...metaOpts, ...apiOpts].forEach(o => {
+	            const key = String(o.label || o.value || '').trim().toLowerCase();
+	            if (key && !mergedMap.has(key)) mergedMap.set(key, o);
+	        });
+	        return Array.from(mergedMap.values());
+	    }, [findSurveyTypeDataElement, surveyTypeOptionsList]);
 
 	    // Resolve the DataElement ID for "Type of Assessment" from loaded metadata
 	    const surveyTypeDeId = useMemo(
@@ -388,7 +415,7 @@ export function Dashboard() {
 
 	    const getSurveyProgramStageIdForGroup = React.useCallback((facilityGroupKey) => {
 	        const normalizedGroup = toFacilityGroupKey(facilityGroupKey);
-	        return SURVEY_PROGRAM_STAGE_BY_GROUP[normalizedGroup] || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+	        return SURVEY_PROGRAM_STAGE_BY_GROUP[normalizedGroup] || '';
 	    }, [toFacilityGroupKey]);
 
 	    const ensureSurveyMetadataForGroup = React.useCallback(async (facilityGroupKey) => {
@@ -655,7 +682,7 @@ export function Dashboard() {
 			                groupStageId ||
 			                assessment?.programStageId ||
 		                configuration?.programStage?.id ||
-		                DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+		                '';
 			    const programId = programStageMetadata?.program?.id || getSurveyEventProgramIdForStage(stageId, assessment);
         const planInfo = await findAssessmentPlanForTei({ teiId, preferredNs: facilityGroup });
         const resolvedGroup = toFacilityGroupKey(facilityGroup || planInfo?.plan?.facilityGroup || assessment?.parentGroupId || '');
@@ -859,7 +886,7 @@ export function Dashboard() {
 	                return;
 	            }
 
-            // fetch all survey events for this Org Unit (regardless of TEI) to capture both 
+            // fetch all survey events for this Org Unit (regardless of TEI) to capture both
             // scheduled and self-initiated assessments in the history table.
             console.log('[AssocEvents] fetching for OrgUnit', { assocKey, programId, stageId, orgUnitId });
             const enrollments = await (api.getProgramEnrollments
@@ -878,8 +905,8 @@ export function Dashboard() {
 	                            SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentStartDate,
 	                            ['assessment start date']
 	                        );
-                        return { 
-                            ...e, 
+                        return {
+                            ...e,
                             _type: 'Enrollment',
 	                            event: e.enrollmentId,
 	                            enrollment: e.enrollmentId,
@@ -1003,7 +1030,7 @@ export function Dashboard() {
 	    const roleNorm = String(assessment?.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i, '').toUpperCase();
 	    const isLead = /LEAD|LEADER/.test(roleNorm);
 	    const roleLabel = roleNorm ? roleNorm.replace(/\s+/g, '_').replace(/_/g, ' ') : '';
-		    const label = hasAssessmentEvent ? 'Update Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
+		    const label = 'Initiate Survey';
 	    const plannedDate = assessment?.scheduledAt ? assessment.scheduledAt.slice(0, 10) : 'N/A';
 	    const lastUpdated = assessment?.updatedAt ? assessment.updatedAt.slice(0, 10) : 'N/A';
 	    const evs = Array.isArray(assessment?.team) ? assessment.team : [];
@@ -1094,13 +1121,12 @@ export function Dashboard() {
 		    return assessment?.programStageId
 		        || getSurveyProgramStageIdForGroup(facilityGroup)
 		        || configuration?.programStage?.id
-		        || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+		        || '';
 		};
 
 			const getSurveyEventProgramIdForStage = (stageId, assessment = null) => {
 			    const normalizedStageId = String(stageId || '').trim();
-			    const isSurveyStage = normalizedStageId === DEFAULT_SURVEY_PROGRAM_STAGE_ID
-			        || Object.values(SURVEY_PROGRAM_STAGE_BY_GROUP).includes(normalizedStageId);
+			    const isSurveyStage = Object.values(SURVEY_PROGRAM_STAGE_BY_GROUP).includes(normalizedStageId);
 			    return isSurveyStage
 			        ? SURVEY_ASSESSMENTS_PROGRAM_ID
 			        : (configuration?.program?.id || getAssignmentProgramId(assessment) || SURVEY_ASSESSMENTS_PROGRAM_ID);
@@ -1121,15 +1147,13 @@ export function Dashboard() {
 		const canOpenAssessmentFromUiState = (uiState, { allowWhileChecking = false } = {}) => {
 		    if (!uiState) return false;
 		    if (!allowWhileChecking && uiState.isCheckingPresence) return false;
-		    if (uiState.label === 'Initiate Survey' && !uiState.isLead) return false;
 		    return true;
 		};
 
 		const openAssessmentFromUiState = (assessment, uiState, { allowWhileChecking = false } = {}) => {
 		    if (!canOpenAssessmentFromUiState(uiState, { allowWhileChecking })) return;
-	    const selfOnly = uiState.hasAssessmentEvent && uiState.label === 'Initiate Survey';
 	    return uiState.label === 'Initiate Survey'
-	        ? handleInitiateSurvey(assessment, { selfOnly })
+	        ? handleOpenAssessment(assessment, { forceDialog: true })
 	        : handleOpenAssessment(assessment);
 	};
 
@@ -1141,18 +1165,18 @@ export function Dashboard() {
 	            </button>
 	        );
 	    }
-	    if (uiState.label === 'Initiate Survey' && !uiState.isLead) return null;
-	    const selfOnly = uiState.hasAssessmentEvent && uiState.label === 'Initiate Survey';
+
+	
 	    return (
 	        <button
 	            className={`btn ${uiState.label === 'Initiate Survey' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-	            disabled={uiState.label === 'Initiate Survey' && uiState.isInitiating}
+	            disabled={uiState.isInitiating}
 	            onClick={(e) => {
 	                e.stopPropagation();
 	                openAssessmentFromUiState(assessment, uiState);
 	            }}
 	        >
-	            {uiState.label === 'Initiate Survey' && uiState.isInitiating ? 'Opening…' : uiState.label}
+	            {uiState.isInitiating ? 'Opening…' : uiState.label}
 	        </button>
 	    );
 	};
@@ -1211,11 +1235,6 @@ export function Dashboard() {
 	                    padding: '2px 8px',
 	                    borderRadius: '9999px'
 	                }}>NO BASELINE</span>
-	                {!isLead && (
-	                    <span style={{ color: '#9A3412', fontSize: '0.9em' }}>
-	                        Please contact the Team Lead to initiate the survey.
-	                    </span>
-	                )}
 	            </div>
 	        );
 	    }
@@ -1298,6 +1317,7 @@ export function Dashboard() {
 	                <tbody>
 	                    {rows.map(ev => (
 	                        <tr
+	                            className={`associated-assessment-row ${loadingSurveyRow === (ev.event || ev.enrollmentId || ev.enrollment || ev.trackedEntityInstance || '') ? 'loading' : ''}`}
 	                            key={`survey-${ev.enrollmentId || ev.enrollment || ev.event || ev.trackedEntityInstance}`}
 	                            onClick={() => openAssociatedSurvey(assessment, ev)}
 	                            style={{ borderTop: '1px dashed #eee', cursor: 'pointer' }}
@@ -1347,6 +1367,24 @@ export function Dashboard() {
 	                                    >
 	                                        Edit SE Assignments
 	                                    </button>
+                                    <button
+                                        className="btn btn-secondary btn-xs"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openAssociatedSurvey(assessment, ev);
+                                        }}
+                                    >
+                                        Update Survey
+                                    </button>
+                                    <button
+                                        className="btn btn-secondary btn-xs"
+                                        onClick={(e) => {
+                                            e.stopPropagation();
+                                            openTeamDialog(assessment);
+                                        }}
+                                    >
+                                        Team ({Array.isArray(assessment.team) ? assessment.team.length : 0})
+                                    </button>
 	                                </div>
 	                            </td>
 	                        </tr>
@@ -1415,6 +1453,8 @@ export function Dashboard() {
     // Open a specific main-survey event from the associated-events table for editing
     const openAssociatedSurvey = async (assessment, ev) => {
         if (!ev?.event) return;
+        const rowKey = ev.event || ev.enrollmentId || ev.enrollment || ev.trackedEntityInstance || '';
+        setLoadingSurveyRow(rowKey);
         const withBaseline = { ...assessment, baselineEventId: ev.event };
 
         const assocKey = getAssocKey(assessment);
@@ -1429,7 +1469,7 @@ export function Dashboard() {
 	            || getSurveyProgramStageIdForGroup(resolvedFacilityGroup)
 	            || assessment?.programStageId
 	            || configuration?.programStage?.id
-	            || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+	            || '';
 
         // The table now loads enrollments, which lack dataValues. Treat the clicked
         // enrollment as the pointer to the assessment bundle and fetch its actual
@@ -1439,10 +1479,11 @@ export function Dashboard() {
             const teiId = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
             const orgUnitId = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || null;
 	            const programId = ev.programId || getSurveyEventProgramIdForStage(resolvedProgramStageId, assessment);
-	            const stageId = resolvedProgramStageId || configuration?.programStage?.id || 'HpHD6u6MV37';
+	            const stageId = resolvedProgramStageId || configuration?.programStage?.id || '';
 
             if (clickedEnrollmentId) {
                 try {
+                    setLoadingSurveyInfo('Loading survey events…');
                     const fetched = await api.getEventsList({
                         programId,
                         enrollmentId: clickedEnrollmentId,
@@ -1461,6 +1502,7 @@ export function Dashboard() {
 
             if (relatedEvents.length === 0 && teiId) {
                 try {
+                    setLoadingSurveyInfo('Fetching survey details…');
                     const fetched = await api.getSurveyEventsForTei({
                         teiId,
                         orgUnitId,
@@ -1476,6 +1518,8 @@ export function Dashboard() {
 
             if (relatedEvents.length === 0) {
                 showToast?.('No survey events found for this enrollment yet.', 'warning');
+                setLoadingSurveyRow(null);
+                setLoadingSurveyInfo(null);
                 return;
             }
         }
@@ -1496,16 +1540,16 @@ export function Dashboard() {
 
         // Preload ALL DE values from ALL related events so the form can render and score with complete context
         const preload = {};
-        
+
         // Build the eventIdMap to know which event handles which SE
         const eventIdMap = {};
-        
+
         relatedEvents.forEach(relatedEv => {
             const dvList = Array.isArray(relatedEv.dataValues) ? relatedEv.dataValues : [];
             dvList.forEach(dv => {
                 if (dv && dv.dataElement) preload[dv.dataElement] = dv.value ?? '';
             });
-            
+
             // Map the event ID based on its SYS_TAG data value
             const tag = getSysTag(relatedEv);
             if (tag) eventIdMap[tag] = relatedEv.event;
@@ -1513,7 +1557,7 @@ export function Dashboard() {
 	        if (primaryEvent?.event && !eventIdMap.FINAL) {
 	            eventIdMap.FINAL = primaryEvent.event;
 	        }
-        
+
         // Save the eventIdMap into preload so App.jsx can use it
         preload['eventIdMap_internal'] = JSON.stringify(eventIdMap);
         if (clickedEnrollmentId) preload['enrollmentId_internal'] = clickedEnrollmentId;
@@ -1526,11 +1570,12 @@ export function Dashboard() {
             // Fallback: resolve baseline Assessment Group from earliest event for this TEI
             try {
 	                const programId = getSurveyEventProgramIdForStage(resolvedProgramStageId, assessment);
-	                const stageId = resolvedProgramStageId || configuration?.programStage?.id || 'HpHD6u6MV37';
+	                const stageId = resolvedProgramStageId || configuration?.programStage?.id || '';
                 // Prefer TEI from the clicked event row; fall back to assignment
                 const teiId = primaryEvent.trackedEntityInstance || ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
                 const orgUnitId = assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || null;
                 if (teiId) {
+                    setLoadingSurveyInfo('Resolving baseline group…');
                     const baselineGroup = await api.getBaselineAssessmentGroup({ teiId, orgUnitId, programId, stageId });
                     if (baselineGroup && String(baselineGroup).trim() !== '') {
                         preload['pzenrgsSny3'] = baselineGroup;
@@ -1572,6 +1617,7 @@ export function Dashboard() {
         // assignment id here can reopen an older local draft bucket.
         const urlId = clickedEnrollmentId || primaryEvent.event || ev.event;
         const teiForUrl = primaryEvent.trackedEntityInstance || ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
+        setLoadingSurveyInfo('Preparing form…');
 	        navigate(`/form?assessmentId=${encodeURIComponent(urlId || '')}&baselineId=${encodeURIComponent(primaryEvent.event || ev.event || '')}&draftKey=${encodeURIComponent(urlId || '')}&assessmentTeiId=${encodeURIComponent(teiForUrl)}${clickedEnrollmentId ? `&enrollmentId=${encodeURIComponent(clickedEnrollmentId)}` : ''}${resolvedProgramStageId ? `&programStageId=${encodeURIComponent(resolvedProgramStageId)}` : ''}${groupKey ? `&parentGroupId=${encodeURIComponent(groupKey)}&facilityGroup=${encodeURIComponent(groupKey)}` : ''}`, { state: { selectedAssignment: selected } });
     };
 
@@ -1590,40 +1636,57 @@ export function Dashboard() {
     };
 
 		const assessmentHasBaselineSurvey = React.useCallback(async (assessment) => {
-	        if (!assessment || !surveyTypeDeId) return false;
+	        if (!assessment) return false;
+		    const facilityOrgUnitId = resolveOrgUnitForAssessment(assessment);
+	        if (!facilityOrgUnitId) return false;
+
+	        // 1. Check enrollment attribute via TEI lookup (preferred)
+	        const data = await api.getTeisByOrgUnitForBaselineCheck({
+	            orgUnitId: facilityOrgUnitId,
+	            programId: 'G2gULe4jsfs'
+	        }).catch(() => null);
+
+	        const hasBaselineFromTeis = data && Array.isArray(data.trackedEntityInstances) &&
+	            data.trackedEntityInstances.some(tei => {
+	                const attrs = tei.attributes || tei.enrollments?.[0]?.attributes || [];
+	                return attrs.some(attr =>
+	                    attr.attribute === 'qrTQdWKRYMB' &&
+	                    String(attr.value || '').trim().toLowerCase() === 'baseline assessment'
+	                );
+	            });
+
+	        if (hasBaselineFromTeis) return true;
+
+	        // 2. Fallback: old event-based check for backward compatibility
+	        if (!surveyTypeDeId) return false;
 		    const stageId = getAssignmentProgramStageId(assessment);
 	        const programId = getSurveyEventProgramIdForStage(stageId, assessment);
-        const facilityOrgUnitId =
-            assessment?.orgUnitId ||
-            (typeof assessment?.orgUnit === 'string' ? assessment.orgUnit : assessment?.orgUnit?.id) ||
-            assessment?.facilityId ||
-            null;
-        const teiId = resolveTeiForAssessment(assessment);
-        if (!facilityOrgUnitId && !teiId) return false;
+	        const teiId = resolveTeiForAssessment(assessment);
+	        if (!facilityOrgUnitId && !teiId) return false;
 
-        const events = facilityOrgUnitId
-            ? await api.getEventsList({
-                programId,
-                stageId,
-                orgUnitId: facilityOrgUnitId,
-                ouMode: 'DESCENDANTS',
-                fields: 'event,orgUnit,trackedEntityInstance,dataValues[dataElement,value]'
-            }).catch(() => [])
-            : await api.getSurveyEventsForTeiByEventIds({
-                teiId,
-                orgUnitId: null,
-                programId,
-                stageId,
-                listPageSize: 50,
-                detailBatchSize: 5,
-                fields: 'event,dataValues[dataElement,value]'
-            }).catch(() => []);
+	        const events = facilityOrgUnitId
+	            ? await api.getEventsList({
+	                programId,
+	                stageId,
+	                orgUnitId: facilityOrgUnitId,
+	                ouMode: 'DESCENDANTS',
+	                fields: 'event,orgUnit,trackedEntityInstance,dataValues[dataElement,value]'
+	            }).catch(() => [])
+	            : await api.getSurveyEventsForTeiByEventIds({
+	                teiId,
+	                orgUnitId: null,
+	                programId,
+	                stageId,
+	                listPageSize: 50,
+	                detailBatchSize: 5,
+	                fields: 'event,dataValues[dataElement,value]'
+	            }).catch(() => []);
 
-        return (Array.isArray(events) ? events : []).some(ev => {
-            const dv = (ev?.dataValues || []).find(d => d?.dataElement === surveyTypeDeId);
-            return dv && isBaselineSurveyType(dv.value);
-        });
-    }, [configuration, surveyTypeDeId, isBaselineSurveyType]);
+	        return (Array.isArray(events) ? events : []).some(ev => {
+	            const dv = (ev?.dataValues || []).find(d => d?.dataElement === surveyTypeDeId);
+	            return dv && isBaselineSurveyType(dv.value);
+	        });
+	    }, [surveyTypeDeId, isBaselineSurveyType]);
 
     const loadSelfAssessmentAssessors = React.useCallback(async (assessment) => {
         const orgUnitId = assessment?.facilityId || assessment?.orgUnitId || resolveOrgUnitForAssessment(assessment);
@@ -1714,7 +1777,10 @@ export function Dashboard() {
         }
     }, [showToast]);
 
-			    const handleOpenAssessment = async (assessment) => {
+			    const handleOpenAssessment = async (assessment, { forceDialog = false } = {}) => {
+		        const actionKey = getAssessmentActionKey(assessment);
+		        setInitiatingAssessmentKey(actionKey);
+		        setLoadingSurveyInfo('Initiating survey....');
 		        try {
 		            const resolvedFacilityGroup = getAssessmentFacilityGroupKey(assessment)
 		                || toFacilityGroupKey(getAssignmentFacilityGroupValue(assessment));
@@ -1738,6 +1804,7 @@ export function Dashboard() {
 
             // New model: one TEI represents one assessment, so hydrate the full
             // assessment bundle (FINAL + all SE events) before opening the form.
+            setLoadingSurveyInfo('Checking for existing surveys...');
             let surveyEvents = [];
             try {
                 surveyEvents = await api.getSurveyEventsForTei({
@@ -1751,7 +1818,7 @@ export function Dashboard() {
                 console.warn('[Dashboard] Could not fetch assessment event bundle', e);
             }
 
-            if (Array.isArray(surveyEvents) && surveyEvents.length > 0) {
+            if (!forceDialog && Array.isArray(surveyEvents) && surveyEvents.length > 0) {
                 const preload = {};
                 const eventIdMap = {};
                 let finalEventId = null;
@@ -1811,48 +1878,41 @@ export function Dashboard() {
                 return;
             }
 
-            // No baseline exists yet. Only Team Lead may initiate.
-            const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
-            const isLead = /LEAD|LEADER/.test(roleNorm);
-            if (!isLead) {
-                if (typeof showToast === 'function') {
-                    showToast('Please contact the Team Lead to initiate the survey.', 'warning');
-                }
-                return;
-            }
+            const team = (assessment.teamAssignments || [])
+                .filter(m => m && m.assignedUserId)
+                .map(m => ({ ...m }));
 
-            // Prime Initiate Survey dialog with team and defaults
-            try {
-                const team = Array.isArray(assessment.team) ? assessment.team : [];
-                const ids = [];
-                team.forEach(m => { const raw = String(m.assignedUserId || '').trim(); if (raw) raw.split('|').forEach(p => ids.push(p.trim())); });
-                const uniq = Array.from(new Set(ids));
-                const map = await api.resolveUserDisplayNames(uniq);
-                const resolved = team.map(m => {
-                    const raw = String(m.assignedUserId || '').trim();
-                    const keys = raw ? raw.split('|').map(s => s.trim()) : [];
-                    const hit = keys.map(k => map[k]).find(Boolean);
-                    return { id: raw, displayName: hit?.displayName || raw, role: m.teamRole };
-                });
-                // Order: Lead first, then alphabetical
-                const roleRank = (r) => (/lead|leader/i.test(String(r || '')) ? 0 : 1);
-                resolved.sort((a, b) => {
-                    const ar = roleRank(a.role); const br = roleRank(b.role);
-                    if (ar !== br) return ar - br;
-                    return String(a.displayName||'').localeCompare(String(b.displayName||''));
-                });
-                setInitTeamOptions(resolved);
-            } catch (_) { setInitTeamOptions([]); }
-		            const hasExistingBaseline = await assessmentHasBaselineSurvey(assessment);
-		            const scheduledTypeValue = getAssignmentTypeValue(assessment);
-		            const scheduledGroupKey = toFacilityGroupKey(resolvedFacilityGroup || getAssignmentFacilityGroupValue(assessment));
-		            let selectedMetadata = null;
-		            if (scheduledGroupKey) {
-		                selectedMetadata = await ensureSurveyMetadataForGroup(scheduledGroupKey);
-		                setInitProgramStageMetadata(selectedMetadata);
-		            } else {
-		                setInitProgramStageMetadata(null);
-		            }
+            const ids = team.map(m => String(m.assignedUserId || '').trim()).filter(Boolean);
+            const uniq = Array.from(new Set(ids));
+            const scheduledTypeValue = getAssignmentTypeValue(assessment);
+            const scheduledGroupKey = toFacilityGroupKey(resolvedFacilityGroup || getAssignmentFacilityGroupValue(assessment));
+            setLoadingSurveyInfo('Loading assessment data...');
+            // Fetch baseline status, team names and metadata in parallel
+            const [mapResult, hasExistingBaseline, selectedMetadata] = await Promise.all([
+                api.resolveUserDisplayNames(uniq).catch(() => ({}))
+                    .then(map => {
+                        const resolved = team.map(m => {
+                            const raw = String(m.assignedUserId || '').trim();
+                            const keys = raw ? raw.split('|').map(s => s.trim()) : [];
+                            const hit = keys.map(k => map[k]).find(Boolean);
+                            return { id: raw, displayName: hit?.displayName || raw, role: m.teamRole };
+                        });
+                        const roleRank = (r) => (/lead|leader/i.test(String(r || '')) ? 0 : 1);
+                        resolved.sort((a, b) => {
+                            const ar = roleRank(a.role); const br = roleRank(b.role);
+                            if (ar !== br) return ar - br;
+                            return String(a.displayName||'').localeCompare(String(b.displayName||''));
+                        });
+                        return resolved;
+                    })
+                    .catch(() => []),
+                assessmentHasBaselineSurvey(assessment).catch(() => false),
+                Object.keys(SURVEY_PROGRAM_STAGE_BY_GROUP).includes(scheduledGroupKey) ? ensureSurveyMetadataForGroup(scheduledGroupKey).catch(() => null) : ensureSurveyMetadataForGroup(Object.keys(SURVEY_PROGRAM_STAGE_BY_GROUP)[0] || 'HOSPITAL').catch(() => null)
+            ]);
+
+            setInitTeamOptions(mapResult);
+            if (selectedMetadata) setInitProgramStageMetadata(selectedMetadata);
+            else setInitProgramStageMetadata(null);
 		            const effectiveTypeOptions = getSurveyTypeOptionsFromMetadata(selectedMetadata).length > 0
 		                ? getSurveyTypeOptionsFromMetadata(selectedMetadata)
 		                : surveyTypeOptions;
@@ -1861,9 +1921,11 @@ export function Dashboard() {
 		                || (isBaselineSurveyType(scheduledTypeValue) ? scheduledTypeValue : '');
 	            setInitHasExistingBaseline(hasExistingBaseline);
 	            setInitSurveyType(!hasExistingBaseline ? firstSurveyType : '');
-	            setInitFacilityGroup(scheduledGroupKey || '');
-	            if (scheduledGroupKey) {
-		                setInitSeOptions(buildSeOptions(scheduledGroupKey, selectedMetadata));
+	            const validGroupKeys = Object.keys(SURVEY_PROGRAM_STAGE_BY_GROUP);
+	            const safeGroupKey = validGroupKeys.includes(scheduledGroupKey) ? scheduledGroupKey : '';
+	            setInitFacilityGroup(safeGroupKey);
+	            if (safeGroupKey) {
+		                setInitSeOptions(buildSeOptions(safeGroupKey, selectedMetadata));
 	            } else {
 	                setInitSeOptions([]);
 	            }
@@ -1878,10 +1940,14 @@ export function Dashboard() {
             setPendingProvisionedBundle(null);
             setCreateErrorInfo(null);
             setCreateDetails([]);
+            setLoadingSurveyInfo('Preparing survey dialog...');
             setShowCreateBaselineDialog(true);
         } catch (err) {
             console.error('Error opening assessment:', err);
-            navigate(`/form?assessmentId=${assessment.eventId}`, { state: { selectedAssignment: assessment } });
+            showToast?.('Could not open assessment. Please try again.', 'error');
+        } finally {
+            setInitiatingAssessmentKey(null);
+            setLoadingSurveyInfo(null);
         }
     };
 
@@ -1892,13 +1958,6 @@ export function Dashboard() {
     const handleInitiateSurvey = async (assessment, { selfOnly = false } = {}) => {
 	        const actionKey = getAssessmentActionKey(assessment);
         setInitiatingAssessmentKey(actionKey);
-        const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
-        const isLead = /LEAD|LEADER/.test(roleNorm);
-        if (!isLead) {
-            showToast?.('Please contact the Team Lead to initiate the survey.', 'warning');
-            setInitiatingAssessmentKey(null);
-            return;
-        }
 			        try {
 			            const stageId = getAssignmentProgramStageId(assessment);
 			            const programId = getSurveyEventProgramIdForStage(stageId, assessment);
@@ -1929,35 +1988,37 @@ export function Dashboard() {
     // Survey is left open unless selfOnly=true, in which case we lock to Self Assessment
     // and only allow Self in the dialog.
     const openInitiateSurveyFollowUp = async (assessment, { selfOnly = false } = {}) => {
+        const actionKey = getAssessmentActionKey(assessment);
+        setInitiatingAssessmentKey(actionKey);
+        setLoadingSurveyInfo(selfOnly ? 'Opening self-assessment setup\u2026' : 'Preparing follow-up survey\u2026');
         try {
-            // Build team options (same as in handleOpenAssessment)
-            try {
-                const team = Array.isArray(assessment.team) ? assessment.team : [];
-                const ids = [];
-                team.forEach(m => { const raw = String(m.assignedUserId || '').trim(); if (raw) raw.split('|').forEach(p => ids.push(p.trim())); });
-                const uniq = Array.from(new Set(ids));
-                const map = await api.resolveUserDisplayNames(uniq);
-                const resolved = team.map(m => {
-                    const raw = String(m.assignedUserId || '').trim();
-                    const keys = raw ? raw.split('|').map(s => s.trim()) : [];
-                    const hit = keys.map(k => map[k]).find(Boolean);
-                    return { id: raw, displayName: hit?.displayName || raw, role: m.teamRole };
-                });
-                const roleRank = (r) => (/lead|leader/i.test(String(r || '')) ? 0 : 1);
-                resolved.sort((a, b) => { const ar = roleRank(a.role); const br = roleRank(b.role); if (ar !== br) return ar - br; return String(a.displayName||'').localeCompare(String(b.displayName||'')); });
-                setInitTeamOptions(resolved);
-            } catch (_) { setInitTeamOptions([]); }
+            const team = Array.isArray(assessment.team) ? assessment.team : [];
+            const ids = [];
+            team.forEach(m => { const raw = String(m.assignedUserId || '').trim(); if (raw) raw.split('|').forEach(p => ids.push(p.trim())); });
+            const uniq = Array.from(new Set(ids));
 
-            const hasExistingBaseline = await assessmentHasBaselineSurvey(assessment);
+            // Parallel: team names, baseline check, and baseline group lookup
+            const [mapResult, hasExistingBaseline, baselineGroupText] = await Promise.all([
+                api.resolveUserDisplayNames(uniq).catch(() => ({}))
+                    .then(map => {
+                        const resolved = team.map(m => {
+                            const raw = String(m.assignedUserId || '').trim();
+                            const keys = raw ? raw.split('|').map(s => s.trim()) : [];
+                            const hit = keys.map(k => map[k]).find(Boolean);
+                            return { id: raw, displayName: hit?.displayName || raw, role: m.teamRole };
+                        });
+                        const roleRank = (r) => (/lead|leader/i.test(String(r || '')) ? 0 : 1);
+                        resolved.sort((a, b) => { const ar = roleRank(a.role); const br = roleRank(b.role); if (ar !== br) return ar - br; return String(a.displayName||'').localeCompare(String(b.displayName||'')); });
+                        return resolved;
+                    })
+                    .catch(() => []),
+                assessmentHasBaselineSurvey(assessment),
+                api.getBaselineAssessmentGroup({ teiId: resolveTeiForAssessment(assessment), orgUnitId: resolveOrgUnitForAssessment(assessment), programId: getSurveyEventProgramIdForStage(getAssignmentProgramStageId(assessment), assessment), stageId: getAssignmentProgramStageId(assessment) }).catch(() => null)
+            ]);
+
+            setInitTeamOptions(mapResult);
             setInitHasExistingBaseline(hasExistingBaseline);
 
-            // Determine baseline facility group and lock it
-		            const stageId = getAssignmentProgramStageId(assessment);
-		            const programId = getSurveyEventProgramIdForStage(stageId, assessment);
-            const orgUnitId = resolveOrgUnitForAssessment(assessment);
-            const teiId = resolveTeiForAssessment(assessment);
-            let baselineGroupText = null;
-            try { baselineGroupText = await api.getBaselineAssessmentGroup({ teiId, orgUnitId, programId, stageId }); } catch (_) {}
             const toGroupKey = (txt) => {
                 const t = String(txt || '').toLowerCase();
                 if (t.includes('hosp')) return 'HOSPITAL';
@@ -1966,20 +2027,20 @@ export function Dashboard() {
                 if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
                 return '';
             };
-		            const grp = toGroupKey(baselineGroupText)
-		                || getAssessmentFacilityGroupKey(assessment)
-		                || toFacilityGroupKey(getAssignmentFacilityGroupValue(assessment));
-	            let selectedMetadata = null;
+            const grp = toGroupKey(baselineGroupText)
+                || getAssessmentFacilityGroupKey(assessment)
+                || toFacilityGroupKey(getAssignmentFacilityGroupValue(assessment));
+            let selectedMetadata = null;
             if (grp) {
                 setInitFacilityGroup(grp);
-		                selectedMetadata = await ensureSurveyMetadataForGroup(grp);
-		                setInitProgramStageMetadata(selectedMetadata);
-		                setInitSeOptions(buildSeOptions(grp, selectedMetadata));
+                setLoadingSurveyInfo('Loading assessment metadata\u2026');
+                selectedMetadata = await ensureSurveyMetadataForGroup(grp);
+                setInitProgramStageMetadata(selectedMetadata);
+                setInitSeOptions(buildSeOptions(grp, selectedMetadata));
                 setLockGroup(true);
-	            } else {
-	                setInitProgramStageMetadata(null);
+            } else {
+                setInitProgramStageMetadata(null);
             }
-
             if (selfOnly) {
 		                const loadedTypeOptions = getSurveyTypeOptionsFromMetadata(selectedMetadata);
 		                const effectiveTypeOptions = loadedTypeOptions.length > 0
@@ -2006,9 +2067,13 @@ export function Dashboard() {
             setPendingProvisionedBundle(null);
             setCreateErrorInfo(null);
             setCreateDetails([]);
+            setLoadingSurveyInfo('Preparing survey dialog...');
             setShowCreateBaselineDialog(true);
         } catch (e) {
             console.warn('openInitiateSurveyFollowUp failed', e);
+        } finally {
+            setInitiatingAssessmentKey(null);
+            setLoadingSurveyInfo(null);
         }
     };
 
@@ -2183,7 +2248,7 @@ export function Dashboard() {
         if (!pendingOpenAssessment) { setShowCreateBaselineDialog(false); return; }
         try {
             setIsBaselineCreating(true);
-	            const stageId = getSurveyProgramStageIdForGroup(initFacilityGroup) || configuration?.programStage?.id || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+	            const stageId = getSurveyProgramStageIdForGroup(initFacilityGroup) || configuration?.programStage?.id || '';
 	            const programId = getSurveyEventProgramIdForStage(stageId, pendingOpenAssessment);
             const orgUnitId = resolveOrgUnitForAssessment(pendingOpenAssessment);
             const teiId = resolveTeiForAssessment(pendingOpenAssessment);
@@ -2236,7 +2301,7 @@ export function Dashboard() {
             setCreateDetails([]);
             setPendingProvisionedBundle(null);
 		            let programId = SURVEY_ASSESSMENTS_PROGRAM_ID;
-	            let stageId = configuration?.programStage?.id || DEFAULT_SURVEY_PROGRAM_STAGE_ID;
+	            let stageId = configuration?.programStage?.id || '';
 	            let trackedEntityTypeId = configuration?.program?.trackedEntityType?.id || 'uTTDt3fuXZK';
             const orgUnitId = resolveOrgUnitForAssessment(pendingOpenAssessment);
             let teiId = resolveTeiForAssessment(pendingOpenAssessment);
@@ -3152,6 +3217,14 @@ export function Dashboard() {
 
     return (
         <div className="home-page dashboard-container">
+            {loadingSurveyInfo && (
+                <div className="dashboard-loading-overlay">
+                    <div className="dashboard-loading-card">
+                        <div className="dashboard-loading-spinner" />
+                        <div className="dashboard-loading-message">{loadingSurveyInfo}</div>
+                    </div>
+                </div>
+            )}
             {/* Program Header */}
 	            <div className="program-header">
 	                <div className="program-info">
@@ -3256,15 +3329,16 @@ export function Dashboard() {
                                                                 {assessment.myTeamRole ? (
                                                                     <> {' \u2022 '} Role: {String(assessment.myTeamRole).replace(/^FAC_ASS_ROLE_/i,'').replace(/\s+/g,'_').replace(/_/g,' ').toUpperCase()} </>
                                                                 ) : null}
+                                                                {(isCheckingPresence || !hasAssessmentEvent) && (
+                                                                    <button
+                                                                        className="btn btn-primary btn-xs"
+                                                                        disabled={isCheckingPresence || isInitiating}
+                                                                        onClick={() => handleOpenAssessment(assessment, { forceDialog: true })}
+                                                                    >
+                                                                        {isCheckingPresence ? 'Checking assessment\u2026' : (isInitiating ? 'Opening\u2026' : 'Initiate Survey')}
+                                                                    </button>
+                                                                )}
                                                             </span>
-                                                            <div style={{ marginTop: '6px' }}>
-                                                                <button
-                                                                    className="btn btn-secondary btn-sm"
-                                                                    onClick={() => openTeamDialog(assessment)}
-                                                                >
-                                                                    Team ({Array.isArray(assessment.team) ? assessment.team.length : 0})
-                                                                </button>
-                                                            </div>
                                                         </>
                                                     )}
                                                 </div>
@@ -3272,17 +3346,6 @@ export function Dashboard() {
                                             </div>
                                             <p>Enrollment: {assessment.enrollment}</p>
                                         </div>
-		                                        <div className="form-actions">
-			                                            {(isCheckingPresence || hasAssessmentEvent || isLead) && (
-		                                                <button
-			                                                    className={`btn ${hasAssessmentEvent ? 'btn-secondary' : 'btn-primary'} btn-sm`}
-		                                                    disabled={isCheckingPresence || isInitiating}
-			                                                    onClick={() => hasAssessmentEvent ? handleOpenAssessment(assessment) : handleInitiateSurvey(assessment)}
-		                                                >
-			                                                    {isCheckingPresence ? 'Checking assessment…' : (isInitiating ? 'Opening…' : (hasAssessmentEvent ? 'Update Survey' : 'Initiate Survey'))}
-		                                                </button>
-		                                            )}
-	                                        </div>
                                     </div>
                                 );
                             })
@@ -3364,7 +3427,8 @@ export function Dashboard() {
 	                                        hasAssessmentEvent,
 	                                        isCheckingPresence,
 	                                        isLead,
-		                                        label: hasAssessmentEvent ? 'Update Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey')),
+	                                        isInitiating,
+		                                        label: 'Initiate Survey',
 	                                    };
 	                                    const groupedSchedules = assessment._duplicates?.length > 1
 	                                        ? (() => {
@@ -3396,7 +3460,7 @@ export function Dashboard() {
                                     const displayId = (facilityId && facilityId !== 'N/A')
                                         ? ` (${facilityId})`
                                         : '';
-		
+
 		                                    const plannedDate = assessment.scheduledAt
 		                                        ? (assessment.scheduledAt.slice(0, 10))
 		                                        : 'N/A';
@@ -3446,19 +3510,7 @@ export function Dashboard() {
                                                                         </span>
                                                                     </div>
                                                                 )}
-	                                                                {assessment._duplicates?.length <= 1 && (
-	                                                                    <div style={{ marginTop: '6px' }}>
-	                                                                        <button
-	                                                                            className="btn btn-secondary btn-sm"
-	                                                                            onClick={(e) => {
-	                                                                                e.stopPropagation();
-	                                                                                openTeamDialog(assessment);
-	                                                                            }}
-	                                                                        >
-	                                                                            Team ({Array.isArray(assessment.team) ? assessment.team.length : 0})
-	                                                                        </button>
-	                                                                    </div>
-	                                                                )}
+
                                                             </>
                                                         )}
                                                     </div>
@@ -3478,6 +3530,7 @@ export function Dashboard() {
 	                                                                )}
 	                                                            </>
 	                                                        )}
+                                                        {renderAssessmentActionButton(assessment, singleAssessmentUiState)}
 	                                                    </div>
                                                 </div>
 		                                            {assessment._duplicates?.length > 1 ? (
@@ -3489,7 +3542,12 @@ export function Dashboard() {
 			                                                    });
 		                                                    return (
 			                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px', minWidth: 0, width: '100%' }}>
-		                                                            {uniqueSchedules.map((scheduledAssessment, scheduleIndex) => {
+		                                                            {uniqueSchedules
+                                                                .filter(scheduledAssessment => {
+                                                                    const ui = getAssessmentUiState(scheduledAssessment);
+                                                                    return ui.isCheckingPresence || !ui.hasAssessmentEvent;
+                                                                })
+                                                                .map((scheduledAssessment, scheduleIndex) => {
 		                                                                const scheduleUi = getAssessmentUiState(scheduledAssessment);
 		                                                                return (
 		                                                                    <div
@@ -3527,8 +3585,9 @@ export function Dashboard() {
 		                                                                                        <div className="form-status success">✓ SYNCED</div>
 		                                                                                    )}
 		                                                                                </div>
-		                                                                                <div style={{ fontSize: '0.85em', color: '#64748b' }}>
+		                                                                                <div style={{ fontSize: '0.85em', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
 		                                                                                    {scheduleUi.roleLabel ? <>Role: {scheduleUi.roleLabel}</> : 'Role: N/A'}
+		                                                                                {renderAssessmentActionButton(scheduledAssessment, scheduleUi)}
 		                                                                                </div>
 		                                                                            </div>
 
@@ -3542,11 +3601,11 @@ export function Dashboard() {
 		                                                                                >
 		                                                                                    Team ({Array.isArray(scheduledAssessment.team) ? scheduledAssessment.team.length : 0})
 		                                                                                </button>
-		                                                                                {renderAssessmentActionButton(scheduledAssessment, scheduleUi)}
 		                                                                            </div>
 		                                                                        </div>
 
-				                                                                        <p className="assessment-details-line" style={{ margin: '10px 0 0', color: '#475569' }}>
+				                                                                        {!scheduleUi.hasAssessmentEvent && (
+                                                                        <p className="assessment-details-line" style={{ margin: '10px 0 0', color: '#475569' }}>
 			                                                                            Assessment ID: {scheduledAssessment.enrollment || scheduledAssessment.eventId || '-'}
 			                                                                            {' '}| Program: {getAssignmentProgramId(scheduledAssessment)}
 			                                                                            {' '}| Stage: {getAssignmentProgramStageId(scheduledAssessment)}
@@ -3557,13 +3616,9 @@ export function Dashboard() {
 			                                                                            {' '}| Type: {getAssignmentTypeValue(scheduledAssessment)}
 			                                                                            {' '}| Status: {formatAssignmentStatusLabel(scheduledAssessment.statusCode || scheduledAssessment.status)}
 			                                                                            {' '}| OU: {scheduledAssessment.orgUnit || '-'}
-			                                                                        </p>
+				                                                                        </p>
+				                                                                        )}
 
-		                                                                        {!scheduleUi.isCheckingPresence && scheduleUi.label === 'Initiate Survey' && !scheduleUi.isLead && (
-		                                                                            <div style={{ marginTop: '8px', color: '#9A3412', fontSize: '0.9em' }}>
-		                                                                                Please contact the Team Lead to initiate this schedule.
-		                                                                            </div>
-		                                                                        )}
 		                                                                    </div>
 		                                                                );
 		                                                            })}
@@ -3594,7 +3649,8 @@ export function Dashboard() {
 		                                                })()
 		                                            ) : (
 		                                                <>
-				                                            <p className="assessment-details-line">
+				                                            {!hasAssessmentEvent && (
+                                                <p className="assessment-details-line">
 				                                                Assessment ID: {assessment.enrollment || assessment.eventId || '-'}
 				                                                {' '}| Program: {getAssignmentProgramId(assessment)}
 				                                                {' '}| Stage: {getAssignmentProgramStageId(assessment)}
@@ -3606,6 +3662,7 @@ export function Dashboard() {
 				                                                {' '}| Status: {formatAssignmentStatusLabel(assessment.statusCode || assessment.status)}
 				                                                {' '}| OU: {assessment.orgUnit || '-'}
 				                                            </p>
+				                                            )}
 	                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
 	                                                <button
 	                                                    className="btn btn-secondary btn-sm"
@@ -3688,11 +3745,6 @@ export function Dashboard() {
                                         padding: '2px 8px',
                                         borderRadius: '9999px'
                                     }}>NO BASELINE</span>
-                                    {!isLead && (
-                                        <span style={{ color: '#9A3412', fontSize: '0.9em' }}>
-                                            Please contact the Team Lead to initiate the survey.
-                                        </span>
-                                    )}
                                 </div>
                             );
                         }
@@ -3774,6 +3826,7 @@ export function Dashboard() {
                                     <tbody>
 	                                                                        {rows.map(ev => (
                                                                             <tr
+	                                                                                className={`associated-assessment-row ${loadingSurveyRow === (ev.event || ev.enrollmentId || ev.enrollment || ev.trackedEntityInstance || '') ? 'loading' : ''}`}
 	                                                                                key={`survey-${ev.enrollmentId || ev.enrollment || ev.event || ev.trackedEntityInstance}`}
                                                                                 onClick={() => openAssociatedSurvey(assessment, ev)}
                                                                                 style={{ borderTop: '1px dashed #eee', cursor: 'pointer' }}
@@ -3834,8 +3887,8 @@ export function Dashboard() {
                     })()}
                 </div>
             )}
-                                            <div className="form-actions">
-                                                {(() => {
+                                            {false && (
+                                                (() => {
 		                                                    if (isCheckingPresence) {
 	                                                        return (
 	                                                            <button className="btn btn-secondary btn-sm" disabled>
@@ -3846,7 +3899,6 @@ export function Dashboard() {
 	                                                    const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
 	                                                    const isLead = /LEAD|LEADER/.test(roleNorm);
 		                                                    const label = hasAssessmentEvent ? 'Update Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
-		                                                    if (label === 'Initiate Survey' && !isLead) return null;
 		                                                    const selfOnly = hasAssessmentEvent && label === 'Initiate Survey';
 	                                                    const onClick = () => {
 		                                                        return label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly }) : handleOpenAssessment(assessment);
@@ -3863,13 +3915,13 @@ export function Dashboard() {
 		                                                            {label === 'Initiate Survey' && isInitiating ? 'Opening…' : label}
                                                         </button>
                                                     );
-                                                })()}
-                                            </div>
+                                                })()
+                                            )}
 	                                            </>
 	                                            )}
 
 	                                        </div>
-        
+
                                         </div>
                                     );
                                 });
@@ -4005,10 +4057,10 @@ export function Dashboard() {
                                                     <MenuItem value="datastore">DHIS2 DataStore (Remote)</MenuItem>
                                                 </Select>
                                             </FormControl>
-                                            
+
                                             {configSource === 'datastore' && (
-                                                <Button 
-                                                    variant="contained" 
+                                                <Button
+                                                    variant="contained"
                                                     size="small"
                                                     onClick={() => loadRemoteConfig()}
                                                     startIcon={<CloudSyncIcon />}
@@ -4665,15 +4717,23 @@ export function Dashboard() {
                             select
 	                            label="Facility Type"
                             value={initFacilityGroup}
-	                            onChange={async e => { 
-	                                const v = e.target.value; 
-	                                setInitFacilityGroup(v); 
+	                            onChange={async e => {
+	                                const v = e.target.value;
+	                                setInitFacilityGroup(v);
 	                                setInitAssignments({});
 	                                setInitMetadataLoading(true);
 	                                try {
 		                                    const metadata = await ensureSurveyMetadataForGroup(v);
 		                                    setInitProgramStageMetadata(metadata);
 		                                    setInitSeOptions(buildSeOptions(v, metadata));
+	                                    if (initMode === 'BASELINE' && !initHasExistingBaseline && !initSurveyType) {
+	                                        const loadedOptions = getSurveyTypeOptionsFromMetadata(metadata);
+	                                        const baselineOpt = (loadedOptions.length > 0 ? loadedOptions : surveyTypeOptions)
+	                                            .find(opt => isBaselineSurveyType(opt.label || opt.value));
+	                                        if (baselineOpt) {
+	                                            setInitSurveyType(baselineOpt.value);
+	                                        }
+	                                    }
 	                                    if (configSource === 'datastore' && isOnline) {
 	                                        loadRemoteConfig();
 	                                    }
@@ -5126,4 +5186,3 @@ export function Dashboard() {
         </div>
     );
 }
-    
