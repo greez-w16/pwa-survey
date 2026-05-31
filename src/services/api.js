@@ -2447,5 +2447,17 @@ export const api = {
             console.warn('getTeisByOrgUnitForBaselineCheck failed (non-fatal)', e);
             return null;
         }
+    },
+
+    // Temporary diagnostic helper to inspect a single enrollment
+    getEnrollmentDetails: async (enrollmentId, fields = '*') => {
+        try {
+            const response = await fetch(`${BASE_URL}/api/enrollments/${enrollmentId}.json?fields=${encodeURIComponent(fields)}`, { headers: getHeaders() });
+            if (!response.ok) return null;
+            return await response.json();
+        } catch (e) {
+            console.warn('getEnrollmentDetails failed (non-fatal)', e);
+            return null;
+        }
     }
 };

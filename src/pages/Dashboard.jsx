@@ -780,6 +780,7 @@ export function Dashboard() {
     const [showClearConfirm, setShowClearConfirm] = useState(false);
 	    const [isAssessmentsCollapsed, setIsAssessmentsCollapsed] = useState(true);
 	    const [showSettings, setShowSettings] = useState(false);
+				    const [expandedFacs, setExpandedFacs] = useState({});
 		    const [selectedSE, setSelectedSE] = useState(null);
 		    const [isEditingJson, setIsEditingJson] = useState(false);
 		    const [editedJson, setEditedJson] = useState('');
@@ -4019,7 +4020,7 @@ export function Dashboard() {
             <Dialog
                 open={showSettings}
                 onClose={() => { setShowSettings(false); setSelectedSE(null); }}
-                maxWidth="md"
+                maxWidth="xl"
                 fullWidth
             >
                 <DialogTitle>
@@ -4376,6 +4377,135 @@ export function Dashboard() {
 		                                        ))}
 		                                    </div>
 		                                </div>
+									<div className="settings-section">
+										<h4>Facility Type — SE Criteria Overview</h4>
+										<p className="settings-subtitle">Expand a facility type to view its criteria.</p>
+										{(() => {
+											const FACILITY_CONFIGS = [
+												{ type: 'Hospital', config: hospitalConfig, key: 'hospital_full_configuration' },
+												{ type: 'Clinics', config: clinicsConfig, key: 'clinics_full_configuration' },
+												{ type: 'EMS', config: emsConfig, key: 'ems_full_configuration' },
+												{ type: 'Mortuary', config: mortuaryConfig, key: 'mortuary_full_configuration' },
+											];
+											const toggleFac = (type) => {
+												setExpandedFacs(prev => ({ ...prev, [type]: !prev[type] }));
+											};
+											return FACILITY_CONFIGS.map(({ type, config, key }) => {
+												const seList = config?.[key] || [];
+												let totalCriteria = 0;
+												seList.forEach(se => {
+													(se.sections || []).forEach(section => {
+														(section.standards || []).forEach(standard => {
+															totalCriteria += (standard.criteria || []).length;
+														});
+													});
+												});
+												const isExpanded = !!expandedFacs[type];
+												return (
+													<div key={type} style={{ marginBottom: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+														<div
+															onClick={() => toggleFac(type)}
+															style={{
+																padding: '10px 16px',
+																background: isExpanded ? '#ebf8ff' : '#f7fafc',
+																cursor: 'pointer',
+																display: 'flex',
+																justifyContent: 'space-between',
+																alignItems: 'center',
+																fontWeight: 600,
+																fontSize: '0.95em',
+																userSelect: 'none',
+															}}
+															>
+																<span>{type} <span style={{ color: '#718096', fontWeight: 400, fontSize: '0.85em' }}>({seList.length} SEs, {totalCriteria} criteria)</span></span>
+																<span style={{ fontSize: '0.8em', color: '#718096' }}>{isExpanded ? '▲ Collapse' : '▼ Expand'}</span>
+															</div>
+															{isExpanded && (
+																<div style={{ padding: '8px', maxHeight: '55vh', overflowY: 'auto', overflowX: 'auto' }}>
+																	<table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em' }}>
+																		<thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
+																			<tr style={{ background: '#edf2f7', textAlign: 'left' }}>
+																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '55px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>SE Number</th>
+																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '70px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Standard</th>
+																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '80px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Criterion</th>
+																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '50px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Root</th>
+																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '110px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Critical / Non-Critical</th>
+																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '180px', position: 'sticky', top: 0, background: '#edf2f7' }}>Linked Criteria</th>
+																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '180px', position: 'sticky', top: 0, background: '#edf2f7' }}>Sub-Criteria</th>
+																			</tr>
+																		</thead>
+																		<tbody>
+																			{seList.flatMap(se => {
+																				const allStandardIds = [];
+																				const rootMap = {};
+																				(hospitalComputeCriteria?.hospital_standards_config?.service_elements || []).forEach(cse => {
+																				    (cse.root_criteria || []).forEach(root => {
+																				        if (root.id) rootMap[root.id] = root.sub_criteria || [];
+																				    });
+																				});
+																				const rows = [];
+																				(se.sections || []).forEach(section => {
+																					(section.standards || []).forEach(standard => {
+																						if (standard.standard_id) allStandardIds.push(standard.standard_id);
+																						const standardCriteriaIds = (standard.criteria || []).map(c => c.id).filter(Boolean);
+																						(standard.criteria || []).forEach(c => {
+																							rows.push({
+																								seId: se.se_id,
+																								standardId: standard.standard_id,
+																								criterionId: c.id,
+																								isCritical: c.is_critical,
+																								linkedCriteria: standardCriteriaIds,
+																								isRoot: !!rootMap[c.id],
+																								subCriteria: rootMap[c.id] || [],
+																							});
+																						});
+																					});
+																				});
+																				const standardIdsUnique = [...new Set(allStandardIds)];
+																				return rows.map((row, idx) => (
+																					<tr key={`${type}-se-${row.seId}-st-${row.standardId}-c-${row.criterionId}-${idx}`}>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>{row.seId}</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontFamily: 'monospace' }}>{row.standardId}</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontFamily: 'monospace' }}>{row.criterionId}</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontWeight: 600, color: row.isRoot ? '#2b6cb0' : '#718096' }}>{row.isRoot ? 'Yes' : 'No'}</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+																							<span style={{
+																								color: row.isCritical ? '#c53030' : '#2f855a',
+																								fontWeight: 600,
+																								background: row.isCritical ? '#fff5f5' : '#f0fff4',
+																								padding: '2px 8px',
+																								borderRadius: '4px',
+																								fontSize: '0.85em',
+																							}}>
+																								{row.isCritical ? 'Critical' : 'Non-Critical'}
+																							</span>
+																						</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0' }}>
+																							<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.8em', fontFamily: 'monospace' }}>
+																								{row.linkedCriteria.length > 0 ? row.linkedCriteria.map((id, i) => (
+																										<span key={id} style={{ color: id === row.criterionId ? '#c53030' : '#276749' }}>
+																											{id}{i < row.linkedCriteria.length - 1 ? ', ' : ''}
+																										</span>
+																									)) : '—'}
+																								</div>
+																						</td>
+																								<td style={{ padding: '8px', border: '1px solid #e2e8f0' }}>
+																									<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.8em', fontFamily: 'monospace' }}>
+																										{row.isRoot ? (row.subCriteria.length > 0 ? row.subCriteria.join(', ') : 'None') : '—'}
+																									</div>
+																								</td>
+																					</tr>
+																				));
+																			})}
+																		</tbody>
+																	</table>
+																</div>
+															)}
+														</div>
+													);
+												});
+											})()}
+											</div>
                                 <div className="settings-section">
                                     <h4>User Info</h4>
                                     <p>Logged in as: <strong>{user?.username || 'Guest'}</strong></p>
