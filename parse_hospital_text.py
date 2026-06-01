@@ -239,49 +239,7 @@ def parse_text(file_paths):
                     current_standard = None
                     continue
 
-            # 3) Standard
-            standard_match = standard_pattern.match(line)
-            if standard_match and current_section:
-                std_id = standard_match.group(1)
-                statement = (
-                    standard_match.group(2).strip()
-                    if standard_match.group(2)
-                    else ""
-                )
-                if std_id.startswith(current_section["section_pi_id"]):
-                    if len(std_id.split(".")) == 3:
-                        if not any(
-                            s["standard_id"] == std_id
-                            for s in current_section["standards"]
-                        ):
-                            extra_text, new_i = collect_following_lines(i + 1, lines)
-                            if extra_text:
-                                statement = (
-                                    (statement + " " + extra_text).strip()
-                                    if statement
-                                    else extra_text
-                                )
-                                skip_to = max(skip_to, new_i - 1)
-
-                            pure_statement, inline_intent = split_standard_and_intent(
-                                statement
-                            )
-
-                            current_standard = {
-                                "standard_id": std_id,
-                                "statement": pure_statement,
-                                "intent_tooltip": inline_intent,
-                                "criteria": [],
-                            }
-                            current_section["standards"].append(current_standard)
-                        else:
-                            for s in current_section["standards"]:
-                                if s["standard_id"] == std_id:
-                                    current_standard = s
-                                    break
-                        continue
-
-            # 4) Criterion
+            # 3) Criterion
             criterion_match = criterion_pattern.search(line)
             if criterion_match and current_standard:
                 crit_id = criterion_match.group(1)
@@ -331,6 +289,48 @@ def parse_text(file_paths):
                         }
                         current_standard["criteria"].append(current_criterion)
                     continue
+
+            # 4) Standard
+            standard_match = standard_pattern.match(line)
+            if standard_match and current_section:
+                std_id = standard_match.group(1)
+                statement = (
+                    standard_match.group(2).strip()
+                    if standard_match.group(2)
+                    else ""
+                )
+                if std_id.startswith(current_section["section_pi_id"]):
+                    if len(std_id.split(".")) == 3:
+                        if not any(
+                            s["standard_id"] == std_id
+                            for s in current_section["standards"]
+                        ):
+                            extra_text, new_i = collect_following_lines(i + 1, lines)
+                            if extra_text:
+                                statement = (
+                                    (statement + " " + extra_text).strip()
+                                    if statement
+                                    else extra_text
+                                )
+                                skip_to = max(skip_to, new_i - 1)
+
+                            pure_statement, inline_intent = split_standard_and_intent(
+                                statement
+                            )
+
+                            current_standard = {
+                                "standard_id": std_id,
+                                "statement": pure_statement,
+                                "intent_tooltip": inline_intent,
+                                "criteria": [],
+                            }
+                            current_section["standards"].append(current_standard)
+                        else:
+                            for s in current_section["standards"]:
+                                if s["standard_id"] == std_id:
+                                    current_standard = s
+                                    break
+                        continue
 
             # 5) Intent paragraphs starting with "Intent of X.X.X".
             intent_m = intent_marker.search(line)

@@ -29,9 +29,13 @@ import {
     MenuItem,
     Autocomplete,
     LinearProgress,
+    CircularProgress,
     FormControl,
     InputLabel,
-    Select
+    Select,
+        ListItemText,
+    FormControlLabel,
+    Switch
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -781,6 +785,12 @@ export function Dashboard() {
 	    const [isAssessmentsCollapsed, setIsAssessmentsCollapsed] = useState(true);
 	    const [showSettings, setShowSettings] = useState(false);
 				    const [expandedFacs, setExpandedFacs] = useState({});
+				    const [loadingFacType, setLoadingFacType] = useState(null);
+				    const [loadingEditRow, setLoadingEditRow] = useState(null);
+				    const [configRevision, setConfigRevision] = useState(0);
+				    const [criterionEditOpen, setCriterionEditOpen] = useState(false);
+				    const [criterionEditData, setCriterionEditData] = useState(null);
+				    const [criterionEditForm, setCriterionEditForm] = useState({});
 		    const [selectedSE, setSelectedSE] = useState(null);
 		    const [isEditingJson, setIsEditingJson] = useState(false);
 		    const [editedJson, setEditedJson] = useState('');
@@ -1167,7 +1177,7 @@ export function Dashboard() {
 	        );
 	    }
 
-	
+
 	    return (
 	        <button
 	            className={`btn ${uiState.label === 'Initiate Survey' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
@@ -3015,6 +3025,135 @@ export function Dashboard() {
 		        });
 		    };
 
+    const handleSaveConfigsToDataStore = async () => {
+        const NAMESPACE = 'qims-survey-configs';
+        const configsToSave = [
+            { key: 'hospital_full_configuration', data: hospitalConfig },
+            { key: 'clinics_full_configuration', data: clinicsConfig },
+            { key: 'ems_full_configuration', data: emsConfig },
+            { key: 'mortuary_full_configuration', data: mortuaryConfig },
+            { key: 'hospital_compute_criteria', data: hospitalComputeCriteria },
+            { key: 'hospital_links', data: hospitalLinks },
+            { key: 'clinics_links', data: clinicsLinks },
+            { key: 'ems_links', data: emsLinks },
+            { key: 'mortuary_links', data: mortuaryLinks },
+        ];
+        let saved = 0;
+        let failed = 0;
+        for (const { key, data } of configsToSave) {
+            try {
+                await api.upsertDataStoreItem(NAMESPACE, key, data);
+                saved++;
+            } catch (e) {
+                console.warn(`Failed to save ${key} to DataStore:`, e);
+                failed++;
+            }
+        }
+        showToast?.(
+            `Saved ${saved} config(s) to DataStore${failed > 0 ? ` (${failed} failed)` : ''}. Developers can export them from /dev-config-export.`,
+            failed > 0 ? 'warning' : 'success'
+        );
+    };
+
+    const handleToggleCritical = (configKey, seId, standardId, criterionId) => {
+        const configMap = {
+            'hospital_full_configuration': hospitalConfig,
+            'clinics_full_configuration': clinicsConfig,
+            'ems_full_configuration': emsConfig,
+            'mortuary_full_configuration': mortuaryConfig,
+        };
+        const config = configMap[configKey];
+        if (!config) return;
+        const se = config.find(s => s.se_id === seId);
+        if (!se) return;
+        se.sections.forEach(section => {
+            section.standards.forEach(std => {
+                if (std.standard_id === standardId) {
+                    const crit = std.criteria.find(c => c.id === criterionId);
+                    if (crit) crit.is_critical = !crit.is_critical;
+                }
+            });
+        });
+        setConfigRevision(r => r + 1);
+    };
+
+    const handleOpenCriterionEdit = (row) => {
+        setCriterionEditForm({
+            newStandardId: row.standardId,
+            subCriteria: [...row.subCriteria],
+            linkedCriteria: [...row.linkedCriteria],
+            isCritical: row.isCritical,
+        });
+        setCriterionEditData(row);
+        setCriterionEditOpen(true);
+    };
+
+    const handleSaveCriterionEdit = () => {
+        if (!criterionEditData) return;
+        const row = criterionEditData;
+        const configMap = {
+            'hospital_full_configuration': hospitalConfig,
+            'clinics_full_configuration': clinicsConfig,
+            'ems_full_configuration': emsConfig,
+            'mortuary_full_configuration': mortuaryConfig,
+        };
+        const config = configMap[row.configKey];
+        if (!config) return;
+
+        if (criterionEditForm.newStandardId && criterionEditForm.newStandardId !== row.standardId) {
+            let critObj = null;
+            row.seObj.sections.forEach(section => {
+                section.standards.forEach(std => {
+                    if (std.standard_id === row.standardId) {
+                        const idx = std.criteria.findIndex(c => c.id === row.criterionId);
+                        if (idx !== -1) {
+                            critObj = std.criteria[idx];
+                            std.criteria.splice(idx, 1);
+                        }
+                    }
+                });
+            });
+            if (critObj) {
+                row.seObj.sections.forEach(section => {
+                    section.standards.forEach(std => {
+                        if (std.standard_id === criterionEditForm.newStandardId) {
+                            std.criteria.push(critObj);
+                        }
+                    });
+                });
+            }
+        }
+
+        // Save linked criteria
+        row.seObj.sections.forEach(section => {
+            section.standards.forEach(std => {
+                const crit = (std.criteria || []).find(c => c.id === row.criterionId);
+                if (crit) {
+                    crit.linked_criteria = criterionEditForm.linkedCriteria;
+                    crit.is_critical = criterionEditForm.isCritical;
+                }
+            });
+        });
+
+        if (row.configKey === 'hospital_full_configuration' && row.isRoot) {
+            setDraftComputeConfig(prev => {
+                if (!prev) return prev;
+                const next = JSON.parse(JSON.stringify(prev));
+                const seList = (next.hospital_standards_config?.service_elements) || [];
+                const hse = seList.find(s => s.se_id === ('SE ' + row.seId));
+                if (!hse) return prev;
+                const root = (hse.root_criteria || []).find(rc => rc.id === row.criterionId);
+                if (!root) return prev;
+                root.sub_criteria = criterionEditForm.subCriteria;
+                return next;
+            });
+        }
+
+        setConfigRevision(r => r + 1);
+        setCriterionEditOpen(false);
+        setCriterionEditData(null);
+    };
+
 		    const handleResetComputeForSe = (seIdLabel) => {
 		        const defaultSeList = (hospitalComputeCriteria?.hospital_standards_config?.service_elements) || [];
 		        const defaultSe = defaultSeList.find(se => se.se_id === seIdLabel);
@@ -4380,6 +4519,14 @@ export function Dashboard() {
 									<div className="settings-section">
 										<h4>Facility Type — SE Criteria Overview</h4>
 										<p className="settings-subtitle">Expand a facility type to view its criteria.</p>
+										<Button
+										    variant='outlined'
+										    size='small'
+										    style={{ marginBottom: '12px' }}
+										    onClick={handleSaveConfigsToDataStore}
+										>
+										    Save Config to DataStore
+										</Button>
 										{(() => {
 											const FACILITY_CONFIGS = [
 												{ type: 'Hospital', config: hospitalConfig, key: 'hospital_full_configuration' },
@@ -4388,7 +4535,11 @@ export function Dashboard() {
 												{ type: 'Mortuary', config: mortuaryConfig, key: 'mortuary_full_configuration' },
 											];
 											const toggleFac = (type) => {
-												setExpandedFacs(prev => ({ ...prev, [type]: !prev[type] }));
+											    setLoadingFacType(type);
+											    setTimeout(() => {
+											        setExpandedFacs(prev => ({ ...prev, [type]: !prev[type] }));
+											        setLoadingFacType(null);
+											    }, 50);
 											};
 											return FACILITY_CONFIGS.map(({ type, config, key }) => {
 												const seList = config?.[key] || [];
@@ -4418,7 +4569,7 @@ export function Dashboard() {
 															}}
 															>
 																<span>{type} <span style={{ color: '#718096', fontWeight: 400, fontSize: '0.85em' }}>({seList.length} SEs, {totalCriteria} criteria)</span></span>
-																<span style={{ fontSize: '0.8em', color: '#718096' }}>{isExpanded ? '▲ Collapse' : '▼ Expand'}</span>
+																<span style={{ fontSize: '0.8em', color: '#718096', display: 'flex', alignItems: 'center', gap: 6 }}>{loadingFacType === type ? <CircularProgress size={14} /> : (isExpanded ? '▲ Collapse' : '▼ Expand')}</span>
 															</div>
 															{isExpanded && (
 																<div style={{ padding: '8px', maxHeight: '55vh', overflowY: 'auto', overflowX: 'auto' }}>
@@ -4454,9 +4605,18 @@ export function Dashboard() {
 																								standardId: standard.standard_id,
 																								criterionId: c.id,
 																								isCritical: c.is_critical,
-																								linkedCriteria: standardCriteriaIds,
+																								linkedCriteria: c.linked_criteria || standardCriteriaIds,
 																								isRoot: !!rootMap[c.id],
 																								subCriteria: rootMap[c.id] || [],
+																																					seName: se.se_name || se.se_id,
+																																					standardName: standard.standard_id,
+																																					allStandards: (se.sections || []).flatMap(sec => (sec.standards || []).map(st => ({ id: st.standard_id, name: st.standard_id }))),
+																																					allCriteriaInSE: (se.sections || []).flatMap(sec => (sec.standards || []).flatMap(st => (st.criteria || []).map(c => ({ id: c.id, name: c.id })))),
+																																					allCriteriaInFacilityType: seList.flatMap(s => (s.sections || []).flatMap(sec => (sec.standards || []).flatMap(st => (st.criteria || []).map(c => ({ id: c.id, name: c.id }))))),
+																							configKey: key,
+																							seObj: se,
+																							standardObj: standard,
+																							criterionObj: c,
 																							});
 																						});
 																					});
@@ -4469,13 +4629,16 @@ export function Dashboard() {
 																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontFamily: 'monospace' }}>{row.criterionId}</td>
 																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontWeight: 600, color: row.isRoot ? '#2b6cb0' : '#718096' }}>{row.isRoot ? 'Yes' : 'No'}</td>
 																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-																							<span style={{
+																							<span
+																								onClick={() => handleToggleCritical(row.configKey, row.seId, row.standardId, row.criterionId)}
+																								style={{
 																								color: row.isCritical ? '#c53030' : '#2f855a',
 																								fontWeight: 600,
 																								background: row.isCritical ? '#fff5f5' : '#f0fff4',
 																								padding: '2px 8px',
 																								borderRadius: '4px',
 																								fontSize: '0.85em',
+																								cursor: 'pointer',
 																							}}>
 																								{row.isCritical ? 'Critical' : 'Non-Critical'}
 																							</span>
@@ -4494,6 +4657,22 @@ export function Dashboard() {
 																										{row.isRoot ? (row.subCriteria.length > 0 ? row.subCriteria.join(', ') : 'None') : '—'}
 																									</div>
 																								</td>
+																					<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
+																						<Button
+																							variant='outlined'
+																							size='small'
+																							disabled={loadingEditRow === row.criterionId}
+																							onClick={() => {
+																							    setLoadingEditRow(row.criterionId);
+																							    setTimeout(() => {
+																							        handleOpenCriterionEdit(row);
+																							        setLoadingEditRow(null);
+																							    }, 50);
+																							}}
+																						>
+																							{loadingEditRow === row.criterionId ? 'Loading...' : 'Edit'}
+																						</Button>
+																					</td>
 																					</tr>
 																				));
 																			})}
@@ -4506,6 +4685,75 @@ export function Dashboard() {
 												});
 											})()}
 											</div>
+                                <Dialog open={criterionEditOpen} onClose={() => setCriterionEditOpen(false)} maxWidth="sm" fullWidth>
+                                    <DialogTitle>Edit Criterion {criterionEditData?.criterionId}</DialogTitle>
+                                    <DialogContent>
+                                        <div style={{ marginTop: '10px' }}>
+                                            <p><strong>SE:</strong> {criterionEditData?.seName}</p>
+                                            <p><strong>Current Standard:</strong> {criterionEditData?.standardName}</p>
+                                            <FormControl fullWidth style={{ marginTop: "15px" }}>
+                                                <FormControlLabel
+                                                    control={
+                                                        <Switch
+                                                            checked={!!criterionEditForm.isCritical}
+                                                            onChange={(e) => setCriterionEditForm({ ...criterionEditForm, isCritical: e.target.checked })}
+                                                        />
+                                                    }
+                                                    label="Critical"
+                                                />
+                                            </FormControl>
+                                        </div>
+                                        <FormControl fullWidth style={{ marginTop: '15px' }}>
+                                            <InputLabel>Move to Standard</InputLabel>
+                                            <Select
+                                                value={criterionEditForm.newStandardId || ''}
+                                                onChange={(e) => setCriterionEditForm({ ...criterionEditForm, newStandardId: e.target.value })}
+                                            >
+                                                {criterionEditData?.allStandards?.map((std) => (
+                                                    <MenuItem key={std.id} value={std.id}>{std.name}</MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        <FormControl fullWidth style={{ marginTop: "15px" }}>
+                                            <InputLabel>Linked Criteria</InputLabel>
+                                            <Select
+                                                multiple
+                                                value={criterionEditForm.linkedCriteria || []}
+                                                onChange={(e) => setCriterionEditForm({ ...criterionEditForm, linkedCriteria: e.target.value })}
+                                                renderValue={(selected) => selected.join(', ')}
+                                            >
+                                                {criterionEditData?.allCriteriaInFacilityType?.map((c) => (
+                                                    <MenuItem key={c.id} value={c.id}>
+                                                        <Checkbox checked={(criterionEditForm.linkedCriteria || []).includes(c.id)} />
+                                                        <ListItemText primary={`${c.id} - ${c.name}`} />
+                                                    </MenuItem>
+                                                ))}
+                                            </Select>
+                                        </FormControl>
+                                        {criterionEditData?.isRoot && (
+                                            <FormControl fullWidth style={{ marginTop: '15px' }}>
+                                                <InputLabel>Sub-Criteria</InputLabel>
+                                                <Select
+                                                    multiple
+                                                    value={criterionEditForm.subCriteria || []}
+                                                    onChange={(e) => setCriterionEditForm({ ...criterionEditForm, subCriteria: e.target.value })}
+                                                    renderValue={(selected) => selected.join(', ')}
+                                                >
+                                                    {criterionEditData?.allCriteriaInSE?.map((c) => (
+                                                        <MenuItem key={c.id} value={c.id}>
+                                                            <Checkbox checked={(criterionEditForm.subCriteria || []).includes(c.id)} />
+                                                            <ListItemText primary={`${c.id} - ${c.name}`} />
+                                                        </MenuItem>
+                                                    ))}
+                                                </Select>
+                                            </FormControl>
+                                        )}
+                                    </DialogContent>
+                                    <DialogActions>
+                                        <Button onClick={() => setCriterionEditOpen(false)}>Cancel</Button>
+                                        <Button onClick={handleSaveCriterionEdit} variant="contained">Save</Button>
+                                    </DialogActions>
+                                </Dialog>
                                 <div className="settings-section">
                                     <h4>User Info</h4>
                                     <p>Logged in as: <strong>{user?.username || 'Guest'}</strong></p>

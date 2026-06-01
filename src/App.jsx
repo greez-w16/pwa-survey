@@ -23,6 +23,7 @@ import { decorateHospitalLinksWithMatrixTags } from './utils/hospitalMatrixTags'
 import './App.css';
 import Report from './pages/Report';
 import Admin from './pages/Admin';
+import DevConfigExport from './pages/DevConfigExport';
 
 const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   HOSPITAL: 'hup8BqEe7Mn',
@@ -1251,6 +1252,15 @@ const PrivateRoute = ({ children }) => {
         element={
           <PrivateRoute>
             <Admin />
+          </PrivateRoute>
+        }
+      />
+
+      <Route
+        path="/dev-config-export"
+        element={
+          <PrivateRoute>
+            <DevConfigExport />
           </PrivateRoute>
         }
       />
