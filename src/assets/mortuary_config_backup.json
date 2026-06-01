@@ -1,0 +1,1769 @@
+{
+  "mortuary_full_configuration": [
+    {
+      "se_id": 1,
+      "se_name": "Management of Mortuary Services",
+      "sections": [
+        {
+          "section_pi_id": "1.1",
+          "title": "Governance of the Mortuary Service",
+          "standards": [
+            {
+              "standard_id": "1.1.1",
+              "statement": "Standard Governance responsibilities and accountabilities are described in bylaws, policies and procedures, or similar documents.",
+              "intent_tooltip": "NB: Standards 1.1.1 to 1.2.3 and their criteria will not apply to mortuaries attached to hospitals, where this aspect is assessed under SE 1 Management and leadership and SE 2 Human Resource management.",
+              "criteria": [
+                {
+                  "id": "1.1.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.1.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.1.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.1.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "1.1.2",
+              "statement": "Standard The organisation's managers ensure that policies and procedures are implemented to support the activities of the mortuaries and to guide the personnel.",
+              "intent_tooltip": "Policies and procedures are formulated at different levels of authority, e.g. national Acts and regulations, national health and labour departmental policies, and mortuary policies.",
+              "criteria": [
+                {
+                  "id": "1.1.2.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.1.2.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.1.2.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.1.2.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.1.2.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.1.2.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "1.2",
+          "title": "Human Resource Management",
+          "standards": [
+            {
+              "standard_id": "1.2.1",
+              "statement": "Standard The organisation's management plan for the provision of adequate numbers of suitably qualified personnel.",
+              "intent_tooltip": "The company's leaders define the desired education, skills, knowledge and any other requirements as part of projecting personnel complements and needs.",
+              "criteria": [
+                {
+                  "id": "1.2.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.1.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "1.2.2",
+              "statement": "Standard There is an adequate number of suitably qualified and competent personnel to provide a safe and effective mortuary service.",
+              "intent_tooltip": "A mortuary needs an appropriate number of suitably qualified people to fulfill its mission and meet client needs.",
+              "criteria": [
+                {
+                  "id": "1.2.2.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.2.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.2.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.2.4",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.2.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "1.2.3",
+              "statement": "Standard Sound industrial relations, which are based on current labour legislation, are implemented and maintained in the organisation.",
+              "intent_tooltip": "Consistent application of fair labour practice, grievance and disciplinary procedures, and dismissal, demotion and retrenchment policies and procedures, is essential to prevent labour unrest with its consequent negative effects on customer care. Membership of personnel in trade unions and/or health professional organisations must be encouraged and there must be negotiation and consultation between these bodies, the management of the organisation and the personnel to promote harmonious working relationships. Current employment policies need to be known and applied.",
+              "criteria": [
+                {
+                  "id": "1.2.3.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.3.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.3.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.3.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.2.3.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "1.3",
+          "title": "Management of the Mortuary",
+          "standards": [
+            {
+              "standard_id": "1.3.1",
+              "statement": "Standard A mortuary manager/supervisor is responsible for operating the mortuary within applicable Laws and Regulations.",
+              "intent_tooltip": "The manager is appointed to be responsible for the overall day-to-day operation of the mortuaries. These responsibilities are documented and known to the personnel of the mortuaries. The individual appointed to carry out these functions has the education and experience to do so.",
+              "criteria": [
+                {
+                  "id": "1.3.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.1.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.1.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "1.3.2",
+              "statement": "Standard The manager/supervisor of the mortuary service ensures that dated, written and signed policies and procedures are developed and maintained.",
+              "intent_tooltip": "The mortuary manager/supervisor must ensure that all policies which apply to the organisation are available to the personnel, and that they are implemented and monitored as they relate to various departments, services and functions. Policies and procedures must be available to guide the personnel in such matters as allocation, use and care of resources, financial practices, human resource management and dealing with complaints.",
+              "criteria": [
+                {
+                  "id": "1.3.2.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.2.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.2.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.2.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.2.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.2.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "1.3.3",
+              "statement": "Standard The mortuary service manager ensures that there is a written, planned and organised orientation and induction programme available for new personnel.",
+              "intent_tooltip": "The decision to appoint an individual to the staff of an organisation sets several processes in motion. To perform well, a new staff member needs to understand the entire organisation and how his or her specific responsibilities contribute to the organisation's mission. This is accomplished through a general orientation to the organisation and his or her role in the organisation, and a specific orientation to the job responsibilities of his or her position.",
+              "criteria": [
+                {
+                  "id": "1.3.3.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.3.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.3.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.3.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "1.3.4",
+              "statement": "Standard Management of the mortuary service ensures the provision of in-service training programmes for its personnel on issues pertinent to the needs of the individual and to the objectives of the service, according to the following criteria:",
+              "intent_tooltip": "The organisation has a responsibility to ensure that personnel are educated in matters which affect their functioning in the specific organisation. In particular, personnel are trained in health and safety matters and infection control.",
+              "criteria": [
+                {
+                  "id": "1.3.4.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.4.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.4.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.4.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.4.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.4.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 2,
+      "se_name": "Facilities and Equipment",
+      "sections": [
+        {
+          "section_pi_id": "2.1",
+          "title": "Facilities and Equipment",
+          "standards": [
+            {
+              "standard_id": "2.1.1",
+              "statement": "Standard The facilities and equipment are adequate to provide an effective and safe mortuary service.",
+              "intent_tooltip": "Management must ensure that resources are adequate to meet statutory requirements and the needs of clients. Mortuary managers/supervisors keep organisation managers informed of facilities which are inadequate, additional equipment requirements, and the current state of facilities and equipment.",
+              "criteria": [
+                {
+                  "id": "2.1.1.1",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.1.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.1.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.1.8",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "2.1.2",
+              "statement": "Standard All equipment and supplies are safely stored.",
+              "intent_tooltip": "The storage of equipment and supplies must allow for security, ease of access and effective inventory taking.  Acts and regulations as well as policies and procedures guide the storage of equipment and supplies.",
+              "criteria": [
+                {
+                  "id": "2.1.2.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.2.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.2.3",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.2.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.2.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "2.1.3",
+              "statement": "Standard A refrigerated facility is used to store all bodies in accordance with prescribed procedures.",
+              "intent_tooltip": "A body storage facility should provide refrigeration adequate for the mortuary workload and maintained at approximately 0ºC. In larger facilities, where longer term storage may be required, storage with a freezing temperature of -20ºC must be provided.",
+              "criteria": [
+                {
+                  "id": "2.1.3.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.3.2",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.3.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.3.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.3.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.3.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.3.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.3.8",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.3.9",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "2.1.4",
+              "statement": "Standard The post-mortem/autopsy theatre is equipped with dissection facilities that meet the needs of the anatomical pathology service. Criterion Comments Recommendations",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "2.1.4.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.4.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.4.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.4.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.4.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.4.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.4.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.4.8",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "2.1.5",
+              "statement": "Standard There is a viewing area where relatives or other relevant persons can identify the body.",
+              "intent_tooltip": "The mortuary must implement processes that prevent unauthorised persons, including relatives, from having access to dissecting rooms. Exposure to infectious agents by visitors to the mortuary must also be prevented. Precautions must be implemented to prevent the trauma of viewing un-shrouded, possibly mutilated, bodies.",
+              "criteria": [
+                {
+                  "id": "2.1.5.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.5.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.5.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.5.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.5.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "2.1.5.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 3,
+      "se_name": "Risk Management",
+      "sections": [
+        {
+          "section_pi_id": "3.1",
+          "title": "Risk Management",
+          "standards": [
+            {
+              "standard_id": "3.1.1",
+              "statement": "Standard Risks are assessed and control measures introduced in order to minimise or eliminate risk.",
+              "intent_tooltip": "Management is accountable for integrating risk management into the everyday activities of the mortuary. Every employee should be trained in and be responsible for following sound risk management practices.  These include: •     Identifying areas of risk within their areas of responsibility •     Contributing to policies and procedures to reduce risk •     Monitoring the implementation of preventive measures to reduce risk •     Ensuring the efficient and effective use of resources •     Safeguarding the company's assets,  and •     Participating in internal auditing procedures.",
+              "criteria": [
+                {
+                  "id": "3.1.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.1.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.1.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.1.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.1.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.1.1.6",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.2",
+          "title": "Safe Operating Practice",
+          "standards": [
+            {
+              "standard_id": "3.2.1",
+              "statement": "Standard There is a process to ensure that safe operating practices are implemented. Criterion Comments Recommendations",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.2.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.2.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.2.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.2.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.2.1.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.2.1.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.2.1.8",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.2.1.9",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.3",
+          "title": "Prevention and Control of Infection",
+          "standards": [
+            {
+              "standard_id": "3.3.1",
+              "statement": "Standard The mortuary implements a coordinated programme to reduce the risks of infections.",
+              "intent_tooltip": "The goal of a mortuary's infection surveillance, prevention and control programme is to identify and reduce the risks of acquiring and/or transmitting infections.",
+              "criteria": [
+                {
+                  "id": "3.3.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.1.4",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "3.3.2",
+              "statement": "Standard Protective clothing, disinfectants and barrier techniques are available and are used correctly as required.",
+              "intent_tooltip": "Hand washing barrier techniques and disinfecting agents are fundamental to infection prevention and control. The mortuary identifies those situations in which the use of gowns, masks and gloves is required and provides training in their correct use. Soap and disinfectants are located in those areas where hand washing and disinfecting procedures are required. Personnel are educated in proper hand washing and disinfecting procedures.",
+              "criteria": [
+                {
+                  "id": "3.3.2.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.2.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.2.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.2.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.2.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "3.3.3",
+              "statement": "Standard All areas within the mortuary are maintained in a safe clean and tidy condition. Criterion Comments Recommendations",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.3.3.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.3.2",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.3.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.3.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.3.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.3.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.3.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.3.8",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.3.9",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.3.3.10",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.4",
+          "title": "Healthcare and other Waste Disposal",
+          "standards": [
+            {
+              "standard_id": "3.4.1",
+              "statement": "Standard The mortuary implements processes for the handling, collection, transport, storage, segregation and disposal of health waste and other waste.",
+              "intent_tooltip": "Hazardous wastes are identified by the mortuary and are safely controlled according to a plan. Such materials and wastes include chemicals, household wastes, hazardous gases and vapours and other regulated medical and infectious wastes. All clinical waste is regarded as hazardous or potentially hazardous.",
+              "criteria": [
+                {
+                  "id": "3.4.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.4.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.4.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.4.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.4.1.5",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.4.1.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.4.1.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.5",
+          "title": "Fire Safety",
+          "standards": [
+            {
+              "standard_id": "3.5.1",
+              "statement": "Standard The mortuary implements the fire safety plan to reduce evident fire risks.",
+              "intent_tooltip": "Fire is an ever present risk in a health organisation. Every organisation needs to plan how it will keep its occupants safe in case of fire or smoke. An organisation plans in particular for: •              The prevention of fire through the reduction of risks such as the safe storage and handling of potentially flammable materials •              Hazards related to any construction in or adjacent to the buildings •              Safe and unobstructed means of exit in the event of a fire •              Clearly depicted fire escape routes •              Early warning and detection systems such as fire patrols, smoke detectors or  fire alarms •              Inspection reports from local fire departments,  and •              Suppression mechanisms such as water hoses, chemical suppressants or sprinkler systems.",
+              "criteria": [
+                {
+                  "id": "3.5.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.5.1.2",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.5.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.5.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.6",
+          "title": "Security",
+          "standards": [
+            {
+              "standard_id": "3.6.1",
+              "statement": "Standard The organisation provides a security service that ensures the safeguarding and protection of buildings, personnel and visitors.",
+              "intent_tooltip": "The organisation has a responsibility to ensure that personnel and visitors are safe from attacks or theft by intruders. The health and safety committee identifies areas and groups that are vulnerable and require added security. The loss of organisation property must be prevented as far as possible through the implementation of security systems.",
+              "criteria": [
+                {
+                  "id": "3.6.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.6.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.6.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.6.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.6.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.7",
+          "title": "Training in Health and Safety",
+          "standards": [
+            {
+              "standard_id": "3.7.1",
+              "statement": "Standard The mortuary educates and trains all personnel about their roles in providing a safe and effective facility.",
+              "intent_tooltip": "The mortuaries' personnel need to be educated and trained to carry out their roles in identifying and reducing risks, protecting others and themselves and creating a safe and secure environment.",
+              "criteria": [
+                {
+                  "id": "3.7.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.7.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.7.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.7.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.7.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.7.1.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.7.1.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "3.7.1.8",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 4,
+      "se_name": "Management of Information",
+      "sections": [
+        {
+          "section_pi_id": "4.1",
+          "title": "Planning",
+          "standards": [
+            {
+              "standard_id": "4.1.1",
+              "statement": "Standard The mortuary management implements processes to meet the information needs of those who manage the organisation, and those outside the organisation who require data and information from the organisation. Criterion Comments Recommendations",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "4.1.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.1.4",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.1.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.1.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.1.8",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "4.1.2",
+              "statement": "Standard Organisation policy identifies those authorised to make entries in the record of the deceased and determines the record's content and format. Criterion Comments Recommendations",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "4.1.2.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.2.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.2.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.2.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "4.1.3",
+              "statement": "Standard The organisation has a policy on the retention time of records, data and information.",
+              "intent_tooltip": "Dispatch records, recorded calls, deceased records and other data are retained for a sufficient period to comply with laws and regulations and then destroyed in a manner that retains confidentiality.",
+              "criteria": [
+                {
+                  "id": "4.1.3.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.3.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.3.3",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "4.1.3.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 5,
+      "se_name": "Quality Management and Improvement",
+      "sections": [
+        {
+          "section_pi_id": "5.1",
+          "title": "Quality Management and Improvement",
+          "standards": [
+            {
+              "standard_id": "5.1.1",
+              "statement": "Standard A formalised proactive quality improvement approach is maintained in the service.",
+              "intent_tooltip": "It is the responsibility of management of the organisation to ensure that standards are set throughout the organisation.  Within each department or service, it is the responsibility of managers to ensure that standards are set for the particular department. This requires coordination with the organisation's central/management/coordinating quality management structures or systems.  Departmental managers use available data and information to identify priority areas for quality monitoring and improvement.",
+              "criteria": [
+                {
+                  "id": "5.1.1.1",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "5.1.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "5.1.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "5.1.1.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "5.1.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "5.1.1.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "5.1.2",
+              "statement": "Standard Improvement in quality is achieved and sustained.",
+              "intent_tooltip": "The health organisation uses the information from data analysis to identify potential improvements to reduce (or prevent) adverse events. Routine monitoring data and data from intensive assessments contribute to an understanding of where improvement should be planned, and what priority should be given to the improvement. In particular, clinical and managerial leaders plan improvements to those data collection areas requiring priority.",
+              "criteria": [
+                {
+                  "id": "5.1.2.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "5.1.2.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 6,
+      "se_name": "Autopsy Processes",
+      "sections": [
+        {
+          "section_pi_id": "6.1",
+          "title": "Management of Pathology Services",
+          "standards": [
+            {
+              "standard_id": "6.1.1",
+              "statement": "Standard A medical director/head of department with appropriate registration, education and training provides oversight of the pathology activities of the organisation.",
+              "intent_tooltip": "Each organisation employs or otherwise obtains the services of a doctor who is accountable for oversight of the pathology activities that take place within the organisation. To accomplish these oversight responsibilities, the medical director/head of department must have training and experience related to forensic medicine/pathology services. The individual selected or appointed by the governing body to carry out these functions has the necessary qualifications as a histopathologist/forensic pathologist, forensic medical officer or medical practitioner qualified to perform post-mortem examinations and/or autopsies.",
+              "criteria": [
+                {
+                  "id": "6.1.1.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.1.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.1.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.1.4",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.1.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.1.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.1.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.1.8",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.1.9",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "6.1.2",
+              "statement": "Standard The pathology service is responsible for the removal and transportation of the body. Criterion Comments Recommendations",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "6.1.2.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.2.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.2.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.2.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "6.1.3",
+              "statement": "Standard Bodies are admitted to the forensic mortuary and stored according to documented procedures. Criterion Comments Recommendations",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "6.1.3.1",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.3.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.3.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.3.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "6.1.4",
+              "statement": "Standard Forensic post-mortem examinations are only conducted in terms of relevant legislation.",
+              "intent_tooltip": "Relevant legislation must be adhered to where post-mortems or autopsies are to be performed. This includes liaison between the investigating officer of the police service and the forensic pathologist so as to maintain the chain of evidence relating to the body and any associated items.",
+              "criteria": [
+                {
+                  "id": "6.1.4.1",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.4.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.4.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.4.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.4.5",
+                  "description": "Critical: þ",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.4.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.4.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.4.8",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.4.9",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.4.10",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "6.1.5",
+              "statement": "Standard Clinical post-mortem examinations are only conducted in terms of relevant legislation.",
+              "intent_tooltip": "Relevant legislation must be adhered to where post-mortems or autopsies are to be performed. For clinical autopsies, a consent from the relatives should be obtained and liaison between the requesting doctor and the pathologist should be established.",
+              "criteria": [
+                {
+                  "id": "6.1.5.1",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.5.2",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.5.3",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.5.4",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.5.5",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.5.6",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "6.1.5.7",
+                  "description": "Critical: ¨",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

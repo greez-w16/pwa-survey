@@ -1,0 +1,1429 @@
+{
+  "ems_full_configuration": [
+    {
+      "se_id": 1,
+      "se_name": "Management and Leadership",
+      "sections": [
+        {
+          "section_pi_id": "1.1",
+          "title": "Governance of the organisation",
+          "standards": [
+            {
+              "standard_id": "1.1.1",
+              "statement": "The responsibilities and accountability of the governance of the organisation",
+              "intent_tooltip": "A description of the context/scope of the",
+              "criteria": [
+                {
+                  "id": "1.1.1.1",
+                  "description": ".  Detail ab out facility",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.1.1.3",
+                  "description": "to 10) requires documented evidence of the involvement of the",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "1.2",
+          "title": "Should the facility have a written policy but no evidence is found of",
+          "standards": [
+            {
+              "standard_id": "1.2.1",
+              "statement": "A senior manager is responsible for operating the organisation",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "1.2.2",
+              "statement": "A senior manager implements processes to manage and control the",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "1.2.3",
+              "statement": ".3",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "1.2.4",
+              "statement": ".2",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "1.2.5",
+              "statement": "The organisation pro vides patient care within business, financial,",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "1.2.6",
+              "statement": "The organisatio n\u2019s leaders ensure that policies and procedures are",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "1.2.7",
+              "statement": "The leaders direct the development and monitor the implementation of",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "1.2.7.1",
+                  "description": "is non -compliant (i.e. if copies of",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "1.2.8",
+              "statement": "The organisation\u2019s leaders foster communica tion between individuals",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "1.3",
+          "title": "Management of Departments and Services",
+          "standards": [
+            {
+              "standard_id": "1.3.1",
+              "statement": "Identified departmental or service managers control clinical and",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "1.3.1.1",
+                  "description": "with special reference to key performance areas.",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "1.3.1.3",
+                  "description": "with regard to \u201cgeneric\u201d functions.",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "1.3.2",
+              "statement": "Policies and procedures and applicable laws and regulations guide the",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 2,
+      "se_name": "Human Resource Management",
+      "sections": [
+        {
+          "section_pi_id": "2.1",
+          "title": "Human Resource Management Support",
+          "standards": [
+            {
+              "standard_id": "2.1.1",
+              "statement": "Administrative support is provided for the organisation\u2019s human",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "2.1.2",
+              "statement": "A personnel file is maintained for each member of staff.",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "2.2",
+          "title": "Staff Planning",
+          "standards": [
+            {
+              "standard_id": "2.2.1",
+              "statement": "The organisation\u2019s leaders plan for the provision of adequate numbers",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "2.3",
+          "title": "Personnel Management",
+          "standards": [
+            {
+              "standard_id": "2.3.1",
+              "statement": "Each staff member\u2019s responsibilities are defined in a current",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "2.3.2",
+              "statement": "The organisation uses a defined process to evaluate personnel",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "2.3.3",
+              "statement": "Sound industrial relations, which are based on current labour",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "2.4",
+          "title": "Staff Orientation and Education",
+          "standards": [
+            {
+              "standard_id": "2.4.1",
+              "statement": "All staff members are orientated to the organisation and to their specific",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "2.4.1.3",
+                  "description": ", for all employees,",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "2.4.2",
+              "statement": "Each staff member receives on -going in -service training and",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "2.4.3",
+              "statement": "Staff members participate in continuing education, research, and other",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "2.4.3.3",
+                  "description": "and 2.4.4.4 will be verified during an audit of the",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "2.5",
+          "title": "Credentialing of Staff Members",
+          "standards": [
+            {
+              "standard_id": "2.5.1",
+              "statement": "The organisation has an effective process for gathering, verifying and",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "2.5.1.4",
+                  "description": ").",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "2.6",
+          "title": "Quality Improvement",
+          "standards": [
+            {
+              "standard_id": "2.6.1",
+              "statement": "A formalised proactive quality improvement approach is maintained in",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 3,
+      "se_name": "Administrative Support",
+      "sections": [
+        {
+          "section_pi_id": "3.1",
+          "title": "Financial Management Support",
+          "standards": [
+            {
+              "standard_id": "3.1.1",
+              "statement": "Budgeting, reporting and auditing processes are consistent with",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.1.1.8",
+                  "description": "above) is",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.2",
+          "title": "Health Record Management",
+          "standards": [
+            {
+              "standard_id": "3.2.1",
+              "statement": "There is a system for the management of health records, which meets",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.3",
+          "title": "Procurement and Provisioning of Supplies",
+          "standards": [
+            {
+              "standard_id": "3.3.1",
+              "statement": "There is a system to ensure that equi pment and supplies are ordered,",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.3.1.2",
+                  "description": "and should be",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "3.3.2",
+              "statement": "All equipment and supplies are safely stored.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.3.2.2",
+                  "description": "(storage of hazardous and flammable materials) applies to",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.4",
+          "title": "Use of Motor Vehicles",
+          "standards": [
+            {
+              "standard_id": "3.4.1",
+              "statement": "The use of organisational motor vehicles by personnel is planned and",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "3.4.2",
+              "statement": ".5",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 4,
+      "se_name": "Access to Services",
+      "sections": [
+        {
+          "section_pi_id": "4.1",
+          "title": "Access to Care",
+          "standards": [
+            {
+              "standard_id": "4.1.1",
+              "statement": "Patients are admitted to receive inpatient care or registered for",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "4.2",
+          "title": "Admission Processes",
+          "standards": [
+            {
+              "standard_id": "4.2.1",
+              "statement": "The organisation seeks to reduce physical, language, cultural and other",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "4.2.2",
+              "statement": "The organisation has an established pro cess for admitting inpatients",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "4.2.3",
+              "statement": "At admission as an inpatient, patients and their families receive",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "4.2.4",
+              "statement": "Admission or transfer to units providing intensive or specialised",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "4.2.4.1",
+                  "description": ", 4.2.4.5 and 4.2.4.6 are not compliant.",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 5,
+      "se_name": "Patient and Family Rights",
+      "sections": [
+        {
+          "section_pi_id": "5.1",
+          "title": "Implementation of Patient Rights",
+          "standards": [
+            {
+              "standard_id": "5.1.1",
+              "statement": "The organisation is responsible for providing processes that s upport",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "5.1.1.2",
+                  "description": ".",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "5.1.1.3",
+                  "description": ".",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "5.2",
+          "title": "Protection of Privacy, Person and Possessions",
+          "standards": [
+            {
+              "standard_id": "5.2.1",
+              "statement": "The organisation takes measures to protect patient privacy.",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "5.2.2",
+              "statement": "Patients are protected from assault.",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "5.3",
+          "title": "Right to Health Education",
+          "standards": [
+            {
+              "standard_id": "5.3.1",
+              "statement": "Health education supports patient and family participation in care",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "5.4",
+          "title": "Right to Treatment and to Refuse Treatment",
+          "standards": [
+            {
+              "standard_id": "5.4.1",
+              "statement": "The organisation respects the rig hts of patients and families to refuse",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "5.4.2",
+              "statement": ".1",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "5.5",
+          "title": "Right  to Voice Complaints",
+          "standards": [
+            {
+              "standard_id": "5.5.1",
+              "statement": "The organisation informs patients and families about its process",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "5.6",
+          "title": "Informed Consent",
+          "standards": [
+            {
+              "standard_id": "5.6.1",
+              "statement": "The organisation has a clearly defined process for obtaining informed",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 6,
+      "se_name": "Management of Information",
+      "sections": [
+        {
+          "section_pi_id": "6.1",
+          "title": "Planning",
+          "standards": [
+            {
+              "standard_id": "6.1.1",
+              "statement": "The organisation plans and implements processes to meet the",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "6.1.2",
+              "statement": "Confidentiality, security and integrity of data and information is",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "6.2",
+          "title": "Information Management Support",
+          "standards": [
+            {
+              "standard_id": "6.2.1",
+              "statement": "The information systems are implemented and supported by suffic ient",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "6.2.2",
+              "statement": "Where information, communication and technology (ICT) equipment is",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "6.3",
+          "title": "Data Processing and Information Management",
+          "standards": [
+            {
+              "standard_id": "6.3.1",
+              "statement": "The organisation has a process to aggregate data for user needs.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "6.3.1.2",
+                  "description": "",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "6.3.2",
+              "statement": "The organisation contributes to external databases when required by",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 7,
+      "se_name": "Risk Management",
+      "sections": [
+        {
+          "section_pi_id": "7.1",
+          "title": "Risk Management",
+          "standards": [
+            {
+              "standard_id": "7.1.1",
+              "statement": "Managers and leaders work collaboratively to develop, implement and",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "7.1.1.2",
+                  "description": "",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "7.1.1.1",
+                  "description": "attempts to indicate the scope of",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "7.2",
+          "title": "Patient Safety",
+          "standards": [
+            {
+              "standard_id": "7.2.1",
+              "statement": "The organisation develops an approach to improve accuracy of patient",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "7.2.2",
+              "statement": "The organisation develops an approach to improve the effectiveness of",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "7.2.3",
+              "statement": "The organisation develops an approach to improve the safety of high -",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "7.2.4",
+              "statement": "The organisation develops an approach to ensure correct -site, correct-",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "7.2.5",
+              "statement": "The organisation develops an approach to reduce the risk of   patient",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "7.2.6",
+              "statement": "The organisation uses a defined process for identifying and managing",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "7.3",
+          "title": "Occupational Health and Safety",
+          "standards": [
+            {
+              "standard_id": "7.3.1",
+              "statement": "As part of risk management an occupational health and safety system",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "7.4",
+          "title": "Security",
+          "standards": [
+            {
+              "standard_id": "7.4.1",
+              "statement": "A security system is maintained for the routine monitoring and",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "7.5",
+          "title": "Fire Safety",
+          "standards": [
+            {
+              "standard_id": "7.5.1",
+              "statement": "As part of risk management, the organisation implements structured",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "7.6",
+          "title": "Emergency Planning",
+          "standards": [
+            {
+              "standard_id": "7.6.1",
+              "statement": "As part of risk management the organisation develops a written plan to",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "7.7",
+          "title": "Waste Management",
+          "standards": [
+            {
+              "standard_id": "7.7.1",
+              "statement": "The organisation has documented control systems for the  handling,",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 8,
+      "se_name": "Quality Management and Improvement",
+      "sections": [
+        {
+          "section_pi_id": "8.1",
+          "title": "Quality Leadership and Design",
+          "standards": [
+            {
+              "standard_id": "8.1.1",
+              "statement": "There are written organisation -wide quality management and",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "8.1.2",
+              "statement": "The leaders coordinate the quality management and improvement",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "8.2",
+          "title": "Clinical And Managerial Quality Monitoring",
+          "standards": [
+            {
+              "standard_id": "8.2.1",
+              "statement": "Clinical practice guidelines are used to guide clinical care.",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "8.2.2",
+              "statement": "There are relevant managerial quality monitoring systems.",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "8.3",
+          "title": "Use of Analysed Data",
+          "standards": [
+            {
+              "standard_id": "8.3.1",
+              "statement": "Analysed data is used to improve the quality of managerial and clinical",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "8.4",
+          "title": "Achieving And Sustaining Quality",
+          "standards": [
+            {
+              "standard_id": "8.4.1",
+              "statement": "Improvement in quality is achieved and sustained.",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 9,
+      "se_name": "Facilities, Equipment and Vehicle Management",
+      "sections": [
+        {
+          "section_pi_id": "9.1",
+          "title": "Infection Control Management",
+          "standards": [
+            {
+              "standard_id": "9.1.1",
+              "statement": "The organisation designs and implements co -ordinated processes to",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "9.1.1.3",
+                  "description": "It is advisable for the coordinator to be trained/experienced in infection prevention",
+                  "is_critical": false,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "9.1.2",
+              "statement": "The organisation designs and implements processes to reduce the risks",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "9.2",
+          "title": "Infection Control Processes",
+          "standards": [
+            {
+              "standard_id": "9.2.1",
+              "statement": "The organisation identifies the procedures and processes associated",
+              "intent_tooltip": "",
+              "criteria": []
+            },
+            {
+              "standard_id": "9.2.2",
+              "statement": "Protective clothing, disinfectants and barrier techniques are available",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "9.3",
+          "title": "Obtaining Of Laboratory Cultures",
+          "standards": [
+            {
+              "standard_id": "9.3.1",
+              "statement": "Laboratory cultures are obtained from designated environmental sites",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "9.4",
+          "title": "Infection Control Quality Management",
+          "standards": [
+            {
+              "standard_id": "9.4.1",
+              "statement": "The infection control processes are integrated with the organisation\u2019s",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        },
+        {
+          "section_pi_id": "9.5",
+          "title": "Infection Control Education For The Staff",
+          "standards": [
+            {
+              "standard_id": "9.5.1",
+              "statement": "The organisation provides education on infection control practices to the",
+              "intent_tooltip": "",
+              "criteria": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 10,
+      "se_name": "Patient Care",
+      "sections": [
+        {
+          "section_pi_id": "10.1",
+          "title": "Assessment Process",
+          "standards": [
+            {
+              "standard_id": "10.1.1",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.1.1.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.1.1.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.1.1.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.1.1.4",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.1.1.5",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "10.1.2",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.1.2.1",
+                  "description": "Critical: \u00fe",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.1.2.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.1.2.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.1.2.4",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "10.2",
+          "title": "Point of Care Testing",
+          "standards": [
+            {
+              "standard_id": "10.2.1",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.2.1.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.2.1.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.2.1.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.2.1.4",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.2.1.5",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.2.1.6",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "10.3",
+          "title": "Delivery of Care for All Patients",
+          "standards": [
+            {
+              "standard_id": "10.3.1",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.3.1.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.3.1.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.3.1.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "10.3.2",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.3.2.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.3.2.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.3.2.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.3.2.4",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "10.4",
+          "title": "Sedation and Induced Paralysis",
+          "standards": [
+            {
+              "standard_id": "10.4.1",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.4.1.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.4.1.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.4.1.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "10.4.2",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.4.2.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.4.2.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.4.2.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.4.2.4",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.4.2.5",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "10.5",
+          "title": "Invasive Procedures",
+          "standards": [
+            {
+              "standard_id": "10.5.1",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.5.1.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.5.1.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.5.1.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.5.1.4",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "10.5.2",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.5.2.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.5.2.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.5.2.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.5.2.4",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.5.2.5",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "10.6",
+          "title": "Medication Use",
+          "standards": [
+            {
+              "standard_id": "10.6.1",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.6.1.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.1.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.1.3",
+                  "description": "Critical: \u00fe",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.1.4",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.1.5",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.1.6",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.1.7",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.1.8",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.1.9",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            },
+            {
+              "standard_id": "10.6.2",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.6.2.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.2.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.2.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.2.4",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.6.2.5",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "10.7",
+          "title": "Non-Treatment and Non-Transport",
+          "standards": [
+            {
+              "standard_id": "10.7.1",
+              "statement": "Standard",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "10.7.1.1",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.7.1.2",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.7.1.3",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.7.1.4",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.7.1.5",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.7.1.6",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.7.1.7",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                },
+                {
+                  "id": "10.7.1.8",
+                  "description": "Critical: \u00a8",
+                  "is_critical": true,
+                  "category": "Basic Process + Patient Care",
+                  "severity": 3
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

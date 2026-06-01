@@ -4415,10 +4415,10 @@ export function Dashboard() {
 										</div>
 										{(() => {
 											const activeConfig = overviewSource === 'active' ? currentConfig : {
-												hospital_full_configuration: hospitalConfig,
-												clinics_full_configuration: clinicsConfig,
-												ems_full_configuration: emsConfig,
-												mortuary_full_configuration: mortuaryConfig,
+												hospital_full_configuration: hospitalConfig.hospital_full_configuration,
+												clinics_full_configuration: clinicsConfig.clinics_full_configuration,
+												ems_full_configuration: emsConfig.ems_full_configuration,
+												mortuary_full_configuration: mortuaryConfig.mortuary_full_configuration,
 											};
 											const FACILITY_CONFIGS = [
 												{ type: 'Hospital', config: activeConfig, key: 'hospital_full_configuration' },

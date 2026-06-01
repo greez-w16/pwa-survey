@@ -1,0 +1,1135 @@
+[
+    {
+        "criteria": "1.1.1.1",
+        "description": "Documents describe governance accountability and responsibilities There is an organizational chart or document, which describes the lines of authority and accountability from governance and within the service. 1.1.13 The responsibilities of governance include providing support to the personnel in the health facility. The support from organization managers includes regular supervisory visits, policies, guidelines, monitoring, written communication and education",
+        "linked_criteria": [
+            "1.1.1.2",
+            "1.1.1.4",
+            "1.1.2.1",
+            "1.3.1.1"
+        ]
+    },
+    {
+        "criteria": "1.1.2.1",
+        "description": "The mortuary managers ensure that policies and procedures guide and support the activities and management of the mortuaries",
+        "linked_criteria": [
+            "1.1.1.4",
+            "1.1.2.3",
+            "1.2.1.1",
+            "1.3.1.1",
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "1.1.2.2",
+        "description": "A designated personnel member is responsible for compiling and indexing policies and procedures, and ensuring their circulation, recall and review",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.1.2.3",
+        "description": "Policies and procedures are signed/endorsed by persons authorized to do so",
+        "linked_criteria": [
+            "1.1.2.1"
+        ]
+    },
+    {
+        "criteria": "1.1.2.4",
+        "description": "Policies and procedures are compiled into a comprehensive manual, which is indexed and easily accessible to all personnel members",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.1.2.5",
+        "description": "All policies and procedures are reviewed at appropriate intervals, dated and signed",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.1.2.6",
+        "description": "There is a mechanism for ensuring that policies are known and implemented",
+        "linked_criteria": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "1.2.1.1",
+        "description": "There are documented processes for staffing the mortuary company\u2019s mortuaries. The desired education, qualifications, skills and knowledge are defined for all personnel members",
+        "linked_criteria": [
+            "1.1.2.1",
+            "1.2.1.2",
+            "1.2.2.1",
+            "1.2.2.2",
+            "1.3.1.2",
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "1.2.1.3",
+        "description": "Documented personnel information is maintained on each personnel member",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.2.1.4",
+        "description": "Each personnel member's responsibilities are defined in a current job description, which is agreed to by the employee",
+        "linked_criteria": [
+            "1.2.2.4"
+        ]
+    },
+    {
+        "criteria": "1.2.1.5",
+        "description": "All personnel members are orientated and inducted to the mortuary and to their specific job responsibilities at the time of appointment",
+        "linked_criteria": [
+            "1.3.3.1"
+        ]
+    },
+    {
+        "criteria": "1.2.1.6",
+        "description": "Each personnel member receives ongoing in - service education and training to maintain or advance his/her skills and knowledge, based on identified needs",
+        "linked_criteria": [
+            "5.1.1.2"
+        ]
+    },
+    {
+        "criteria": "1.2.2.1",
+        "description": "There is a process in place to recruit personnel",
+        "linked_criteria": [
+            "1.2.1.1",
+            "1.2.1.2"
+        ]
+    },
+    {
+        "criteria": "1.2.2.2",
+        "description": "There is a process in place to evaluate the qualifications of new personnel",
+        "linked_criteria": [
+            "1.2.1.2"
+        ]
+    },
+    {
+        "criteria": "1.2.2.3",
+        "description": "There is a process in place to appoint, evaluate and terminate personnel. Personnel members employed in the service have a written job description, which defines their responsibilities",
+        "linked_criteria": [
+            "1.2.1.4",
+            "1.2.2.4"
+        ]
+    },
+    {
+        "criteria": "1.2.2.5",
+        "description": "There is at least one documented evaluation of personnel each year, or more frequently, as defined by the organisation",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.2.3.1",
+        "description": "There are mutually agreed policies and procedures with the personnel for the satisfactory conduct of industrial relations activities",
+        "linked_criteria": [
+            "1.2.3.5",
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "1.2.3.2",
+        "description": "Written disciplinary procedures, which meet the requirements of current legislation, are available",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "1.2.3.3",
+        "description": "There is a grievance procedure in terms of current legislation",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "1.2.3.4",
+        "description": "There are dispute and appeal procedures",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.2.3.5",
+        "description": "There are recognition agreements for trade unions and/or health professional organizations",
+        "linked_criteria": [
+            "1.2.3.1"
+        ]
+    },
+    {
+        "criteria": "1.3.1.1",
+        "description": "The mortuary manager/supervisor is responsible and accountable for the day- to - d a y operation of the mortuary service",
+        "linked_criteria": [
+            "1.1.1.4",
+            "1.1.2.1"
+        ]
+    },
+    {
+        "criteria": "1.3.1.2",
+        "description": "The manager has the education and experience to carry out his or her responsibilities",
+        "linked_criteria": [
+            "1.2.1.2"
+        ]
+    },
+    {
+        "criteria": "1.3.1.3",
+        "description": "The manager ensures that approved policies are carried out",
+        "linked_criteria": [
+            "1.1.2.1",
+            "1.1.2.6",
+            "1.2.1.1",
+            "1.2.3.1",
+            "1.3.1.5",
+            "1.3.2.1",
+            "1.3.2.4",
+            "1.3.2.5",
+            "1.3.2.6",
+            "2.1.3.1",
+            "3.2.1.1",
+            "3.2.1.2",
+            "3.2.1.3",
+            "3.2.1.4",
+            "4.1.3.1",
+            "6.1.2.2"
+        ]
+    },
+    {
+        "criteria": "1.3.1.4",
+        "description": "The manager ensures compliance with applicable Laws and regulations. 3.4.14",
+        "linked_criteria": [
+            "1.2.1.2",
+            "1.2.3.2",
+            "1.2.3.3",
+            "2.1.1.1",
+            "2.1.1.2",
+            "2.1.1.3",
+            "2.1.2.3",
+            "2.1.3.2",
+            "3.3.1.3"
+        ]
+    },
+    {
+        "criteria": "3.5.1.1",
+        "description": "(b)",
+        "linked_criteria": [
+            "4.1.3.3",
+            "6.1.1.1",
+            "6.1.3.1",
+            "6.1.3.4",
+            "6.1.4.10",
+            "6.1.4.6",
+            "6.1.4.7",
+            "6.1.4.8",
+            "6.1.4.9",
+            "6.1.5.6",
+            "6.1.5.7"
+        ]
+    },
+    {
+        "criteria": "1.3.1.5",
+        "description": "The manager implements processes to manage and control human, financial and other resources",
+        "linked_criteria": [
+            "1.3.1.3",
+            "1.3.1.6",
+            "1.3.1.7",
+            "1.3.2.2",
+            "2.1.1.4",
+            "2.1.1.5",
+            "2.1.1.6",
+            "2.1.1.8",
+            "2.1.2.2",
+            "2.1.4.4",
+            "2.1.4.5",
+            "2.1.4.6",
+            "2.1.4.7",
+            "2.1.4.8",
+            "2.1.5.2",
+            "2.1.5.3",
+            "3.3.2.4",
+            "3.4.1.1"
+        ]
+    },
+    {
+        "criteria": "1.3.1.6",
+        "description": "The manager is involved in the preparation financial estimates for the mortuary. There are designated individuals appointed to act in the absence of the mortuary manager/supervisor to provide the service with direction at all times",
+        "linked_criteria": [
+            "1.3.1.5",
+            "1.3.1.7"
+        ]
+    },
+    {
+        "criteria": "1.3.2.1",
+        "description": "The manager/supervisor ensures that policies and procedures are available to guide the service",
+        "linked_criteria": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "1.3.2.2",
+        "description": "The manager/supervisor provides guidelines on professional conduct within the mortuary service",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "1.3.2.3",
+        "description": "Policies and procedures are signed by persons authorized to do so Policies and procedures are compiled in a comprehensive manual, which is indexed and easily accessible to all personnel",
+        "linked_criteria": [
+            "1.3.1.3",
+            "1.3.2.4"
+        ]
+    },
+    {
+        "criteria": "1.3.2.5",
+        "description": "Each policy and procedure is reviewed, dated and signed",
+        "linked_criteria": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "1.3.2.6",
+        "description": "There is a mechanism to ensure that policies and procedures are known to and implemented by personnel working in the mortuary service",
+        "linked_criteria": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "1.3.3.1",
+        "description": "There is a written, planned orientation and induction programme for mortuary service personnel who are new to the service. The orientation and induction programme prepares personnel for their roles and responsibilities in the mortuary service",
+        "linked_criteria": [
+            "1.2.1.5",
+            "1.3.3.2",
+            "5.1.1.2"
+        ]
+    },
+    {
+        "criteria": "1.3.3.3",
+        "description": "The orientation and induction programme includes instruction on the manner of communication with visitors to the mortuary",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.3.3.4",
+        "description": "The orientation and induction programme includes health and safety and infection control policies as they apply to the mortuary service",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.3.4.1",
+        "description": "The mortuary service provides documented in - service training programmes for its personnel consistent with service objectives. The in -service training programme ensures that all personnel are competent and updated when new systems and equipment are installed",
+        "linked_criteria": [
+            "1.3.4.2"
+        ]
+    },
+    {
+        "criteria": "1.3.4.3",
+        "description": "The in-service training programme provides supervisory training",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.3.4.4",
+        "description": "Personnel in the service receive in -service training to ensure competency",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.3.4.5",
+        "description": "The in-service training programme includes on -going training in emergency procedures (e.g., fire drill and security)",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "1.3.4.6",
+        "description": "Records of the holding of in -service training sessions are kept, including records of attendance",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.1.1",
+        "description": "There is evidence that permits required by the local authority for the carrying out of mortuary operation are current. Facilities and equipment are maintained to provide clean and safe working conditions which comply with relevant legislation",
+        "linked_criteria": [
+            "1.3.1.4",
+            "2.1.1.2"
+        ]
+    },
+    {
+        "criteria": "2.1.1.3",
+        "description": "Mortuary vehicles comply with specifications applicable to the transport of human bodies",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "2.1.1.4",
+        "description": "All areas are provided with adequate lighting and ventilation",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.1.5",
+        "description": "Washing facilities (showers and hand-wash basin with hot and cold water are provided",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.1.6",
+        "description": "Lockers for storing personal clothing and property are provided away from work areas and are not used to store work clothing and personal protective equipment. Personnel who use equipment are trained on its use",
+        "linked_criteria": [
+            "1.3.1.5",
+            "2.1.1.7"
+        ]
+    },
+    {
+        "criteria": "2.1.1.8",
+        "description": "Records of equipment maintenance are available",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.2.1",
+        "description": "Records of equipment maintenance are available",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.2.2",
+        "description": "Records of stocks of chemicals, cleaning agents and detergents are maintained",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.2.3",
+        "description": "Hazardous and flammable materials are stored in accordance with relevant regulations",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "2.1.2.4",
+        "description": "Arrangements, including lockable doors are used to provide security for the mortuary",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.2.5",
+        "description": "There is adequate storage space to enable rapid retrieval and removal of equipment when needed",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.3.1",
+        "description": "Policies and procedures guiding the storage of bodies in the mortuary are available. Bodies known or suspected of harbouring infectious diseases are contained within a body bag of approved specifications",
+        "linked_criteria": [
+            "1.3.1.3",
+            "1.3.1.4",
+            "2.1.3.2",
+            "3.1.1.1"
+        ]
+    },
+    {
+        "criteria": "3.3.1.1",
+        "description": "(a)",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.3.3",
+        "description": "Bodies are stored at a prescribed temperature",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.3.4",
+        "description": "The temperature of each refrigerator is checked and recorded twice daily",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.3.5",
+        "description": "Emergency power is available for the refrigerators",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.3.6",
+        "description": "Access to the refrigerators is controlled",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.3.7",
+        "description": "Manual lifting of bodies is minimized by the provision of hoists and/or elevating trolleys. There is documented evidence of approval for the removal of bodies",
+        "linked_criteria": [
+            "2.1.3.8"
+        ]
+    },
+    {
+        "criteria": "2.1.3.9",
+        "description": "A register is kept for the storage and removal of bodies",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.4.1",
+        "description": "The autopsy table and dissection bench is provided with shadow- free lighting",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.4.2",
+        "description": "Adequate ventilation is provided for dissection benches where formalin fixed organs and tissues are handled",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.4.3",
+        "description": "The floor surface is impervious, easy to clean, sealed at the edges and provided with drains, which have filtered traps",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.4.4",
+        "description": "There is adequate storage for equipment and instruments",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.4.5",
+        "description": "Working bays are large enough to enable personnel to work without being crowded",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.4.6",
+        "description": "Instruments and other equipment required for an autopsy is readily accessible to each working bay",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.4.7",
+        "description": "The mortuary theatre has facilities for weighing and measuring organs",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.4.8",
+        "description": "The mortuary theatre has facilities for photographic evidence collection",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.5.1",
+        "description": "There is a designated viewing area separated from the body storage section",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.5.2",
+        "description": "The waiting room of the viewing area is suitably furnished",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.5.3",
+        "description": "There is sufficient space for seating and a mortuary trolley in the viewing area",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.1.5.4",
+        "description": "Toilet facilities are available within easy access of the viewing area",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.5.5",
+        "description": "The mortuary manager/supervisor ensures that the mortuary personnel demonstrate respect for the deceased",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "2.1.5.6",
+        "description": "The personnel are courteous and display respect towards the deceased and their families at all times",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.1.1.1",
+        "description": "There is a documented risk management plan for the mortuary",
+        "linked_criteria": [
+            "2.1.3.2"
+        ]
+    },
+    {
+        "criteria": "3.1.1.2",
+        "description": "Risk assessments are recorded and the results are made available to personnel",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.1.1.3",
+        "description": "There is a mechanism to ensure that personnel are aware of risks and their consequences",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.1.1.4",
+        "description": "The mortuary implements response plan to likely community emergencies, epidemics and natural or other disasters",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.1.1.5",
+        "description": "An internal incident and emergency plan is in place",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.1.1.6",
+        "description": "A monitoring programme provides data on incidents, injuries and other events that support planning and further risk reduction",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.2.1.1",
+        "description": "Policies and procedures are available relating to the handling and storage of bodies",
+        "linked_criteria": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "3.2.1.2",
+        "description": "Policies and procedures are available relating to the isolation of bodies suspected of harbouring infectious diseases",
+        "linked_criteria": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "3.2.1.3",
+        "description": "Policies and procedures are available relating to the wearing of protective clothing",
+        "linked_criteria": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "3.2.1.4",
+        "description": "Policies and procedures are available relating to the colour coding of bags for soiled and infected linen and their handling, processing and disposal",
+        "linked_criteria": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "3.2.1.5",
+        "description": "There is a process to deal with used, discarded or contaminated protective clothing",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.2.1.6",
+        "description": "First aid is available to provide immediate attention to all injuries",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.2.1.7",
+        "description": "An emergency shower or eye-wash facility is provided in the washroom area and where chemicals are stored or handled",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.2.1.8",
+        "description": "Counseling and treatment is available to personnel who have suffered a sharps injury",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.2.1.9",
+        "description": "Processes for regular debriefing sessions for employees are in place",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.1.2",
+        "description": "The infection control processes include prevention of the spread of blood -borne diseases (such as HIV, and hepatitis B/C) and focuses on processes that may lead to infection",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.1.3",
+        "description": "The processes are compliant with National laws and regulations",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "3.3.1.4",
+        "description": "All personnel, vehicles, and other areas of the mortuary are included in the infection control processes",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.1.5",
+        "description": "The mortuary has established the processes associated with infection risk and developed procedures to reduce infection risk",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.2.1",
+        "description": "The mortuary identifies those situations for which protective clothing is required",
+        "linked_criteria": [
+            "3.1.1.1"
+        ]
+    },
+    {
+        "criteria": "3.3.2.2",
+        "description": "The mortuary identifies those areas where hand washing and disinfecting procedures are required",
+        "linked_criteria": [
+            "3.1.1.1"
+        ]
+    },
+    {
+        "criteria": "3.3.2.3",
+        "description": "Hand washing and disinfecting procedures are used correctly in those areas",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.2.4",
+        "description": "Gloves, masks, soap and disinfectants are available and are used correctly when required",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "3.3.3.1",
+        "description": "Secure storage areas and well-maintained equipment are available to housekeeping personnel",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.3.2",
+        "description": "Mops and brooms are cleaned and dried before being stored",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.3.3",
+        "description": "Cleaning cupboards are adequately ventilated",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.3.4",
+        "description": "Access to entrances, exits and emergency equipment is kept free of obstruction",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.3.5",
+        "description": "Soiled linen is placed in bags designated for that purpose",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.3.6",
+        "description": "Linen is not stacked close to heating or cooling equipment, the vents of motors or air -conditioning units",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.3.7",
+        "description": "Soiled linen is stored in a secure facility",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.3.8",
+        "description": "A separate storage area is set aside for combustible refuse, waste paper and empty containers pending their removal from the premises",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.3.3.9",
+        "description": "Pest control mechanisms are identified and implemented",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.4.1.1",
+        "description": "There is a plan for the inventory, handling, storage and use of clinical materials and the control and disposal of materials and waste",
+        "linked_criteria": [
+            "1.3.1.5"
+        ]
+    },
+    {
+        "criteria": "3.4.1.2",
+        "description": "(b) Health wastes are managed according to a plan",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.4.1.3",
+        "description": "The plan includes labeling of hazardous materials and wastes",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.4.1.4",
+        "description": "The plan identifies documentation requirements including any permits, licenses, or other regulatory requirements",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "3.4.1.5",
+        "description": "The plan includes the procedures to be adopted when a spill of a hazardous chemical or infectious material occurs",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.4.1.6",
+        "description": "The plan includes the proper disposal of health and other waste",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.5.1.2",
+        "description": "Fire fighting equipment is regularly inspected and serviced at least annually and the date of the service is recorded on the apparatus",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.6.1.1",
+        "description": "A 24-hour security system is maintained for the routine monitoring and safeguarding of the building, personnel and visitors",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.6.1.2",
+        "description": "The powers and duties of security officers are clearly defined",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.6.1.3",
+        "description": "Safety and security systems are developed with input from personnel",
+        "linked_criteria": [
+            "3.1.1.1"
+        ]
+    },
+    {
+        "criteria": "3.6.1.4",
+        "description": "Security systems include access control of defined protected areas",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.6.1.5",
+        "description": "The building is evaluated to identify areas requiring security doors and locks",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.7.1.1",
+        "description": "For each component of the mortuaries risk management programme, there is planned education to ensure that personnel can effectively carry out their responsibilities",
+        "linked_criteria": [
+            "3.1.1.1"
+        ]
+    },
+    {
+        "criteria": "3.7.1.2",
+        "description": "Personnel can describe and/or demonstrate their role in response to a fire",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.7.1.3",
+        "description": "Personnel can describe and/or demonstrate actions to eliminate, minimize, or report safety, security and other risks",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.7.1.4",
+        "description": "Personnel can describe and/or demonstrate precautions, procedures and participation in the storage, handling, segregation, disposal of hazardous wastes and materials, in related emergencies",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.7.1.5",
+        "description": "Personnel can describe and/or demonstrate procedures and their role in internal and community emergencies and disasters",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.7.1.6",
+        "description": "Personnel knowledge is tested regarding their role in maintaining a safe and effective facility",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "3.7.1.7",
+        "description": "Personnel training and testing is documented as to who was trained and tested, and the results",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.1.1",
+        "description": "The organisation has a plan to meet information needs, based on an assessment of the needs of those within and outside the organisation",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.1.2",
+        "description": "The information needs of those who provide pathology services are considered in the planning process",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.1.3",
+        "description": "The information needs and requirements of individuals and agencies outside the organisation are considered in the planning process",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.1.4",
+        "description": "The information plan includes how the confidentiality, security and integrity of data and information will be maintained",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.1.5",
+        "description": "Security and confidentiality of deceased person data and information are maintained",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.1.6",
+        "description": "The mortuary has a process to aggregate data and has determined what data and information are to be regularly aggregated to meet the needs of the organisation",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.1.7",
+        "description": "Aggregate data and information to support organisation management",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.1.8",
+        "description": "Aggregate data and information to support the quality management programme",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.2.1",
+        "description": "The specific content of records has been determined by the organisation",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.2.2",
+        "description": "Those prescribed to make entries in the record are identified in organisation policy",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.2.3",
+        "description": "The format and location of entries are determined by organisation policy",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.2.4",
+        "description": "There is a process to ensure that only authorised individuals make entries in records",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.3.1",
+        "description": "The organisation has a policy on the retention of records and other data and information",
+        "linked_criteria": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "4.1.3.2",
+        "description": "The retention process provides expected confidentiality and security",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "4.1.3.3",
+        "description": "Records, data and information are retained according to policy or laws and regulations",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "4.1.3.4",
+        "description": "Records, data and information are destroyed appropriately",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "5.1.1.1",
+        "description": "There are formalised quality improvement processes for the service that have been developed and agreed upon by the personnel of the service",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "5.1.1.2",
+        "description": "There is a training programme for Personnel that is consistent with their role in the quality management and improvement programme",
+        "linked_criteria": [
+            "1.2.1.6",
+            "1.3.3.2"
+        ]
+    },
+    {
+        "criteria": "5.1.1.3",
+        "description": "Indicators of performance are identified to evaluate the quality of service rendered",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "5.1.1.4",
+        "description": "The quality improvement cycle includes the monitoring and evaluation of the standards set and the remedial action implemented",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "5.1.1.5",
+        "description": "A documentation audit system is in place",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "5.1.1.6",
+        "description": "Information on the quality management and improvement programme is communicated to personnel regularly",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "5.1.2.1",
+        "description": "The organisation documents the improvements achieved and sustained",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "5.1.2.2",
+        "description": "This information leads to the development of processes to ensure that quality is sustained. Criteria",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.1.1",
+        "description": "There is a trained and licensed Pathologist who is accountable for the oversight of all autopsy services of the organisation",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "6.1.1.2",
+        "description": "The pathologist is accountable for the development, implementation, and monitoring of autopsy service functions",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.1.3",
+        "description": "The pathologist is accountable for the in -service training/education and performance monitoring of employees that provide autopsy services",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.1.4",
+        "description": "A determination is made about the current qualifications of individuals to provide pathology services",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.1.5",
+        "description": "The organisation has an effective process to authorise all health professionals to provide pathology services consistent with their qualifications",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.1.6",
+        "description": "The head of department/medical director is accountable for the medical components of the quality management and improvement programme",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.1.7",
+        "description": "The medical director and the managerial leaders select pathology practice guidelines",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.1.8",
+        "description": "The medical director and the managerial leaders adapt guidelines as appropriate for the clients served by the organisation and the resources available within the organisation",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.1.9",
+        "description": "Guidelines are reviewed and adapted on a regular basis after implementation",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.2.1",
+        "description": "The forensic pathology service removes the body from the scene of death in consultation with the Investigation Officer after death certification by a qualified medical practitioner",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.2.2",
+        "description": "The body is handled according to prescribed policies and procedures",
+        "linked_criteria": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "6.1.2.3",
+        "description": "The body is transported to the mortuary according to stipulated procedures after it has been certified dead by the hospital Accident and Emergency Department or Clinic doctors",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.2.4",
+        "description": "Designated vehicles are used for the transportation of bo dies",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.3.1",
+        "description": "The medico -legal admission requirements and processes are adhered to when a body is admitted",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "6.1.3.2",
+        "description": "The body is stored in accordance with the prescribed procedure",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.3.3",
+        "description": "Access to the body is controlled at all times",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.3.4",
+        "description": "Medico-legal post mortems are conducted within prescribed time frames. For forensic post -mortem examinations, the forensic pathologist secures custodianship of the body from the scene of death",
+        "linked_criteria": [
+            "1.3.1.4",
+            "6.1.4.1"
+        ]
+    },
+    {
+        "criteria": "6.1.4.2",
+        "description": "For forensic post-mortem examinations, the forensic pathologist will have the full authority to discretionally allow access to the body. Access to the body will be limited to those who have a medical background and fulfil the criteria",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.4.3",
+        "description": "For forensic post -mortem examinations, the body shall be viewed by the family representative for purposes of identification only",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.4.4",
+        "description": "For forensic post-mortem examinations, the family may elect to have a medical practitioner observe the Post -mortem procedure",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.4.5",
+        "description": "For forensic post -mortem examinations, the forensic pathologist maintains the chain of evidence relating to the body and any associated items",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.4.6",
+        "description": "For forensic post -mortem examinations, the forensic pathologist conducts the post mortem investigation and harvesting of evidentiary material according to prescribed laws and procedures",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "6.1.4.7",
+        "description": "For forensic post -mortem examinations, the forensic pathologist conducts appropriate special investigations according to prescribed laws and procedures",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "6.1.4.8",
+        "description": "For forensic post -mortem examinations, the forensic pathologist produces medico -legal reports, consultancy reports, expert testimony and opinions",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "6.1.4.9",
+        "description": "For forensic post -mortem examinations, the forensic pathologist archives documents, specimens and related materials",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "6.1.4.10",
+        "description": "For forensic post -mortem examinations, the forensic pathologist releases the body to a registered undertaker or for a pauper\u2019s burial in terms of relevant legislation",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "6.1.5.1",
+        "description": "For clinical post -mortem examinations, the anatomical pathologist conducts the post mortem examination and harvesting of diagnostic material",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.5.2",
+        "description": "For clinical post -mortem examinations consent from relatives should be obtained before the case is admitted for post -mortem examination",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.5.3",
+        "description": "For clinical post -mortem examinations, the anatomical pathologist conducts appropriate special investigations",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.5.4",
+        "description": "For clinical post -mortem examinations the anatomical pathologist conducts the post mortem examination and harvesting of diagnostic material",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.5.5",
+        "description": "For clinical post -mortem examinations, the anatomical pathologist produces reports and submits it to the requesting entity",
+        "linked_criteria": []
+    },
+    {
+        "criteria": "6.1.5.6",
+        "description": "For clinical post -mortem examinations, the anatomical pathologist archives documents, specimens and related materials according to national regulations",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    },
+    {
+        "criteria": "6.1.5.7",
+        "description": "Following anatomical post -mortem examinations, the mortuary personnel release the body to a registered undertaker or for a pauper\u2019s burial in terms of relevant legislation",
+        "linked_criteria": [
+            "1.3.1.4"
+        ]
+    }
+]

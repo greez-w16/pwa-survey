@@ -1,0 +1,6127 @@
+[
+    {
+        "criteria": "1.1.1.6",
+        "description": "This license covers all services offered by the facility",
+        "linked_criteria": [
+            "1.1.1.5"
+        ],
+        "root": []
+    },
+    {
+        "criteria": "1.1.1.7",
+        "description": "The pharmacy is licensed by a relevant licensing body",
+        "linked_criteria": [
+            "1.2.1.5",
+            "11.1.1.2"
+        ],
+        "root": [
+            "11.1.1.2"
+        ]
+    },
+    {
+        "criteria": "1.1.1.8",
+        "description": "The laboratory is licensed by a relevant licensing body",
+        "linked_criteria": [
+            "1.2.1.5",
+            "9.1.1.2"
+        ],
+        "root": [
+            "9.1.1.2"
+        ]
+    },
+    {
+        "criteria": "1.1.1.9",
+        "description": "The diagnostic imaging service is licensed by a relevant licensing body of radiation control council or equivalent body",
+        "linked_criteria": [
+            "1.2.1.5",
+            "10.1.1.3",
+            "10.1.2.1"
+        ],
+        "root": [
+            "1.2.1.5",
+            "10.1.1.3",
+            "10.1.2.1"
+        ]
+    },
+    {
+        "criteria": "1.2.1.1",
+        "description": "The organisation ensures that a qualified individual manages the facility",
+        "linked_criteria": [
+            "2.1.1.2"
+        ],
+        "root": [
+            "2.1.1.2"
+        ]
+    },
+    {
+        "criteria": "1.2.1.4",
+        "description": "The facility manager ensures that approved policies are implemented",
+        "linked_criteria": [
+            "12.2.2.4"
+        ],
+        "root": [
+            "12.2.2.4"
+        ]
+    },
+    {
+        "criteria": "1.2.1.5",
+        "description": "The facility manager ensures compliance with applicable laws and Regulations",
+        "linked_criteria": [
+            "1.1.1.5",
+            "1.1.1.9",
+            "10.1.1.3",
+            "10.1.2.1",
+            "10.1.2.2",
+            "11.1.1.2",
+            "11.5.1.5",
+            "11.6.1.1",
+            "11.6.1.2",
+            "11.7.1.10",
+            "12.2.5.2",
+            "12.4.1.1",
+            "13.1.4.1",
+            "13.3.4.1",
+            "2.3.1.1",
+            "2.3.1.2",
+            "3.1.1.2",
+            "4.3.1.1",
+            "5.2.1.2",
+            "5.4.1.2",
+            "5.6.2.1",
+            "6.2.1.7",
+            "6.4.3.3",
+            "8.2.2.1",
+            "8.2.5.7",
+            "9.1.1.2"
+        ],
+        "root": [
+            "1.1.1.7",
+            "1.1.1.8",
+            "1.1.1.9",
+            "10.1.2.2",
+            "11.1.1.2",
+            "11.5.1.5",
+            "11.6.1.1",
+            "11.6.1.2",
+            "11.7.1.10",
+            "12.2.5.2",
+            "12.4.1.1",
+            "13.1.4.1",
+            "13.3.4.1",
+            "2.3.1.1",
+            "2.3.1.2",
+            "3.1.1.2",
+            "4.3.1.1",
+            "5.2.1.2",
+            "5.4.1.2",
+            "5.6.2.1",
+            "6.2.1.7",
+            "6.4.3.3",
+            "8.2.2.1",
+            "8.2.5.7",
+            "9.1.1.2"
+        ]
+    },
+    {
+        "criteria": "1.2.1.6",
+        "description": "The facility manager implements process to manage and control human, financial and other resources",
+        "linked_criteria": [
+            "1.2.2.6",
+            "10.2.1.1",
+            "10.2.2.1",
+            "11.4.1.1",
+            "12.2.3.8",
+            "12.2.4.1",
+            "12.2.5.1",
+            "12.3.1.3",
+            "12.4.1.3",
+            "13.3.3.1",
+            "2.1.1.1",
+            "2.1.1.3",
+            "2.1.1.4",
+            "2.2.2.2",
+            "6.2.1.1",
+            "7.2.1.1",
+            "8.2.1.1",
+            "9.3.1.1"
+        ],
+        "root": [
+            "1.2.2.6",
+            "10.2.1.1",
+            "10.2.2.1",
+            "11.4.1.1",
+            "12.2.3.8",
+            "12.2.4.1",
+            "12.2.5.1",
+            "12.3.1.3",
+            "12.4.1.3",
+            "13.3.3.1",
+            "2.1.1.1",
+            "2.1.1.3",
+            "2.1.1.4",
+            "2.2.2.2",
+            "6.2.1.1",
+            "7.2.1.1",
+            "8.2.1.1",
+            "9.3.1.1"
+        ]
+    },
+    {
+        "criteria": "1.2.1.7",
+        "description": "Contracts and other arrangements are monitored to ensure that the terms of the contracts are met",
+        "linked_criteria": [
+            "13.1.2.3",
+            "13.2.1.1",
+            "13.2.2.2",
+            "13.3.1.1",
+            "13.3.2.2",
+            "5.4.1.3"
+        ],
+        "root": [
+            "13.1.2.3",
+            "13.2.1.1",
+            "13.2.2.2",
+            "13.3.1.1",
+            "13.3.2.2",
+            "5.4.1.3"
+        ]
+    },
+    {
+        "criteria": "1.2.2.6",
+        "description": "There is a documented budgeting process",
+        "linked_criteria": [
+            "1.2.1.6",
+            "12.2.2.1"
+        ],
+        "root": [
+            "1.2.1.6",
+            "12.2.2.1"
+        ]
+    },
+    {
+        "criteria": "1.2.2.9",
+        "description": "There is an inventory, which is checked according to policy",
+        "linked_criteria": [
+            "6.2.1.3"
+        ],
+        "root": [
+            "6.2.1.3"
+        ]
+    },
+    {
+        "criteria": "1.2.3.3",
+        "description": "The leaders are collectively responsible for ensuring that the mission statement is known to all personnel, patients, carers and the community served",
+        "linked_criteria": [
+            "3.8.1.3"
+        ],
+        "root": [
+            "3.8.1.3"
+        ]
+    },
+    {
+        "criteria": "1.2.4.1",
+        "description": "The health facilities manager promoted networking with the leaders of other relevant organisations in the community",
+        "linked_criteria": [
+            "3.3.1.5",
+            "3.8.1.3"
+        ],
+        "root": [
+            "3.3.1.5",
+            "3.8.1.3"
+        ]
+    },
+    {
+        "criteria": "1.2.4.4",
+        "description": "The management is aware of and accesses services from other provider facilities operating in the area",
+        "linked_criteria": [
+            "3.7.1.2",
+            "6.1.1.5",
+            "6.1.1.6",
+            "6.1.1.8",
+            "6.5.2.1"
+        ],
+        "root": [
+            "3.7.1.2",
+            "6.1.1.5",
+            "6.1.1.6",
+            "6.1.1.8",
+            "6.5.2.1"
+        ]
+    },
+    {
+        "criteria": "1.2.5.1",
+        "description": "The health facilities manager ensures that policies and procedures guide and support the activities and management of the health facility",
+        "linked_criteria": [
+            "10.1.2.1",
+            "11.3.1.1",
+            "11.3.1.2",
+            "11.3.1.3",
+            "11.3.1.4",
+            "12.2.1.4",
+            "12.3.1.2",
+            "12.4.1.1",
+            "13.1.1.5",
+            "13.2.1.5",
+            "13.3.1.5",
+            "3.6.1.1",
+            "4.4.1.1",
+            "4.4.1.2",
+            "4.5.1.3",
+            "5.2.1.4",
+            "6.3.2.1",
+            "6.4.2.1",
+            "6.5.1.1",
+            "7.3.2.1",
+            "8.3.1.1",
+            "9.1.1.6",
+            "9.4.1.1",
+            "9.4.1.7"
+        ],
+        "root": [
+            "10.1.2.1",
+            "11.3.1.1",
+            "11.3.1.2",
+            "11.3.1.3",
+            "11.3.1.4",
+            "12.2.1.4",
+            "12.3.1.2",
+            "13.1.1.5",
+            "13.2.1.5",
+            "13.3.1.5",
+            "3.6.1.1",
+            "4.4.1.2",
+            "4.5.1.3",
+            "5.2.1.4",
+            "6.3.2.1",
+            "6.4.2.1",
+            "6.5.1.1",
+            "7.3.2.1",
+            "8.3.1.1",
+            "9.1.1.6",
+            "9.4.1.1",
+            "9.4.1.7"
+        ]
+    },
+    {
+        "criteria": "1.2.5.6",
+        "description": "There is a mechanism for ensuring that polices are known and implemented",
+        "linked_criteria": [
+            "3.1.1.3",
+            "3.2.1.4",
+            "4.5.1.2",
+            "5.1.1.2",
+            "7.3.2.1"
+        ],
+        "root": [
+            "3.1.1.3",
+            "3.2.1.4",
+            "4.5.1.2",
+            "5.1.1.2",
+            "7.3.2.1"
+        ]
+    },
+    {
+        "criteria": "1.2.6.1",
+        "description": "A suitably qualified individual is designated to control the ordering, storage, distribution and control of equipment and supplies used in the organisation",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": [
+            "2.1.1.1"
+        ]
+    },
+    {
+        "criteria": "1.2.6.2",
+        "description": "There is a system for ensuring that equipment and supplies are ordered, available, correctly stored and distributed",
+        "linked_criteria": [
+            "6.4.2.2",
+            "7.2.2.6",
+            "8.2.3.1"
+        ],
+        "root": [
+            "6.4.2.2",
+            "7.2.2.6",
+            "8.2.3.1"
+        ]
+    },
+    {
+        "criteria": "1.2.6.4",
+        "description": "There is a system for monitoring the quality of goods delivered",
+        "linked_criteria": [
+            "9.3.1.10"
+        ],
+        "root": [
+            "9.3.1.10"
+        ]
+    },
+    {
+        "criteria": "1.2.6.6",
+        "description": "Secure adequate storage facilities are available",
+        "linked_criteria": [
+            "11.2.1.2",
+            "9.3.1.6"
+        ],
+        "root": [
+            "11.2.1.2",
+            "9.3.1.6"
+        ]
+    },
+    {
+        "criteria": "1.2.6.7",
+        "description": "Records of goods received and goods issued are available",
+        "linked_criteria": [
+            "11.5.1.8"
+        ],
+        "root": [
+            "11.5.1.8"
+        ]
+    },
+    {
+        "criteria": "1.2.6.9",
+        "description": "There is a system for disposing of expired stock, including pharmaceuticals",
+        "linked_criteria": [
+            "11.5.1.7",
+            "11.5.1.9",
+            "9.3.1.9"
+        ],
+        "root": [
+            "11.5.1.7",
+            "11.5.1.9",
+            "9.3.1.9"
+        ]
+    },
+    {
+        "criteria": "1.3.1.1",
+        "description": "There is a relevant training programme to equip the personnel with the necessary competencies for designing, implementing and evaluating a quality management and improvement programme",
+        "linked_criteria": [
+            "2.4.2.1"
+        ],
+        "root": [
+            "2.4.2.1"
+        ]
+    },
+    {
+        "criteria": "1.3.1.2",
+        "description": "The health centre\u2019s manager and personnel collaborate to plan and carry out the quality improvement and patient safety programme",
+        "linked_criteria": [
+            "10.3.1.8",
+            "10.3.3.7",
+            "4.3.1.3",
+            "5.1.1.1",
+            "5.1.1.5",
+            "5.3.1.2",
+            "9.5.1.1"
+        ],
+        "root": [
+            "10.3.1.8",
+            "10.3.3.7",
+            "4.3.1.3",
+            "5.1.1.1",
+            "5.1.1.5",
+            "5.3.1.2",
+            "9.5.1.1"
+        ]
+    },
+    {
+        "criteria": "1.3.1.3",
+        "description": "The health centre\u2019s manager and personnel monitor quality of data collected by the institution",
+        "linked_criteria": [
+            "4.1.1.1",
+            "4.2.1.1"
+        ],
+        "root": [
+            "4.1.1.1",
+            "4.2.1.1"
+        ]
+    },
+    {
+        "criteria": "1.3.1.6",
+        "description": "The quality management and improvement programme reflects all components and quality activities in relation to standard/indicator development, monitoring/evaluation and remedial action",
+        "linked_criteria": [
+            "12.2.6.2",
+            "12.3.1.5",
+            "5.6.1.5",
+            "5.6.1.9",
+            "6.4.2.11"
+        ],
+        "root": [
+            "12.2.6.2",
+            "12.3.1.5",
+            "5.6.1.5",
+            "5.6.1.9",
+            "6.4.2.11"
+        ]
+    },
+    {
+        "criteria": "1.3.1.7",
+        "description": "There is a process for reviewing patient care",
+        "linked_criteria": [
+            "4.3.2.2",
+            "4.4.2.1",
+            "4.4.2.16",
+            "6.3.2.5",
+            "6.4.1.4",
+            "7.3.2.2",
+            "8.4.3.1"
+        ],
+        "root": [
+            "4.3.2.2",
+            "4.4.2.1",
+            "4.4.2.16",
+            "6.3.2.5",
+            "6.4.1.4",
+            "7.3.2.2",
+            "8.4.3.1"
+        ]
+    },
+    {
+        "criteria": "1.3.1.8",
+        "description": "There is a process for reviewing medication use",
+        "linked_criteria": [
+            "11.7.1.6"
+        ],
+        "root": [
+            "11.7.1.6"
+        ]
+    },
+    {
+        "criteria": "1.3.1.9",
+        "description": "There is a process for monitoring patient satisfaction with the care process, the care environment and the facility's personnel",
+        "linked_criteria": [
+            "3.5.1.1",
+            "6.3.1.6"
+        ],
+        "root": [
+            "3.3.1.5",
+            "6.3.1.6"
+        ]
+    },
+    {
+        "criteria": "1.3.1.10",
+        "description": "There is a relevant/appropriate system for reporting on quality management and improvement matters and communicating with all stakeholders concerned Criteria",
+        "linked_criteria": [
+            "4.3.1.4"
+        ],
+        "root": [
+            "4.3.1.4"
+        ]
+    },
+    {
+        "criteria": "2.1.1.1",
+        "description": "There are documented processes for staffing the health facility. 8.1.1. 1 8.1.1. 5 8.1.1. 6 9.1.3. 2",
+        "linked_criteria": [
+            "1.2.1.6",
+            "1.2.6.1",
+            "10.1.2.5",
+            "11.1.1.1",
+            "12.2.1.1",
+            "12.3.1.1",
+            "12.4.1.2",
+            "13.1.1.2",
+            "13.2.1.2",
+            "13.3.1.2",
+            "7.1.1.1"
+        ],
+        "root": [
+            "1.2.1.6",
+            "1.2.6.1",
+            "10.1.2.5",
+            "11.1.1.1",
+            "12.2.1.1",
+            "12.3.1.1",
+            "12.4.1.2",
+            "13.1.1.2",
+            "13.2.1.2",
+            "13.3.1.2",
+            "7.1.1.1",
+            "8.1.1.1",
+            "8.1.1.5",
+            "8.1.1.6",
+            "9.1.3.2"
+        ]
+    },
+    {
+        "criteria": "2.1.1.2",
+        "description": "The desired education, qualifications, skills and knowledge are defined for all personnel members",
+        "linked_criteria": [
+            "1.2.1.1",
+            "10.3.1.1",
+            "10.3.3.1",
+            "6.6.3.3",
+            "6.6.3.4",
+            "8.1.1.2",
+            "9.1.2.1",
+            "9.1.3.1"
+        ],
+        "root": [
+            "1.2.1.1",
+            "10.3.1.1",
+            "10.3.3.1",
+            "6.6.3.3",
+            "6.6.3.4",
+            "8.1.1.2",
+            "9.1.2.1",
+            "9.1.3.1"
+        ]
+    },
+    {
+        "criteria": "2.1.1.3",
+        "description": "Details of the organisation\u2019s absenteeism, sickness rates and personnel turnover rates are recorded and analysed to allow for informed decision making by the management of organisation",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "2.1.1.4",
+        "description": "Details of the personal establishment (i.e. available posts, filled and vacant posts) are recorded and analysed to allow for informed decision making by the organisation\u2019s management",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "2.2.2.1",
+        "description": "Each employee has a written job description and performance agreement, which defines their responsibilities",
+        "linked_criteria": [
+            "13.1.1.4",
+            "13.1.2.1",
+            "13.2.1.4",
+            "13.2.2.1",
+            "13.3.1.4",
+            "13.3.2.1"
+        ],
+        "root": [
+            "13.1.1.4",
+            "13.1.2.1",
+            "13.2.1.4",
+            "13.2.2.1",
+            "13.3.1.4",
+            "13.3.2.1"
+        ]
+    },
+    {
+        "criteria": "2.2.2.2",
+        "description": "Each staff member signs their job description and performance agreement to show that they accept it",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "2.3.1.1",
+        "description": "There is a process for evaluating and verifying the credentials (licence, education, training and experience) of medical practitioners",
+        "linked_criteria": [
+            "1.2.1.5",
+            "2.3.1.4",
+            "8.1.1.3"
+        ],
+        "root": [
+            "1.2.1.5",
+            "2.3.1.4",
+            "8.1.1.3"
+        ]
+    },
+    {
+        "criteria": "2.3.1.2",
+        "description": "There is a process for evaluating and verifying the credentials (licence, education, training and experience) of nurses and other health professionals",
+        "linked_criteria": [
+            "1.2.1.5",
+            "10.3.1.2",
+            "10.3.1.3",
+            "10.3.3.2",
+            "10.3.3.3",
+            "2.3.1.4",
+            "6.4.3.4"
+        ],
+        "root": [
+            "1.2.1.5",
+            "10.3.1.2",
+            "10.3.1.3",
+            "10.3.3.2",
+            "10.3.3.3",
+            "2.3.1.4",
+            "6.4.3.4"
+        ]
+    },
+    {
+        "criteria": "2.3.1.4",
+        "description": "A determination is made about the annual registration of the individual to provide patient care services",
+        "linked_criteria": [
+            "2.3.1.1",
+            "2.3.1.2"
+        ],
+        "root": [
+            "2.3.1.1",
+            "2.3.1.2"
+        ]
+    },
+    {
+        "criteria": "2.4.1.1",
+        "description": "There are written programmes for orientating and inducting personnel to the health facility",
+        "linked_criteria": [
+            "13.1.2.1",
+            "13.2.2.1",
+            "13.3.2.1"
+        ],
+        "root": [
+            "13.1.2.1",
+            "13.2.2.1",
+            "13.3.2.1"
+        ]
+    },
+    {
+        "criteria": "2.4.2.1",
+        "description": "The health facility has a coordinated plan for in-service education",
+        "linked_criteria": [
+            "1.3.1.1",
+            "13.1.2.1",
+            "13.2.2.1",
+            "13.3.2.1"
+        ],
+        "root": [
+            "1.3.1.1",
+            "13.1.2.1",
+            "13.2.2.1",
+            "13.3.2.1"
+        ]
+    },
+    {
+        "criteria": "2.4.2.3",
+        "description": "All health facility personnel are provided with on-going in-service education, training and development",
+        "linked_criteria": [
+            "12.2.3.5",
+            "12.2.4.4",
+            "13.1.2.5",
+            "13.1.2.6",
+            "13.2.2.1",
+            "13.3.2.1",
+            "13.3.2.4",
+            "5.1.1.3",
+            "5.6.1.4",
+            "6.4.2.3",
+            "7.4.2.2",
+            "9.1.3.3",
+            "9.1.3.4"
+        ],
+        "root": [
+            "12.2.3.5",
+            "12.2.4.4",
+            "12.4.1.9",
+            "13.1.2.5",
+            "13.1.2.6",
+            "13.2.2.1",
+            "13.3.2.1",
+            "13.3.2.4",
+            "5.1.1.3",
+            "5.6.1.4",
+            "6.4.2.3",
+            "7.4.2.2",
+            "9.1.3.3",
+            "9.1.3.4"
+        ]
+    },
+    {
+        "criteria": "2.4.2.4",
+        "description": "Personnel competencies, where relevant, are assessed and recorded before and after in- service training and development",
+        "linked_criteria": [
+            "6.6.1.2",
+            "6.6.1.4",
+            "6.6.2.2",
+            "6.6.6.2",
+            "9.1.3.3"
+        ],
+        "root": [
+            "6.6.1.2",
+            "6.6.1.4",
+            "6.6.2.2",
+            "6.6.6.2",
+            "9.1.3.3"
+        ]
+    },
+    {
+        "criteria": "3.1.1.2",
+        "description": "Where applicable, relevant charters, laws and regulations are included in organisational policies regarding patient and family rights",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "3.1.1.3",
+        "description": "The personnel are trained on the policies and procedures and their participation in care processes",
+        "linked_criteria": [
+            "1.2.5.6"
+        ],
+        "root": [
+            "1.2.5.6"
+        ]
+    },
+    {
+        "criteria": "3.2.1.4",
+        "description": "Policies and procedures to prevent the loss or misuse of patient information are implemented",
+        "linked_criteria": [
+            "1.2.5.6"
+        ],
+        "root": [
+            "1.2.5.6"
+        ]
+    },
+    {
+        "criteria": "3.3.1.5",
+        "description": "The health facility identifies and establishes relationships with community resources which support continuing health promotion and disease prevention education. There is a mechanism to allow complaints to be heard and acted upon",
+        "linked_criteria": [
+            "1.2.4.1",
+            "1.3.1.9",
+            "3.5.1.1"
+        ],
+        "root": [
+            "1.2.4.1"
+        ]
+    },
+    {
+        "criteria": "3.6.1.1",
+        "description": "Policies and procedures guide the personnel in the process of obtaining informed consent",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "3.7.1.2",
+        "description": "The health facility has access to Emergency Medical Services (EMS)",
+        "linked_criteria": [
+            "1.2.4.4"
+        ],
+        "root": [
+            "1.2.4.4"
+        ]
+    },
+    {
+        "criteria": "3.8.1.3",
+        "description": "Information on services, hours of operation and processes for obtaining care is provided to agencies and referral sources in the community and to the population served",
+        "linked_criteria": [
+            "1.2.3.3",
+            "1.2.4.1"
+        ],
+        "root": [
+            "1.2.3.3",
+            "1.2.4.1"
+        ]
+    },
+    {
+        "criteria": "4.1.1.1",
+        "description": "The health facility uses a health information system that facilitates the collection and utilisation of data",
+        "linked_criteria": [
+            "1.3.1.3"
+        ],
+        "root": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "4.2.1.1",
+        "description": "Data is aggregated, analysed and transformed into useful information",
+        "linked_criteria": [
+            "1.3.1.3"
+        ],
+        "root": [
+            "1.3.1.3"
+        ]
+    },
+    {
+        "criteria": "4.3.1.1",
+        "description": "The health facility contributes to external reference databases when required by laws or regulations",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "4.3.1.3",
+        "description": "The performance of the facility on identified priority indicators forms part of the discussions at regular staff meetings",
+        "linked_criteria": [
+            "1.3.1.2"
+        ],
+        "root": [
+            "1.3.1.2"
+        ]
+    },
+    {
+        "criteria": "4.3.1.4",
+        "description": "The performance of the facility on identified priority indicators forms part of the discussions at meetings with community representatives",
+        "linked_criteria": [
+            "1.3.1.10"
+        ],
+        "root": [
+            "1.3.1.10"
+        ]
+    },
+    {
+        "criteria": "4.3.2.2",
+        "description": "Data is analysed and used to provide relevant information for improving the clinical service",
+        "linked_criteria": [
+            "1.3.1.7"
+        ],
+        "root": [
+            "1.3.1.7"
+        ]
+    },
+    {
+        "criteria": "4.4.1.1",
+        "description": "There are written policies and procedures relating to the type of patient record used, e.g. carry cards or other health",
+        "linked_criteria": [],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "4.4.1.2",
+        "description": "Policies specify the records or registers relating to the visits of each patient to be kept by the health facility",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "4.4.2.1",
+        "description": "The patients' records are up to date to ensure the transfer of the latest information between care providers",
+        "linked_criteria": [
+            "1.3.1.7"
+        ],
+        "root": [
+            "1.3.1.7"
+        ]
+    },
+    {
+        "criteria": "4.4.2.16",
+        "description": "A document audit process regularly reviews patient records",
+        "linked_criteria": [
+            "1.3.1.7"
+        ],
+        "root": [
+            "1.3.1.7"
+        ]
+    },
+    {
+        "criteria": "4.5.1.2",
+        "description": "The health facility manager ensures that policies and procedures are implemented to guide the personnel",
+        "linked_criteria": [
+            "1.2.5.6"
+        ],
+        "root": [
+            "1.2.5.6"
+        ]
+    },
+    {
+        "criteria": "4.5.1.3",
+        "description": "Policies and procedures relate to the safeguarding of information in the record against loss, damage, breach of confidentiality or use by unauthorised persons",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "5.1.1.1",
+        "description": "There are documented risk management processes for identifying all risks (physical environmental, medico-legal, operational, etc) relating to organisational processes and systems, personnel, patients, visitors and physical facilities",
+        "linked_criteria": [
+            "1.3.1.2"
+        ],
+        "root": [
+            "1.3.1.2"
+        ]
+    },
+    {
+        "criteria": "5.1.1.2",
+        "description": "Managers and leaders ensure the development and implementation of written policies and procedures for risk management processes and activities",
+        "linked_criteria": [
+            "1.2.5.6"
+        ],
+        "root": [
+            "1.2.5.6"
+        ]
+    },
+    {
+        "criteria": "5.1.1.3",
+        "description": "On-going in -service training of all personnel in these policies, procedures and risk management principles, including reporting of adverse events, is documented",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "5.1.1.5",
+        "description": "There is a system for monitoring negative incidents/near misses/ adverse (sentinel) events and it includes the documentation of interventions and responses to recorded incidents",
+        "linked_criteria": [
+            "1.3.1.2"
+        ],
+        "root": [
+            "1.3.1.2"
+        ]
+    },
+    {
+        "criteria": "5.2.1.2",
+        "description": "Where applicable, legislation regarding occupational health services is implemented",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "5.2.1.4",
+        "description": "Written policies and procedures on all aspects of health and safety guide the personnel in maintaining a safe work environment",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "5.3.1.2",
+        "description": "There is effective control of access to restricted areas in the facility, e.g. laboratory, pharmacy, etc",
+        "linked_criteria": [
+            "1.3.1.2"
+        ],
+        "root": [
+            "1.3.1.2"
+        ]
+    },
+    {
+        "criteria": "5.4.1.2",
+        "description": "Documented certification is available from the relevant authority to show that the facility complies with applicable laws and regulations in relation to fire safety (e.g. fire clearance certificate)",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "5.4.1.3",
+        "description": "Fire fighting equipment is regularly inspected and serviced at least annually; the date of the service is recorded on the apparatus",
+        "linked_criteria": [
+            "1.2.1.7"
+        ],
+        "root": [
+            "1.2.1.7"
+        ]
+    },
+    {
+        "criteria": "5.6.1.4",
+        "description": "Regular in -service training is given to all personnel in the field of infection control and is documented",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "5.6.1.5",
+        "description": "Infection Control Program is monitored through a document audit process",
+        "linked_criteria": [
+            "1.3.1.6"
+        ],
+        "root": [
+            "1.3.1.6"
+        ]
+    },
+    {
+        "criteria": "5.6.1.9",
+        "description": "The organisation uses risk, rate and trend information to design or modify processes to reduce nosocomial infections to the lowest possible levels",
+        "linked_criteria": [
+            "1.3.1.6"
+        ],
+        "root": [
+            "1.3.1.6"
+        ]
+    },
+    {
+        "criteria": "5.6.2.1",
+        "description": "There is a waste management system, consistent with current local bylaws and regulations",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "6.1.1.5",
+        "description": "Radiology services are available for the level of care provided",
+        "linked_criteria": [
+            "1.2.4.4"
+        ],
+        "root": [
+            "1.2.4.4"
+        ]
+    },
+    {
+        "criteria": "6.1.1.6",
+        "description": "Laboratory services are available for the level of care provided",
+        "linked_criteria": [
+            "1.2.4.4"
+        ],
+        "root": [
+            "1.2.4.4"
+        ]
+    },
+    {
+        "criteria": "6.1.1.8",
+        "description": "Ultrasound services are available for the level of care provided",
+        "linked_criteria": [
+            "1.2.4.4"
+        ],
+        "root": [
+            "1.2.4.4"
+        ]
+    },
+    {
+        "criteria": "6.2.1.1",
+        "description": "Patient and staff accommodation in the outpatient service is adequate for the personnel to provide patient care",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "6.2.1.3",
+        "description": "The required furniture and equipment is available in accordance with established lists and is functioning properly",
+        "linked_criteria": [
+            "1.2.2.9"
+        ],
+        "root": [
+            "1.2.2.9"
+        ]
+    },
+    {
+        "criteria": "6.2.1.7",
+        "description": "Oxygen cylinders are stored in accordance with local safety standards",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "6.3.1.6",
+        "description": "Waiting times are monitored as part of the organisation's quality management and improvement programme and kept to the minimum",
+        "linked_criteria": [
+            "1.3.1.9"
+        ],
+        "root": [
+            "1.3.1.9"
+        ]
+    },
+    {
+        "criteria": "6.3.2.1",
+        "description": "Policies and procedures for assessing patients on arrival and during ongoing care are implemented",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "6.3.2.5",
+        "description": "Current clinical guidelines relevant to the organisation's patients and services are used to standardise care processes",
+        "linked_criteria": [
+            "1.3.1.7"
+        ],
+        "root": [
+            "1.3.1.7"
+        ]
+    },
+    {
+        "criteria": "6.4.1.4",
+        "description": "Case reviews are undertaken to assess the quality of treatment and care of patients requiring emergency care",
+        "linked_criteria": [
+            "1.3.1.7"
+        ],
+        "root": [
+            "1.3.1.7"
+        ]
+    },
+    {
+        "criteria": "6.4.2.1",
+        "description": "The health facility has a policy on resuscitation which includes the level at which resuscitation is provided, by whom, and training and equipment requirements",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "6.4.2.2",
+        "description": "The availability of resuscitation equipment and medicines with clear instructions is specified in the organisation's policy on resuscitation",
+        "linked_criteria": [
+            "1.2.6.2"
+        ],
+        "root": [
+            "1.2.6.2"
+        ]
+    },
+    {
+        "criteria": "6.4.2.3",
+        "description": "The personnel are trained in resuscitation and records are kept of their participation in such training",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "6.4.2.11",
+        "description": "Records of these checks are kept, with reports on problems experienced, advice given, and any remedial action taken",
+        "linked_criteria": [
+            "1.3.1.6"
+        ],
+        "root": [
+            "1.3.1.6"
+        ]
+    },
+    {
+        "criteria": "6.4.3.3",
+        "description": "Response time standards are monitored against national laws, regulations, policies or guidelines",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "6.4.3.4",
+        "description": "The individuals who provide patient care in the ambulance services have the required training and experience",
+        "linked_criteria": [
+            "2.3.1.2"
+        ],
+        "root": [
+            "2.3.1.2"
+        ]
+    },
+    {
+        "criteria": "6.5.1.1",
+        "description": "Policies and procedures for holding patients for observation are implemented",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "6.5.2.1",
+        "description": "Arrangements are in place to ensure that adequate referral services are available",
+        "linked_criteria": [
+            "1.2.4.4"
+        ],
+        "root": [
+            "1.2.4.4"
+        ]
+    },
+    {
+        "criteria": "6.6.1.2",
+        "description": "The personnel show evidence of education for and competence in providing a contraceptive service",
+        "linked_criteria": [
+            "2.4.2.4"
+        ],
+        "root": [
+            "2.4.2.4"
+        ]
+    },
+    {
+        "criteria": "6.6.1.4",
+        "description": "The personnel who are authorised to insert intrauterine contraceptive devices show evidence of current training and competence in the procedure",
+        "linked_criteria": [
+            "2.4.2.4"
+        ],
+        "root": [
+            "2.4.2.4"
+        ]
+    },
+    {
+        "criteria": "6.6.2.2",
+        "description": "The personnel show evidence of education and competence in the provision of antenatal care",
+        "linked_criteria": [
+            "2.4.2.4"
+        ],
+        "root": [
+            "2.4.2.4"
+        ]
+    },
+    {
+        "criteria": "6.6.3.3",
+        "description": "A registered/professional nurse with midwifery training/experience is present at every birth",
+        "linked_criteria": [
+            "2.1.1.2"
+        ],
+        "root": [
+            "2.1.1.2"
+        ]
+    },
+    {
+        "criteria": "6.6.3.4",
+        "description": "At least one person who is competent in the management of maternal and neonatal emergencies is available for consultation at all times",
+        "linked_criteria": [
+            "2.1.1.2"
+        ],
+        "root": [
+            "2.1.1.2"
+        ]
+    },
+    {
+        "criteria": "6.6.6.2",
+        "description": "The personnel show evidence of education for and competence in providing postnatal care",
+        "linked_criteria": [
+            "2.4.2.4"
+        ],
+        "root": [
+            "2.4.2.4"
+        ]
+    },
+    {
+        "criteria": "7.1.1.1",
+        "description": "The individuals responsible for the patient's care are designated",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": [
+            "2.1.1.1"
+        ]
+    },
+    {
+        "criteria": "7.2.1.1",
+        "description": "Patient and staff accommodation in the service is adequate to meet patient care needs",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "7.2.2.6",
+        "description": "Resuscitation equipment is available in accordance with the policies of the organisation",
+        "linked_criteria": [
+            "1.2.6.2"
+        ],
+        "root": [
+            "1.2.6.2"
+        ]
+    },
+    {
+        "criteria": "7.3.2.1",
+        "description": "Policies and procedures for nursing care are available and are followed as indicated in the statement of intent above",
+        "linked_criteria": [
+            "1.2.5.1",
+            "1.2.5.6"
+        ],
+        "root": [
+            "1.2.5.1",
+            "1.2.5.6"
+        ]
+    },
+    {
+        "criteria": "7.3.2.2",
+        "description": "Guidelines are used in clinical monitoring as part of a structured clinical audit",
+        "linked_criteria": [
+            "1.3.1.7"
+        ],
+        "root": [
+            "1.3.1.7"
+        ]
+    },
+    {
+        "criteria": "7.4.2.2",
+        "description": "The organisation educates health professionals in assessing and managing pain",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "8.1.1.1",
+        "description": "A senior professional, who is suitably qualified and/or experienced, is in charge of the theatre and recovery area",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": []
+    },
+    {
+        "criteria": "8.1.1.2",
+        "description": "Operating theatre rosters ensure that registered nurses with suitable qualifications and/or experience are present during all shifts, for theatre duties, anaesthetic assistance, and for recovery room duties",
+        "linked_criteria": [
+            "2.1.1.2"
+        ],
+        "root": [
+            "2.1.1.2"
+        ]
+    },
+    {
+        "criteria": "8.1.1.3",
+        "description": "Anaesthesia is administered only by qualified practitioners, who are privileged by the organisation to do so",
+        "linked_criteria": [
+            "2.3.1.1"
+        ],
+        "root": [
+            "2.3.1.1"
+        ]
+    },
+    {
+        "criteria": "8.1.1.5",
+        "description": "Theatre is at least one suitably trained and/or experienced anaesthetic nurse per operating theatre",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": []
+    },
+    {
+        "criteria": "8.1.1.6",
+        "description": "Nurses, who are trained in recovery room care, are available until the patient has fully recovered",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": []
+    },
+    {
+        "criteria": "8.2.1.1",
+        "description": "The design of the operating theatre complex provides space for the reception, anaesthesia, surgery, recovery, and observation of patients",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "8.2.2.1",
+        "description": "The provision and use of anaesthetic mixture components and other peri-operative medication complies with the guidelines of a professional society or similar reputable professional body",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "8.2.3.1",
+        "description": "Emergency resuscitation equipment and supplies are available",
+        "linked_criteria": [
+            "1.2.6.2"
+        ],
+        "root": [
+            "1.2.6.2"
+        ]
+    },
+    {
+        "criteria": "8.2.5.7",
+        "description": "Where ethylene oxide is used as a sterilising agent, the installation complies with relevant safety standards and legislation",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "8.3.1.1",
+        "description": "There are written policies and procedures to guide the activities of the theatre and the anaesthetic service",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "8.4.3.1",
+        "description": "During the post-anaesthetic recovery period, patients receive monitoring appropriate to their condition",
+        "linked_criteria": [
+            "1.3.1.7"
+        ],
+        "root": [
+            "1.3.1.7"
+        ]
+    },
+    {
+        "criteria": "9.1.1.2",
+        "description": "The laboratory services are organised and provided in a manner that meets applicable national standards, laws and regulations",
+        "linked_criteria": [
+            "1.1.1.8",
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.1.1.8",
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "9.1.1.6",
+        "description": "Laboratory results are validated and include unique patient identity, date of testing/reporting, name and location of the requesting medical practitioner",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "9.1.2.1",
+        "description": "The laboratory is under the direction of a qualified individual",
+        "linked_criteria": [
+            "2.1.1.2"
+        ],
+        "root": [
+            "2.1.1.2"
+        ]
+    },
+    {
+        "criteria": "9.1.3.1",
+        "description": "Qualified individuals are assigned to perform and supervise the provided laboratory services",
+        "linked_criteria": [
+            "2.1.1.2"
+        ],
+        "root": [
+            "2.1.1.2"
+        ]
+    },
+    {
+        "criteria": "9.1.3.2",
+        "description": "There are enough staff members to meet service needs",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": []
+    },
+    {
+        "criteria": "9.1.3.3",
+        "description": "On-going in-service training is provided to all personnel members",
+        "linked_criteria": [
+            "2.4.2.3",
+            "2.4.2.4"
+        ],
+        "root": [
+            "2.4.2.3",
+            "2.4.2.4"
+        ]
+    },
+    {
+        "criteria": "9.1.3.4",
+        "description": "Records of the training provided are kept for each personnel member",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "9.3.1.1",
+        "description": "The available supplies, consumables, reagents, chemicals and kits are sufficient for projected activities",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "9.3.1.6",
+        "description": "All reagents are stored in a lockable storage room or cupboard",
+        "linked_criteria": [
+            "1.2.6.6"
+        ],
+        "root": [
+            "1.2.6.6"
+        ]
+    },
+    {
+        "criteria": "9.3.1.9",
+        "description": "All reagents are checked for expiry dates",
+        "linked_criteria": [
+            "1.2.6.9"
+        ],
+        "root": [
+            "1.2.6.9"
+        ]
+    },
+    {
+        "criteria": "9.3.1.10",
+        "description": "There is a documented stock management system that keeps track of current stock",
+        "linked_criteria": [
+            "1.2.6.4"
+        ],
+        "root": [
+            "1.2.6.4"
+        ]
+    },
+    {
+        "criteria": "9.4.1.1",
+        "description": "Policies and procedures (SOPs) for handling specimens are implemented",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "9.4.1.7",
+        "description": "Policies and procedures (SOPs) regarding reporting and reviewing results are implemented",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "9.5.1.1",
+        "description": "There is a documented quality control system",
+        "linked_criteria": [
+            "1.3.1.2"
+        ],
+        "root": [
+            "1.3.1.2"
+        ]
+    },
+    {
+        "criteria": "10.1.1.3",
+        "description": "The selection of an outside source is based on an acceptable record and compliance with applicable laws and regulations",
+        "linked_criteria": [
+            "1.1.1.9"
+        ],
+        "root": [
+            "1.1.1.9",
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "10.1.2.1",
+        "description": "Written policies and procedures address compliance with applicable standards, laws and regulations",
+        "linked_criteria": [
+            "1.1.1.9",
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.1.1.9",
+            "1.2.1.5",
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "10.1.2.2",
+        "description": "A copy of the local rules relating to the current Ionising Radiation regulations is available and the requirements are met",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "10.1.2.5",
+        "description": "A radiation protection supervisor is identified and available to assist a radiation protection inspector in complying with the Ionising Radiation regulations",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": [
+            "2.1.1.1"
+        ]
+    },
+    {
+        "criteria": "10.2.1.1",
+        "description": "The organisation identifies the equipment required for the projected activities",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "10.2.2.1",
+        "description": "Essential quantities of film, reagents and supplies are available",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "10.3.1.1",
+        "description": "A qualified individual manages the diagnostic imaging service",
+        "linked_criteria": [
+            "2.1.1.2"
+        ],
+        "root": [
+            "2.1.1.2"
+        ]
+    },
+    {
+        "criteria": "10.3.1.2",
+        "description": "Those individuals who may perform X-ray procedures and those who may interpret and report the results are identified",
+        "linked_criteria": [
+            "2.3.1.2"
+        ],
+        "root": [
+            "2.3.1.2"
+        ]
+    },
+    {
+        "criteria": "10.3.1.3",
+        "description": "There is a mechanism that ensures that procedures are performed only by radiographers, radiologists or specially trained doctors and other persons who are authorised to do so by a radiation protection advisor",
+        "linked_criteria": [
+            "2.3.1.2"
+        ],
+        "root": [
+            "2.3.1.2"
+        ]
+    },
+    {
+        "criteria": "10.3.1.8",
+        "description": "Quality control procedures are implemented",
+        "linked_criteria": [
+            "1.3.1.2"
+        ],
+        "root": [
+            "1.3.1.2"
+        ]
+    },
+    {
+        "criteria": "10.3.3.1",
+        "description": "A qualified individual manages the ultrasound service",
+        "linked_criteria": [
+            "2.1.1.2"
+        ],
+        "root": [
+            "2.1.1.2"
+        ]
+    },
+    {
+        "criteria": "10.3.3.2",
+        "description": "Those individuals who may perform ultrasound procedures and those who may interpret and report the results are identified",
+        "linked_criteria": [
+            "2.3.1.2"
+        ],
+        "root": [
+            "2.3.1.2"
+        ]
+    },
+    {
+        "criteria": "10.3.3.3",
+        "description": "Ultrasound procedures are performed only by individuals with specific training",
+        "linked_criteria": [
+            "2.3.1.2"
+        ],
+        "root": [
+            "2.3.1.2"
+        ]
+    },
+    {
+        "criteria": "10.3.3.7",
+        "description": "Quality control procedures are implemented",
+        "linked_criteria": [
+            "1.3.1.2"
+        ],
+        "root": [
+            "1.3.1.2"
+        ]
+    },
+    {
+        "criteria": "11.1.1.1",
+        "description": "A designated individual, who is suitably qualified, has clearly defined responsibilities and accountability for all aspects of the pharmaceutical service",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": [
+            "2.1.1.1"
+        ]
+    },
+    {
+        "criteria": "11.1.1.2",
+        "description": "Individuals who dispense medications act in accordance with legislation affecting pharmacy practice and current pharmaceutical, medical and nursing guidelines",
+        "linked_criteria": [
+            "1.1.1.7",
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.1.1.7",
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "11.2.1.2",
+        "description": "Secure facilities for storage of medications include, but are not limited to, lockable storage facilities, ceiling cages, burglar guards, and alarm systems with key pads",
+        "linked_criteria": [
+            "1.2.6.6"
+        ],
+        "root": [
+            "1.2.6.6"
+        ]
+    },
+    {
+        "criteria": "11.3.1.1",
+        "description": "Policies and procedures are developed and implemented for identified processes, which include at least those from a) to h) in the intent above",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "11.3.1.2",
+        "description": "Policies and procedures are implemented to ensure that medications are procured according to national guidelines regarding specific agents and approved suppliers",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "11.3.1.3",
+        "description": "Policies and procedures are implemented to ensure medications are transported to the facility in accordance with manufacturers guidelines, with specific emphasis on maintaining cold chain requirements",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "11.3.1.4",
+        "description": "Policies and procedures are implemented to ensure that medications are dispensed on the written instructions/ prescription of the designated health care worker who is qualified and/ or experienced in their use",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "11.4.1.1",
+        "description": "There is a list of the medications stocked in the organisation or readily available from outside sources",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "11.5.1.5",
+        "description": "Medications controlled by law or organisational policy are accurately accounted for in a specific register",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "11.5.1.7",
+        "description": "All pharmaceuticals, vaccines or medical consumables are regularly checked for expiry dates and checks are recorded",
+        "linked_criteria": [
+            "1.2.6.9"
+        ],
+        "root": [
+            "1.2.6.9"
+        ]
+    },
+    {
+        "criteria": "11.5.1.8",
+        "description": "An inventory management system, manual (stock cards) or automated, is in place and functioning appropriately, e.g. to monitor and control stock losses. under quarantine, e.g. expired stock, compounded products",
+        "linked_criteria": [
+            "1.2.6.7"
+        ],
+        "root": [
+            "1.2.6.7"
+        ]
+    },
+    {
+        "criteria": "11.5.1.9",
+        "description": "Separate designated storage areas are provided for materials",
+        "linked_criteria": [
+            "1.2.6.9"
+        ],
+        "root": [
+            "1.2.6.9"
+        ]
+    },
+    {
+        "criteria": "11.6.1.1",
+        "description": "Only those permitted by national laws and regulations prescribe medication",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "11.6.1.2",
+        "description": "Prescriptions conform to legal requirements",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "11.7.1.6",
+        "description": "A register is maintained of all medicines dispensed",
+        "linked_criteria": [
+            "1.3.1.8"
+        ],
+        "root": [
+            "1.3.1.8"
+        ]
+    },
+    {
+        "criteria": "11.7.1.10",
+        "description": "Prescriptions are securely stored in accordance with legislation or organisational policy",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "12.2.1.1",
+        "description": "A designated, competent individual is responsible for supervising the maintenance of buildings, plant and installations",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": [
+            "2.1.1.1"
+        ]
+    },
+    {
+        "criteria": "12.2.1.4",
+        "description": "Written policies and procedures guide the organisation\u2019s personnel in the implementation of all service-related requirements",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "12.2.2.1",
+        "description": "The organisation plans and budgets for upgrading or replacing systems, buildings or components needed for the continued operation of a safe and effective facility",
+        "linked_criteria": [
+            "1.2.2.6"
+        ],
+        "root": [
+            "1.2.2.6"
+        ]
+    },
+    {
+        "criteria": "12.2.2.4",
+        "description": "Regular inspections of all buildings, plant, installations and machinery are documented",
+        "linked_criteria": [
+            "1.2.1.4"
+        ],
+        "root": [
+            "1.2.1.4"
+        ]
+    },
+    {
+        "criteria": "12.2.3.5",
+        "description": "There is documented evidence that relevant personnel are regularly trained to use/operate electrical supply systems and to access power in emergencies",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "12.2.3.8",
+        "description": "Sufficient fuel, e.g. diesel, is available to provide power for twenty four (24) hours",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "12.2.4.1",
+        "description": "Regular and/or emergency water supplies, including drinkable water, are available twenty four (24) hours a day, seven days a week in all essential areas",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "12.2.4.4",
+        "description": "There is documented evidence that relevant personnel are regularly trained to ensure that all operations to secure safe water are properly performed",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "12.2.5.1",
+        "description": "Medical gas (oxygen, nitrous oxide and medical air) supplies are available according to the operational requirements of the facility",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "12.2.5.2",
+        "description": "Medical gas supply systems comply with safety standards",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "12.2.6.2",
+        "description": "Piped vacuum systems are regularly tested, and these tests are documented",
+        "linked_criteria": [
+            "1.3.1.6"
+        ],
+        "root": [
+            "1.3.1.6"
+        ]
+    },
+    {
+        "criteria": "12.3.1.1",
+        "description": "A designated individual supervises the management of medical equipment in the organisation",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": [
+            "2.1.1.1"
+        ]
+    },
+    {
+        "criteria": "12.3.1.2",
+        "description": "Policies and procedures guide the management of medical equipment",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "12.3.1.3",
+        "description": "The supply of medical equipment is adequate to meet the needs of the service",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "12.3.1.5",
+        "description": "Records are kept of the checking and maintenance of medical equipment",
+        "linked_criteria": [
+            "1.3.1.6"
+        ],
+        "root": [
+            "1.3.1.6"
+        ]
+    },
+    {
+        "criteria": "12.4.1.1",
+        "description": "Policies and procedures guide the management of ICT equipment",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5",
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "12.4.1.2",
+        "description": "A designated individual supervises the management of ICT equipment in the organisation",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": [
+            "2.1.1.1"
+        ]
+    },
+    {
+        "criteria": "12.4.1.3",
+        "description": "The supply of ICT equipment is adequate to meet the needs of the services",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "12.4.1.9",
+        "description": "There is documented evidence that relevant personnel are regularly trained to use/operate ICT equipment",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": []
+    },
+    {
+        "criteria": "13.1.1.2",
+        "description": "A suitably qualified or experienced person manages/supervises the service",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": [
+            "2.1.1.1"
+        ]
+    },
+    {
+        "criteria": "13.1.1.5",
+        "description": "The departmental manager ensures that written policies and procedures are available to guide the personnel in all service-related aspects",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "13.1.1.4",
+        "description": "The responsibilities of the manager/supervisor are defined in writing",
+        "linked_criteria": [
+            "2.2.2.1"
+        ],
+        "root": [
+            "2.2.2.1"
+        ]
+    },
+    {
+        "criteria": "13.1.2.1",
+        "description": "Personnel employed by the organisation are managed in terms of the employer's policies and procedures relating to job descriptions, orientation and induction, in service training and staff performance appraisals",
+        "linked_criteria": [
+            "2.2.2.1",
+            "2.4.1.1",
+            "2.4.2.1"
+        ],
+        "root": [
+            "2.2.2.1",
+            "2.4.1.1",
+            "2.4.2.1"
+        ]
+    },
+    {
+        "criteria": "13.1.2.3",
+        "description": "The manager has established an orientation and induction programme for service personnel",
+        "linked_criteria": [
+            "1.2.1.7"
+        ],
+        "root": [
+            "1.2.1.7"
+        ]
+    },
+    {
+        "criteria": "13.1.2.5",
+        "description": "The organisation ensures that contracted personnel are oriented to relevant organisational policies and procedures",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "13.1.2.6",
+        "description": "The Organisation ensures that contracted personnel participates in relevant organisational in-service training programmes (eg; Infection control, Health and Safety)",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "13.1.4.1",
+        "description": "The food service area meets health and safety regulations",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "13.2.1.1",
+        "description": "A written agreement is available where the services are outsourced",
+        "linked_criteria": [
+            "1.2.1.7"
+        ],
+        "root": [
+            "1.2.1.7"
+        ]
+    },
+    {
+        "criteria": "13.2.1.2",
+        "description": "A suitably qualified and/or experienced person manages/supervises the service",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": [
+            "2.1.1.1"
+        ]
+    },
+    {
+        "criteria": "13.2.1.4",
+        "description": "The responsibilities of the manager/supervisor are defined in writing",
+        "linked_criteria": [
+            "2.2.2.1"
+        ],
+        "root": [
+            "2.2.2.1"
+        ]
+    },
+    {
+        "criteria": "13.2.1.5",
+        "description": "The organisation ensures that contracted personnel are oriented to relevant organisational policies and procedures",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "13.2.2.1",
+        "description": "Personnel employed by the organisation are managed in terms of the employer's policies and procedures relating to job descriptions, orientation and induction, in service training and staff performance appraisals",
+        "linked_criteria": [
+            "2.2.2.1",
+            "2.4.1.1",
+            "2.4.2.1",
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.2.2.1",
+            "2.4.1.1",
+            "2.4.2.1",
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "13.2.2.2",
+        "description": "Contracted personnel are managed as determined in the written service agreement",
+        "linked_criteria": [
+            "1.2.1.7"
+        ],
+        "root": [
+            "1.2.1.7"
+        ]
+    },
+    {
+        "criteria": "13.3.1.1",
+        "description": "A written agreement is available where the service is outsourced",
+        "linked_criteria": [
+            "1.2.1.7"
+        ],
+        "root": [
+            "1.2.1.7"
+        ]
+    },
+    {
+        "criteria": "13.3.1.2",
+        "description": "A suitably qualified and/or experienced person manages/supervises the service",
+        "linked_criteria": [
+            "2.1.1.1"
+        ],
+        "root": [
+            "2.1.1.1"
+        ]
+    },
+    {
+        "criteria": "13.3.1.4",
+        "description": "The responsibilities of the manager/supervisor are defined in writing",
+        "linked_criteria": [
+            "2.2.2.1"
+        ],
+        "root": [
+            "2.2.2.1"
+        ]
+    },
+    {
+        "criteria": "13.3.1.5",
+        "description": "The departmental manager ensures that written policies and procedures are available to guide the personnel in all service-related aspects",
+        "linked_criteria": [
+            "1.2.5.1"
+        ],
+        "root": [
+            "1.2.5.1"
+        ]
+    },
+    {
+        "criteria": "13.3.2.1",
+        "description": "Personnel employed by the organisation are managed in terms of the employer's policies and procedures relating to job descriptions, orientation and induction, in service training and staff performance appraisals",
+        "linked_criteria": [
+            "2.2.2.1",
+            "2.4.1.1",
+            "2.4.2.1",
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.2.2.1",
+            "2.4.1.1",
+            "2.4.2.1",
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "13.3.2.2",
+        "description": "Contracted personnel are managed as determined in the written service agreement",
+        "linked_criteria": [
+            "1.2.1.7"
+        ],
+        "root": [
+            "1.2.1.7"
+        ]
+    },
+    {
+        "criteria": "13.3.2.4",
+        "description": "The organisation ensures that contracted personnel participate in relevant organisational in-service training programmes (e.g. infection control, health and safety)",
+        "linked_criteria": [
+            "2.4.2.3"
+        ],
+        "root": [
+            "2.4.2.3"
+        ]
+    },
+    {
+        "criteria": "13.3.3.1",
+        "description": "Adequate and secure storage areas are available for equipment and chemicals",
+        "linked_criteria": [
+            "1.2.1.6"
+        ],
+        "root": [
+            "1.2.1.6"
+        ]
+    },
+    {
+        "criteria": "13.3.4.1",
+        "description": "Waste is segregated in accordance with policies, procedures and municipal by laws",
+        "linked_criteria": [
+            "1.2.1.5"
+        ],
+        "root": [
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "6.8.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.5.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.2.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.4.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.10.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.3.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.5.1.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.4.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.1.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.4.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.4.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.1.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.1.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.6.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.9.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.3.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.4.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.3.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.5.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.6.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.5.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.3.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.3.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.2.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.4.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.6.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.7.2.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.5.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.6.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.4.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.4.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.1.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.4.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.2.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.1.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.3.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.2.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.2.1.13",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.1.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.4.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.3.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.2.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.9.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.4.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.7.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.6.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.3.11",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.4.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.2.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.6.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.9.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.6.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.13.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.2.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.5.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.3.3.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.3.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.7.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.3.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.2.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.6.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.2.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.1.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.3.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.3.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.3.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.1.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.2.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.2.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.3.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.2.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.10.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.2.1.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.1.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.7.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.7.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.5.1.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.5.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.6.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.4.1.14",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.8.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.9.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.4.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.7.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.5.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.7.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.6.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.3.4.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.2.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.4.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.4.1.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.6.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.4.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.5.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.1.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": [
+            "1.1.1.6",
+            "1.2.1.5"
+        ]
+    },
+    {
+        "criteria": "2.3.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.5.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.5.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.4.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.6.1.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.4.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.3.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.5.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.7.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.3.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.6.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.2.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.13.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.6.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.3.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.3.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.3.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.5.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.7.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.8.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.5.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.12.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.4.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.6.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.1.2.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.5.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.2.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.5.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.3.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.4.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.4.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.5.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.8.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.5.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.4.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.6.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.7.2.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.3.1.11",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.4.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.4.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.3.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.8.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.8.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.1.3.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.3.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.1.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.3.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.1.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.7.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.2.11",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.3.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.3.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.7.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.6.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.1.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.7.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.4.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.3.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.5.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.11",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.1.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.2.1.12",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.6.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.6.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.12",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.5.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.4.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.4.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.1.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.3.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.2.1.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.3.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.5.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.4.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.2.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.5.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.3.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.13.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.1.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.2.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.4.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.3.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.17",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.2.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.8.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.6.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.6.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.2.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.2.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.3.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.2.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.5.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.3.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.3.4.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.9.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.7.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.4.3.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.3.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.8.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.3.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.3.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.4.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.1.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.7.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.4.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.5.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.4.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.3.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.6.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.1.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.2.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.4.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.3.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.4.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.5.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.4.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.5.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.7.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.3.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.1.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.3.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.3.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.4.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.3.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.1.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.6.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.6.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.7.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.5.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.3.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.2.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.3.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.2.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.1.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.1.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.2.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.2.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.1.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.5.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.5.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.4.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.3.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.5.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.3.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.2.11",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.1.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.1.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.3.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.3.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.5.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.3.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.5.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.15",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.2.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.7.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.4.3.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.5.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.1.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.3.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.6.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.1.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.5.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.4.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.3.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.3.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.2.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.3.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.2.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.5.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.3.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.3.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.2.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.6.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.1.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.2.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.4.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.1.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.8.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.3.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.5.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.1.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.2.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.5.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.7.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.3.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.6.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.7.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.5.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.3.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.7.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.4.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.7.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.3.4.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.3.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.3.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.6.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.5.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.5.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.2.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.4.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.5.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": [
+            "1.3.1.9",
+            "3.3.1.5"
+        ]
+    },
+    {
+        "criteria": "2.4.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.9.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.7.1.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.2.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.6.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.6.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.8.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.8.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.1.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.3.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.4.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.4.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.2.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.6.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.3.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.4.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.5.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.3.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.6.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.4.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.7.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.2.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.4.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.5.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.1.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.5.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.1.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.4.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.1.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.6.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.2.1.11",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.11",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.4.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.6.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.3.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.3.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.7.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.1.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.1.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.5.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.3.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.2.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.3.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.4.3.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.12.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.3.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.6.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.4.1.11",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.7.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.4.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.1.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.3.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.3.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.6.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.4.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.6.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.3.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.3.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.3.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.1.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.3.3.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.4.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.2.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.1.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.1.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.3.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.6.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.6.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.3.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.4.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.3.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.4.1.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.4.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.3.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.3.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.3.2.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.3.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.4.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.2.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.1.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.3.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.4.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.5.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.3.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.3.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.2.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.5.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.4.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.5.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.5.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.6.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.4.1.12",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.1.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.1.2.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.1.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.8.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.9.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.6.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.4.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.4.1.13",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.3.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.4.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.5.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.8.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.2.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.3.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.2.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.1.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.1.1.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.2.4.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "2.2.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.9.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.5.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "12.2.6.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.12.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.2.1.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.2.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "9.5.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.14",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.6.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.3.8",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "10.3.2.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.2.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.3.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.12.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.11.3.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.8.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.4.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.5.1.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.3.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.3.1.7",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "1.2.5.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.1.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.4.6",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.4.1.10",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "5.3.1.5",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "8.2.1.9",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.13",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "3.7.1.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "4.4.2.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.7.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "11.7.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.6.4.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.1.1.1",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.8.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.7.1.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "7.7.1.3",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "6.4.3.2",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    },
+    {
+        "criteria": "13.1.4.4",
+        "description": "",
+        "linked_criteria": [],
+        "root": []
+    }
+]
