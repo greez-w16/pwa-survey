@@ -438,7 +438,15 @@ export const api = {
   getEventsForEnrollment: async (enrollmentId, { programId = null, stageId = null } = {}) => {
     if (!enrollmentId) throw new Error('getEventsForEnrollment: enrollmentId is required');
     const fields = 'event,enrollment,program,programStage';
-    const url = `${BASE_URL}/api/events?paging=false&enrollment=${encodeURIComponent(enrollmentId)}&fields=${encodeURIComponent(fields)}`;
+    const params = [
+      'paging=false',
+      'skipPaging=true',
+      `enrollment=${encodeURIComponent(enrollmentId)}`,
+      programId ? `program=${encodeURIComponent(programId)}` : null,
+      stageId ? `programStage=${encodeURIComponent(stageId)}` : null,
+      `fields=${encodeURIComponent(fields)}`
+    ].filter(Boolean).join('&');
+    const url = `${BASE_URL}/api/events?${params}`;
     const resp = await fetch(url, { headers: getHeaders() });
     if (!resp.ok) throw new Error(`Failed to fetch events for enrollment: ${resp.status}`);
     const data = await resp.json();
@@ -1417,13 +1425,14 @@ export const api = {
             : null;
         const params = [
             'paging=false',
-            enrollmentId ? null : (programId ? `program=${programId}` : null),
-            enrollmentId ? null : (stageId ? `programStage=${stageId}` : null),
-            enrollmentId ? null : (teiId ? `trackedEntityInstance=${teiId}` : null),
+            'skipPaging=true',
+            programId ? `program=${programId}` : null,
+            stageId ? `programStage=${stageId}` : null,
+            teiId ? `trackedEntityInstance=${teiId}` : null,
             enrollmentId ? `enrollment=${enrollmentId}` : null,
             eventIdsParam,
-            enrollmentId ? null : (orgUnitId ? `orgUnit=${orgUnitId}` : null),
-            enrollmentId ? null : (orgUnitId ? `ouMode=${ouMode}` : null),
+            orgUnitId ? `orgUnit=${orgUnitId}` : null,
+            orgUnitId ? `ouMode=${ouMode}` : null,
             order ? `order=${order}` : null,
             scopedFields ? `fields=${scopedFields}` : null
         ].filter(Boolean).join('&');
@@ -1535,12 +1544,12 @@ export const api = {
 	            'paging=true',
 	            `page=${Math.max(1, Number(page) || 1)}`,
 	            `pageSize=${Math.max(1, Number(pageSize) || 10)}`,
-		            enrollmentId ? null : (programId ? `program=${programId}` : null),
-		            enrollmentId ? null : (stageId ? `programStage=${stageId}` : null),
-		            enrollmentId ? null : (teiId ? `trackedEntityInstance=${teiId}` : null),
+		            programId ? `program=${programId}` : null,
+		            stageId ? `programStage=${stageId}` : null,
+		            teiId ? `trackedEntityInstance=${teiId}` : null,
 	            enrollmentId ? `enrollment=${enrollmentId}` : null,
-		            enrollmentId ? null : (orgUnitId ? `orgUnit=${orgUnitId}` : null),
-		            enrollmentId ? null : (orgUnitId ? `ouMode=${ouMode}` : null),
+		            orgUnitId ? `orgUnit=${orgUnitId}` : null,
+		            orgUnitId ? `ouMode=${ouMode}` : null,
 	            order ? `order=${order}` : null,
 		            scopedFields ? `fields=${scopedFields}` : null
 	        ].filter(Boolean).join('&');

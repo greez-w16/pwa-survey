@@ -1911,14 +1911,15 @@ export function Dashboard() {
                     teiId,
                     orgUnitId,
                     programId,
-                    stageId,
-                    fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
+                    stageId: '',
+                    fields: 'event,eventDate,status,programStage,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
                 });
             } catch (e) {
                 console.warn('[Dashboard] Could not fetch assessment event bundle', e);
             }
 
             if (!forceDialog && Array.isArray(surveyEvents) && surveyEvents.length > 0) {
+                const resolvedStageId = surveyEvents[0]?.programStage || stageId;
                 const preload = {};
                 const eventIdMap = {};
                 let finalEventId = null;
@@ -1959,20 +1960,22 @@ export function Dashboard() {
                     preload['pzenrgsSny3'] = ag.value;
                 }
 
+                const resolvedGroup = getFacilityGroupKeyFromProgramStageId(resolvedStageId) || resolvedFacilityGroup;
+
                 const selected = {
                     ...assessment,
                     trackedEntityInstance: teiId,
                     scheduleTeiId: teiId,
                     baselineEventId: finalEventId,
-	                    programStageId: stageId,
-	                    parentGroupId: assessment?.parentGroupId || resolvedFacilityGroup || assessment?.facilityGroup,
+	                    programStageId: resolvedStageId,
+	                    parentGroupId: resolvedGroup || assessment?.parentGroupId || resolvedFacilityGroup || assessment?.facilityGroup,
                     preloadDataValues: preload,
                     hydrateAll: true,
                     preloadMode: 'REPLACE'
                 };
                 const urlId = assessment.eventId || assessment.enrollment || finalEventId;
                 navigate(
-	                    `/form?assessmentId=${encodeURIComponent(urlId)}&baselineId=${encodeURIComponent(finalEventId || '')}&draftKey=${encodeURIComponent(finalEventId || urlId)}&assessmentTeiId=${encodeURIComponent(teiId)}&programStageId=${encodeURIComponent(stageId)}`,
+	                    `/form?assessmentId=${encodeURIComponent(urlId)}&baselineId=${encodeURIComponent(finalEventId || '')}&draftKey=${encodeURIComponent(finalEventId || urlId)}&assessmentTeiId=${encodeURIComponent(teiId)}&programStageId=${encodeURIComponent(resolvedStageId)}`,
                     { state: { selectedAssignment: selected } }
                 );
                 return;
@@ -4331,6 +4334,15 @@ export function Dashboard() {
                 onClose={() => { setShowSettings(false); setSelectedSE(null); }}
                 maxWidth="xl"
                 fullWidth
+                PaperProps={{
+                    style: {
+                        width: '96vw',
+                        height: '92vh',
+                        maxWidth: 'none',
+                        maxHeight: 'none',
+                        margin: 0,
+                    }
+                }}
             >
                 <DialogTitle>
                     {selectedSE ? (

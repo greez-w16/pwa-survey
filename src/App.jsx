@@ -229,6 +229,7 @@ const PrivateRoute = ({ children }) => {
 		  const locallyEditedFieldIdsRef = React.useRef(new Set());
 
 		  const saveField = React.useCallback((fieldKey, fieldValue) => {
+		    console.log(`[App Debug] saveField called: key="${fieldKey}", value=`, fieldValue, new Error().stack);
 		    if (fieldKey) locallyEditedFieldIdsRef.current.add(fieldKey);
 		    baseSaveField(fieldKey, fieldValue);
 		  }, [baseSaveField]);
@@ -301,8 +302,8 @@ const PrivateRoute = ({ children }) => {
         setFormLoadingMessage('Restoring saved answers…');
         await loadFormData();
       } finally {
+        leaveFormLoading();
         if (!cancelled) {
-            leaveFormLoading();
             setHasLoadedDraft(true);
         }
       }
@@ -477,10 +478,7 @@ const PrivateRoute = ({ children }) => {
 	      '';
 		    const groupStageId = getSurveyProgramStageIdForGroupText(groupText);
 		    const explicitStageId = searchParams.get('programStageId') || stateAssignment?.programStageId || '';
-		    const targetStageId =
-		      groupStageId !== ''
-		        ? groupStageId
-		        : (explicitStageId || groupStageId);
+		    const targetStageId = explicitStageId || groupStageId || '';
 
 
 			    // When the URL lacks stage/group info (e.g. after refresh), try to infer

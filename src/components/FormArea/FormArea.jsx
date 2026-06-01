@@ -79,6 +79,72 @@
                 return index;
             };
 
+            const injectVirtualStandards = (sections, criterionIndex) => {
+                if (!Array.isArray(sections)) return [];
+                return sections.map(section => {
+                    const fields = section.fields || [];
+                    const presentCodes = new Set();
+                    fields.forEach(f => {
+                        let norm = normalizeCriterionCode(f.code);
+                        if (!norm || !/\d/.test(norm)) {
+                            const match = (f.label || '').match(/\b\d+(?:\.\d+){2,3}\b/);
+                            if (match) norm = match[0];
+                        }
+                        if (norm) presentCodes.add(norm);
+                    });
+
+                    const missingStandards = new Set();
+                    fields.forEach(f => {
+                        let norm = normalizeCriterionCode(f.code);
+                        if (!norm || !/\d/.test(norm)) {
+                            const match = (f.label || '').match(/\b\d+(?:\.\d+){2,3}\b/);
+                            if (match) norm = match[0];
+                        }
+                        if (norm && /^\d+(\.\d+){3}$/.test(norm)) {
+                            const stdCode = norm.split('.').slice(0, 3).join('.');
+                            if (!presentCodes.has(stdCode)) {
+                                missingStandards.add(stdCode);
+                            }
+                        }
+                    });
+
+                    if (missingStandards.size === 0) return section;
+
+                    const newFields = [];
+                    const injectedStandards = new Set();
+
+                    fields.forEach(f => {
+                        let norm = normalizeCriterionCode(f.code);
+                        if (!norm || !/\d/.test(norm)) {
+                            const match = (f.label || '').match(/\b\d+(?:\.\d+){2,3}\b/);
+                            if (match) norm = match[0];
+                        }
+
+                        if (norm && /^\d+(\.\d+){3}$/.test(norm)) {
+                            const stdCode = norm.split('.').slice(0, 3).join('.');
+                            if (missingStandards.has(stdCode) && !injectedStandards.has(stdCode)) {
+                                injectedStandards.add(stdCode);
+                                const stdInfo = criterionIndex?.[stdCode] || {};
+                                const statement = stdInfo.statement || `Standard ${stdCode}`;
+                                newFields.push({
+                                    id: `virtual-std-${section.id}-${stdCode}`,
+                                    label: statement,
+                                    type: 'text',
+                                    code: stdCode,
+                                    isVirtualStandard: true,
+                                });
+                            }
+                        }
+                        newFields.push(f);
+                    });
+
+                    return {
+                        ...section,
+                        fields: newFields
+                    };
+                });
+            };
+
         // Default index for helper functions that don't have access to component state
         const DEFAULT_CRITERION_INDEX = buildCriterionIndex(emsConfig);
 
@@ -463,12 +529,12 @@
     };
 
     const FormArea = ({
-        activeSection,
+        activeSection: propsActiveSection,
         selectedFacility,
         user,
         groups,
         formData,
-        saveField,
+        saveField: rawSaveField,
         isSaving,
         lastSaved,
         isADComplete,
@@ -477,6 +543,11 @@
         isScoringPending,
         onCriterionChange
     }) => {
+        const saveField = React.useCallback((key, val) => {
+            console.log(`[FormArea Debug] saveField called: key="${key}", value=`, val, new Error().stack);
+            rawSaveField(key, val);
+        }, [rawSaveField]);
+
         const [isScoringModalOpen, setIsScoringModalOpen] = useState(false);
         const [viewingRootCalc, setViewingRootCalc] = useState(null); // { code, result }
         const [currentSubsectionIndex, setCurrentSubsectionIndex] = useState(0);
@@ -489,94 +560,99 @@
         const [openCriterionTooltip, setOpenCriterionTooltip] = useState(null);
         const [randomizeRunState, setRandomizeRunState] = useState(null); // { status, label, summary, completedAt }
 
+        const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
+
+        const resolveAssessmentGroupId = React.useCallback((text) => {
+            const t = String(text || '').toLowerCase();
+            if (t.includes('hosp')) return 'HOSPITAL';
+            if (t.includes('clinic')) return 'CLINICS';
+            if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
+            if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
+            return null;
+        }, []);
+
+        const resolveAssessmentNamespace = React.useCallback((text) => {
+            const t = String(text || '').toLowerCase();
+            if (t.includes('hosp')) return 'HOSPITAL';
+            if (t.includes('clinic')) return 'CLINICS';
+            if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
+            if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
+            return String(text || '').toUpperCase().trim() || null;
+        }, []);
+
+        const assessmentGroupText = React.useMemo(
+            () => String(formData?.[FACILITY_GROUP_DE_ID] || '').trim(),
+            [formData?.[FACILITY_GROUP_DE_ID]]
+        );
+
+        const activeGroup = React.useMemo(() => {
+            return groups.find(g => g.sections?.some(s => s.id === propsActiveSection?.id)) || null;
+        }, [groups, propsActiveSection]);
+
+        const assessmentScopedGroup = React.useMemo(() => {
+            const targetId = resolveAssessmentGroupId(assessmentGroupText);
+            const matched = targetId && Array.isArray(groups)
+                ? groups.find(g => g.id === targetId)
+                : null;
+            return matched || activeGroup || null;
+        }, [groups, activeGroup, assessmentGroupText, resolveAssessmentGroupId]);
+
+        const programmeType = React.useMemo(() => {
+            if (activeGroup?.id === 'SURV-MORTUARY' || activeGroup?.id === 'GENERAL' || activeGroup?.name === 'Mortuary') {
+                return 'mortuary';
+            }
+            if (activeGroup?.id === 'CLINICS' || activeGroup?.name === 'Clinics') {
+                return 'clinics';
+            }
+            if (activeGroup?.id === 'HOSPITAL' || activeGroup?.name === 'Hospital') {
+                return 'hospital';
+            }
+            return 'ems';
+        }, [activeGroup]);
+
+        const { configuration, showToast, isOnline } = useApp();
+
+        // Resolve configuration for the current programme (EMS, Mortuary, Clinics, Hospital)
+        const activeConfigArray = React.useMemo(() => {
+            const configKeyMap = {
+                ems: 'ems_full_configuration',
+                mortuary: 'mortuary_full_configuration',
+                clinics: 'clinics_full_configuration',
+                hospital: 'hospital_full_configuration',
+            };
+            const key = configKeyMap[programmeType];
+            if (configuration && key && Array.isArray(configuration[key])) {
+                return configuration[key];
+            }
+            return [];
+        }, [configuration, programmeType]);
+
+        // Resolve links for the current programme
+        const activeLinks = React.useMemo(() => {
+            const links = configuration?.links || {};
+            return links[programmeType] || [];
+        }, [configuration, programmeType]);
+
+        const criterionIndex = React.useMemo(() => buildCriterionIndex(activeConfigArray), [activeConfigArray]);
+
+        const rawAssessmentScopedSections = React.useMemo(
+            () => (Array.isArray(assessmentScopedGroup?.sections) ? assessmentScopedGroup.sections : []),
+            [assessmentScopedGroup]
+        );
+
+        const assessmentScopedSections = React.useMemo(() => {
+            return injectVirtualStandards(rawAssessmentScopedSections, criterionIndex);
+        }, [rawAssessmentScopedSections, criterionIndex]);
+
+        const activeSection = React.useMemo(() => {
+            const matched = assessmentScopedSections.find(s => s.id === propsActiveSection?.id);
+            return matched || propsActiveSection;
+        }, [assessmentScopedSections, propsActiveSection]);
+
         // Reset pagination when activeSection changes
         React.useEffect(() => {
             setCurrentSubsectionIndex(0);
-        }, [activeSection?.id]);
-
-        React.useEffect(() => {
-            setRandomizeRunState(null);
-        }, [
-            formData?.teiId_internal,
-            formData?.enrollmentId_internal,
-            selectedFacility?.trackedEntityInstance,
-            selectedFacility?.scheduleTeiId,
-            selectedFacility?.enrollment,
-            selectedFacility?.enrollmentId,
-            activeEventId,
-        ]);
-
-            const activeGroup = groups.find(g => g.sections?.some(s => s.id === activeSection?.id));
-            const FACILITY_GROUP_DE_ID = 'pzenrgsSny3';
-
-            const resolveAssessmentGroupId = React.useCallback((text) => {
-                const t = String(text || '').toLowerCase();
-                if (t.includes('hosp')) return 'HOSPITAL';
-                if (t.includes('clinic')) return 'CLINICS';
-                if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
-                if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
-                return null;
-            }, []);
-
-            const resolveAssessmentNamespace = React.useCallback((text) => {
-                const t = String(text || '').toLowerCase();
-                if (t.includes('hosp')) return 'HOSPITAL';
-                if (t.includes('clinic')) return 'CLINICS';
-                if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
-                if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
-                return String(text || '').toUpperCase().trim() || null;
-            }, []);
-
-            const assessmentGroupText = React.useMemo(
-                () => String(formData?.[FACILITY_GROUP_DE_ID] || '').trim(),
-                [formData?.[FACILITY_GROUP_DE_ID]]
-            );
-
-            const assessmentScopedGroup = React.useMemo(() => {
-                const targetId = resolveAssessmentGroupId(assessmentGroupText);
-                const matched = targetId && Array.isArray(groups)
-                    ? groups.find(g => g.id === targetId)
-                    : null;
-                return matched || activeGroup || null;
-            }, [groups, activeGroup, assessmentGroupText, resolveAssessmentGroupId]);
-
-            const programmeType = (() => {
-                if (activeGroup?.id === 'SURV-MORTUARY' || activeGroup?.id === 'GENERAL' || activeGroup?.name === 'Mortuary') {
-                    return 'mortuary';
-                }
-                if (activeGroup?.id === 'CLINICS' || activeGroup?.name === 'Clinics') {
-                    return 'clinics';
-                }
-                if (activeGroup?.id === 'HOSPITAL' || activeGroup?.name === 'Hospital') {
-                    return 'hospital';
-                }
-                return 'ems';
-            })();
-
-            const { configuration, showToast, isOnline } = useApp();
-
-            // Resolve configuration for the current programme (EMS, Mortuary, Clinics, Hospital)
-            const activeConfigArray = (() => {
-                const configKeyMap = {
-                    ems: 'ems_full_configuration',
-                    mortuary: 'mortuary_full_configuration',
-                    clinics: 'clinics_full_configuration',
-                    hospital: 'hospital_full_configuration',
-                };
-                const key = configKeyMap[programmeType];
-                if (configuration && key && Array.isArray(configuration[key])) {
-                    return configuration[key];
-                }
-                return [];
-            })();
-
-            // Resolve links for the current programme
-            const activeLinks = (() => {
-                const links = configuration?.links || {};
-                return links[programmeType] || [];
-            })();
-
-            const criterionIndex = React.useMemo(() => buildCriterionIndex(activeConfigArray), [activeConfigArray]);
+        }, [propsActiveSection?.id]);
 
             // Resolve Hospital compute criteria from configuration
             const HOSPITAL_SUBCRITERIA_MAP = React.useMemo(() => {
@@ -911,11 +987,6 @@
 	            return name === 'ad' || name === 'assessment_details' || name === 'assessment-details' || name.includes('assessment details');
 	        }, []);
 
-        const assessmentScopedSections = React.useMemo(
-            () => (Array.isArray(assessmentScopedGroup?.sections) ? assessmentScopedGroup.sections : []),
-            [assessmentScopedGroup]
-        );
-
         const assessmentScopedSeSections = React.useMemo(
             () => assessmentScopedSections.filter(sec => !isAssessmentDetailsSection(sec)),
             [assessmentScopedSections, isAssessmentDetailsSection]
@@ -1236,10 +1307,12 @@
                         || null;
                     let surveyEvents = selectedEnrollmentId
                         ? await api.getEventsList({
+                            teiId,
+                            orgUnitId,
                             programId,
                             stageId,
                             enrollmentId: selectedEnrollmentId,
-                            fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
+                            fields: 'event,eventDate,status,programStage,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
                         }).catch(() => [])
                         : await api.getSurveyEventsForTeiByEventIds({
                             teiId,
@@ -1248,7 +1321,7 @@
                             stageId,
                             listPageSize: 50,
                             detailBatchSize: 5,
-                            fields: 'event,eventDate,status,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
+                            fields: 'event,eventDate,status,programStage,trackedEntityInstance,notes[note,value],dataValues[dataElement,value]'
                         }).catch(() => []);
 					const authoritativeEventIds = new Set(Object.values(authoritativeEventIdMap || {}).filter(Boolean));
 					if (!selectedEnrollmentId && authoritativeEventIds.size > 0) {
