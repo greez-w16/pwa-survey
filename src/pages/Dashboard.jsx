@@ -55,6 +55,96 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     MORTUARY: 'morStageU11',
 };
 
+const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, placeholder, autoOpen, onClose }) => {
+    const [open, setOpen] = useState(false);
+    const [search, setSearch] = useState('');
+
+    useEffect(() => {
+        if (autoOpen) {
+            setOpen(true);
+        }
+    }, [autoOpen]);
+
+    const handleClose = () => {
+        setOpen(false);
+        setSearch('');
+        if (onClose) onClose();
+    };
+
+    const filteredOptions = useMemo(() => {
+        const query = search.trim().toLowerCase();
+        if (!query) {
+            const selectedSet = new Set(value || []);
+            const selectedList = options.filter(opt => selectedSet.has(opt.id));
+            const remainingList = options.filter(opt => !selectedSet.has(opt.id)).slice(0, 100);
+            return [...selectedList, ...remainingList];
+        }
+        return options.filter(opt => 
+            opt.id.toLowerCase().includes(query) || 
+            (opt.name && opt.name.toLowerCase().includes(query))
+        ).slice(0, 100);
+    }, [search, options, value]);
+
+    return (
+        <Select
+            multiple
+            value={value || []}
+            open={open}
+            onOpen={() => setOpen(true)}
+            onClose={handleClose}
+            disabled={disabled}
+            onChange={(e) => onChange(e.target.value)}
+            renderValue={(selected) => (
+                <span style={{ fontFamily: 'monospace', fontSize: '0.95em' }}>
+                    {selected.length > 0 ? selected.join(', ') : (placeholder || 'None')}
+                </span>
+            )}
+            variant="standard"
+            disableUnderline
+            fullWidth
+            MenuProps={{
+                autoFocus: false,
+                PaperProps: {
+                    style: {
+                        maxHeight: 350,
+                        width: 320,
+                    }
+                }
+            }}
+        >
+            <div style={{ padding: '8px', position: 'sticky', top: 0, background: '#fff', zIndex: 3, borderBottom: '1px solid #e2e8f0' }} onClick={(e) => e.stopPropagation()}>
+                <TextField
+                    size="small"
+                    fullWidth
+                    placeholder="Search..."
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    onKeyDown={(e) => {
+                        e.stopPropagation();
+                    }}
+                    autoFocus
+                />
+            </div>
+            {filteredOptions.map((opt) => (
+                <MenuItem key={opt.id} value={opt.id}>
+                    <Checkbox checked={(value || []).includes(opt.id)} size="small" />
+                    <ListItemText 
+                        primary={opt.id} 
+                        secondary={opt.name || ''} 
+                        primaryTypographyProps={{ style: { fontFamily: 'monospace', fontSize: '0.9em' } }}
+                        secondaryTypographyProps={{ style: { fontSize: '0.75em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
+                    />
+                </MenuItem>
+            ))}
+            {filteredOptions.length === 0 && (
+                <MenuItem disabled>
+                    <ListItemText primary="No matches found" />
+                </MenuItem>
+            )}
+        </Select>
+    );
+});
+
 export function Dashboard() {
 	    const navigate = useNavigate();
 	    const [searchParams] = useSearchParams();
@@ -788,11 +878,8 @@ export function Dashboard() {
 	    const [showSettings, setShowSettings] = useState(false);
 				    const [expandedFacs, setExpandedFacs] = useState({});
 				    const [loadingFacType, setLoadingFacType] = useState(null);
-				    const [loadingEditRow, setLoadingEditRow] = useState(null);
 				    const [configRevision, setConfigRevision] = useState(0);
-				    const [criterionEditOpen, setCriterionEditOpen] = useState(false);
-				    const [criterionEditData, setCriterionEditData] = useState(null);
-				    const [criterionEditForm, setCriterionEditForm] = useState({});
+				    const [activeCellKey, setActiveCellKey] = useState(null);
 		    const [selectedSE, setSelectedSE] = useState(null);
 		    const [isEditingJson, setIsEditingJson] = useState(false);
 		    const [editedJson, setEditedJson] = useState('');
@@ -3102,7 +3189,7 @@ export function Dashboard() {
     const handleToggleCritical = (configKey, seId, standardId, criterionId) => {
         updateActiveConfigBundle((bundle) => {
             const nextConfig = { ...(bundle.config || {}) };
-            const list = Array.isArray(nextConfig[configKey]) ? [...nextConfig[configKey]] : [];
+            const list = Array.isArray(nextConfig[configKey]) ? JSON.parse(JSON.stringify(nextConfig[configKey])) : [];
             const se = list.find(s => s.se_id === seId);
             if (se) {
                 se.sections.forEach(section => {
@@ -3120,81 +3207,99 @@ export function Dashboard() {
         setConfigRevision(r => r + 1);
     };
 
-    const handleOpenCriterionEdit = (row) => {
-        setCriterionEditForm({
-            newStandardId: row.standardId,
-            subCriteria: [...row.subCriteria],
-            linkedCriteria: [...row.linkedCriteria],
-            isCritical: row.isCritical,
+    const handleMoveStandard = (configKey, seId, oldStandardId, newStandardId, criterionId) => {
+        if (!newStandardId || oldStandardId === newStandardId) return;
+        updateActiveConfigBundle((bundle) => {
+            const nextConfig = { ...(bundle.config || {}) };
+            const list = Array.isArray(nextConfig[configKey]) ? JSON.parse(JSON.stringify(nextConfig[configKey])) : [];
+            const se = list.find(s => s.se_id === seId);
+            if (se) {
+                let critObj = null;
+                se.sections.forEach(section => {
+                    section.standards.forEach(std => {
+                        if (std.standard_id === oldStandardId) {
+                            const idx = std.criteria.findIndex(c => c.id === criterionId);
+                            if (idx !== -1) {
+                                critObj = std.criteria[idx];
+                                std.criteria.splice(idx, 1);
+                            }
+                        }
+                    });
+                });
+                if (critObj) {
+                    se.sections.forEach(section => {
+                        section.standards.forEach(std => {
+                            if (std.standard_id === newStandardId) {
+                                std.criteria.push(critObj);
+                            }
+                        });
+                    });
+                }
+            }
+            nextConfig[configKey] = list;
+            return { ...bundle, config: nextConfig };
         });
-        setCriterionEditData(row);
-        setCriterionEditOpen(true);
+        setConfigRevision(r => r + 1);
     };
 
-    const handleSaveCriterionEdit = () => {
-        if (!criterionEditData) return;
-        const row = criterionEditData;
-        const configMap = {
-            'hospital_full_configuration': hospitalConfig,
-            'clinics_full_configuration': clinicsConfig,
-            'ems_full_configuration': emsConfig,
-            'mortuary_full_configuration': mortuaryConfig,
-        };
-        const config = configMap[row.configKey];
-        if (!config) return;
-
-        if (criterionEditForm.newStandardId && criterionEditForm.newStandardId !== row.standardId) {
-            let critObj = null;
-            row.seObj.sections.forEach(section => {
-                section.standards.forEach(std => {
-                    if (std.standard_id === row.standardId) {
-                        const idx = std.criteria.findIndex(c => c.id === row.criterionId);
-                        if (idx !== -1) {
-                            critObj = std.criteria[idx];
-                            std.criteria.splice(idx, 1);
-                        }
-                    }
-                });
-            });
-            if (critObj) {
-                row.seObj.sections.forEach(section => {
+    const handleUpdateLinkedCriteria = (configKey, seId, standardId, criterionId, linkedCriteria) => {
+        updateActiveConfigBundle((bundle) => {
+            const nextConfig = { ...(bundle.config || {}) };
+            const list = Array.isArray(nextConfig[configKey]) ? JSON.parse(JSON.stringify(nextConfig[configKey])) : [];
+            const se = list.find(s => s.se_id === seId);
+            if (se) {
+                se.sections.forEach(section => {
                     section.standards.forEach(std => {
-                        if (std.standard_id === criterionEditForm.newStandardId) {
-                            std.criteria.push(critObj);
+                        const crit = (std.criteria || []).find(c => c.id === criterionId);
+                        if (crit) {
+                            crit.linked_criteria = linkedCriteria;
                         }
                     });
                 });
             }
-        }
-
-        // Save linked criteria
-        row.seObj.sections.forEach(section => {
-            section.standards.forEach(std => {
-                const crit = (std.criteria || []).find(c => c.id === row.criterionId);
-                if (crit) {
-                    crit.linked_criteria = criterionEditForm.linkedCriteria;
-                    crit.is_critical = criterionEditForm.isCritical;
-                }
-            });
+            nextConfig[configKey] = list;
+            return { ...bundle, config: nextConfig };
         });
-
-        if (row.configKey === 'hospital_full_configuration' && row.isRoot) {
-            setDraftComputeConfig(prev => {
-                if (!prev) return prev;
-                const next = JSON.parse(JSON.stringify(prev));
-                const seList = (next.hospital_standards_config?.service_elements) || [];
-                const hse = seList.find(s => s.se_id === ('SE ' + row.seId));
-                if (!hse) return prev;
-                const root = (hse.root_criteria || []).find(rc => rc.id === row.criterionId);
-                if (!root) return prev;
-                root.sub_criteria = criterionEditForm.subCriteria;
-                return next;
-            });
-        }
-
         setConfigRevision(r => r + 1);
-        setCriterionEditOpen(false);
-        setCriterionEditData(null);
+    };
+
+    const handleUpdateSubCriteria = (seId, criterionId, subCriteria) => {
+        updateActiveConfigBundle((bundle) => {
+            const nextCompute = JSON.parse(JSON.stringify(bundle.compute || hospitalComputeCriteria));
+            const seList = (nextCompute.hospital_standards_config?.service_elements) || [];
+            const hse = seList.find(s => s.se_id === ('SE ' + seId));
+            if (hse) {
+                const root = (hse.root_criteria || []).find(rc => rc.id === criterionId);
+                if (root) {
+                    root.sub_criteria = subCriteria;
+                }
+            }
+            return { ...bundle, compute: nextCompute };
+        });
+        setConfigRevision(r => r + 1);
+    };
+
+    const handleToggleRoot = (seId, criterionId, makeRoot) => {
+        updateActiveConfigBundle((bundle) => {
+            const nextCompute = JSON.parse(JSON.stringify(bundle.compute || hospitalComputeCriteria));
+            const seList = (nextCompute.hospital_standards_config?.service_elements) || [];
+            const hse = seList.find(s => s.se_id === ('SE ' + seId));
+            if (hse) {
+                if (!hse.root_criteria) hse.root_criteria = [];
+                const idx = hse.root_criteria.findIndex(rc => rc.id === criterionId);
+                if (makeRoot) {
+                    if (idx === -1) {
+                        hse.root_criteria.push({ id: criterionId, sub_criteria: [] });
+                    }
+                } else {
+                    if (idx !== -1) {
+                        hse.root_criteria.splice(idx, 1);
+                    }
+                }
+            }
+            return { ...bundle, compute: nextCompute };
+        });
+        setConfigRevision(r => r + 1);
     };
 
 		    const handleResetComputeForSe = (seIdLabel) => {
@@ -4327,6 +4432,9 @@ export function Dashboard() {
 													});
 												});
 												const isExpanded = !!expandedFacs[type];
+												const allCriteriaInFacilityType = isExpanded 
+													? seList.flatMap(s => (s.sections || []).flatMap(sec => (sec.standards || []).flatMap(st => (st.criteria || []).map(c => ({ id: c.id, name: c.id })))))
+													: [];
 												return (
 													<div key={type} style={{ marginBottom: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
 														<div
@@ -4364,11 +4472,15 @@ export function Dashboard() {
 																			{seList.flatMap(se => {
 																				const allStandardIds = [];
 																				const rootMap = {};
-																				(hospitalComputeCriteria?.hospital_standards_config?.service_elements || []).forEach(cse => {
+																				(currentComputeCriteria?.hospital_standards_config?.service_elements || []).forEach(cse => {
 																				    (cse.root_criteria || []).forEach(root => {
 																				        if (root.id) rootMap[root.id] = root.sub_criteria || [];
 																				    });
 																				});
+																				
+																				const allStandards = (se.sections || []).flatMap(sec => (sec.standards || []).map(st => ({ id: st.standard_id, name: st.standard_id })));
+																				const allCriteriaInSE = (se.sections || []).flatMap(sec => (sec.standards || []).flatMap(st => (st.criteria || []).map(c => ({ id: c.id, name: c.id }))));
+																				
 																				const rows = [];
 																				(se.sections || []).forEach(section => {
 																					(section.standards || []).forEach(standard => {
@@ -4385,9 +4497,9 @@ export function Dashboard() {
 																								subCriteria: rootMap[c.id] || [],
 																																					seName: se.se_name || se.se_id,
 																																					standardName: standard.standard_id,
-																																					allStandards: (se.sections || []).flatMap(sec => (sec.standards || []).map(st => ({ id: st.standard_id, name: st.standard_id }))),
-																																					allCriteriaInSE: (se.sections || []).flatMap(sec => (sec.standards || []).flatMap(st => (st.criteria || []).map(c => ({ id: c.id, name: c.id })))),
-																																					allCriteriaInFacilityType: seList.flatMap(s => (s.sections || []).flatMap(sec => (sec.standards || []).flatMap(st => (st.criteria || []).map(c => ({ id: c.id, name: c.id }))))),
+																																					allStandards,
+																																					allCriteriaInSE,
+																																					allCriteriaInFacilityType,
 																							configKey: key,
 																							seObj: se,
 																							standardObj: standard,
@@ -4396,63 +4508,184 @@ export function Dashboard() {
 																						});
 																					});
 																				});
-																				const standardIdsUnique = [...new Set(allStandardIds)];
 																				return rows.map((row, idx) => (
 																					<tr key={`${type}-se-${row.seId}-st-${row.standardId}-c-${row.criterionId}-${idx}`}>
 																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>{row.seId}</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontFamily: 'monospace' }}>{row.standardId}</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontFamily: 'monospace' }}>{row.criterionId}</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontWeight: 600, color: row.isRoot ? '#2b6cb0' : '#718096' }}>{row.isRoot ? 'Yes' : 'No'}</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-																							<span
-																								onClick={() => {
-																									if (overviewSource !== 'local') {
-																										handleToggleCritical(row.configKey, row.seId, row.standardId, row.criterionId);
-																									}
-																								}}
-																								style={{
-																								color: row.isCritical ? '#c53030' : '#2f855a',
-																								fontWeight: 600,
-																								background: row.isCritical ? '#fff5f5' : '#f0fff4',
-																								padding: '2px 8px',
-																								borderRadius: '4px',
-																								fontSize: '0.85em',
-																								cursor: overviewSource === 'local' ? 'default' : 'pointer',
-																								opacity: overviewSource === 'local' ? 0.7 : 1,
-																							}}>
-																								{row.isCritical ? 'Critical' : 'Non-Critical'}
-																							</span>
+																						<td 
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							onClick={() => {
+																								if (overviewSource !== 'local') {
+																									setActiveCellKey(`${row.criterionId}-standard`);
+																								}
+																							}}
+																						>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-standard` ? (
+																								<Select
+																									value={row.standardId}
+																									onChange={(e) => {
+																										handleMoveStandard(row.configKey, row.seId, row.standardId, e.target.value, row.criterionId);
+																										setActiveCellKey(null);
+																									}}
+																									onClose={() => setActiveCellKey(null)}
+																									size="small"
+																									variant="standard"
+																									disableUnderline
+																									style={{ fontFamily: 'monospace', fontSize: '1em' }}
+																									autoFocus
+																									defaultOpen
+																								>
+																									{row.allStandards.map((std) => (
+																										<MenuItem key={std.id} value={std.id}>{std.name}</MenuItem>
+																									))}
+																								</Select>
+																							) : (
+																								<span style={{ fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>{row.standardId}</span>
+																							)}
 																						</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0' }}>
-																							<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.8em', fontFamily: 'monospace' }}>
-																								{row.linkedCriteria.length > 0 ? row.linkedCriteria.map((id, i) => (
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontFamily: 'monospace' }}>{row.criterionId}</td>
+																						<td 
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', cursor: (overviewSource === 'local' || row.configKey !== 'hospital_full_configuration') ? 'default' : 'pointer' }}
+																							onClick={() => {
+																								if (overviewSource !== 'local' && row.configKey === 'hospital_full_configuration') {
+																									setActiveCellKey(`${row.criterionId}-root`);
+																								}
+																							}}
+																						>
+																							{overviewSource !== 'local' && row.configKey === 'hospital_full_configuration' && activeCellKey === `${row.criterionId}-root` ? (
+																								<Select
+																									value={row.isRoot ? 'yes' : 'no'}
+																									onChange={(e) => {
+																										handleToggleRoot(row.seId, row.criterionId, e.target.value === 'yes');
+																										setActiveCellKey(null);
+																									}}
+																									onClose={() => setActiveCellKey(null)}
+																									size="small"
+																									variant="standard"
+																									disableUnderline
+																									style={{ fontWeight: 600, color: row.isRoot ? '#2b6cb0' : '#718096' }}
+																									autoFocus
+																									defaultOpen
+																								>
+																									<MenuItem value="yes" style={{ color: '#2b6cb0', fontWeight: 600 }}>Yes</MenuItem>
+																									<MenuItem value="no" style={{ color: '#718096', fontWeight: 600 }}>No</MenuItem>
+																								</Select>
+																							) : (
+																								<span 
+																									style={{ 
+																										fontWeight: 600, 
+																										color: row.isRoot ? '#2b6cb0' : '#718096',
+																										borderBottom: (overviewSource === 'local' || row.configKey !== 'hospital_full_configuration') ? 'none' : '1px dashed currentColor'
+																									}}
+																								>
+																									{row.isRoot ? 'Yes' : 'No'}
+																								</span>
+																							)}
+																						</td>
+																						<td 
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							onClick={() => {
+																								if (overviewSource !== 'local') {
+																									setActiveCellKey(`${row.criterionId}-critical`);
+																								}
+																							}}
+																						>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-critical` ? (
+																								<Select
+																									value={row.isCritical ? 'critical' : 'non-critical'}
+																									onChange={() => {
+																										handleToggleCritical(row.configKey, row.seId, row.standardId, row.criterionId);
+																										setActiveCellKey(null);
+																									}}
+																									onClose={() => setActiveCellKey(null)}
+																									size="small"
+																									variant="standard"
+																									disableUnderline
+																									style={{
+																										color: row.isCritical ? '#c53030' : '#2f855a',
+																										fontWeight: 600,
+																										backgroundColor: row.isCritical ? '#fff5f5' : '#f0fff4',
+																										padding: '2px 8px',
+																										borderRadius: '4px',
+																										fontSize: '0.9em',
+																									}}
+																									autoFocus
+																									defaultOpen
+																								>
+																									<MenuItem value="critical" style={{ color: '#c53030', fontWeight: 600 }}>Critical</MenuItem>
+																									<MenuItem value="non-critical" style={{ color: '#2f855a', fontWeight: 600 }}>Non-Critical</MenuItem>
+																								</Select>
+																							) : (
+																								<span
+																									style={{
+																										color: row.isCritical ? '#c53030' : '#2f855a',
+																										fontWeight: 600,
+																										background: row.isCritical ? '#fff5f5' : '#f0fff4',
+																										padding: '2px 8px',
+																										borderRadius: '4px',
+																										fontSize: '0.85em',
+																										borderBottom: overviewSource === 'local' ? 'none' : '1px dashed currentColor',
+																									}}
+																								>
+																									{row.isCritical ? 'Critical' : 'Non-Critical'}
+																								</span>
+																							)}
+																						</td>
+																						<td 
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							onClick={() => {
+																								if (overviewSource !== 'local' && activeCellKey !== `${row.criterionId}-linked`) {
+																									setActiveCellKey(`${row.criterionId}-linked`);
+																								}
+																							}}
+																						>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-linked` ? (
+																								<SearchableMultiSelect
+																									value={row.linkedCriteria}
+																									options={row.allCriteriaInFacilityType}
+																									onChange={(val) => {
+																										handleUpdateLinkedCriteria(row.configKey, row.seId, row.standardId, row.criterionId, val);
+																									}}
+																									onClose={() => setActiveCellKey(null)}
+																									placeholder="—"
+																									autoOpen
+																								/>
+																							) : (
+																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
+																									{row.linkedCriteria.length > 0 ? row.linkedCriteria.map((id, i) => (
 																										<span key={id} style={{ color: id === row.criterionId ? '#c53030' : '#276749' }}>
 																											{id}{i < row.linkedCriteria.length - 1 ? ', ' : ''}
 																										</span>
 																									)) : '—'}
 																								</div>
+																							)}
 																						</td>
-																								<td style={{ padding: '8px', border: '1px solid #e2e8f0' }}>
-																									<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.8em', fontFamily: 'monospace' }}>
-																										{row.isRoot ? (row.subCriteria.length > 0 ? row.subCriteria.join(', ') : 'None') : '—'}
-																									</div>
-																								</td>
-																					<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
-																						<Button
-																							variant='outlined'
-																							size='small'
-																							disabled={overviewSource === 'local' || loadingEditRow === row.criterionId}
+																						<td 
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', cursor: (!row.isRoot || overviewSource === 'local') ? 'default' : 'pointer' }}
 																							onClick={() => {
-																							    setLoadingEditRow(row.criterionId);
-																							    setTimeout(() => {
-																							        handleOpenCriterionEdit(row);
-																							        setLoadingEditRow(null);
-																							    }, 50);
+																								if (row.isRoot && overviewSource !== 'local' && activeCellKey !== `${row.criterionId}-sub`) {
+																									setActiveCellKey(`${row.criterionId}-sub`);
+																								}
 																							}}
 																						>
-																							{loadingEditRow === row.criterionId ? 'Loading...' : 'Edit'}
-																						</Button>
-																					</td>
+																							{!row.isRoot ? (
+																								<span style={{ color: '#a0aec0' }}>—</span>
+																							) : overviewSource !== 'local' && activeCellKey === `${row.criterionId}-sub` ? (
+																								<SearchableMultiSelect
+																									value={row.subCriteria}
+																									options={row.allCriteriaInSE}
+																									onChange={(val) => {
+																										handleUpdateSubCriteria(row.seId, row.criterionId, val);
+																									}}
+																									onClose={() => setActiveCellKey(null)}
+																									placeholder="None"
+																									autoOpen
+																								/>
+																							) : (
+																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
+																									{row.subCriteria.length > 0 ? row.subCriteria.join(', ') : 'None'}
+																								</div>
+																							)}
+																						</td>
 																					</tr>
 																				));
 																			})}
@@ -4465,75 +4698,6 @@ export function Dashboard() {
 												});
 											})()}
 											</div>
-                                <Dialog open={criterionEditOpen} onClose={() => setCriterionEditOpen(false)} maxWidth="sm" fullWidth>
-                                    <DialogTitle>Edit Criterion {criterionEditData?.criterionId}</DialogTitle>
-                                    <DialogContent>
-                                        <div style={{ marginTop: '10px' }}>
-                                            <p><strong>SE:</strong> {criterionEditData?.seName}</p>
-                                            <p><strong>Current Standard:</strong> {criterionEditData?.standardName}</p>
-                                            <FormControl fullWidth style={{ marginTop: "15px" }}>
-                                                <FormControlLabel
-                                                    control={
-                                                        <Switch
-                                                            checked={!!criterionEditForm.isCritical}
-                                                            onChange={(e) => setCriterionEditForm({ ...criterionEditForm, isCritical: e.target.checked })}
-                                                        />
-                                                    }
-                                                    label="Critical"
-                                                />
-                                            </FormControl>
-                                        </div>
-                                        <FormControl fullWidth style={{ marginTop: '15px' }}>
-                                            <InputLabel>Move to Standard</InputLabel>
-                                            <Select
-                                                value={criterionEditForm.newStandardId || ''}
-                                                onChange={(e) => setCriterionEditForm({ ...criterionEditForm, newStandardId: e.target.value })}
-                                            >
-                                                {criterionEditData?.allStandards?.map((std) => (
-                                                    <MenuItem key={std.id} value={std.id}>{std.name}</MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                        <FormControl fullWidth style={{ marginTop: "15px" }}>
-                                            <InputLabel>Linked Criteria</InputLabel>
-                                            <Select
-                                                multiple
-                                                value={criterionEditForm.linkedCriteria || []}
-                                                onChange={(e) => setCriterionEditForm({ ...criterionEditForm, linkedCriteria: e.target.value })}
-                                                renderValue={(selected) => selected.join(', ')}
-                                            >
-                                                {criterionEditData?.allCriteriaInFacilityType?.map((c) => (
-                                                    <MenuItem key={c.id} value={c.id}>
-                                                        <Checkbox checked={(criterionEditForm.linkedCriteria || []).includes(c.id)} />
-                                                        <ListItemText primary={`${c.id} - ${c.name}`} />
-                                                    </MenuItem>
-                                                ))}
-                                            </Select>
-                                        </FormControl>
-                                        {criterionEditData?.isRoot && (
-                                            <FormControl fullWidth style={{ marginTop: '15px' }}>
-                                                <InputLabel>Sub-Criteria</InputLabel>
-                                                <Select
-                                                    multiple
-                                                    value={criterionEditForm.subCriteria || []}
-                                                    onChange={(e) => setCriterionEditForm({ ...criterionEditForm, subCriteria: e.target.value })}
-                                                    renderValue={(selected) => selected.join(', ')}
-                                                >
-                                                    {criterionEditData?.allCriteriaInSE?.map((c) => (
-                                                        <MenuItem key={c.id} value={c.id}>
-                                                            <Checkbox checked={(criterionEditForm.subCriteria || []).includes(c.id)} />
-                                                            <ListItemText primary={`${c.id} - ${c.name}`} />
-                                                        </MenuItem>
-                                                    ))}
-                                                </Select>
-                                            </FormControl>
-                                        )}
-                                    </DialogContent>
-                                    <DialogActions>
-                                        <Button onClick={() => setCriterionEditOpen(false)}>Cancel</Button>
-                                        <Button onClick={handleSaveCriterionEdit} variant="contained">Save</Button>
-                                    </DialogActions>
-                                </Dialog>
 
                             </>
                         ) : selectedSE ? (
