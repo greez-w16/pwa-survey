@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../../services/api';
 import { useStorage } from '../../hooks/useStorage';
 import { useApp } from '../../contexts/AppContext';
@@ -11,8 +11,11 @@ const Login = ({ onLogin }) => {
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const navigate = useNavigate();
+    const location = useLocation();
     const storage = useStorage();
     const { configSource, setConfigSource } = useApp();
+
+    const from = location.state?.from || '/';
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -36,7 +39,7 @@ const Login = ({ onLogin }) => {
             if (onLogin) {
                 onLogin(user);
             }
-            navigate('/');
+            navigate(from, { replace: true });
         } catch (err) {
             console.error('[Login] Login error:', err);
             setError('Login failed. Please check credentials or network.');

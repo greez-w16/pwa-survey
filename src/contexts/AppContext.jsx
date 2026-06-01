@@ -132,16 +132,81 @@ export const AppProvider = ({ children }) => {
 		    }, []);
 
             const loadRemoteConfig = useCallback(async () => {
-	                console.info('[AppContext] Remote configuration bundle loading is disabled. Using built-in configuration.');
-	                showToast?.('Remote configuration bundle loading is disabled for now. Using built-in configuration.', 'info');
-	            }, [showToast]);
+                const NAMESPACE = 'qims-survey-configs';
+                const keys = [
+                    { key: 'hospital_full_configuration' },
+                    { key: 'clinics_full_configuration' },
+                    { key: 'ems_full_configuration' },
+                    { key: 'mortuary_full_configuration' },
+                    { key: 'hospital_compute_criteria' },
+                    { key: 'hospital_links' },
+                    { key: 'clinics_links' },
+                    { key: 'ems_links' },
+                    { key: 'mortuary_links' },
+                ];
+
+                try {
+                    console.info('[AppContext] Fetching remote configuration from DataStore...');
+                    const fetchedData = {};
+                    for (const { key } of keys) {
+                        try {
+                            const val = await api.getDataStoreItem(NAMESPACE, key);
+                            if (val) {
+                                fetchedData[key] = val;
+                            }
+                        } catch (e) {
+                            console.warn(`[AppContext] Failed to fetch key ${key} from DataStore`, e);
+                        }
+                    }
+
+                    // Only update if we successfully fetched at least some remote configuration
+                    if (Object.keys(fetchedData).length > 0) {
+                        setConfigBundles(prev => {
+                            const next = { ...prev };
+                            const activeId = activeConfigVersionId || 'v1';
+                            const currentBundle = next[activeId] || {};
+
+                            const remoteConfig = {
+                                ...currentBundle.config,
+                                ...(fetchedData.hospital_full_configuration ? { hospital_full_configuration: fetchedData.hospital_full_configuration } : {}),
+                                ...(fetchedData.clinics_full_configuration ? { clinics_full_configuration: fetchedData.clinics_full_configuration } : {}),
+                                ...(fetchedData.ems_full_configuration ? { ems_full_configuration: fetchedData.ems_full_configuration } : {}),
+                                ...(fetchedData.mortuary_full_configuration ? { mortuary_full_configuration: fetchedData.mortuary_full_configuration } : {}),
+                            };
+
+                            const remoteLinks = {
+                                ...currentBundle.links,
+                                ...(fetchedData.ems_links ? { ems: fetchedData.ems_links } : {}),
+                                ...(fetchedData.hospital_links ? { hospital: fetchedData.hospital_links } : {}),
+                                ...(fetchedData.clinics_links ? { clinics: fetchedData.clinics_links } : {}),
+                                ...(fetchedData.mortuary_links ? { mortuary: fetchedData.mortuary_links } : {}),
+                            };
+
+                            next[activeId] = {
+                                ...currentBundle,
+                                config: remoteConfig,
+                                links: remoteLinks,
+                                ...(fetchedData.hospital_compute_criteria ? { compute: fetchedData.hospital_compute_criteria } : {}),
+                            };
+                            return next;
+                        });
+                        console.info('[AppContext] Remote configuration bundle loaded successfully.');
+                        showToast?.('Remote configuration loaded from DataStore successfully.', 'success');
+                    } else {
+                        console.info('[AppContext] No remote configuration found in DataStore. Using built-in baseline.');
+                    }
+                } catch (err) {
+                    console.error('[AppContext] Failed to load remote configuration', err);
+                    showToast?.('Failed to load remote configuration from DataStore.', 'error');
+                }
+            }, [activeConfigVersionId, showToast]);
 
             // Automatically fetch latest DHIS2 config when the user logs in 
             // and the DataStore strategy is selected
             useEffect(() => {
-	                if (user && configSource === 'datastore') {
-	                    console.info('[AppContext] DataStore configuration strategy selected, but remote bundle loading is disabled.');
-	                }
+                if (user && configSource === 'datastore') {
+                    loadRemoteConfig();
+                }
             }, [user, configSource, loadRemoteConfig]);
 
 	    // Load initial user session and their facility assignments.

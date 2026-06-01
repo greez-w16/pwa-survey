@@ -84,6 +84,8 @@ export function Dashboard() {
 	    } = useApp();
     const storage = useStorage();
     const [searchTerm, setSearchTerm] = useState('');
+    const [overviewSource, setOverviewSource] = useState('active'); // 'active' | 'local'
+    const [showResetConfirmDialog, setShowResetConfirmDialog] = useState(false);
     const [events, setEvents] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedFacilityId, setSelectedFacilityId] = useState(null);
@@ -3028,15 +3030,15 @@ export function Dashboard() {
     const handleSaveConfigsToDataStore = async () => {
         const NAMESPACE = 'qims-survey-configs';
         const configsToSave = [
-            { key: 'hospital_full_configuration', data: hospitalConfig },
-            { key: 'clinics_full_configuration', data: clinicsConfig },
-            { key: 'ems_full_configuration', data: emsConfig },
-            { key: 'mortuary_full_configuration', data: mortuaryConfig },
-            { key: 'hospital_compute_criteria', data: hospitalComputeCriteria },
-            { key: 'hospital_links', data: hospitalLinks },
-            { key: 'clinics_links', data: clinicsLinks },
-            { key: 'ems_links', data: emsLinks },
-            { key: 'mortuary_links', data: mortuaryLinks },
+            { key: 'hospital_full_configuration', data: currentConfig.hospital_full_configuration },
+            { key: 'clinics_full_configuration', data: currentConfig.clinics_full_configuration },
+            { key: 'ems_full_configuration', data: currentConfig.ems_full_configuration },
+            { key: 'mortuary_full_configuration', data: currentConfig.mortuary_full_configuration },
+            { key: 'hospital_compute_criteria', data: currentComputeCriteria },
+            { key: 'hospital_links', data: currentLinks.hospital },
+            { key: 'clinics_links', data: currentLinks.clinics },
+            { key: 'ems_links', data: currentLinks.ems },
+            { key: 'mortuary_links', data: currentLinks.mortuary },
         ];
         let saved = 0;
         let failed = 0;
@@ -3055,24 +3057,65 @@ export function Dashboard() {
         );
     };
 
+    const handleResetConfigsToBaseline = async () => {
+        const NAMESPACE = 'qims-survey-configs';
+        const configsToSave = [
+            { key: 'hospital_full_configuration', data: hospitalConfig },
+            { key: 'clinics_full_configuration', data: clinicsConfig },
+            { key: 'ems_full_configuration', data: emsConfig },
+            { key: 'mortuary_full_configuration', data: mortuaryConfig },
+            { key: 'hospital_compute_criteria', data: hospitalComputeCriteria },
+            { key: 'hospital_links', data: hospitalLinks },
+            { key: 'clinics_links', data: clinicsLinks },
+            { key: 'ems_links', data: emsLinks },
+            { key: 'mortuary_links', data: mortuaryLinks },
+        ];
+        let saved = 0;
+        let failed = 0;
+        for (const { key, data } of configsToSave) {
+            try {
+                await api.upsertDataStoreItem(NAMESPACE, key, data);
+                saved++;
+            } catch (e) {
+                console.warn(`Failed to reset ${key} to DataStore:`, e);
+                failed++;
+            }
+        }
+        updateActiveConfigBundle((bundle) => {
+            return {
+                config: { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig },
+                links: {
+                    ems: emsLinks,
+                    mortuary: mortuaryLinks,
+                    clinics: clinicsLinks,
+                    hospital: hospitalLinks,
+                },
+                compute: hospitalComputeCriteria,
+            };
+        });
+        showToast?.(
+            `Reset ${saved} config(s) to local baseline in DataStore${failed > 0 ? ` (${failed} failed)` : ''}.`,
+            failed > 0 ? 'warning' : 'success'
+        );
+    };
+
     const handleToggleCritical = (configKey, seId, standardId, criterionId) => {
-        const configMap = {
-            'hospital_full_configuration': hospitalConfig,
-            'clinics_full_configuration': clinicsConfig,
-            'ems_full_configuration': emsConfig,
-            'mortuary_full_configuration': mortuaryConfig,
-        };
-        const config = configMap[configKey];
-        if (!config) return;
-        const se = config.find(s => s.se_id === seId);
-        if (!se) return;
-        se.sections.forEach(section => {
-            section.standards.forEach(std => {
-                if (std.standard_id === standardId) {
-                    const crit = std.criteria.find(c => c.id === criterionId);
-                    if (crit) crit.is_critical = !crit.is_critical;
-                }
-            });
+        updateActiveConfigBundle((bundle) => {
+            const nextConfig = { ...(bundle.config || {}) };
+            const list = Array.isArray(nextConfig[configKey]) ? [...nextConfig[configKey]] : [];
+            const se = list.find(s => s.se_id === seId);
+            if (se) {
+                se.sections.forEach(section => {
+                    section.standards.forEach(std => {
+                        if (std.standard_id === standardId) {
+                            const crit = std.criteria.find(c => c.id === criterionId);
+                            if (crit) crit.is_critical = !crit.is_critical;
+                        }
+                    });
+                });
+            }
+            nextConfig[configKey] = list;
+            return { ...bundle, config: nextConfig };
         });
         setConfigRevision(r => r + 1);
     };
@@ -4155,6 +4198,28 @@ export function Dashboard() {
                 </DialogActions>
             </Dialog>
 
+            {/* Reset Baseline Confirmation Dialog */}
+            <Dialog open={showResetConfirmDialog} onClose={() => setShowResetConfirmDialog(false)}>
+                <DialogTitle>Confirm Reset to Code Baseline</DialogTitle>
+                <DialogContent dividers>
+                    Are you sure you want to reset the remote DataStore configuration to match the local code baseline?
+                    This will completely overwrite and erase all remote edits currently saved in the DataStore.
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setShowResetConfirmDialog(false)}>Cancel</Button>
+                    <Button
+                        onClick={async () => {
+                            setShowResetConfirmDialog(false);
+                            await handleResetConfigsToBaseline();
+                        }}
+                        color="error"
+                        variant="contained"
+                    >
+                        Reset to Baseline
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
             {/* Settings Dialog */}
             <Dialog
                 open={showSettings}
@@ -4179,360 +4244,70 @@ export function Dashboard() {
                     <div className="settings-content">
 	                        {!selectedSE && !showLinksEditor ? (
 	                            <>
-                                    <div className="settings-section" style={{ borderBottom: '2px solid #e2e8f0', paddingBottom: '1.5rem', marginBottom: '1.5rem' }}>
-                                        <h4 style={{ color: '#1e40af' }}>Configuration Strategy (Testing)</h4>
-                                        <p className="settings-subtitle">
-                                            Switch between using the <strong>In-App hardcoded assets</strong> and the <strong>Remote DHIS2 DataStore</strong>.
-                                            This allows you to verify that configurations pulled from DHIS2 match the expected application behavior.
-                                        </p>
-                                        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginTop: '10px' }}>
-                                            <FormControl size="small" style={{ minWidth: '200px' }}>
-                                                <InputLabel>Source Strategy</InputLabel>
-                                                <Select
-                                                    value={configSource}
-                                                    label="Source Strategy"
-                                                    onChange={(e) => setConfigSource(e.target.value)}
-                                                >
-                                                    <MenuItem value="local">Local Assets (In-App)</MenuItem>
-                                                    <MenuItem value="datastore">DHIS2 DataStore (Remote)</MenuItem>
-                                                </Select>
-                                            </FormControl>
-
-                                            {configSource === 'datastore' && (
-                                                <Button
-                                                    variant="contained"
-                                                    size="small"
-                                                    onClick={() => loadRemoteConfig()}
-                                                    startIcon={<CloudSyncIcon />}
-                                                >
-                                                    Fetch from DataStore
-                                                </Button>
-                                            )}
-                                        </div>
-                                        {configSource === 'datastore' && (
-                                            <div style={{ marginTop: '8px', fontSize: '0.8em', color: '#666' }}>
-                                                <span>Namespace: <code>qims-config</code> | Keys: <code>hospital, clinics, ems, mortuary, links, compute</code></span>
-                                            </div>
-                                        )}
-                                    </div>
-
-		                                <div className="settings-section">
-		                                    <h4>Configuration Versions</h4>
-		                                    <p className="settings-subtitle">
-		                                        Each version bundles together the Service Elements, Criteria Linkages and
-		                                        Computation rules. Non-technical users can name and describe versions
-		                                        without editing JSON.
-		                                    </p>
-		                                    <div className="version-header-row">
-		                                        <span style={{ fontSize: '0.9em', color: '#4a5568' }}>
-		                                            Active version:
-		                                        </span>{' '}
-		                                        <span style={{ fontWeight: 600 }}>
-		                                            {activeVersion ? activeVersion.name : 'V1 \\u2013 Baseline configuration'}
-		                                        </span>
-		                                    </div>
-		                                    <div className="version-actions-row" style={{ marginTop: '8px', marginBottom: '8px' }}>
-		                                        <Button
-		                                            variant="outlined"
-		                                            size="small"
-		                                            onClick={() => setShowNewVersionDialog(true)}
-		                                        >
-		                                            Create new version
-		                                        </Button>
-		                                    </div>
-		                                    <div className="version-list" style={{ maxHeight: '160px', overflowY: 'auto' }}>
-		                                        {configVersions.map(v => (
-		                                            <div
-		                                                key={v.id}
-		                                                className="version-item"
-		                                                style={{
-		                                                    padding: '6px 8px',
-		                                                    borderBottom: '1px solid #e2e8f0',
-		                                                    display: 'flex',
-		                                                    justifyContent: 'space-between',
-		                                                    alignItems: 'center',
-		                                                    cursor: 'pointer',
-		                                                    backgroundColor: activeVersion && v.id === activeVersion.id ? '#edf2f7' : 'transparent',
-		                                                }}
-		                                                onClick={() => handleSelectVersion(v.id)}
-		                                            >
-		                                                <div>
-		                                                    <div style={{ fontWeight: 600 }}>{v.name}</div>
-		                                                    <div style={{ fontSize: '0.8em', color: '#4a5568' }}>
-		                                                        {v.description}
-		                                                    </div>
-		                                                </div>
-		                                                <div style={{ textAlign: 'right' }}>
-		                                                    <div className={v.status === 'ACTIVE' ? 'config-status-tag success' : 'config-status-tag'}>
-		                                                        {v.status}
-		                                                    </div>
-		                                                    <div style={{ fontSize: '0.7em', color: '#718096' }}>
-		                                                        {new Date(v.createdAt).toLocaleDateString()}
-		                                                    </div>
-		                                                    {(!activeVersion || v.id !== activeVersion.id) && (
-		                                                        <Button
-		                                                            size="small"
-		                                                            variant="text"
-		                                                            onClick={(e) => {
-		                                                                e.stopPropagation();
-		                                                                handleSelectVersion(v.id);
-		                                                            }}
-		                                                            style={{ marginTop: 4 }}
-		                                                        >
-		                                                            Set active
-		                                                        </Button>
-		                                                    )}
-		                                                </div>
-		                                            </div>
-		                                        ))}
-		                                        {configVersions.length === 0 && (
-		                                            <div style={{ fontSize: '0.85em', color: '#718096' }}>
-		                                                No versions defined yet. The current on-disk configuration is treated as V1.
-		                                            </div>
-		                                        )}
-		                                    </div>
-		                                </div>
-	                                <div className="settings-section">
-	                                    <h4>Service Element Configuration</h4>
-	                                    <p className="settings-subtitle">EMS Standards (SE 1 - SE 10)</p>
-	                                    <div className="se-config-list">
-	                                        {(emsConfig.ems_full_configuration || []).map(se => {
-	                                            const activeList = currentConfig.ems_full_configuration || [];
-	                                            const versionSe = activeList.find(x => x.se_id === se.se_id);
-	                                            const isActive = Boolean(versionSe);
-	                                            const displaySe = versionSe || se;
-	                                            return (
-	                                                <div
-	                                                    key={`ems-${se.se_id}`}
-	                                                    className="se-config-item clickable"
-	                                                    onClick={() => {
-	                                                        setSelectedSE({ ...displaySe, _type: 'ems' });
-	                                                        setEditedJson(JSON.stringify(displaySe, null, 2));
-	                                                        setIsEditingJson(false);
-	                                                    }}
-	                                                >
-	                                                    <Checkbox
-	                                                        size="small"
-	                                                        checked={isActive}
-	                                                        onClick={(e) => e.stopPropagation()}
-	                                                        onChange={(e) => handleToggleSeActive('ems', se, e.target.checked)}
-	                                                        style={{ padding: 0, marginRight: 6 }}
-	                                                    />
-	                                                    <span className="se-id-badge">SE {se.se_id}</span>
-	                                                    <span className="se-name-text">{se.se_name}</span>
-	                                                    <span className="chevron-right">›</span>
-	                                                </div>
-	                                            );
-	                                        })}
-	                                    </div>
-	                                    <p className="settings-subtitle" style={{ marginTop: '1rem' }}>Hospital Standards (SE 1 - SE 45)</p>
-	                                    <div className="se-config-list">
-	                                        {(hospitalConfig.hospital_full_configuration || []).map(se => {
-	                                            const activeList = currentConfig.hospital_full_configuration || [];
-	                                            const versionSe = activeList.find(x => x.se_id === se.se_id);
-	                                            const isActive = Boolean(versionSe);
-	                                            const displaySe = versionSe || se;
-	                                            return (
-	                                                <div
-	                                                    key={`hospital-${se.se_id}`}
-	                                                    className="se-config-item clickable"
-	                                                    onClick={() => {
-	                                                        setSelectedSE({ ...displaySe, _type: 'hospital' });
-	                                                        setEditedJson(JSON.stringify(displaySe, null, 2));
-	                                                        setIsEditingJson(false);
-	                                                    }}
-	                                                >
-	                                                    <Checkbox
-	                                                        size="small"
-	                                                        checked={isActive}
-	                                                        onClick={(e) => e.stopPropagation()}
-	                                                        onChange={(e) => handleToggleSeActive('hospital', se, e.target.checked)}
-	                                                        style={{ padding: 0, marginRight: 6 }}
-	                                                    />
-	                                                    <span className="se-id-badge">SE {se.se_id}</span>
-	                                                    <span className="se-name-text">{se.se_name}</span>
-	                                                    <span className="chevron-right">›</span>
-	                                                </div>
-	                                            );
-	                                        })}
-	                                    </div>
-	                                    <p className="settings-subtitle" style={{ marginTop: '1rem' }}>Mortuary Standards (SE 1 - SE 6)</p>
-	                                    <div className="se-config-list">
-	                                        {(mortuaryConfig.mortuary_full_configuration || []).map(se => {
-	                                            const activeList = currentConfig.mortuary_full_configuration || [];
-	                                            const versionSe = activeList.find(x => x.se_id === se.se_id);
-	                                            const isActive = Boolean(versionSe);
-	                                            const displaySe = versionSe || se;
-	                                            return (
-	                                                <div
-	                                                    key={`mort-${se.se_id}`}
-	                                                    className="se-config-item clickable"
-	                                                    onClick={() => {
-	                                                        setSelectedSE({ ...displaySe, _type: 'mortuary' });
-	                                                        setEditedJson(JSON.stringify(displaySe, null, 2));
-	                                                        setIsEditingJson(false);
-	                                                    }}
-	                                                >
-	                                                    <Checkbox
-	                                                        size="small"
-	                                                        checked={isActive}
-	                                                        onClick={(e) => e.stopPropagation()}
-	                                                        onChange={(e) => handleToggleSeActive('mortuary', se, e.target.checked)}
-	                                                        style={{ padding: 0, marginRight: 6 }}
-	                                                    />
-	                                                    <span className="se-id-badge">SE {se.se_id}</span>
-	                                                    <span className="se-name-text">{se.se_name}</span>
-	                                                    <span className="chevron-right">›</span>
-	                                                </div>
-	                                            );
-	                                        })}
-	                                    </div>
-	                                    <p className="settings-subtitle" style={{ marginTop: '1rem' }}>Clinics Standards (SE 1 - SE 13)</p>
-	                                    <div className="se-config-list">
-	                                        {(clinicsConfig.clinics_full_configuration || []).map(se => {
-	                                            const activeList = currentConfig.clinics_full_configuration || [];
-	                                            const versionSe = activeList.find(x => x.se_id === se.se_id);
-	                                            const isActive = Boolean(versionSe);
-	                                            const displaySe = versionSe || se;
-	                                            return (
-	                                                <div
-	                                                    key={`clinics-${se.se_id}`}
-	                                                    className="se-config-item clickable"
-	                                                    onClick={() => {
-	                                                        setSelectedSE({ ...displaySe, _type: 'clinics' });
-	                                                        setEditedJson(JSON.stringify(displaySe, null, 2));
-	                                                        setIsEditingJson(false);
-	                                                    }}
-	                                                >
-	                                                    <Checkbox
-	                                                        size="small"
-	                                                        checked={isActive}
-	                                                        onClick={(e) => e.stopPropagation()}
-	                                                        onChange={(e) => handleToggleSeActive('clinics', se, e.target.checked)}
-	                                                        style={{ padding: 0, marginRight: 6 }}
-	                                                    />
-	                                                    <span className="se-id-badge">SE {se.se_id}</span>
-	                                                    <span className="se-name-text">{se.se_name}</span>
-	                                                    <span className="chevron-right">›</span>
-	                                                </div>
-	                                            );
-	                                        })}
-	                                    </div>
-	                                    <div className="config-status-tag success" style={{ marginTop: '10px' }}>STABLE</div>
-	                                </div>
-                                <div className="settings-section">
-                                    <h4>Criteria Linking Configuration</h4>
-                                    <p className="settings-subtitle">EMS Criteria dependencies and associations</p>
-                                    <div
-                                        className="se-config-item clickable"
-                                        onClick={() => {
-                                            setShowLinksEditor('ems');
-                                            setEditedLinksJson(JSON.stringify(currentLinks.ems || currentLinks, null, 2));
-                                            setIsEditingLinks(false);
-                                        }}
-                                    >
-                                        <span className="se-id-badge">EMS LINKS</span>
-                                        <span className="se-name-text">View/Edit EMS Linked Criteria Map</span>
-                                        <span className="chevron-right">›</span>
-                                    </div>
-	                                    <p className="settings-subtitle" style={{ marginTop: '1rem' }}>Hospital Criteria dependencies and associations</p>
-	                                    <div
-	                                        className="se-config-item clickable"
-	                                        onClick={() => {
-	                                            setShowLinksEditor('hospital');
-	                                            setEditedLinksJson(JSON.stringify(currentLinks.hospital || currentLinks, null, 2));
-	                                            setIsEditingLinks(false);
-	                                        }}
-		                                    >
-		                                        <span className="se-id-badge">HOSP LINKS</span>
-		                                        <span className="se-name-text">View/Edit Hospital Linked Criteria Map</span>
-		                                        <span className="chevron-right">›</span>
-		                                    </div>
-	                                    <p className="settings-subtitle" style={{ marginTop: '1rem' }}>Mortuary Criteria dependencies and associations</p>
-                                    <div
-                                        className="se-config-item clickable"
-                                        onClick={() => {
-                                            setShowLinksEditor('mortuary');
-                                            setEditedLinksJson(JSON.stringify(currentLinks.mortuary || currentLinks, null, 2));
-                                            setIsEditingLinks(false);
-                                        }}
-                                    >
-                                        <span className="se-id-badge">MORT LINKS</span>
-                                        <span className="se-name-text">View/Edit Mortuary Linked Criteria Map</span>
-                                        <span className="chevron-right">›</span>
-                                    </div>
-                                    <p className="settings-subtitle" style={{ marginTop: '1rem' }}>Clinics Criteria dependencies and associations</p>
-                                    <div
-                                        className="se-config-item clickable"
-                                        onClick={() => {
-                                            setShowLinksEditor('clinics');
-                                            setEditedLinksJson(JSON.stringify(currentLinks.clinics || currentLinks, null, 2));
-                                            setIsEditingLinks(false);
-                                        }}
-                                    >
-                                        <span className="se-id-badge">CLINIC LINKS</span>
-                                        <span className="se-name-text">View/Edit Clinics Linked Criteria Map</span>
-                                        <span className="chevron-right">›</span>
-                                    </div>
-		                                </div>
-		                                <div className="settings-section">
-		                                    <h4>Criteria and Sub Criteria for Computation</h4>
-		                                    <p className="settings-subtitle">Hospital root criteria and their sub-criteria used for computation helpers.</p>
-	                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-	                                        <span style={{ fontSize: '0.85em', color: '#4a5568' }}>
-	                                            Editing for version: <strong>{activeVersion ? activeVersion.name : 'Baseline configuration'}</strong>
-	                                        </span>
-	                                        <Button
-	                                            variant="outlined"
-	                                            size="small"
-	                                            onClick={handleOpenComputeEditor}
-	                                        >
-	                                            Configure for active version
-	                                        </Button>
-	                                    </div>
-		                                    <div className="se-config-list">
-		                                        {hospitalComputeServiceElements.map(se => (
-		                                            <div key={se.se_id} className="se-config-item">
-		                                                <span className="se-id-badge">{se.se_id}</span>
-		                                                <span className="se-name-text">{se.name}</span>
-		                                            </div>
-		                                        ))}
-		                                    </div>
-		                                    <div className="raw-json-container" style={{ marginTop: '10px', maxHeight: '240px', overflowY: 'auto' }}>
-		                                        {hospitalComputeServiceElements.map(se => (
-		                                            <div key={`${se.se_id}-detail`} style={{ marginBottom: '12px' }}>
-		                                                <strong>{se.se_id} – {se.name}</strong>
-		                                                <ul style={{ marginTop: '4px', paddingLeft: '18px' }}>
-		                                                    {se.root_criteria.map(rc => (
-		                                                        <li key={rc.id}>
-		                                                            <div><strong>{rc.id}</strong>: {rc.description}</div>
-		                                                            <div style={{ fontSize: '0.85em', marginLeft: '4px' }}>
-		                                                                Sub-criteria: {rc.sub_criteria.join(', ')}
-		                                                            </div>
-		                                                        </li>
-		                                                    ))}
-		                                                </ul>
-		                                            </div>
-		                                        ))}
-		                                    </div>
-		                                </div>
 									<div className="settings-section">
 										<h4>Facility Type — SE Criteria Overview</h4>
+										<div style={{ fontSize: '0.85rem', color: '#475569', marginTop: '4px', marginBottom: '12px', padding: '8px 12px', backgroundColor: '#f1f5f9', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+											<strong>Active App Source Strategy:</strong> {configSource === 'datastore' ? 'Remote DHIS2 DataStore' : 'Local Assets (In-App)'}
+											<br />
+											<span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+												Note: To compare edits or perform a reset, use the <em>View Configuration Mode</em> selector below.
+											</span>
+										</div>
+
+										<div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px' }}>
+											<FormControl size="small" style={{ minWidth: '240px' }}>
+												<InputLabel>View Configuration Mode</InputLabel>
+												<Select
+													value={overviewSource}
+													label="View Configuration Mode"
+													onChange={(e) => setOverviewSource(e.target.value)}
+												>
+													<MenuItem value="active">Active/Remote Config</MenuItem>
+													<MenuItem value="local">Local Baseline (In-App JSONs)</MenuItem>
+												</Select>
+											</FormControl>
+										</div>
+
 										<p className="settings-subtitle">Expand a facility type to view its criteria.</p>
-										<Button
-										    variant='outlined'
-										    size='small'
-										    style={{ marginBottom: '12px' }}
-										    onClick={handleSaveConfigsToDataStore}
-										>
-										    Save Config to DataStore
-										</Button>
+										<div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+											{overviewSource === 'active' ? (
+												<Button
+													variant='outlined'
+													size='small'
+													onClick={handleSaveConfigsToDataStore}
+												>
+													Save Config to DataStore
+												</Button>
+											) : (
+												<Button
+													variant='outlined'
+													size='small'
+													color='error'
+													onClick={() => setShowResetConfirmDialog(true)}
+												>
+													Reset DataStore to Local Baseline
+												</Button>
+											)}
+											<Button
+												variant='outlined'
+												size='small'
+												onClick={() => navigate('/dev-config-export')}
+											>
+												Export Configs
+											</Button>
+										</div>
 										{(() => {
+											const activeConfig = overviewSource === 'active' ? currentConfig : {
+												hospital_full_configuration: hospitalConfig,
+												clinics_full_configuration: clinicsConfig,
+												ems_full_configuration: emsConfig,
+												mortuary_full_configuration: mortuaryConfig,
+											};
 											const FACILITY_CONFIGS = [
-												{ type: 'Hospital', config: hospitalConfig, key: 'hospital_full_configuration' },
-												{ type: 'Clinics', config: clinicsConfig, key: 'clinics_full_configuration' },
-												{ type: 'EMS', config: emsConfig, key: 'ems_full_configuration' },
-												{ type: 'Mortuary', config: mortuaryConfig, key: 'mortuary_full_configuration' },
+												{ type: 'Hospital', config: activeConfig, key: 'hospital_full_configuration' },
+												{ type: 'Clinics', config: activeConfig, key: 'clinics_full_configuration' },
+												{ type: 'EMS', config: activeConfig, key: 'ems_full_configuration' },
+												{ type: 'Mortuary', config: activeConfig, key: 'mortuary_full_configuration' },
 											];
 											const toggleFac = (type) => {
 											    setLoadingFacType(type);
@@ -4630,7 +4405,11 @@ export function Dashboard() {
 																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontWeight: 600, color: row.isRoot ? '#2b6cb0' : '#718096' }}>{row.isRoot ? 'Yes' : 'No'}</td>
 																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>
 																							<span
-																								onClick={() => handleToggleCritical(row.configKey, row.seId, row.standardId, row.criterionId)}
+																								onClick={() => {
+																									if (overviewSource !== 'local') {
+																										handleToggleCritical(row.configKey, row.seId, row.standardId, row.criterionId);
+																									}
+																								}}
 																								style={{
 																								color: row.isCritical ? '#c53030' : '#2f855a',
 																								fontWeight: 600,
@@ -4638,7 +4417,8 @@ export function Dashboard() {
 																								padding: '2px 8px',
 																								borderRadius: '4px',
 																								fontSize: '0.85em',
-																								cursor: 'pointer',
+																								cursor: overviewSource === 'local' ? 'default' : 'pointer',
+																								opacity: overviewSource === 'local' ? 0.7 : 1,
 																							}}>
 																								{row.isCritical ? 'Critical' : 'Non-Critical'}
 																							</span>
@@ -4661,7 +4441,7 @@ export function Dashboard() {
 																						<Button
 																							variant='outlined'
 																							size='small'
-																							disabled={loadingEditRow === row.criterionId}
+																							disabled={overviewSource === 'local' || loadingEditRow === row.criterionId}
 																							onClick={() => {
 																							    setLoadingEditRow(row.criterionId);
 																							    setTimeout(() => {
@@ -4754,22 +4534,7 @@ export function Dashboard() {
                                         <Button onClick={handleSaveCriterionEdit} variant="contained">Save</Button>
                                     </DialogActions>
                                 </Dialog>
-                                <div className="settings-section">
-                                    <h4>User Info</h4>
-                                    <p>Logged in as: <strong>{user?.username || 'Guest'}</strong></p>
-                                </div>
-                                <div className="settings-section">
-                                    <h4>Troubleshooting</h4>
-                                    <Button
-                                        variant="outlined"
-                                        color="error"
-                                        onClick={() => { setShowSettings(false); setShowClearConfirm(true); }}
-                                        size="small"
-                                        style={{ marginTop: '10px' }}
-                                    >
-                                        Reset Local Data
-                                    </Button>
-                                </div>
+
                             </>
                         ) : selectedSE ? (
                             <div className="se-details-view raw-json-container">
