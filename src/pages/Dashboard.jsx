@@ -1274,24 +1274,26 @@ export function Dashboard() {
 	    };
 	};
 
-			const getFacilityGroupKeyFromProgramStageId = (stageId) => {
+			function getFacilityGroupKeyFromProgramStageId(stageId) {
 			    const id = String(stageId || '').trim();
 			    if (!id) return '';
 			    const entry = Object.entries(SURVEY_PROGRAM_STAGE_BY_GROUP).find(([, value]) => value === id);
 			    return entry?.[0] || '';
-			};
+			}
 
-			const getAssignmentFacilityGroupRawValue = (assessment) => (
-			    assessment?.parentGroupId
-			    || assessment?.facilityGroup
-			    || assessment?.schedule?.parentGroupId
-			    || assessment?.schedule?.facilityGroup
-			    || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
-			    || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
-			    || ''
-			);
+			function getAssignmentFacilityGroupRawValue(assessment) {
+			    return (
+			        assessment?.parentGroupId
+			        || assessment?.facilityGroup
+			        || assessment?.schedule?.parentGroupId
+			        || assessment?.schedule?.facilityGroup
+			        || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
+			        || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
+			        || ''
+			    );
+			}
 
-			const getAssessmentFacilityGroupKey = (assessment) => {
+			function getAssessmentFacilityGroupKey(assessment) {
 			    const raw = getAssignmentFacilityGroupRawValue(assessment);
 			    const key = toFacilityGroupKey(raw);
 			    if (key && key !== '-') return key;
@@ -1300,49 +1302,55 @@ export function Dashboard() {
 			        || assessment?.schedule?.programStageId
 			        || assessment?.schedule?.enrollments?.[0]?.programStage
 			    );
-			};
+			}
 
-			const getAssignmentFacilityGroupValue = (assessment) => {
+			function getAssignmentFacilityGroupValue(assessment) {
 			    const raw = getAssignmentFacilityGroupRawValue(assessment);
 			    const key = getAssessmentFacilityGroupKey(assessment);
 			    return key ? getFacilityGroupLabel(key) : (raw || '-');
-			};
+			}
 
-		const getAssignmentTypeValue = (assessment) => (
-		    assessment?.typeOfAssessment
-		    || assessment?.assessmentType
-		    || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
-		    || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
-		    || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentType, ['assessment type'])
-		    || '-'
-		);
+			function getAssignmentTypeValue(assessment) {
+			    return (
+			        assessment?.typeOfAssessment
+			        || assessment?.assessmentType
+			        || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
+			        || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
+			        || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentType, ['assessment type'])
+			        || '-'
+			    );
+			}
 
-		const getAssignmentProgramId = (assessment) => (
-		    assessment?.program
-		    || assessment?.programId
-		    || assessment?.schedule?.enrollments?.[0]?.program
-			    || configuration?.program?.id
-			    || SURVEY_ASSESSMENTS_PROGRAM_ID
-		);
+			function getAssignmentProgramId(assessment) {
+			    return (
+			        assessment?.program
+			        || assessment?.programId
+			        || assessment?.schedule?.enrollments?.[0]?.program
+				    || configuration?.program?.id
+				    || SURVEY_ASSESSMENTS_PROGRAM_ID
+			    );
+			}
 
 				const ASSOCIATED_ASSESSMENTS_PROGRAM_ID = SURVEY_ASSESSMENTS_PROGRAM_ID;
-			const supportsAssociatedAssessments = (assessment) => Boolean(resolveOrgUnitForAssessment(assessment));
+			function supportsAssociatedAssessments(assessment) {
+			    return Boolean(resolveOrgUnitForAssessment(assessment));
+			}
 
-			const getAssignmentProgramStageId = (assessment) => {
+			function getAssignmentProgramStageId(assessment) {
 			    const facilityGroup = getAssessmentFacilityGroupKey(assessment) || getAssignmentFacilityGroupValue(assessment);
-		    return assessment?.programStageId
-		        || getSurveyProgramStageIdForGroup(facilityGroup)
-		        || configuration?.programStage?.id
-		        || '';
-		};
+			    return assessment?.programStageId
+			        || getSurveyProgramStageIdForGroup(facilityGroup)
+			        || configuration?.programStage?.id
+			        || '';
+			}
 
-			const getSurveyEventProgramIdForStage = (stageId, assessment = null) => {
+			function getSurveyEventProgramIdForStage(stageId, assessment = null) {
 			    const normalizedStageId = String(stageId || '').trim();
 			    const isSurveyStage = Object.values(SURVEY_PROGRAM_STAGE_BY_GROUP).includes(normalizedStageId);
 			    return isSurveyStage
 			        ? SURVEY_ASSESSMENTS_PROGRAM_ID
 			        : (configuration?.program?.id || getAssignmentProgramId(assessment) || SURVEY_ASSESSMENTS_PROGRAM_ID);
-			};
+			}
 		const formatAssignmentStatusLabel = (value) => {
 		    const raw = String(value || '').trim();
 		    const map = {
