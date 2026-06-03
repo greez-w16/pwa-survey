@@ -48,7 +48,10 @@ const filterEventsByExactScope = (events, {
         if (!ev?.event) return false;
         if (programId && ev.program !== programId) return false;
         if (stageId && ev.programStage !== stageId) return false;
-        if (teiId && ev.trackedEntityInstance !== teiId) return false;
+        if (teiId) {
+            const teiIds = String(teiId).split(';').map(id => id.trim()).filter(Boolean);
+            if (!teiIds.includes(ev.trackedEntityInstance)) return false;
+        }
         if (enrollmentId && ev.enrollment !== enrollmentId) return false;
         return true;
     });

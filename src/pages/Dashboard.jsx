@@ -1083,17 +1083,126 @@ export function Dashboard() {
 
 		    React.useEffect(() => {
 		        if (assessmentsLoading) return;
-		        const all = [...(pendingAssessments || []), ...(upcomingAssessments || []), ...(accredAssignments || [])];
-	        const seen = new Set();
-	        all.forEach(assessment => {
-	            const assocKey = getAssocKey(assessment);
-	            if (!assocKey || seen.has(assocKey)) return;
-	            seen.add(assocKey);
-	            const current = assessmentEventPresenceByKey?.[assocKey];
-	            if (current && (current.loading || typeof current.hasAssessmentEvent === 'boolean')) return;
-	            checkAssessmentEventPresence(assessment);
-	        });
-		    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, assessmentEventPresenceByKey, checkAssessmentEventPresence]);
+		        
+		        // 1. Gather all top-level and duplicate sub-assessments
+		        const topLevelList = [
+		            ...(pendingAssessments || []),
+		            ...(upcomingAssessments || []),
+		            ...(accredAssignments || [])
+		        ];
+		        
+		        const allAssessments = [];
+		        topLevelList.forEach(a => {
+		            allAssessments.push(a);
+		            if (Array.isArray(a._duplicates)) {
+		                allAssessments.push(...a._duplicates);
+		            }
+		        });
+		        
+		        // 2. Filter out those that are already checked or currently checking
+		        const seen = new Set();
+		        const toCheck = [];
+		        
+		        allAssessments.forEach(assessment => {
+		            const assocKey = getAssocKey(assessment);
+		            if (!assocKey || seen.has(assocKey)) return;
+		            seen.add(assocKey);
+		            
+		            const current = assessmentEventPresenceByKey?.[assocKey];
+		            if (current && (current.loading || typeof current.hasAssessmentEvent === 'boolean')) {
+		                return;
+		            }
+		            
+		            // Ensure we have a TEI ID before trying to query presence
+		            const teiId = assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
+		            if (!teiId) {
+		                // Set default immediately
+		                setAssessmentEventPresenceByKey(prev => ({
+		                    ...prev,
+		                    [assocKey]: { loading: false, hasAssessmentEvent: false }
+		                }));
+		                return;
+		            }
+		            
+		            toCheck.push(assessment);
+		        });
+		        
+		        if (toCheck.length === 0) return;
+		        
+		        // 3. Perform bulk check
+		        const checkInBulk = async () => {
+		            // Set all to loading state
+		            setAssessmentEventPresenceByKey(prev => {
+		                const next = { ...prev };
+		                toCheck.forEach(a => {
+		                    const assocKey = getAssocKey(a);
+		                    next[assocKey] = { ...(prev[assocKey] || {}), loading: true };
+		                });
+		                return next;
+		            });
+		            
+		            try {
+		                // Group toCheck by program & stage
+		                const groups = {};
+		                toCheck.forEach(a => {
+		                    const stageId = getAssignmentProgramStageId(a);
+		                    const programId = getSurveyEventProgramIdForStage(stageId, a);
+		                    const teiId = a.trackedEntityInstance || a.scheduleTeiId;
+		                    const key = `${programId}-${stageId}`;
+		                    if (!groups[key]) groups[key] = { programId, stageId, teiIds: new Set() };
+		                    groups[key].teiIds.add(teiId);
+		                });
+		                
+		                // Fetch events in parallel for each program/stage group
+		                const results = await Promise.all(Object.values(groups).map(async (g) => {
+		                    const teiIds = [...g.teiIds];
+		                    if (teiIds.length === 0) return [];
+		                    try {
+		                        const events = await api.getEventsList({
+		                            programId: g.programId,
+		                            stageId: g.stageId,
+		                            teiId: teiIds.join(';'),
+		                            ouMode: 'DESCENDANTS',
+		                            fields: 'event,trackedEntityInstance'
+		                        });
+		                        return events || [];
+		                    } catch (err) {
+		                        console.warn(`Bulk presence check failed for program ${g.programId} stage ${g.stageId}`, err);
+		                        return [];
+		                    }
+		                }));
+		                
+		                const allEvents = results.flat();
+		                
+		                // Update presence status for all checked assessments
+		                setAssessmentEventPresenceByKey(prev => {
+		                    const next = { ...prev };
+		                    toCheck.forEach(a => {
+		                        const assocKey = getAssocKey(a);
+		                        const teiId = a.trackedEntityInstance || a.scheduleTeiId;
+		                        const hasEvent = allEvents.some(ev =>
+		                            ev?.event && String(ev?.trackedEntityInstance || '').trim() === String(teiId).trim()
+		                        );
+		                        next[assocKey] = { loading: false, hasAssessmentEvent: hasEvent };
+		                    });
+		                    return next;
+		                });
+		            } catch (err) {
+		                console.error('Failed to run bulk presence check', err);
+		                // Fallback all to loaded=false
+		                setAssessmentEventPresenceByKey(prev => {
+		                    const next = { ...prev };
+		                    toCheck.forEach(a => {
+		                        const assocKey = getAssocKey(a);
+		                        next[assocKey] = { loading: false, hasAssessmentEvent: false };
+		                    });
+		                    return next;
+		                });
+		            }
+		        };
+		        
+		        checkInBulk();
+		    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, assessmentEventPresenceByKey, getAssignmentProgramStageId, getSurveyEventProgramIdForStage]);
 
 	    const toggleExpandAssessment = async (assessment) => {
 	        if (!supportsAssociatedAssessments(assessment)) {
