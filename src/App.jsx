@@ -384,9 +384,20 @@ const PrivateRoute = ({ children }) => {
   const loadInitialData = async () => {
     setIsLoading(true);
     try {
-      // Legacy default stage HpHD6u6MV37 is no longer used; metadata is loaded
-      // on-demand per group. Only fetch assignments initially.
-      const msgAssignments = await api.getAssignments();
+      // Fetch only assignments linked to the logged in user
+      const [legacyByUid, legacyByUsername] = await Promise.all([
+        api.getAssignments('G2gULe4jsfs', user.id),
+        user.username && user.username !== user.id ? api.getAssignments('G2gULe4jsfs', user.username) : Promise.resolve([])
+      ]);
+      const rawAssignments = [...legacyByUid, ...legacyByUsername];
+      const seenEnrollments = new Set();
+      const msgAssignments = [];
+      for (const enr of rawAssignments) {
+        if (!seenEnrollments.has(enr.enrollment)) {
+          seenEnrollments.add(enr.enrollment);
+          msgAssignments.push(enr);
+        }
+      }
       setAssignments(msgAssignments || []);
       setGroups([]); // no default stage groups; loaded per-stage when needed
 

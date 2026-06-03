@@ -82,21 +82,26 @@ class AssessmentTeamAssignmentService {
 		                count: enrollments?.length || 0
 		            });
 
-		            // Always fetch legacy enrollments-based assignments from the main survey 
-		            // program (G2gULe4jsfs) so that users see their historical or
-		            // manually assigned assessments alongside the new scheduled ones.
 		            if (userId) {
-		                const legacyEnrollments = await api.getAssignments('G2gULe4jsfs', null);
-		                const filteredLegacy = legacyEnrollments.filter(enr => {
-		                    const listAttr = (enr.attributes || []).find(a => a.attribute === INSPECTOR_LIST_ATTR);
-		                    if (!listAttr || !listAttr.value) return false;
-		                    const val = String(listAttr.value);
-		                    const idMatch = userId && val.includes(String(userId));
-		                    const usernameMatch = username && val.toLowerCase().includes(String(username).toLowerCase());
-		                    return idMatch || usernameMatch;
-		                });
-		                console.log('[AssessmentTeamAssignmentService] Legacy assignments for user', { userId, username, count: filteredLegacy.length });
-		                enrollments = [...(enrollments || []), ...filteredLegacy];
+		                // Fetch legacy enrollments filtered by user ID and/or username on the server
+		                const [legacyByUid, legacyByUsername] = await Promise.all([
+		                    api.getAssignments('G2gULe4jsfs', userId),
+		                    username && username !== userId ? api.getAssignments('G2gULe4jsfs', username) : Promise.resolve([])
+		                ]);
+		                const legacyEnrollments = [...legacyByUid, ...legacyByUsername];
+		                
+		                // Deduplicate by enrollment ID
+		                const seenEnrollments = new Set();
+		                const uniqueLegacy = [];
+		                for (const enr of legacyEnrollments) {
+		                    if (!seenEnrollments.has(enr.enrollment)) {
+		                        seenEnrollments.add(enr.enrollment);
+		                        uniqueLegacy.push(enr);
+		                    }
+		                }
+
+		                console.log('[AssessmentTeamAssignmentService] Legacy assignments for user (server filtered)', { userId, username, count: uniqueLegacy.length });
+		                enrollments = [...(enrollments || []), ...uniqueLegacy];
 		            }
 
 	            console.log('[AssessmentTeamAssignmentService] Total enrollments to map into domain assignments', {

@@ -737,7 +737,7 @@ export const api = {
                 console.log(`[API] Fetching ${missingIds.size} missing data elements for section hydration...`);
                 const deFields = 'id,formName,displayFormName,name,displayName,shortName,code,description,valueType,aggregationType,lastUpdated,optionSet[id,displayName,options[id,displayName,code,sortOrder]]';
                 const deResponse = await fetch(
-                    `${BASE_URL}/api/dataElements?paging=false&filter=id:in:[${[...missingIds].join(',')}]&fields=${deFields}&_=${Date.now()}`,
+                    `${BASE_URL}/api/dataElements?paging=false&filter=id:in:${[...missingIds].join(',')}&fields=${deFields}&_=${Date.now()}`,
                     { headers: { ...getHeaders(), 'Cache-Control': 'no-cache', Pragma: 'no-cache' }, cache: 'no-store' }
                 );
 
@@ -1280,7 +1280,7 @@ export const api = {
 		        let ouMap = {};
 		        if (ouIds.length > 0) {
 		            try {
-                const ouUrl = `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:[${ouIds.join(',')}]` +
+                const ouUrl = `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:${ouIds.join(',')}` +
                     `&fields=id,displayName,name,level,parent[id,displayName,name,level,parent[id,displayName,name,level]]`;
 		                const ouResponse = await fetch(
 		                    ouUrl,
