@@ -5,7 +5,7 @@ const ADMIN_USER_RESOLVER_URL = '/email2/api/admin/resolve-users';
 const getAdminUserResolverUrls = () => {
     const urls = [ADMIN_USER_RESOLVER_URL];
     if (typeof window !== 'undefined' && /^localhost$|^127\.0\.0\.1$/.test(window.location.hostname)) {
-        urls.push('https://qimsdev.5am.co.bw/email2/api/admin/resolve-users');
+        urls.push('https://moh-qimsuat.gov.bw/email2/api/admin/resolve-users');
     }
     return urls;
 };

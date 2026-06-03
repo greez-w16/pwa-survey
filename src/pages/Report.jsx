@@ -32,7 +32,8 @@ import {
 	  PolarGrid,
 	  PolarAngleAxis,
 	  PolarRadiusAxis,
-	  Radar
+	  Radar,
+	  ReferenceLine
 } from 'recharts';
 
 const SURVEY_PROGRAM_STAGE_BY_GROUP = {
@@ -40,6 +41,7 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   CLINICS: 'cliStageU11',
   EMS: 'emsStageU11',
   MORTUARY: 'morStageU11',
+  OBGYN: 'obgStageU11',
 };
 
 const toFacilityGroupKey = (value) => {
@@ -49,6 +51,7 @@ const toFacilityGroupKey = (value) => {
   if (t.includes('clinic')) return 'CLINICS';
   if (t.includes('ems') || t === 'se' || t.includes(' se')) return 'EMS';
   if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
+  if (t.includes('obg')) return 'OBGYN';
   return String(value || '').trim().toUpperCase();
 };
 
@@ -206,6 +209,7 @@ export default function Report() {
       mortuary: buildMeta(sourceConfig, 'mortuary_full_configuration', effectiveLinks.mortuary || mortuaryLinks),
       clinics: buildMeta(sourceConfig, 'clinics_full_configuration', effectiveLinks.clinics || clinicsLinks),
       hospital: buildMeta(sourceConfig, 'hospital_full_configuration', effectiveLinks.hospital || hospitalLinks),
+      obgyn: buildMeta(sourceConfig, 'obgyn_full_configuration', effectiveLinks.obgyn || []),
     };
   }, [configBundles, activeConfigVersionId]);
 
@@ -582,7 +586,7 @@ export default function Report() {
 	        } : null);
 
         // Build assessment structure for scoring based on facility group
-        const programmeType = (groupId === 'HOSPITAL') ? 'hospital' : (groupId === 'CLINICS') ? 'clinics' : (groupId === 'EMS') ? 'ems' : (groupId === 'MORTUARY') ? 'mortuary' : 'mortuary';
+        const programmeType = (groupId === 'HOSPITAL') ? 'hospital' : (groupId === 'CLINICS') ? 'clinics' : (groupId === 'EMS') ? 'ems' : (groupId === 'MORTUARY') ? 'mortuary' : (groupId === 'OBGYN') ? 'obgyn' : 'mortuary';
         const { linksDataLookup, severityLookup } = programmeScoringMeta[programmeType] || programmeScoringMeta.ems;
 
         // Under the new model, each SE lives in its own event tagged as SYS_TAG:<seNum>
@@ -663,6 +667,7 @@ export default function Report() {
             else if (programmeType === 'clinics') arr = clinicsConfig.clinics_full_configuration || [];
             else if (programmeType === 'ems') arr = emsConfig.ems_full_configuration || [];
             else if (programmeType === 'mortuary') arr = mortuaryConfig.mortuary_full_configuration || [];
+            else if (programmeType === 'obgyn') arr = [];
             const map = {};
             (arr || []).forEach(se => {
               const n = parseInt(String(se.se_id || ''), 10);
@@ -863,8 +868,9 @@ export default function Report() {
   // Drilldown state for Baseline vs Latest chart
   const [drillOpen, setDrillOpen] = useState(false);
   const [drillSectionId, setDrillSectionId] = useState(null);
-  const [drillLevel, setDrillLevel] = useState('roots'); // roots | criteria
-  const [drillRootCode, setDrillRootCode] = useState(null);
+  const [drillLevel, setDrillLevel] = useState('pi'); // pi | standards | criteria
+  const [drillRootCode, setDrillRootCode] = useState(null); // holds PI code (e.g. "1.1")
+  const [drillStandardCode, setDrillStandardCode] = useState(null); // holds Standard code (e.g. "1.1.1")
   const drillChartRef = useRef(null);
 
   const formatOverviewDate = (value) => {
@@ -888,7 +894,9 @@ export default function Report() {
     if (!Number.isFinite(baselineValue) || !Number.isFinite(latestValue)) {
       return { value: null, display: '—', category: 'muted' };
     }
-    const value = Math.round(latestValue - baselineValue);
+    const roundedBaseline = Math.round(baselineValue);
+    const roundedLatest = Math.round(latestValue);
+    const value = roundedLatest - roundedBaseline;
     return {
       value,
       display: `${value > 0 ? '+' : ''}${value}%`,
@@ -976,7 +984,7 @@ export default function Report() {
 
       // Critical criteria counts
       // Try to detect programme type from reportInfo.groupId
-      const programmeType = (reportInfo.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo.groupId === 'CLINICS') ? 'clinics' : (reportInfo.groupId === 'EMS') ? 'ems' : (reportInfo.groupId === 'MORTUARY') ? 'mortuary' : 'mortuary';
+      const programmeType = (reportInfo.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo.groupId === 'CLINICS') ? 'clinics' : (reportInfo.groupId === 'EMS') ? 'ems' : (reportInfo.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo.groupId === 'OBGYN') ? 'obgyn' : 'mortuary';
       const criticalLookup = (programmeScoringMeta[programmeType] && programmeScoringMeta[programmeType].criticalLookup) || {};
       const getCritical = (list) => list.filter(c => {
         const code = String(c.code || '').trim();
@@ -1261,7 +1269,8 @@ export default function Report() {
   const openDrillForSection = (sectionId) => {
     setDrillSectionId(sectionId);
     setDrillRootCode(null);
-    setDrillLevel('roots');
+    setDrillStandardCode(null);
+    setDrillLevel('pi');
     setDrillOpen(true);
   };
 
@@ -1269,13 +1278,19 @@ export default function Report() {
     setDrillOpen(false);
     setDrillSectionId(null);
     setDrillRootCode(null);
-    setDrillLevel('roots');
+    setDrillStandardCode(null);
+    setDrillLevel('pi');
   };
 
   const backDrill = () => {
     if (drillLevel === 'criteria') {
+      setDrillStandardCode(null);
+      setDrillLevel('standards');
+      return;
+    }
+    if (drillLevel === 'standards') {
       setDrillRootCode(null);
-      setDrillLevel('roots');
+      setDrillLevel('pi');
       return;
     }
     closeDrill();
@@ -1345,27 +1360,137 @@ export default function Report() {
     return 'NA';
   };
 
-  const buildRootChartData = (sectionId) => {
+  const getPiLabel = (piCode) => {
+    if (!piCode) return '';
+    const programmeType = (reportInfo?.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo?.groupId === 'CLINICS') ? 'clinics' : (reportInfo?.groupId === 'EMS') ? 'ems' : (reportInfo?.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo?.groupId === 'OBGYN') ? 'obgyn' : 'mortuary';
+    const configMap = {
+      hospital: hospitalConfig?.hospital_full_configuration,
+      mortuary: mortuaryConfig?.mortuary_full_configuration,
+      clinics: clinicsConfig?.clinics_full_configuration,
+      ems: emsConfig?.ems_full_configuration,
+      obgyn: []
+    };
+    const config = configMap[programmeType] || [];
+    for (const se of config) {
+      for (const sec of se.sections || []) {
+        if ((sec.section_pi_id || '').trim() === piCode) {
+          return sec.title || '';
+        }
+      }
+    }
+    return '';
+  };
+
+  const getStandardLabel = (standardCode) => {
+    if (!standardCode) return '';
+    const programmeType = (reportInfo?.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo?.groupId === 'CLINICS') ? 'clinics' : (reportInfo?.groupId === 'EMS') ? 'ems' : (reportInfo?.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo?.groupId === 'OBGYN') ? 'obgyn' : 'mortuary';
+    const configMap = {
+      hospital: hospitalConfig?.hospital_full_configuration,
+      mortuary: mortuaryConfig?.mortuary_full_configuration,
+      clinics: clinicsConfig?.clinics_full_configuration,
+      ems: emsConfig?.ems_full_configuration,
+      obgyn: []
+    };
+    const config = configMap[programmeType] || [];
+    for (const se of config) {
+      for (const sec of se.sections || []) {
+        for (const std of sec.standards || []) {
+          if ((std.standard_id || '').trim() === standardCode) {
+            return std.statement || std.title || '';
+          }
+        }
+      }
+    }
+    return '';
+  };
+
+  const toPiScoreValue = (scoreBag, piCode, sectionCriteria) => {
+    const latestByCode = criteriaByCode(sectionCriteria);
+    const standardCodes = Array.from(new Set(
+      sectionCriteria
+        .filter(c => c?.isRoot || /^\d+\.\d+\.\d+$/.test(normalizeCriterionCode(c.code || c.id) || ''))
+        .map(c => normalizeCriterionCode(c.code || c.id))
+        .filter(code => code && code.startsWith(`${piCode}.`))
+    ));
+    if (standardCodes.length === 0) return 0;
+    let sum = 0;
+    let count = 0;
+    standardCodes.forEach(code => {
+      const val = toChartScoreValue(scoreBag, code, latestByCode[code]);
+      if (Number.isFinite(val)) {
+        sum += val;
+        count++;
+      }
+    });
+    return count > 0 ? Math.round(sum / count) : 0;
+  };
+
+  const buildPiChartData = (sectionId) => {
+    const latestCriteria = getSectionCriteria(reportAssessment, sectionId);
+    const baselineCriteria = getSectionCriteria(baselineAssessment, sectionId);
+    const piCodesSet = new Set();
+    [...latestCriteria, ...baselineCriteria].forEach(c => {
+      const code = normalizeCriterionCode(c.code || c.id);
+      if (code) {
+        const parts = code.split('.');
+        if (parts.length >= 2) {
+          piCodesSet.add(`${parts[0]}.${parts[1]}`);
+        }
+      }
+    });
+    const piCodes = Array.from(piCodesSet).sort((a, b) => {
+      const aParts = String(a).split('.').map(Number);
+      const bParts = String(b).split('.').map(Number);
+      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const aNum = Number.isFinite(aParts[i]) ? aParts[i] : 0;
+        const bNum = Number.isFinite(bParts[i]) ? bParts[i] : 0;
+        if (aNum !== bNum) return aNum - bNum;
+      }
+      return 0;
+    });
+    return piCodes.map(code => {
+      const title = getPiLabel(code) || `PI ${code}`;
+      return {
+        code,
+        name: shortCriterionLabel(`${code} ${title}`),
+        fullLabel: `${code} ${title}`,
+        Baseline: toPiScoreValue(baselineScoring, code, baselineCriteria),
+        Latest: toPiScoreValue(scoring, code, latestCriteria),
+      };
+    });
+  };
+
+  const buildRootChartData = (sectionId, piCode) => {
     const latestCriteria = getSectionCriteria(reportAssessment, sectionId);
     const baselineCriteria = getSectionCriteria(baselineAssessment, sectionId);
     const latestByCode = criteriaByCode(latestCriteria);
     const baselineByCode = criteriaByCode(baselineCriteria);
-    const latestRoots = latestCriteria.filter(c => c?.isRoot);
-    const baselineRoots = baselineCriteria.filter(c => c?.isRoot);
+    const isStandard = c => c?.isRoot || /^\d+\.\d+\.\d+$/.test(normalizeCriterionCode(c?.code || c?.id || '') || '');
+    const latestRoots = latestCriteria.filter(c => isStandard(c) && normalizeCriterionCode(c.code || c.id)?.startsWith(`${piCode}.`));
+    const baselineRoots = baselineCriteria.filter(c => isStandard(c) && normalizeCriterionCode(c.code || c.id)?.startsWith(`${piCode}.`));
     const codes = Array.from(new Set([
       ...latestRoots.map(c => normalizeCriterionCode(c.code || c.id)),
       ...baselineRoots.map(c => normalizeCriterionCode(c.code || c.id))
-    ].filter(Boolean)));
+    ].filter(Boolean))).sort((a, b) => {
+      const aParts = String(a).split('.').map(Number);
+      const bParts = String(b).split('.').map(Number);
+      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const aNum = Number.isFinite(aParts[i]) ? aParts[i] : 0;
+        const bNum = Number.isFinite(bParts[i]) ? bParts[i] : 0;
+        if (aNum !== bNum) return aNum - bNum;
+      }
+      return 0;
+    });
     return codes.map(code => ({
       code,
-	      name: shortCriterionLabel(criterionLabelForCode(code, latestByCode[code], baselineByCode[code])),
-	      fullLabel: criterionLabelForCode(code, latestByCode[code], baselineByCode[code]),
+      name: shortCriterionLabel(criterionLabelForCode(code, latestByCode[code], baselineByCode[code])),
+      fullLabel: criterionLabelForCode(code, latestByCode[code], baselineByCode[code]),
       Baseline: toChartScoreValue(baselineScoring, code, baselineByCode[code]),
       Latest: toChartScoreValue(scoring, code, latestByCode[code]),
     }));
   };
 
-  const buildCriteriaChartData = (sectionId, rootCode) => {
+  const buildCriteriaChartData = (sectionId, standardCode) => {
     const stripTag = (raw) => {
       const m = String(raw || '').match(/^(.*?)-([GB])$/i);
       return m ? m[1] : String(raw || '');
@@ -1375,7 +1500,8 @@ export default function Report() {
     const latestByCode = criteriaByCode(latestCriteria);
     const baselineByCode = criteriaByCode(baselineCriteria);
     const allCriteria = [...latestCriteria, ...baselineCriteria];
-    const findRoot = (list) => list.find(c => c?.isRoot && normalizeCriterionCode(c.code || c.id) === rootCode);
+    const isStandard = c => c?.isRoot || /^\d+\.\d+\.\d+$/.test(normalizeCriterionCode(c?.code || c?.id || '') || '');
+    const findRoot = (list) => list.find(c => isStandard(c) && normalizeCriterionCode(c.code || c.id) === standardCode);
     const latestRoot = findRoot(latestCriteria);
     const baselineRoot = findRoot(baselineCriteria);
     const linkedCodes = [
@@ -1383,14 +1509,23 @@ export default function Report() {
       ...((baselineRoot?.links || []).map(v => normalizeCriterionCode(stripTag(v))) || [])
     ];
     const inferredCodes = allCriteria
-      .filter(c => !c?.isRoot)
+      .filter(c => !isStandard(c))
       .map(c => normalizeCriterionCode(c.code || c.id))
-      .filter(code => code && (code.startsWith(`${rootCode}.`) || code.startsWith(`${rootCode}-`)));
-    const codes = Array.from(new Set([...linkedCodes, ...inferredCodes].filter(Boolean)));
+      .filter(code => code && (code.startsWith(`${standardCode}.`) || code.startsWith(`${standardCode}-`)));
+    const codes = Array.from(new Set([...linkedCodes, ...inferredCodes].filter(Boolean))).sort((a, b) => {
+      const aParts = String(a).split('.').map(Number);
+      const bParts = String(b).split('.').map(Number);
+      for (let i = 0; i < Math.max(aParts.length, bParts.length); i++) {
+        const aNum = Number.isFinite(aParts[i]) ? aParts[i] : 0;
+        const bNum = Number.isFinite(bParts[i]) ? bParts[i] : 0;
+        if (aNum !== bNum) return aNum - bNum;
+      }
+      return 0;
+    });
     return codes.map(code => ({
       code,
-	      name: shortCriterionLabel(criterionLabelForCode(code, latestByCode[code], baselineByCode[code])),
-	      fullLabel: criterionLabelForCode(code, latestByCode[code], baselineByCode[code]),
+      name: shortCriterionLabel(criterionLabelForCode(code, latestByCode[code], baselineByCode[code])),
+      fullLabel: criterionLabelForCode(code, latestByCode[code], baselineByCode[code]),
       Baseline: toChartScoreValue(baselineScoring, code, baselineByCode[code]),
       Latest: toChartScoreValue(scoring, code, latestByCode[code]),
     }));
@@ -1574,7 +1709,7 @@ export default function Report() {
 	      <div style={{ background: '#111827', color: '#e5e7eb', padding: '8px 10px', borderRadius: 8, boxShadow: '0 4px 14px rgba(0,0,0,0.25)' }}>
 	        <div style={{ fontWeight: 700, marginBottom: 6 }}>{item.fullName || item.name || 'Service element'}</div>
 	        <div style={{ color: '#bfdbfe' }}>Baseline: {Number(item.Baseline || 0).toFixed(1)}%</div>
-	        <div style={{ color: '#fecaca' }}>Latest: {Number(item.Latest || 0).toFixed(1)}%</div>
+	        <div style={{ color: '#f87171' }}>Latest: {Number(item.Latest || 0).toFixed(1)}%</div>
 	      </div>
 	    );
 	  };
@@ -1587,7 +1722,7 @@ export default function Report() {
 	        <div style={{ fontWeight: 700, marginBottom: 6 }}>{item.name || item.id || 'Service element'}</div>
 	        <div style={{ color: '#bbf7d0' }}>C: {item.cCount || 0} criteria ({Number(item.C || 0).toFixed(1)}%)</div>
 	        <div style={{ color: '#fde68a' }}>PC: {item.pcCount || 0} criteria ({Number(item.PC || 0).toFixed(1)}%)</div>
-	        <div style={{ color: '#fecaca' }}>NC: {item.ncCount || 0} criteria ({Number(item.NC || 0).toFixed(1)}%)</div>
+	        <div style={{ color: '#f87171' }}>NC: {item.ncCount || 0} criteria ({Number(item.NC || 0).toFixed(1)}%)</div>
 	        {Number(item.naCount || 0) > 0 && (
 	          <div style={{ color: '#cbd5e1', marginTop: 4 }}>N/A excluded: {item.naCount}</div>
 	        )}
@@ -1707,19 +1842,37 @@ export default function Report() {
         const serviceElement = chartLabel
           ? chartLabel.replace(/^\s*SE\s*[0-9]+\s*/i, '').trim()
           : String(label || '').replace(/^\s*SE\s*[0-9]+\s*/i, '').trim();
-        return { seCode, serviceElement, facilitator: getFacilitatorsForServiceElement(seCode) };
+        
+        // Find score from facilityOverview
+        const ovRow = facilityOverview[idx];
+        const latestPercent = ovRow ? Number(ovRow.latestPercent) : 0;
+        const seenVal = (Number.isFinite(latestPercent) && latestPercent > 0) ? 'Yes' : 'No';
+
+        return { 
+          seCode, 
+          serviceElement, 
+          facilitator: getFacilitatorsForServiceElement(seCode),
+          scheduled: 'Yes',
+          seen: seenVal
+        };
       })
-      : facilityOverview.map(row => ({
-        seCode: row.seIndex,
-        serviceElement: row.seName,
-        facilitator: getFacilitatorsForServiceElement(row.seIndex),
-      }));
+      : facilityOverview.map(row => {
+        const latestPercent = Number(row.latestPercent) || 0;
+        const seenVal = (Number.isFinite(latestPercent) && latestPercent > 0) ? 'Yes' : 'No';
+        return {
+          seCode: row.seIndex,
+          serviceElement: row.seName,
+          facilitator: getFacilitatorsForServiceElement(row.seIndex),
+          scheduled: 'Yes',
+          seen: seenVal
+        };
+      });
     const serviceElementTableRows = serviceElementRowsSource.map(row => `
       <tr>
         <td class="se-code">${escapeHtml(row.seCode)}</td>
         <td class="se-name">${escapeHtml(row.serviceElement)}</td>
-        <td class="se-small"></td>
-        <td class="se-small"></td>
+        <td class="se-small">${escapeHtml(row.scheduled)}</td>
+        <td class="se-small">${escapeHtml(row.seen)}</td>
         <td class="se-reason"></td>
         <td class="se-facilitator">${escapeHtml(row.facilitator)}</td>
       </tr>
@@ -2264,27 +2417,27 @@ export default function Report() {
             <table class="facility-overview-table">
               <thead>
                 <tr>
-                  <th class="fo-se" rowspan="2">SE</th>
-                  <th class="fo-service" rowspan="2">Service</th>
-                  <th class="group-scores" rowspan="2">Overall<br />baseline<br />score</th>
-                  <th class="group-scores" rowspan="2">Overall<br />progress<br />score</th>
-                  <th class="group-insights" colspan="4">Action<br />insights</th>
-                  <th class="group-baseline" colspan="3">Deficiencies<br />identified at<br />baseline</th>
-                  <th class="group-completed" rowspan="2">Deficiencies<br />completed<br />to date</th>
-                  <th class="group-remaining" colspan="3">Remaining<br />deficiencies to be<br />addressed</th>
-                  <th class="group-critical" colspan="3">Critical Criteria</th>
-                  <th class="group-critical" colspan="3">Critical Criteria<br />Remaining</th>
-                  <th class="fo-date" rowspan="2">Most recent<br />assessment<br />date</th>
+                  <th class="fo-se" rowspan="2" title="Service Element index code">SE</th>
+                  <th class="fo-service" rowspan="2" title="Service Element name">Service</th>
+                  <th class="group-scores" rowspan="2" title="First recorded compliance score inside the selected date range.">Overall<br />baseline<br />score</th>
+                  <th class="group-scores" rowspan="2" title="Most recent recorded compliance score inside the selected date range.">Overall<br />progress<br />score</th>
+                  <th class="group-insights" colspan="4" title="Action-oriented metrics tracking change, closure rate, timeline, and status.">Action<br />insights</th>
+                  <th class="group-baseline" colspan="3" title="Deficiencies (Non-Compliant or Partially Compliant criteria) identified in the baseline assessment.">Deficiencies<br />identified at<br />baseline</th>
+                  <th class="group-completed" rowspan="2" title="Baseline deficiencies successfully resolved to Compliant in the latest assessment.">Deficiencies<br />completed<br />to date</th>
+                  <th class="group-remaining" colspan="3" title="Baseline deficiencies that remain Non-Compliant or Partially Compliant in the latest assessment.">Remaining<br />deficiencies to be<br />addressed</th>
+                  <th class="group-critical" colspan="3" title="Total number of critical criteria evaluated at baseline.">Critical Criteria</th>
+                  <th class="group-critical" colspan="3" title="Number of baseline critical criteria that remain deficient (NC/PC) in the latest assessment.">Critical Criteria<br />Remaining</th>
+                  <th class="fo-date" rowspan="2" title="Date of the most recent assessment within the selected range.">Most recent<br />assessment<br />date</th>
                 </tr>
                 <tr>
-                  <th class="fo-insight">Δ<br />Change</th>
-                  <th class="fo-insight">Closure<br />Rate</th>
-                  <th class="fo-insight">Months<br />Since</th>
-                  <th class="fo-status">Status</th>
-                  <th>Total</th><th>NC</th><th>PC</th>
-                  <th>Total</th><th>NC</th><th>PC</th>
-                  <th>Total</th><th>NC</th><th>PC</th>
-                  <th>Total</th><th>NC</th><th>PC</th>
+                  <th class="fo-insight" title="Percentage point change between progress and baseline scores: (rounded progress % - rounded baseline %).">Δ<br />Change</th>
+                  <th class="fo-insight" title="Percentage of baseline deficiencies successfully resolved: (Completed / Baseline Total) * 100.">Closure<br />Rate</th>
+                  <th class="fo-insight" title="Number of months elapsed since the latest assessment was completed.">Months<br />Since</th>
+                  <th class="fo-status" title="Current status of the service: Critical (remaining critical deficiencies or score drop <= -15%), Warning (some deficiencies or score drop <= -5%), or On Track.">Status</th>
+                  <th title="Total baseline deficiencies: (NC + PC).">Total</th><th title="Baseline criteria scored as Non-Compliant.">NC</th><th title="Baseline criteria scored as Partially Compliant.">PC</th>
+                  <th title="Total remaining deficiencies: (NC + PC).">Total</th><th title="Remaining criteria scored as Non-Compliant in the latest assessment.">NC</th><th title="Remaining criteria scored as Partially Compliant in the latest assessment.">PC</th>
+                  <th title="Total critical criteria evaluated at baseline.">Total</th><th title="Critical criteria scored as Non-Compliant at baseline.">NC</th><th title="Critical criteria scored as Partially Compliant at baseline.">PC</th>
+                  <th title="Total critical criteria remaining deficient in the latest assessment.">Total</th><th title="Critical criteria remaining Non-Compliant in the latest assessment.">NC</th><th title="Critical criteria remaining Partially Compliant in the latest assessment.">PC</th>
                 </tr>
               </thead>
               <tbody>${facilityOverviewTableRows}</tbody>
@@ -2530,35 +2683,35 @@ export default function Report() {
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84em', minWidth: 1500 }}>
                   <thead>
                     <tr>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')}>SE</th>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a', { minWidth: 220 })}>Service</th>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')}>Overall baseline score</th>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')}>Overall progress score</th>
-                      <th colSpan={4} style={overviewHeaderCellStyle('#e0f2fe', '#075985')}>Action insights</th>
-                      <th colSpan={3} style={overviewHeaderCellStyle('#fef3c7', '#92400e')}>Deficiencies identified at baseline</th>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#dcfce7', '#166534')}>Deficiencies completed to date</th>
-                      <th colSpan={3} style={overviewHeaderCellStyle('#fee2e2', '#991b1b')}>Remaining deficiencies to be addressed</th>
-                      <th colSpan={3} style={overviewHeaderCellStyle('#fecaca', '#7f1d1d')}>Critical Criteria</th>
-                      <th colSpan={3} style={overviewHeaderCellStyle('#fecaca', '#7f1d1d')}>Critical Criteria Remaining</th>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')}>Most recent assessment date</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')} title="Service Element index code">SE</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a', { minWidth: 220 })} title="Service Element name">Service</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')} title="First recorded compliance score inside the selected date range.">Overall baseline score</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')} title="Most recent recorded compliance score inside the selected date range.">Overall progress score</th>
+                      <th colSpan={4} style={overviewHeaderCellStyle('#e0f2fe', '#075985')} title="Action-oriented metrics tracking change, closure rate, timeline, and status.">Action insights</th>
+                      <th colSpan={3} style={overviewHeaderCellStyle('#fef3c7', '#92400e')} title="Deficiencies (Non-Compliant or Partially Compliant criteria) identified in the baseline assessment.">Deficiencies identified at baseline</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#dcfce7', '#166534')} title="Baseline deficiencies successfully resolved to Compliant in the latest assessment.">Deficiencies completed to date</th>
+                      <th colSpan={3} style={overviewHeaderCellStyle('#fee2e2', '#991b1b')} title="Baseline deficiencies that remain Non-Compliant or Partially Compliant in the latest assessment.">Remaining deficiencies to be addressed</th>
+                      <th colSpan={3} style={overviewHeaderCellStyle('#fecaca', '#7f1d1d')} title="Total number of critical criteria evaluated at baseline.">Critical Criteria</th>
+                      <th colSpan={3} style={overviewHeaderCellStyle('#fecaca', '#7f1d1d')} title="Number of baseline critical criteria that remain deficient (NC/PC) in the latest assessment.">Critical Criteria Remaining</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')} title="Date of the most recent assessment within the selected range.">Most recent assessment date</th>
                     </tr>
                     <tr>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })}>Δ Change</th>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')}>Closure Rate</th>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })}>Months Since</th>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')}>Status</th>
-                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>Total</th>
-                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>NC</th>
-                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')}>PC</th>
-                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')}>Total</th>
-                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')}>NC</th>
-                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')}>PC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>Total</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>NC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>PC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>Total</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>NC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')}>PC</th>
+                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })} title="Percentage point change between progress and baseline scores: (rounded progress % - rounded baseline %).">Δ Change</th>
+                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')} title="Percentage of baseline deficiencies successfully resolved: (Completed / Baseline Total) * 100.">Closure Rate</th>
+                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })} title="Number of months elapsed since the latest assessment was completed.">Months Since</th>
+                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')} title="Current status of the service: Critical (remaining critical deficiencies or score drop <= -15%), Warning (some deficiencies or score drop <= -5%), or On Track.">Status</th>
+                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')} title="Total baseline deficiencies: (NC + PC).">Total</th>
+                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')} title="Baseline criteria scored as Non-Compliant.">NC</th>
+                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')} title="Baseline criteria scored as Partially Compliant.">PC</th>
+                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')} title="Total remaining deficiencies: (NC + PC).">Total</th>
+                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')} title="Remaining criteria scored as Non-Compliant in the latest assessment.">NC</th>
+                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')} title="Remaining criteria scored as Partially Compliant in the latest assessment.">PC</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Total critical criteria evaluated at baseline.">Total</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria scored as Non-Compliant at baseline.">NC</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria scored as Partially Compliant at baseline.">PC</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Total critical criteria remaining deficient in the latest assessment.">Total</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria remaining Non-Compliant in the latest assessment.">NC</th>
+                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria remaining Partially Compliant in the latest assessment.">PC</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -2668,18 +2821,34 @@ export default function Report() {
 	                  ) : (() => {
 	                    const chartWidth = Math.max(760, responseDistributionData.length * 150);
 	                    return (
-	                      <div style={{ width: '100%', overflowX: 'auto' }}>
-	                        <div style={{ width: chartWidth, height: 360 }}>
-	                          <BarChart width={chartWidth} height={360} data={responseDistributionData} margin={{ top: 16, right: 16, bottom: 64, left: 0 }}>
-	                            <CartesianGrid strokeDasharray="3 3" />
-	                            <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-25} textAnchor="end" height={86} />
-	                            <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={42} />
-	                            <Tooltip content={<ResponseDistributionTooltip />} />
-	                            <Legend />
-	                            <Bar dataKey="C" name="Compliant" stackId="latest" fill="#22c55e" />
-	                            <Bar dataKey="PC" name="Partially compliant" stackId="latest" fill="#f59e0b" />
-	                            <Bar dataKey="NC" name="Non-compliant" stackId="latest" fill="#ef4444" />
-	                          </BarChart>
+	                      <div style={{ width: '100%' }}>
+	                        <div style={{ width: '100%', overflowX: 'auto' }}>
+	                          <div style={{ width: chartWidth, height: 360 }}>
+	                            <BarChart width={chartWidth} height={360} data={responseDistributionData} margin={{ top: 16, right: 16, bottom: 76, left: 60 }}>
+	                              <CartesianGrid strokeDasharray="3 3" />
+	                              <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-25} textAnchor="end" height={86} />
+	                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={42} />
+	                              <Tooltip content={<ResponseDistributionTooltip />} />
+	                              <Bar dataKey="C" name="Compliant" stackId="latest" fill="#22c55e" />
+	                              <Bar dataKey="PC" name="Partially compliant" stackId="latest" fill="#f59e0b" />
+	                              <Bar dataKey="NC" name="Non-compliant" stackId="latest" fill="#ef4444" />
+	                            </BarChart>
+	                          </div>
+	                        </div>
+	                        {/* Centered viewport-fixed Legend */}
+	                        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 8, fontSize: 12, fontWeight: 500, color: '#475569' }}>
+	                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+	                            <span style={{ width: 12, height: 12, backgroundColor: '#22c55e', borderRadius: 2 }} />
+	                            <span>Compliant</span>
+	                          </div>
+	                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+	                            <span style={{ width: 12, height: 12, backgroundColor: '#f59e0b', borderRadius: 2 }} />
+	                            <span>Partially compliant</span>
+	                          </div>
+	                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+	                            <span style={{ width: 12, height: 12, backgroundColor: '#ef4444', borderRadius: 2 }} />
+	                            <span>Non-compliant</span>
+	                          </div>
 	                        </div>
 	                      </div>
 	                    );
@@ -2863,15 +3032,16 @@ export default function Report() {
                     }));
                     const chartWidth = Math.max(700, ids.length * 140);
                     return (
-                      <>
-                        <div style={{ width: '100%', overflowX: 'auto', marginBottom: 12 }}>
+                      <div style={{ width: '100%', marginBottom: 12 }}>
+                        <div style={{ width: '100%', overflowX: 'auto' }}>
                           <div style={{ width: chartWidth, height: 340 }}>
-                            <BarChart width={chartWidth} height={340} data={chartData} margin={{ top: 16, right: 16, bottom: 24, left: 0 }}>
+                            <BarChart width={chartWidth} height={340} data={chartData} margin={{ top: 16, right: 16, bottom: 52, left: 60 }}>
                               <CartesianGrid strokeDasharray="3 3" />
                               <XAxis dataKey="name" tick={{ fontSize: 11 }} interval={0} angle={-20} textAnchor="end" height={60} />
                               <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
                               <Tooltip content={<MainChartTooltip />} />
-                              <Legend />
+                              <ReferenceLine y={40} stroke="#d97706" strokeDasharray="3 3" label={{ value: '40%', position: 'insideBottomLeft', fill: '#b45309', fontSize: 10 }} />
+                              <ReferenceLine y={80} stroke="#16a34a" strokeDasharray="3 3" label={{ value: '80%', position: 'insideBottomLeft', fill: '#15803d', fontSize: 10 }} />
                               <Bar dataKey="Baseline" fill="#60a5fa" cursor="pointer" onClick={(d) => openDrillForSection(d?.id || d?.payload?.id)}>
                                 <LabelList content={<ValueLabel />} />
                               </Bar>
@@ -2881,8 +3051,18 @@ export default function Report() {
                             </BarChart>
                           </div>
                         </div>
-
-                      </>
+                        {/* Centered viewport-fixed Legend */}
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 8, fontSize: 12, fontWeight: 500, color: '#475569' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ width: 12, height: 12, backgroundColor: '#60a5fa', borderRadius: 2 }} />
+                            <span>Baseline</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ width: 12, height: 12, backgroundColor: '#ef4444', borderRadius: 2 }} />
+                            <span>Latest ({reportInfo?.latestType || 'Latest'})</span>
+                          </div>
+                        </div>
+                      </div>
                     );
                   })()}
                 </>
@@ -2916,63 +3096,129 @@ export default function Report() {
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 12 }}>
                     <div>
-                      <h3 style={{ margin: 0 }}>SE Drilldown</h3>
+                      <h3 style={{ margin: 0 }}>
+                        SE Drilldown: {drillLevel === 'pi' ? "PI's" : drillLevel === 'standards' ? "Standards" : "Criterions"}
+                      </h3>
                       <div style={{ color: '#64748b', fontSize: 13, marginTop: 4 }}>
                         {sectionChartLabels[drillSectionId] || sectionLabels[drillSectionId] || drillSectionId}
-	                        {drillLevel === 'criteria' && drillRootCode ? ` / ${criterionLabelInSection(drillSectionId, drillRootCode)}` : ''}
+                        {drillLevel === 'standards' && drillRootCode ? ` / PI ${drillRootCode}: ${getPiLabel(drillRootCode)}` : ''}
+                        {drillLevel === 'criteria' && drillStandardCode ? ` / PI ${drillRootCode} / Standard ${drillStandardCode}: ${shortCriterionLabel(getStandardLabel(drillStandardCode), 60)}` : ''}
                       </div>
                     </div>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-                      <Button size="small" variant="outlined" onClick={backDrill}>{drillLevel === 'criteria' ? 'Back to standards' : 'Close'}</Button>
+                      <Button size="small" variant="outlined" onClick={backDrill}>
+                        {drillLevel === 'criteria' ? 'Back to standards' : drillLevel === 'standards' ? 'Back to PIs' : 'Close'}
+                      </Button>
                       <Button size="small" variant="outlined" onClick={exportDrillAsPng}>Export as PNG</Button>
                     </div>
                   </div>
 
-                  {drillLevel === 'roots' && (() => {
-                    const data = buildRootChartData(drillSectionId);
-	                    const chartWidth = Math.max(800, data.length * 170);
-                    if (data.length === 0) return <div style={{ color: '#64748b' }}>No standards available for this SE.</div>;
+                  {drillLevel === 'pi' && (() => {
+                    const data = buildPiChartData(drillSectionId);
+                    const chartWidth = Math.max(800, data.length * 170);
+                    if (data.length === 0) return <div style={{ color: '#64748b' }}>No PIs available for this SE.</div>;
                     return (
-                      <div style={{ width: '100%', overflowX: 'auto' }}>
-	                        <div ref={drillChartRef} style={{ width: chartWidth, height: 430 }}>
-	                          <BarChart width={chartWidth} height={430} data={data} margin={{ top: 16, right: 16, bottom: 76, left: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-	                            <XAxis dataKey="name" tick={<DrillAxisTick />} interval={0} height={118} />
-                            <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
-                            <Tooltip content={<DrillTooltip />} />
-                            <Legend />
-                            <Bar dataKey="Baseline" fill="#60a5fa" cursor="pointer" onClick={(d) => { setDrillRootCode(d?.code || d?.payload?.code || null); setDrillLevel('criteria'); }}>
-                              <LabelList content={<ValueLabel />} />
-                            </Bar>
-                            <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#ef4444" cursor="pointer" onClick={(d) => { setDrillRootCode(d?.code || d?.payload?.code || null); setDrillLevel('criteria'); }}>
-                              <LabelList content={<ValueLabel />} />
-                            </Bar>
-                          </BarChart>
+                      <div style={{ width: '100%' }}>
+                        <div style={{ width: '100%', overflowX: 'auto' }}>
+                          <div ref={drillChartRef} style={{ width: chartWidth, height: 430 }}>
+                            <BarChart width={chartWidth} height={430} data={data} margin={{ top: 16, right: 16, bottom: 108, left: 60 }}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" tick={<DrillAxisTick />} interval={0} height={118} />
+                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
+                              <Tooltip content={<DrillTooltip />} />
+                              <Bar dataKey="Baseline" fill="#60a5fa" cursor="pointer" onClick={(d) => { setDrillRootCode(d?.code || d?.payload?.code || null); setDrillLevel('standards'); }}>
+                                <LabelList content={<ValueLabel />} />
+                              </Bar>
+                              <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#ef4444" cursor="pointer" onClick={(d) => { setDrillRootCode(d?.code || d?.payload?.code || null); setDrillLevel('standards'); }}>
+                                <LabelList content={<ValueLabel />} />
+                              </Bar>
+                            </BarChart>
+                          </div>
+                        </div>
+                        {/* Centered viewport-fixed Legend */}
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 8, fontSize: 12, fontWeight: 500, color: '#475569' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ width: 12, height: 12, backgroundColor: '#60a5fa', borderRadius: 2 }} />
+                            <span>Baseline</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ width: 12, height: 12, backgroundColor: '#ef4444', borderRadius: 2 }} />
+                            <span>Latest ({reportInfo?.latestType || 'Latest'})</span>
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })()}
+
+                  {drillLevel === 'standards' && (() => {
+                    const data = buildRootChartData(drillSectionId, drillRootCode);
+                    const chartWidth = Math.max(800, data.length * 170);
+                    if (data.length === 0) return <div style={{ color: '#64748b' }}>No standards available for this PI.</div>;
+                    return (
+                      <div style={{ width: '100%' }}>
+                        <div style={{ width: '100%', overflowX: 'auto' }}>
+                          <div ref={drillChartRef} style={{ width: chartWidth, height: 430 }}>
+                            <BarChart width={chartWidth} height={430} data={data} margin={{ top: 16, right: 16, bottom: 108, left: 60 }}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" tick={<DrillAxisTick />} interval={0} height={118} />
+                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
+                              <Tooltip content={<DrillTooltip />} />
+                              <Bar dataKey="Baseline" fill="#60a5fa" cursor="pointer" onClick={(d) => { setDrillStandardCode(d?.code || d?.payload?.code || null); setDrillLevel('criteria'); }}>
+                                <LabelList content={<ValueLabel />} />
+                              </Bar>
+                              <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#ef4444" cursor="pointer" onClick={(d) => { setDrillStandardCode(d?.code || d?.payload?.code || null); setDrillLevel('criteria'); }}>
+                                <LabelList content={<ValueLabel />} />
+                              </Bar>
+                            </BarChart>
+                          </div>
+                        </div>
+                        {/* Centered viewport-fixed Legend */}
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 8, fontSize: 12, fontWeight: 500, color: '#475569' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ width: 12, height: 12, backgroundColor: '#60a5fa', borderRadius: 2 }} />
+                            <span>Baseline</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ width: 12, height: 12, backgroundColor: '#ef4444', borderRadius: 2 }} />
+                            <span>Latest ({reportInfo?.latestType || 'Latest'})</span>
+                          </div>
                         </div>
                       </div>
                     );
                   })()}
 
                   {drillLevel === 'criteria' && (() => {
-                    const data = buildCriteriaChartData(drillSectionId, drillRootCode);
-	                    const chartWidth = Math.max(800, data.length * 170);
-                    if (data.length === 0) return <div style={{ color: '#64748b' }}>No linked criteria found for {drillRootCode}.</div>;
+                    const data = buildCriteriaChartData(drillSectionId, drillStandardCode);
+                    const chartWidth = Math.max(800, data.length * 170);
+                    if (data.length === 0) return <div style={{ color: '#64748b' }}>No linked criteria found for {drillStandardCode}.</div>;
                     return (
-                      <div style={{ width: '100%', overflowX: 'auto' }}>
-	                        <div ref={drillChartRef} style={{ width: chartWidth, height: 430 }}>
-	                          <BarChart width={chartWidth} height={430} data={data} margin={{ top: 16, right: 16, bottom: 76, left: 0 }}>
-                            <CartesianGrid strokeDasharray="3 3" />
-	                            <XAxis dataKey="name" tick={<DrillAxisTick />} interval={0} height={118} />
-                            <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
-                            <Tooltip content={<DrillTooltip />} />
-                            <Legend />
-                            <Bar dataKey="Baseline" fill="#60a5fa">
-                              <LabelList content={<ValueLabel />} />
-                            </Bar>
-                            <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#ef4444">
-                              <LabelList content={<ValueLabel />} />
-                            </Bar>
-                          </BarChart>
+                      <div style={{ width: '100%' }}>
+                        <div style={{ width: '100%', overflowX: 'auto' }}>
+                          <div ref={drillChartRef} style={{ width: chartWidth, height: 430 }}>
+                            <BarChart width={chartWidth} height={430} data={data} margin={{ top: 16, right: 16, bottom: 108, left: 60 }}>
+                              <CartesianGrid strokeDasharray="3 3" />
+                              <XAxis dataKey="name" tick={<DrillAxisTick />} interval={0} height={118} />
+                              <YAxis domain={[0, 100]} tickFormatter={(v) => `${v}%`} width={40} />
+                              <Tooltip content={<DrillTooltip />} />
+                              <Bar dataKey="Baseline" fill="#60a5fa">
+                                <LabelList content={<ValueLabel />} />
+                              </Bar>
+                              <Bar dataKey="Latest" name={`Latest (${reportInfo?.latestType || 'Latest'})`} fill="#ef4444">
+                                <LabelList content={<ValueLabel />} />
+                              </Bar>
+                            </BarChart>
+                          </div>
+                        </div>
+                        {/* Centered viewport-fixed Legend */}
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 8, fontSize: 12, fontWeight: 500, color: '#475569' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ width: 12, height: 12, backgroundColor: '#60a5fa', borderRadius: 2 }} />
+                            <span>Baseline</span>
+                          </div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                            <span style={{ width: 12, height: 12, backgroundColor: '#ef4444', borderRadius: 2 }} />
+                            <span>Latest ({reportInfo?.latestType || 'Latest'})</span>
+                          </div>
                         </div>
                       </div>
                     );

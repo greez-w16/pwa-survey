@@ -30,6 +30,7 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   CLINICS: 'cliStageU11',
   EMS: 'emsStageU11',
   MORTUARY: 'morStageU11',
+  OBGYN: 'obgStageU11',
 };
 
 const getSurveyProgramStageIdForGroupText = (text) => {
@@ -38,6 +39,7 @@ const getSurveyProgramStageIdForGroupText = (text) => {
   if (value.includes('clinic')) return SURVEY_PROGRAM_STAGE_BY_GROUP.CLINICS;
   if (value.includes('ems') || value.startsWith('se') || value.includes(' se')) return SURVEY_PROGRAM_STAGE_BY_GROUP.EMS;
   if (value.includes('mortu') || value.includes('general')) return SURVEY_PROGRAM_STAGE_BY_GROUP.MORTUARY;
+  if (value.includes('obg')) return SURVEY_PROGRAM_STAGE_BY_GROUP.OBGYN;
   return '';
 };
 
@@ -351,6 +353,7 @@ const PrivateRoute = ({ children }) => {
       mortuary: buildScoringMeta(sourceConfig, 'mortuary_full_configuration', effectiveLinks.mortuary || mortuaryLinks),
       clinics: buildScoringMeta(sourceConfig, 'clinics_full_configuration', effectiveLinks.clinics || clinicsLinks),
       hospital: buildScoringMeta(sourceConfig, 'hospital_full_configuration', effectiveLinks.hospital || hospitalLinks),
+      obgyn: buildScoringMeta(sourceConfig, 'obgyn_full_configuration', effectiveLinks.obgyn || []),
     };
 		  }, [configBundles, activeConfigVersionId]);
 
@@ -1072,13 +1075,17 @@ const PrivateRoute = ({ children }) => {
       activeGroup?.id === 'CLINICS' || activeGroup?.name === 'Clinics';
     const isHospital =
       activeGroup?.id === 'HOSPITAL' || activeGroup?.name === 'Hospital';
+    const isObgyn =
+      activeGroup?.id === 'OBGYN' || activeGroup?.name === 'OBGYN';
 
-		    const programmeType = isMortuary
+    const programmeType = isMortuary
       ? 'mortuary'
       : isClinics
       ? 'clinics'
       : isHospital
       ? 'hospital'
+      : isObgyn
+      ? 'obgyn'
       : 'ems';
 
     // Use precomputed lookups for this programme type from the

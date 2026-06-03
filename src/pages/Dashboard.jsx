@@ -53,6 +53,7 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     CLINICS: 'cliStageU11',
     EMS: 'emsStageU11',
     MORTUARY: 'morStageU11',
+    OBGYN: 'obgStageU11',
 };
 
 const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, placeholder, autoOpen, onClose }) => {
@@ -449,6 +450,7 @@ export function Dashboard() {
 	        if (ns === 'CLINICS') return text.includes('CLINIC') || text.includes('CLINICS');
 	        if (ns === 'EMS') return text.includes('SURV_EMS') || text.includes('SURV-EMS') || /^\s*(EMS|SE)([_\s-]|$)/.test(text);
 	        if (ns === 'MORTUARY') return text.includes('MORTUARY') || text.includes('SURV_MORTUARY') || text.includes('SURV-MORTUARY');
+	        if (ns === 'OBGYN') return text.includes('OBG') || text.includes('OBGYN') || text.includes('SURV_OBG') || text.includes('SURV-OBG');
 	        return false;
 	    };
 
@@ -462,7 +464,7 @@ export function Dashboard() {
 	            if (!seId || optionsById.has(seId)) return;
 	            const rawName = section?.displayName || section?.name || section?.code || '';
 	            const label = String(rawName)
-	                .replace(/^\s*(SURV[-_])?(HOSPITAL|HOSP|CLINICS?|EMS|MORTUARY)[-_\s]*/i, '')
+	                .replace(/^\s*(SURV[-_])?(HOSPITAL|HOSP|CLINICS?|EMS|MORTUARY|OBGYN|OBG)[-_\s]*/i, '')
 	                .replace(/^\s*SE\s*([0-9]+)[-_\s:]*/i, '')
 	                .trim();
 	            optionsById.set(seId, { id: seId, label: `SE ${seId} ${label || ''}`.trim() });
@@ -496,6 +498,7 @@ export function Dashboard() {
         if (t.includes('clinic')) return 'CLINICS';
         if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
         if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
+        if (t.includes('obg')) return 'OBGYN';
         return String(txt || '').toUpperCase().trim();
     }, []);
 
@@ -505,7 +508,7 @@ export function Dashboard() {
 	    }, [configuration, toFacilityGroupKey]);
 
     const getFacilityGroupLabel = React.useCallback((facilityGroupKey) => {
-        const labelMap = { HOSPITAL: 'Hospital', CLINICS: 'Clinics', EMS: 'EMS', MORTUARY: 'Mortuary' };
+        const labelMap = { HOSPITAL: 'Hospital', CLINICS: 'Clinics', EMS: 'EMS', MORTUARY: 'Mortuary', OBGYN: 'OBGYN' };
         return labelMap[String(facilityGroupKey).toUpperCase()] || String(facilityGroupKey || '');
     }, []);
 
@@ -5073,6 +5076,7 @@ export function Dashboard() {
                             <MenuItem value={'CLINICS'}>Clinics</MenuItem>
                             <MenuItem value={'EMS'}>EMS</MenuItem>
                             <MenuItem value={'MORTUARY'}>Mortuary</MenuItem>
+                            <MenuItem value={'OBGYN'}>OBGYN</MenuItem>
                         </TextField>
                     </div>
 	                  	                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (

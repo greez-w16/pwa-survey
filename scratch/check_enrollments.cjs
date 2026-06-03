@@ -2,7 +2,7 @@ const https = require('https');
 
 const username = 'admin';
 const password = '5Am53808053@';
-const baseUrl = 'https://qimsdev.5am.co.bw/qims';
+const baseUrl = 'https://moh-qimsuat.gov.bw/qims';
 const teiId = 'XzN6svVGGEb';
 
 const auth = Buffer.from(`${username}:${password}`).toString('base64');

@@ -14,7 +14,7 @@ export default defineConfig({
 
     proxy: {
       '/qims': {
-        target: 'https://qimsdev.5am.co.bw',
+        target: 'https://moh-qimsuat.gov.bw',
         changeOrigin: true,
         secure: false,
         configure: (proxy, options) => {
@@ -30,12 +30,12 @@ export default defineConfig({
         }
       },
       '/api': {
-        target: 'https://qimsdev.5am.co.bw/qims',
+        target: 'https://moh-qimsuat.gov.bw/qims',
         changeOrigin: true,
         secure: false,
       },
       '/email2': {
-        target: 'https://qimsdev.5am.co.bw',
+        target: 'https://moh-qimsuat.gov.bw',
         changeOrigin: true,
         secure: false,
       }
@@ -47,7 +47,7 @@ export default defineConfig({
     allowedHosts: true,
     proxy: {
       '/pwa-survey/api': {
-        target: 'https://qimsdev.5am.co.bw/qims/api',
+        target: 'https://moh-qimsuat.gov.bw/qims/api',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/pwa-survey\/api/, ''),
@@ -58,12 +58,12 @@ export default defineConfig({
         }
       },
       '/api': {
-        target: 'https://qimsdev.5am.co.bw/qims',
+        target: 'https://moh-qimsuat.gov.bw/qims',
         changeOrigin: true,
         secure: false,
       },
       '/email2': {
-        target: 'https://qimsdev.5am.co.bw',
+        target: 'https://moh-qimsuat.gov.bw',
         changeOrigin: true,
         secure: false,
       }

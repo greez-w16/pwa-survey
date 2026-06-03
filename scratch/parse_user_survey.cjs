@@ -1,6 +1,6 @@
 const https = require('https');
 
-const DHIS2_URL = 'https://qimsdev.5am.co.bw/qims';
+const DHIS2_URL = 'https://moh-qimsuat.gov.bw/qims';
 const USERNAME = 'inspector1';
 const PASSWORD = 'Nomisr123$';
 const auth = Buffer.from(`${USERNAME}:${PASSWORD}`).toString('base64');

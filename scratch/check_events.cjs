@@ -5,7 +5,7 @@ const password = '5Am53808053@';
 const orgUnit = 'Q363I00X4TY';
 const program = 'G2gULe4jsfs';
 const stage = 'HpHD6u6MV37';
-const baseUrl = 'https://qimsdev.5am.co.bw/qims';
+const baseUrl = 'https://moh-qimsuat.gov.bw/qims';
 
 const auth = Buffer.from(`${username}:${password}`).toString('base64');
 

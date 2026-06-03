@@ -5,7 +5,7 @@ const http = require('http');
 // Configuration
 // You may need to change these to point to your target DHIS2 instance
 // Defaulting to the proxy or local dev server if it supports DataStore
-const DHIS2_URL = 'https://qimsdev.5am.co.bw/qims'; // Change to the actual DHIS2 URL if needed
+const DHIS2_URL = 'https://moh-qimsuat.gov.bw/qims'; // Change to the actual DHIS2 URL if needed
 const USERNAME = 'inspector1'; // Change if needed
 const PASSWORD = 'Nomisr123$'; // Change if needed
 
