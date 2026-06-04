@@ -1589,7 +1589,7 @@ export const api = {
             stageId,
             teiId,
             orgUnitId,
-            ouMode: 'DESCENDANTS',
+            ouMode: orgUnitId ? 'DESCENDANTS' : 'ALL',
             order: 'eventDate:desc',
             fields
         });
@@ -1655,7 +1655,7 @@ export const api = {
 	            stageId,
 	            teiId,
 	            orgUnitId,
-	            ouMode: 'DESCENDANTS',
+	            ouMode: orgUnitId ? 'DESCENDANTS' : 'ALL',
 	            order: 'eventDate:desc',
 	            fields,
 	            page,

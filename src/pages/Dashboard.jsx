@@ -915,6 +915,7 @@ export function Dashboard() {
 			        loading: hookLoading = false,
 				        error: hookError = null,
 				        debug: hookDebug = null,
+				        initialized: hookInitialized = false,
 			        respondToAssignment,
 			    } = assessmentHook || {};
 
@@ -932,7 +933,7 @@ export function Dashboard() {
 			        completed: 0,
 			        declined: 0,
 			    };
-			    const assessmentsLoading = hookLoading;
+			    const assessmentsLoading = hookLoading || !hookInitialized;
 
   // Load Accreditation assignments for current user from accreditation programme
   useEffect(() => {
@@ -1600,10 +1601,10 @@ export function Dashboard() {
                                         className="btn btn-secondary btn-xs"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            openTeamDialog(assessment);
+                                            openTeamDialog(ev);
                                         }}
                                     >
-                                        Team ({Array.isArray(assessment.team) ? assessment.team.length : 0})
+                                        Team
                                     </button>
 	                                </div>
 	                            </td>
@@ -1617,10 +1618,32 @@ export function Dashboard() {
 
 	  // Open a modal to show team members for an assignment
   const openTeamDialog = async (assessment) => {
-    const team = Array.isArray(assessment.team) ? assessment.team : [];
+    let team = Array.isArray(assessment.team) ? assessment.team : [];
     const label = assessment.orgUnitName || assessment.facilityId || assessment.orgUnitId || '';
-    setTeamDialogData({ orgUnitName: label, team, loading: true });
+    setTeamDialogData({ orgUnitName: label, team: [], loading: true });
     setTeamDialogOpen(true);
+
+    try {
+      const teiId = assessment.trackedEntityInstance || assessment.teiId || assessment.scheduleTeiId || '';
+      const facilityGroup = assessment.facilityGroup || getAssociatedAssessmentGroupValue(assessment) || '';
+      if (team.length === 0 && teiId && facilityGroup) {
+        try {
+          const ns = String(facilityGroup).toUpperCase();
+          const plan = await api.getDataStoreItem(ns, teiId);
+          if (plan && Array.isArray(plan.team)) {
+            team = plan.team.map(t => ({
+              assignedUserId: t.userId || t.assignedUserId || '',
+              displayName: t.displayName || '',
+              teamRole: t.role || t.teamRole || ''
+            }));
+          }
+        } catch (dsErr) {
+          console.warn('Failed to load team from DataStore for team dialog', dsErr);
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to resolve DataStore team lookup context', err);
+    }
 
     try {
       // Build list of identifiers (support composite values like "id|username")
@@ -2101,7 +2124,7 @@ export function Dashboard() {
                 return;
             }
 
-            const team = (assessment.teamAssignments || [])
+            const team = (assessment.team || assessment.teamAssignments || [])
                 .filter(m => m && m.assignedUserId)
                 .map(m => ({ ...m }));
 
@@ -3834,13 +3857,7 @@ export function Dashboard() {
 	                                    const isCheckingPresence = !presence || presence.loading;
 	                                    const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
 	                                    const isLead = /LEAD|LEADER/.test(roleNorm);
-	                                    const singleAssessmentUiState = {
-	                                        hasAssessmentEvent,
-	                                        isCheckingPresence,
-	                                        isLead,
-	                                        isInitiating,
-		                                        label: 'Initiate Survey',
-	                                    };
+	                                    const singleAssessmentUiState = getAssessmentUiState(assessment);
 	                                    const groupedSchedules = assessment._duplicates?.length > 1
 	                                        ? (() => {
 	                                            const uniqueSchedules = [];
@@ -3925,7 +3942,7 @@ export function Dashboard() {
                                                             </>
                                                         )}
                                                     </div>
-	                                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
+	                                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center' }}>
 	                                                        {assessment._duplicates?.length > 1 ? (
 	                                                            <div className="form-status success">{new Set((assessment._duplicates || []).map(item => getAssessmentActionKey(item))).size} UNIQUE SCHEDULES</div>
 	                                                        ) : (
@@ -3942,6 +3959,17 @@ export function Dashboard() {
 	                                                            </>
 	                                                        )}
                                                         {renderAssessmentActionButton(assessment, singleAssessmentUiState)}
+                                                        {assessment._duplicates?.length <= 1 && Array.isArray(assessment.team) && assessment.team.length > 0 && (
+                                                            <button
+                                                                className="btn btn-secondary btn-sm"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    openTeamDialog(assessment);
+                                                                }}
+                                                            >
+                                                                Team ({assessment.team.length})
+                                                            </button>
+                                                        )}
 	                                                    </div>
                                                 </div>
 		                                            {assessment._duplicates?.length > 1 ? (
@@ -3998,20 +4026,19 @@ export function Dashboard() {
 		                                                                                </div>
 		                                                                                <div style={{ fontSize: '0.85em', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
 		                                                                                    {scheduleUi.roleLabel ? <>Role: {scheduleUi.roleLabel}</> : 'Role: N/A'}
-		                                                                                {renderAssessmentActionButton(scheduledAssessment, scheduleUi)}
+		                                                                                    {renderAssessmentActionButton(scheduledAssessment, scheduleUi)}
+                                                                                            {Array.isArray(scheduledAssessment.team) && scheduledAssessment.team.length > 0 && (
+                                                                                                <button
+                                                                                                    className="btn btn-secondary btn-sm"
+                                                                                                    onClick={(e) => {
+                                                                                                        e.stopPropagation();
+                                                                                                        openTeamDialog(scheduledAssessment);
+                                                                                                    }}
+                                                                                                >
+                                                                                                    Team ({scheduledAssessment.team.length})
+                                                                                                </button>
+                                                                                            )}
 		                                                                                </div>
-		                                                                            </div>
-
-		                                                                            <div className="form-actions" style={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-		                                                                                <button
-		                                                                                    className="btn btn-secondary btn-sm"
-	                                                                                    onClick={(e) => {
-	                                                                                        e.stopPropagation();
-	                                                                                        openTeamDialog(scheduledAssessment);
-	                                                                                    }}
-		                                                                                >
-		                                                                                    Team ({Array.isArray(scheduledAssessment.team) ? scheduledAssessment.team.length : 0})
-		                                                                                </button>
 		                                                                            </div>
 		                                                                        </div>
 
