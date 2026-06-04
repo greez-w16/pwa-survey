@@ -55,7 +55,7 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     MORTUARY: 'morStageU11',
 };
 
-const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, placeholder, autoOpen, onClose }) => {
+const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, placeholder, autoOpen, onClose, showClearAll = false }) => {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
 
@@ -112,18 +112,33 @@ const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, 
                 }
             }}
         >
-            <div style={{ padding: '8px', position: 'sticky', top: 0, background: '#fff', zIndex: 3, borderBottom: '1px solid #e2e8f0' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '8px', position: 'sticky', top: 0, background: '#fff', zIndex: 3, borderBottom: '1px solid #e2e8f0', display: 'flex', gap: 8, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
                 <TextField
                     size="small"
-                    fullWidth
                     placeholder="Search..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     onKeyDown={(e) => {
                         e.stopPropagation();
                     }}
+                    style={{ flex: 1 }}
                     autoFocus
                 />
+                {showClearAll && (
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        disabled={(value || []).length === 0}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onChange([]);
+                        }}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        Clear all
+                    </Button>
+                )}
             </div>
             {filteredOptions.map((opt) => (
                 <MenuItem key={opt.id} value={opt.id}>
@@ -144,6 +159,123 @@ const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, 
         </Select>
     );
 });
+
+const SETTINGS_TABLE_HEADERS = [
+    { label: 'SE Number', minWidth: 55, align: 'center' },
+    { label: 'SE Description', minWidth: 220, align: 'center' },
+    { label: 'Standard', minWidth: 70, align: 'center' },
+    { label: 'Statement', minWidth: 300, align: 'center' },
+    { label: 'Criterion', minWidth: 80, align: 'center' },
+    { label: 'Criterion Description', minWidth: 280, align: 'center' },
+    { label: 'Root', minWidth: 50, align: 'center' },
+    { label: 'Critical / Non-Critical', minWidth: 110, align: 'center' },
+    { label: 'Linked Criteria', minWidth: 180 },
+    { label: 'Sub-Criteria', minWidth: 180 },
+    { label: 'Guidelines', minWidth: 320, align: 'center' },
+];
+
+const criterionOptionsFor = (serviceElements) => serviceElements.flatMap(se =>
+    (se.sections || []).flatMap(section =>
+        (section.standards || []).flatMap(standard =>
+            (standard.criteria || []).map(criterion => ({ id: criterion.id, name: criterion.id }))
+        )
+    )
+);
+
+const buildRootMap = (computeCriteria) => {
+    const rootMap = {};
+    (computeCriteria?.hospital_standards_config?.service_elements || []).forEach(cse => {
+        (cse.root_criteria || []).forEach(root => {
+            if (root.id) rootMap[root.id] = root.sub_criteria || [];
+        });
+    });
+    return rootMap;
+};
+
+const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, rootMap) => (
+    serviceElements.flatMap(se => {
+        const allStandards = (se.sections || []).flatMap(section =>
+            (section.standards || []).map(standard => ({ id: standard.standard_id, name: standard.standard_id }))
+        );
+        const allCriteriaInSE = criterionOptionsFor([se]);
+        const standardGroups = (se.sections || []).flatMap(section =>
+            (section.standards || []).map(standard => {
+                const standardCriteriaIds = (standard.criteria || []).map(c => c.id).filter(Boolean);
+                const rows = (standard.criteria || []).map(criterion => ({
+                    seId: se.se_id,
+                    seDescription: se.se_description || se.description || se.se_name || se.name || '',
+                    standardId: standard.standard_id,
+                    statement: standard.statement || standard.intent || standard.intent_tooltip || '',
+                    criterionId: criterion.id,
+                    criterionDescription: criterion.description || '',
+                    guidelines: criterion.guidelines || criterion.guideline || '',
+                    isCritical: criterion.is_critical,
+                    linkedCriteria: criterion.linked_criteria || standardCriteriaIds,
+                    isRoot: !!rootMap[criterion.id],
+                    subCriteria: rootMap[criterion.id] || [],
+                    allStandards,
+                    allCriteriaInSE,
+                    allCriteriaInFacilityType,
+                    configKey,
+                }));
+                return rows.map((row, index) => ({
+                    ...row,
+                    isFirstStandardRow: index === 0,
+                    standardRowSpan: rows.length,
+                }));
+            })
+        );
+        const rows = standardGroups.flat();
+        return rows.map((row, index) => ({
+            ...row,
+            isFirstSeRow: index === 0,
+            seRowSpan: rows.length,
+        }));
+    })
+);
+
+const EditableTextCell = ({
+    value,
+    active,
+    editable,
+    maxHeight = 90,
+    onOpen,
+    onSave,
+}) => {
+    const displayValue = value || '—';
+    if (editable && active) {
+        return (
+            <TextField
+                value={value || ''}
+                onChange={(e) => onSave(e.target.value)}
+                onBlur={() => onOpen(null)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Escape') onOpen(null);
+                }}
+                multiline
+                minRows={3}
+                maxRows={8}
+                size="small"
+                fullWidth
+                autoFocus
+                onClick={(e) => e.stopPropagation()}
+            />
+        );
+    }
+    return (
+        <div
+            onClick={editable ? onOpen : undefined}
+            style={{
+                maxHeight: `${maxHeight}px`,
+                overflowY: 'auto',
+                cursor: editable ? 'pointer' : 'default',
+                borderBottom: editable ? '1px dashed #cbd5e0' : 'none',
+            }}
+        >
+            {displayValue}
+        </div>
+    );
+};
 
 export function Dashboard() {
 	    const navigate = useNavigate();
@@ -169,7 +301,7 @@ export function Dashboard() {
 	        configBundles,
 	        setConfigBundles,
             configSource,
-            setConfigSource,
+            remoteConfigLoading,
             loadRemoteConfig,
 	    } = useApp();
     const storage = useStorage();
@@ -3117,13 +3249,49 @@ export function Dashboard() {
 		        });
 		    };
 
+    const withCriterionRootFlags = (configList, computeConfig) => {
+        const rootMap = computeConfig ? buildRootMap(computeConfig) : {};
+        const rootIds = new Set(Object.keys(rootMap));
+        const cloned = Array.isArray(configList) ? JSON.parse(JSON.stringify(configList)) : [];
+        cloned.forEach(se => {
+            (se.sections || []).forEach(section => {
+                (section.standards || []).forEach(standard => {
+                    (standard.criteria || []).forEach(criterion => {
+                        criterion.is_root = rootIds.has(String(criterion.id || ''));
+                    });
+                });
+            });
+        });
+        return cloned;
+    };
+
+    const exportFacilityConfigsToAssets = async (facilityConfigs) => {
+        const response = await fetch('/__qims/export-facility-config-assets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ configurations: facilityConfigs }),
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(result?.error || 'Local asset export failed');
+        }
+        return result;
+    };
+
     const handleSaveConfigsToDataStore = async () => {
         const NAMESPACE = 'qims-survey-configs';
+        const facilityConfigs = {
+            hospital_full_configuration: withCriterionRootFlags(currentConfig.hospital_full_configuration, currentComputeCriteria),
+            clinics_full_configuration: withCriterionRootFlags(currentConfig.clinics_full_configuration, null),
+            ems_full_configuration: withCriterionRootFlags(currentConfig.ems_full_configuration, null),
+            mortuary_full_configuration: withCriterionRootFlags(currentConfig.mortuary_full_configuration, null),
+        };
         const configsToSave = [
-            { key: 'hospital_full_configuration', data: currentConfig.hospital_full_configuration },
-            { key: 'clinics_full_configuration', data: currentConfig.clinics_full_configuration },
-            { key: 'ems_full_configuration', data: currentConfig.ems_full_configuration },
-            { key: 'mortuary_full_configuration', data: currentConfig.mortuary_full_configuration },
+            { key: 'hospital_full_configuration', data: facilityConfigs.hospital_full_configuration },
+            { key: 'clinics_full_configuration', data: facilityConfigs.clinics_full_configuration },
+            { key: 'ems_full_configuration', data: facilityConfigs.ems_full_configuration },
+            { key: 'mortuary_full_configuration', data: facilityConfigs.mortuary_full_configuration },
             { key: 'hospital_compute_criteria', data: currentComputeCriteria },
             { key: 'hospital_links', data: currentLinks.hospital },
             { key: 'clinics_links', data: currentLinks.clinics },
@@ -3132,6 +3300,7 @@ export function Dashboard() {
         ];
         let saved = 0;
         let failed = 0;
+        const failedKeys = [];
         for (const { key, data } of configsToSave) {
             try {
                 await api.upsertDataStoreItem(NAMESPACE, key, data);
@@ -3139,21 +3308,41 @@ export function Dashboard() {
             } catch (e) {
                 console.warn(`Failed to save ${key} to DataStore:`, e);
                 failed++;
+                failedKeys.push(key);
             }
         }
-        showToast?.(
-            `Saved ${saved} config(s) to DataStore${failed > 0 ? ` (${failed} failed)` : ''}. Developers can export them from /dev-config-export.`,
-            failed > 0 ? 'warning' : 'success'
-        );
+
+        let exportResult = null;
+        let exportError = null;
+        try {
+            exportResult = await exportFacilityConfigsToAssets(facilityConfigs);
+        } catch (err) {
+            console.warn('Failed to export facility configurations to src/assets:', err);
+            exportError = err;
+        }
+
+        const exportMessage = exportResult?.written?.length
+            ? ` Updated ${exportResult.written.join(', ')}.`
+            : exportError
+                ? ` Local file export failed: ${exportError.message || exportError}.`
+                : '';
+
+        if (failed === 0) {
+            showToast?.(`Configuration saved to DHIS2 DataStore (${saved} item(s)).${exportMessage}`, exportError ? 'warning' : 'success');
+        } else if (saved > 0) {
+            showToast?.(`Configuration partially saved to DHIS2 DataStore: ${saved} saved, ${failed} failed.${exportMessage}`, 'warning');
+        } else {
+            showToast?.(`Configuration was not saved to DHIS2 DataStore. ${failed} item(s) failed.${exportMessage}`, 'error');
+        }
     };
 
     const handleResetConfigsToBaseline = async () => {
         const NAMESPACE = 'qims-survey-configs';
         const configsToSave = [
-            { key: 'hospital_full_configuration', data: hospitalConfig },
-            { key: 'clinics_full_configuration', data: clinicsConfig },
-            { key: 'ems_full_configuration', data: emsConfig },
-            { key: 'mortuary_full_configuration', data: mortuaryConfig },
+            { key: 'hospital_full_configuration', data: hospitalConfig.hospital_full_configuration },
+            { key: 'clinics_full_configuration', data: clinicsConfig.clinics_full_configuration },
+            { key: 'ems_full_configuration', data: emsConfig.ems_full_configuration },
+            { key: 'mortuary_full_configuration', data: mortuaryConfig.mortuary_full_configuration },
             { key: 'hospital_compute_criteria', data: hospitalComputeCriteria },
             { key: 'hospital_links', data: hospitalLinks },
             { key: 'clinics_links', data: clinicsLinks },
@@ -3238,6 +3427,60 @@ export function Dashboard() {
                         });
                     });
                 }
+            }
+            nextConfig[configKey] = list;
+            return { ...bundle, config: nextConfig };
+        });
+        setConfigRevision(r => r + 1);
+    };
+
+    const handleUpdateSeDescription = (configKey, seId, value) => {
+        updateActiveConfigBundle((bundle) => {
+            const nextConfig = { ...(bundle.config || {}) };
+            const list = Array.isArray(nextConfig[configKey]) ? JSON.parse(JSON.stringify(nextConfig[configKey])) : [];
+            const se = list.find(s => s.se_id === seId);
+            if (se) {
+                if ('se_description' in se) se.se_description = value;
+                else if ('description' in se) se.description = value;
+                else se.se_name = value;
+            }
+            nextConfig[configKey] = list;
+            return { ...bundle, config: nextConfig };
+        });
+        setConfigRevision(r => r + 1);
+    };
+
+    const handleUpdateStandardText = (configKey, seId, standardId, field, value) => {
+        updateActiveConfigBundle((bundle) => {
+            const nextConfig = { ...(bundle.config || {}) };
+            const list = Array.isArray(nextConfig[configKey]) ? JSON.parse(JSON.stringify(nextConfig[configKey])) : [];
+            const se = list.find(s => s.se_id === seId);
+            if (se) {
+                (se.sections || []).forEach(section => {
+                    (section.standards || []).forEach(std => {
+                        if (std.standard_id === standardId) std[field] = value;
+                    });
+                });
+            }
+            nextConfig[configKey] = list;
+            return { ...bundle, config: nextConfig };
+        });
+        setConfigRevision(r => r + 1);
+    };
+
+    const handleUpdateCriterionText = (configKey, seId, standardId, criterionId, field, value) => {
+        updateActiveConfigBundle((bundle) => {
+            const nextConfig = { ...(bundle.config || {}) };
+            const list = Array.isArray(nextConfig[configKey]) ? JSON.parse(JSON.stringify(nextConfig[configKey])) : [];
+            const se = list.find(s => s.se_id === seId);
+            if (se) {
+                (se.sections || []).forEach(section => {
+                    (section.standards || []).forEach(std => {
+                        if (std.standard_id !== standardId) return;
+                        const crit = (std.criteria || []).find(c => c.id === criterionId);
+                        if (crit) crit[field] = value;
+                    });
+                });
             }
             nextConfig[configKey] = list;
             return { ...bundle, config: nextConfig };
@@ -3432,6 +3675,33 @@ export function Dashboard() {
 		        persistVersions(updatedVersions, versionId);
 		        showToast(`Active configuration version set to "${target.name}".`, 'info');
 		    };
+
+		    const settingsFacilityTables = useMemo(() => {
+		        const activeConfig = overviewSource === 'active' ? currentConfig : {
+		            hospital_full_configuration: hospitalConfig.hospital_full_configuration,
+		            clinics_full_configuration: clinicsConfig.clinics_full_configuration,
+		            ems_full_configuration: emsConfig.ems_full_configuration,
+		            mortuary_full_configuration: mortuaryConfig.mortuary_full_configuration,
+		        };
+		        const rootMap = buildRootMap(currentComputeCriteria);
+		        return [
+		            { type: 'Hospital', config: activeConfig, key: 'hospital_full_configuration' },
+		            { type: 'Clinics', config: activeConfig, key: 'clinics_full_configuration' },
+		            { type: 'EMS', config: activeConfig, key: 'ems_full_configuration' },
+		            { type: 'Mortuary', config: activeConfig, key: 'mortuary_full_configuration' },
+		        ].map(({ type, config, key }) => {
+		            const seList = Array.isArray(config?.[key]) ? config[key] : [];
+		            const allCriteriaInFacilityType = criterionOptionsFor(seList);
+		            const rows = rowsForFacility(seList, key, allCriteriaInFacilityType, rootMap);
+		            return {
+		                type,
+		                key,
+		                seList,
+		                rows,
+		                totalCriteria: rows.length,
+		            };
+		        });
+		    }, [overviewSource, currentConfig, currentComputeCriteria]);
 
     // Filter events
     const filteredEvents = useMemo(() => {
@@ -4357,21 +4627,42 @@ export function Dashboard() {
                         </div>
                     ) : 'App Settings'}
                 </DialogTitle>
-                <DialogContent dividers>
+                <DialogContent dividers style={{ position: 'relative' }}>
+                    {remoteConfigLoading && (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                inset: 0,
+                                zIndex: 5,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 12,
+                                background: 'rgba(255, 255, 255, 0.86)',
+                                color: '#0f172a',
+                            }}
+                        >
+                            <CircularProgress />
+                            <div style={{ fontSize: '1rem', fontWeight: 600 }}>
+                                Loading configurations...
+                            </div>
+                        </div>
+                    )}
                     <div className="settings-content">
 	                        {!selectedSE && !showLinksEditor ? (
 	                            <>
 									<div className="settings-section">
 										<h4>Facility Type — SE Criteria Overview</h4>
 										<div style={{ fontSize: '0.85rem', color: '#475569', marginTop: '4px', marginBottom: '12px', padding: '8px 12px', backgroundColor: '#f1f5f9', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-											<strong>Active App Source Strategy:</strong> {configSource === 'datastore' ? 'Remote DHIS2 DataStore' : 'Local Assets (In-App)'}
+											<strong>Active App Source Strategy:</strong> Remote DHIS2 DataStore
 											<br />
 											<span style={{ fontSize: '0.8rem', color: '#64748b' }}>
 												Note: To compare edits or perform a reset, use the <em>View Configuration Mode</em> selector below.
 											</span>
 										</div>
 
-										<div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px' }}>
+										<div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap' }}>
 											<FormControl size="small" style={{ minWidth: '240px' }}>
 												<InputLabel>View Configuration Mode</InputLabel>
 												<Select
@@ -4414,18 +4705,6 @@ export function Dashboard() {
 											</Button>
 										</div>
 										{(() => {
-											const activeConfig = overviewSource === 'active' ? currentConfig : {
-												hospital_full_configuration: hospitalConfig.hospital_full_configuration,
-												clinics_full_configuration: clinicsConfig.clinics_full_configuration,
-												ems_full_configuration: emsConfig.ems_full_configuration,
-												mortuary_full_configuration: mortuaryConfig.mortuary_full_configuration,
-											};
-											const FACILITY_CONFIGS = [
-												{ type: 'Hospital', config: activeConfig, key: 'hospital_full_configuration' },
-												{ type: 'Clinics', config: activeConfig, key: 'clinics_full_configuration' },
-												{ type: 'EMS', config: activeConfig, key: 'ems_full_configuration' },
-												{ type: 'Mortuary', config: activeConfig, key: 'mortuary_full_configuration' },
-											];
 											const toggleFac = (type) => {
 											    setLoadingFacType(type);
 											    setTimeout(() => {
@@ -4433,20 +4712,8 @@ export function Dashboard() {
 											        setLoadingFacType(null);
 											    }, 50);
 											};
-											return FACILITY_CONFIGS.map(({ type, config, key }) => {
-												const seList = config?.[key] || [];
-												let totalCriteria = 0;
-												seList.forEach(se => {
-													(se.sections || []).forEach(section => {
-														(section.standards || []).forEach(standard => {
-															totalCriteria += (standard.criteria || []).length;
-														});
-													});
-												});
+											return settingsFacilityTables.map(({ type, key, seList, rows, totalCriteria }) => {
 												const isExpanded = !!expandedFacs[type];
-												const allCriteriaInFacilityType = isExpanded 
-													? seList.flatMap(s => (s.sections || []).flatMap(sec => (sec.standards || []).flatMap(st => (st.criteria || []).map(c => ({ id: c.id, name: c.id })))))
-													: [];
 												return (
 													<div key={type} style={{ marginBottom: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
 														<div
@@ -4471,92 +4738,162 @@ export function Dashboard() {
 																	<table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em' }}>
 																		<thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
 																			<tr style={{ background: '#edf2f7', textAlign: 'left' }}>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '55px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>SE Number</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '70px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Standard</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '80px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Criterion</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '50px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Root</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '110px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Critical / Non-Critical</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '180px', position: 'sticky', top: 0, background: '#edf2f7' }}>Linked Criteria</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '180px', position: 'sticky', top: 0, background: '#edf2f7' }}>Sub-Criteria</th>
+																				{SETTINGS_TABLE_HEADERS.map(header => (
+																					<th
+																						key={header.label}
+																						style={{
+																							padding: '8px',
+																							border: '1px solid #cbd5e0',
+																							minWidth: `${header.minWidth}px`,
+																							position: 'sticky',
+																							top: 0,
+																							background: '#edf2f7',
+																							textAlign: header.align || 'center',
+																						}}
+																					>
+																						{header.label}
+																					</th>
+																				))}
 																			</tr>
 																		</thead>
 																		<tbody>
-																			{seList.flatMap(se => {
-																				const allStandardIds = [];
-																				const rootMap = {};
-																				(currentComputeCriteria?.hospital_standards_config?.service_elements || []).forEach(cse => {
-																				    (cse.root_criteria || []).forEach(root => {
-																				        if (root.id) rootMap[root.id] = root.sub_criteria || [];
-																				    });
-																				});
-																				
-																				const allStandards = (se.sections || []).flatMap(sec => (sec.standards || []).map(st => ({ id: st.standard_id, name: st.standard_id })));
-																				const allCriteriaInSE = (se.sections || []).flatMap(sec => (sec.standards || []).flatMap(st => (st.criteria || []).map(c => ({ id: c.id, name: c.id }))));
-																				
-																				const rows = [];
-																				(se.sections || []).forEach(section => {
-																					(section.standards || []).forEach(standard => {
-																						if (standard.standard_id) allStandardIds.push(standard.standard_id);
-																						const standardCriteriaIds = (standard.criteria || []).map(c => c.id).filter(Boolean);
-																						(standard.criteria || []).forEach(c => {
-																							rows.push({
-																								seId: se.se_id,
-																								standardId: standard.standard_id,
-																								criterionId: c.id,
-																								isCritical: c.is_critical,
-																								linkedCriteria: c.linked_criteria || standardCriteriaIds,
-																								isRoot: !!rootMap[c.id],
-																								subCriteria: rootMap[c.id] || [],
-																																					seName: se.se_name || se.se_id,
-																																					standardName: standard.standard_id,
-																																					allStandards,
-																																					allCriteriaInSE,
-																																					allCriteriaInFacilityType,
-																							configKey: key,
-																							seObj: se,
-																							standardObj: standard,
-																							criterionObj: c,
-																							});
-																						});
-																					});
-																				});
-																				return rows.map((row, idx) => (
+																			{rows.map((row, idx) => (
 																					<tr key={`${type}-se-${row.seId}-st-${row.standardId}-c-${row.criterionId}-${idx}`}>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>{row.seId}</td>
-																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
-																							onClick={() => {
-																								if (overviewSource !== 'local') {
-																									setActiveCellKey(`${row.criterionId}-standard`);
-																								}
-																							}}
-																						>
-																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-standard` ? (
-																								<Select
-																									value={row.standardId}
-																									onChange={(e) => {
-																										handleMoveStandard(row.configKey, row.seId, row.standardId, e.target.value, row.criterionId);
-																										setActiveCellKey(null);
-																									}}
-																									onClose={() => setActiveCellKey(null)}
-																									size="small"
-																									variant="standard"
-																									disableUnderline
-																									style={{ fontFamily: 'monospace', fontSize: '1em' }}
-																									autoFocus
-																									defaultOpen
+																						{row.isFirstSeRow && (
+																							<td
+																								rowSpan={row.seRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																									fontWeight: 700,
+																									background: '#f8fafc',
+																								}}
+																							>
+																								{row.seId}
+																							</td>
+																						)}
+																						{row.isFirstSeRow && (
+																							<td
+																								rowSpan={row.seRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																									background: '#f8fafc',
+																								}}
+																							>
+																								{overviewSource !== 'local' && activeCellKey === `${row.seId}-se-description` ? (
+																									<EditableTextCell
+																										value={row.seDescription}
+																										active
+																										editable
+																										onOpen={() => setActiveCellKey(null)}
+																										onSave={(value) => handleUpdateSeDescription(row.configKey, row.seId, value)}
+																									/>
+																								) : (
+																								<div
+																									onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.seId}-se-description`) : undefined}
+																									style={{ maxHeight: '90px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
 																								>
-																									{row.allStandards.map((std) => (
-																										<MenuItem key={std.id} value={std.id}>{std.name}</MenuItem>
-																									))}
-																								</Select>
+																									{row.seDescription || '—'}
+																								</div>
+																								)}
+																							</td>
+																						)}
+																						{row.isFirstStandardRow && (
+																							<td
+																								rowSpan={row.standardRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																									cursor: overviewSource === 'local' ? 'default' : 'pointer',
+																									background: '#ffffff',
+																								}}
+																								onClick={() => {
+																									if (overviewSource !== 'local') {
+																										setActiveCellKey(`${row.criterionId}-standard`);
+																									}
+																								}}
+																							>
+																								{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-standard` ? (
+																									<Select
+																										value={row.standardId}
+																										onChange={(e) => {
+																											handleMoveStandard(row.configKey, row.seId, row.standardId, e.target.value, row.criterionId);
+																											setActiveCellKey(null);
+																										}}
+																										onClose={() => setActiveCellKey(null)}
+																										size="small"
+																										variant="standard"
+																										disableUnderline
+																										style={{ fontFamily: 'monospace', fontSize: '1em' }}
+																										autoFocus
+																										defaultOpen
+																									>
+																										{row.allStandards.map((std) => (
+																											<MenuItem key={std.id} value={std.id}>{std.name}</MenuItem>
+																										))}
+																									</Select>
+																								) : (
+																									<span style={{ fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>{row.standardId}</span>
+																								)}
+																							</td>
+																						)}
+																						{row.isFirstStandardRow && (
+																							<td
+																								rowSpan={row.standardRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																								}}
+																							>
+																								{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-statement` ? (
+																									<EditableTextCell
+																										value={row.statement}
+																										active
+																										editable
+																										maxHeight={110}
+																										onOpen={() => setActiveCellKey(null)}
+																										onSave={(value) => handleUpdateStandardText(row.configKey, row.seId, row.standardId, 'statement', value)}
+																									/>
+																								) : (
+																								<div
+																									onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-statement`) : undefined}
+																									style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																								>
+																									{row.statement || '—'}
+																								</div>
+																								)}
+																							</td>
+																						)}
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', fontFamily: 'monospace' }}>{row.criterionId}</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle' }}>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-description` ? (
+																								<EditableTextCell
+																									value={row.criterionDescription}
+																									active
+																									editable
+																									onOpen={() => setActiveCellKey(null)}
+																									onSave={(value) => handleUpdateCriterionText(row.configKey, row.seId, row.standardId, row.criterionId, 'description', value)}
+																								/>
 																							) : (
-																								<span style={{ fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>{row.standardId}</span>
+																							<div
+																								onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-description`) : undefined}
+																								style={{ maxHeight: '90px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																							>
+																								{row.criterionDescription || '—'}
+																							</div>
 																							)}
 																						</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontFamily: 'monospace' }}>{row.criterionId}</td>
 																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', cursor: (overviewSource === 'local' || row.configKey !== 'hospital_full_configuration') ? 'default' : 'pointer' }}
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: (overviewSource === 'local' || row.configKey !== 'hospital_full_configuration') ? 'default' : 'pointer' }}
 																							onClick={() => {
 																								if (overviewSource !== 'local' && row.configKey === 'hospital_full_configuration') {
 																									setActiveCellKey(`${row.criterionId}-root`);
@@ -4594,7 +4931,7 @@ export function Dashboard() {
 																							)}
 																						</td>
 																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
 																							onClick={() => {
 																								if (overviewSource !== 'local') {
 																									setActiveCellKey(`${row.criterionId}-critical`);
@@ -4643,7 +4980,7 @@ export function Dashboard() {
 																							)}
 																						</td>
 																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
 																							onClick={() => {
 																								if (overviewSource !== 'local' && activeCellKey !== `${row.criterionId}-linked`) {
 																									setActiveCellKey(`${row.criterionId}-linked`);
@@ -4660,9 +4997,10 @@ export function Dashboard() {
 																									onClose={() => setActiveCellKey(null)}
 																									placeholder="—"
 																									autoOpen
+																									showClearAll
 																								/>
 																							) : (
-																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
+																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', textAlign: 'center', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
 																									{row.linkedCriteria.length > 0 ? row.linkedCriteria.map((id, i) => (
 																										<span key={id} style={{ color: id === row.criterionId ? '#c53030' : '#276749' }}>
 																											{id}{i < row.linkedCriteria.length - 1 ? ', ' : ''}
@@ -4672,7 +5010,7 @@ export function Dashboard() {
 																							)}
 																						</td>
 																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', cursor: (!row.isRoot || overviewSource === 'local') ? 'default' : 'pointer' }}
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: (!row.isRoot || overviewSource === 'local') ? 'default' : 'pointer' }}
 																							onClick={() => {
 																								if (row.isRoot && overviewSource !== 'local' && activeCellKey !== `${row.criterionId}-sub`) {
 																									setActiveCellKey(`${row.criterionId}-sub`);
@@ -4693,14 +5031,32 @@ export function Dashboard() {
 																									autoOpen
 																								/>
 																							) : (
-																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
+																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', textAlign: 'center', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
 																									{row.subCriteria.length > 0 ? row.subCriteria.join(', ') : 'None'}
 																								</div>
 																							)}
 																						</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle' }}>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-guidelines` ? (
+																								<EditableTextCell
+																									value={row.guidelines}
+																									active
+																									editable
+																									maxHeight={110}
+																									onOpen={() => setActiveCellKey(null)}
+																									onSave={(value) => handleUpdateCriterionText(row.configKey, row.seId, row.standardId, row.criterionId, 'guidelines', value)}
+																								/>
+																							) : (
+																							<div
+																								onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-guidelines`) : undefined}
+																								style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																							>
+																								{row.guidelines || '—'}
+																							</div>
+																							)}
+																						</td>
 																					</tr>
-																				));
-																			})}
+																				))}
 																		</tbody>
 																	</table>
 																</div>
