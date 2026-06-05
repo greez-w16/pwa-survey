@@ -155,6 +155,7 @@ const PrivateRoute = ({ children }) => {
     if (t.includes('clinic')) return 'CLINICS';
     if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
     if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
+    if (t.includes('obg')) return 'OBGYN';
     return null;
   }, []);
 
@@ -763,6 +764,7 @@ const PrivateRoute = ({ children }) => {
 		          EMS: 'EMS',
 		          GENERAL: 'Mortuary',
 		          MORTUARY: 'Mortuary',
+		          OBGYN: 'OBGYN',
 		        }[selectedGroupId] || selectedGroupText;
 		        const groupValue = selectedFacility?.preloadDataValues?.[groupField.id]
 		          || selectedGroupLabel

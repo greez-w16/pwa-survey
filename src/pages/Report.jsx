@@ -265,6 +265,7 @@ export default function Report() {
     if (t.includes('clinic')) return 'CLINICS';
     if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
     if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
+    if (t.includes('obg')) return 'OBGYN';
     return null;
   };
 
