@@ -3278,20 +3278,6 @@ export function Dashboard() {
         return cloned;
     };
 
-    const exportFacilityConfigsToAssets = async (facilityConfigs) => {
-        const response = await fetch('/__qims/export-facility-config-assets', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ configurations: facilityConfigs }),
-        });
-
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) {
-            throw new Error(result?.error || 'Local asset export failed');
-        }
-        return result;
-    };
-
     const handleSaveConfigsToDataStore = async (facilityType) => {
         const NAMESPACE = 'qims-survey-configs';
         const normalizedFacility = String(facilityType || '').trim().toLowerCase();
@@ -3325,16 +3311,12 @@ export function Dashboard() {
             showToast?.('Open a facility configuration before saving.', 'warning');
             return;
         }
-        const facilityConfigs = {
-            [target.configKey]: target.config,
-        };
         const configsToSave = [
             { key: target.configKey, data: target.config },
             ...target.extras,
         ];
         let saved = 0;
         let failed = 0;
-        const failedKeys = [];
         for (const { key, data } of configsToSave) {
             try {
                 await api.upsertDataStoreItem(NAMESPACE, key, data);
@@ -3342,31 +3324,15 @@ export function Dashboard() {
             } catch (e) {
                 console.warn(`Failed to save ${key} to DataStore:`, e);
                 failed++;
-                failedKeys.push(key);
             }
         }
 
-        let exportResult = null;
-        let exportError = null;
-        try {
-            exportResult = await exportFacilityConfigsToAssets(facilityConfigs);
-        } catch (err) {
-            console.warn('Failed to export facility configurations to src/assets:', err);
-            exportError = err;
-        }
-
-        const exportMessage = exportResult?.written?.length
-            ? ` Updated ${exportResult.written.join(', ')}.`
-            : exportError
-                ? ` Local file export failed: ${exportError.message || exportError}.`
-                : '';
-
         if (failed === 0) {
-            showToast?.(`${facilityType} configuration saved to DHIS2 DataStore (${saved} item(s)).${exportMessage}`, exportError ? 'warning' : 'success');
+            showToast?.(`${facilityType} configuration saved to DHIS2 DataStore (${saved} item(s)).`, 'success');
         } else if (saved > 0) {
-            showToast?.(`Configuration partially saved to DHIS2 DataStore: ${saved} saved, ${failed} failed.${exportMessage}`, 'warning');
+            showToast?.(`Configuration partially saved to DHIS2 DataStore: ${saved} saved, ${failed} failed.`, 'warning');
         } else {
-            showToast?.(`Configuration was not saved to DHIS2 DataStore. ${failed} item(s) failed.${exportMessage}`, 'error');
+            showToast?.(`Configuration was not saved to DHIS2 DataStore. ${failed} item(s) failed.`, 'error');
         }
     };
 

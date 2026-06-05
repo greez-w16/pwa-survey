@@ -15,7 +15,7 @@
                   "category": "Basic Process + Patient Care",
                   "severity": 4,
                   "guideline": "This governance structure refers to the authority(ies) above the level of the Hospital Manager and may include National/Regional/District levels in the public sector together with the Hospital Board, or corporate structures in the private sector including structures such as Head Office, Regional Office, Hospital Board/Board of Directors/ Governance Committees/any other structures that may exist. \nPlease note that full compliance can only be achieved if there is formal evidence of sharing this information with the staff of the organisation. A mere organogram does not render this criterion compliant unless there is a concise description/listing of the key functions of the relevant structures as reflected in this criterion. \nAlso take note that some of this information may be contained in Acts, regulations or directives. In the private sector this information may also be published as a corporate document or on the organisation’s website.\nDocumented evidence is required of a process through which the personnel of the organisation are informed of these responsibilities of the governance structure, e.g. during orientation and induction programmes, staff meetings, information leaflets, memos.",
-                  "description": "The organisation’s governance structure is described in written documents and is known to the staff of the organisation.",
+                  "description": "1. loomThe organisation’s governance structure is described in written documents and is known to the staff of the organisation.",
                   "is_critical": false,
                   "linked_criteria": []
                 },
@@ -382,7 +382,7 @@
                   "is_root": false,
                   "category": "Basic Process + Patient Care",
                   "severity": 3,
-                  "guidelines": "This is a test.",
+                  "guidelines": "",
                   "description": "The organisation has a committee or other mechanism to control all research undertaken within the organisation. (Testing)",
                   "is_critical": false
                 }
@@ -16371,7 +16371,7 @@
               ],
               "statement": "Standard A qualified individual is responsible for managing the laboratory service.",
               "standard_id": "19.1.2",
-              "intent_tooltip": "The laboratory service is under the direction of a qualified person who has\ndocumented evidence of training, expertise and experience and who is registered by the\nHealth Professions Council in accordance with applicable laws and regulations.  This\nqualified person assumes professional responsibility for the laboratory facility and for the\nservices provided. When this individual provides clinical consultations or medical opinions,\nhe or she is a physician, preferably a pathologist. Speciality and subspecialty laboratory\nservices are under the direction of appropriately qualified individuals.  Responsibilities of the\nlaboratory director/manager include the:\n•��      ordering of tests\n•       collecting and identifying of specimens\n•       transporting, storing and preserving of specimens\n•       receiving, logging in and tracking of specimens.\n\nThese procedures are also observed for specimens sent to outside sources for testing."
+              "intent_tooltip": "The laboratory service is under the direction of a qualified person who has\ndocumented evidence of training, expertise and experience and who is registered by the\nHealth Professions Council in accordance with applicable laws and regulations.  This\nqualified person assumes professional responsibility for the laboratory facility and for the\nservices provided. When this individual provides clinical consultations or medical opinions,\nhe or she is a physician, preferably a pathologist. Speciality and subspecialty laboratory\nservices are under the direction of appropriately qualified individuals.  Responsibilities of the\nlaboratory director/manager include the:\n•    ��  ordering of tests\n•       collecting and identifying of specimens\n•       transporting, storing and preserving of specimens\n•       receiving, logging in and tracking of specimens.\n\nThese procedures are also observed for specimens sent to outside sources for testing."
             },
             {
               "criteria": [
@@ -17392,7 +17392,7 @@
               ],
               "statement": "Standard X-ray film and other supplies are regularly available.",
               "standard_id": "20.2.3",
-              "intent_tooltip": "The organisation has identified the quantities of film, reagents and supplies\nnecessary to provide a radiology and diagnostic imaging service to its patients.  A process\nto order or secure essential film, reagents and other supplies is effective.  All supplies are\nstored and dispensed according to defined procedures.  The periodic evaluation of reagents\nensures accuracy and precision of results.  Written guidelines ensure the complete and\naccurate labelling of film, reagents and solutions."
+              "intent_tooltip": "The organisation has identified the quantities of film, reagents and supplies\nnecessary to provide a radiology and diagnostic imaging service to its patients.  A process\nto order or secure essential film, reagents and other supplies is effective.  All supplies are\nstored and dispensed according to defined procedures.�� The periodic evaluation of reagents\nensures accuracy and precision of results.  Written guidelines ensure the complete and\naccurate labelling of film, reagents and solutions."
             }
           ],
           "section_pi_id": "20.2"
