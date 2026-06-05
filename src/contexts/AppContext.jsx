@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { api } from '../services/api';
 import indexedDBService from '../services/indexedDBService';
 import { useStorage } from '../hooks/useStorage';
@@ -11,8 +11,14 @@ import mortuaryLinks from '../assets/mortuary_links.json';
 import clinicsLinks from '../assets/clinics_links.json';
 import hospitalLinks from '../assets/hospital_links.json';
 import hospitalComputeCriteria from '../assets/hospital_compute_criteria.json';
+import { Alert, Snackbar } from '@mui/material';
 
-const AppContext = createContext();
+const APP_CONTEXT_KEY = '__QIMS_APP_CONTEXT__';
+const AppContext = globalThis[APP_CONTEXT_KEY] || createContext();
+
+if (!globalThis[APP_CONTEXT_KEY]) {
+    globalThis[APP_CONTEXT_KEY] = AppContext;
+}
 
 export const AppProvider = ({ children }) => {
     const [user, setUser] = useState(null);
@@ -20,10 +26,24 @@ export const AppProvider = ({ children }) => {
     const [isOnline, setIsOnline] = useState(navigator.onLine);
 	    // Track whether we are still checking for an existing session on load.
 	    const [authInitializing, setAuthInitializing] = useState(true);
+        const [toast, setToast] = useState({
+            open: false,
+            message: '',
+            type: 'info',
+        });
 
     const showToast = useCallback((message, type = 'info') => {
         console.log(`[TOAST] ${type.toUpperCase()}: ${message}`);
-        // Implement actual toast UI here if needed
+        setToast({
+            open: true,
+            message: String(message || ''),
+            type: ['success', 'warning', 'error', 'info'].includes(type) ? type : 'info',
+        });
+    }, []);
+
+    const closeToast = useCallback((event, reason) => {
+        if (reason === 'clickaway') return;
+        setToast(prev => ({ ...prev, open: false }));
     }, []);
     const storage = useStorage();
 
@@ -42,8 +62,11 @@ export const AppProvider = ({ children }) => {
 	    const [configVersions, setConfigVersions] = useState([]);
 	    const [activeConfigVersionId, setActiveConfigVersionId] = useState(null);
 	    const [configBundles, setConfigBundles] = useState({});
-	    const [configSource, setConfigSource] = useState(() => localStorage.getItem('qims_config_source') || 'local'); // 'local' | 'datastore'
+        const [configSource, setConfigSource] = useState('datastore'); // 'datastore'
+        const [remoteConfigLoading, setRemoteConfigLoading] = useState(false);
         const [appMetadata, setAppMetadata] = useState(null);
+        const remoteLoadKeyRef = useRef(null);
+        const loadedRemoteFacilitiesRef = useRef(new Set());
 
 	    useEffect(() => {
             localStorage.setItem('qims_config_source', configSource);
@@ -131,22 +154,61 @@ export const AppProvider = ({ children }) => {
 		        setConfigBundles(initialBundles);
 		    }, []);
 
-            const loadRemoteConfig = useCallback(async () => {
+            const unwrapDataStoreValue = (value, key) => {
+                if (!value) return undefined;
+                if (value?.configurations && value.configurations[key] !== undefined) {
+                    return unwrapDataStoreValue(value.configurations[key], key);
+                }
+                if (value[key] !== undefined) {
+                    return unwrapDataStoreValue(value[key], key);
+                }
+                return value;
+            };
+
+            const unwrapDataStoreArray = (value, key) => {
+                const unwrapped = unwrapDataStoreValue(value, key);
+                return Array.isArray(unwrapped) ? unwrapped : undefined;
+            };
+
+            const unwrapDataStoreObject = (value, key) => {
+                const unwrapped = unwrapDataStoreValue(value, key);
+                return unwrapped && typeof unwrapped === 'object' && !Array.isArray(unwrapped)
+                    ? unwrapped
+                    : undefined;
+            };
+
+            const loadRemoteConfig = useCallback(async (facilityType) => {
                 const NAMESPACE = 'qims-survey-configs';
-                const keys = [
-                    { key: 'hospital_full_configuration' },
-                    { key: 'clinics_full_configuration' },
-                    { key: 'ems_full_configuration' },
-                    { key: 'mortuary_full_configuration' },
-                    { key: 'hospital_compute_criteria' },
-                    { key: 'hospital_links' },
-                    { key: 'clinics_links' },
-                    { key: 'ems_links' },
-                    { key: 'mortuary_links' },
-                ];
+                const normalizedFacility = String(facilityType || '').trim().toLowerCase();
+                const facilityKeys = {
+                    hospital: [
+                        { key: 'hospital_full_configuration' },
+                        { key: 'hospital_compute_criteria' },
+                        { key: 'hospital_links' },
+                    ],
+                    clinics: [
+                        { key: 'clinics_full_configuration' },
+                        { key: 'clinics_links' },
+                    ],
+                    ems: [
+                        { key: 'ems_full_configuration' },
+                        { key: 'ems_links' },
+                    ],
+                    mortuary: [
+                        { key: 'mortuary_full_configuration' },
+                        { key: 'mortuary_links' },
+                    ],
+                };
+                const keys = facilityKeys[normalizedFacility] || Object.values(facilityKeys).flat();
+                const loadScope = normalizedFacility || 'all';
+                const loadKey = `${activeConfigVersionId || 'v1'}:${loadScope}`;
+                if (loadedRemoteFacilitiesRef.current.has(loadKey)) {
+                    return { loaded: true, cached: true, count: 0 };
+                }
 
                 try {
-                    console.info('[AppContext] Fetching remote configuration from DataStore...');
+                    setRemoteConfigLoading(true);
+                    console.info(`[AppContext] Fetching ${loadScope} configuration from DataStore...`);
                     const fetchedData = {};
                     for (const { key } of keys) {
                         try {
@@ -168,46 +230,55 @@ export const AppProvider = ({ children }) => {
 
                             const remoteConfig = {
                                 ...currentBundle.config,
-                                ...(fetchedData.hospital_full_configuration ? { hospital_full_configuration: fetchedData.hospital_full_configuration } : {}),
-                                ...(fetchedData.clinics_full_configuration ? { clinics_full_configuration: fetchedData.clinics_full_configuration } : {}),
-                                ...(fetchedData.ems_full_configuration ? { ems_full_configuration: fetchedData.ems_full_configuration } : {}),
-                                ...(fetchedData.mortuary_full_configuration ? { mortuary_full_configuration: fetchedData.mortuary_full_configuration } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.hospital_full_configuration, 'hospital_full_configuration') ? { hospital_full_configuration: unwrapDataStoreArray(fetchedData.hospital_full_configuration, 'hospital_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.clinics_full_configuration, 'clinics_full_configuration') ? { clinics_full_configuration: unwrapDataStoreArray(fetchedData.clinics_full_configuration, 'clinics_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.ems_full_configuration, 'ems_full_configuration') ? { ems_full_configuration: unwrapDataStoreArray(fetchedData.ems_full_configuration, 'ems_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.mortuary_full_configuration, 'mortuary_full_configuration') ? { mortuary_full_configuration: unwrapDataStoreArray(fetchedData.mortuary_full_configuration, 'mortuary_full_configuration') } : {}),
                             };
 
                             const remoteLinks = {
                                 ...currentBundle.links,
-                                ...(fetchedData.ems_links ? { ems: fetchedData.ems_links } : {}),
-                                ...(fetchedData.hospital_links ? { hospital: fetchedData.hospital_links } : {}),
-                                ...(fetchedData.clinics_links ? { clinics: fetchedData.clinics_links } : {}),
-                                ...(fetchedData.mortuary_links ? { mortuary: fetchedData.mortuary_links } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.ems_links, 'ems_links') ? { ems: unwrapDataStoreArray(fetchedData.ems_links, 'ems_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.hospital_links, 'hospital_links') ? { hospital: unwrapDataStoreArray(fetchedData.hospital_links, 'hospital_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.clinics_links, 'clinics_links') ? { clinics: unwrapDataStoreArray(fetchedData.clinics_links, 'clinics_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.mortuary_links, 'mortuary_links') ? { mortuary: unwrapDataStoreArray(fetchedData.mortuary_links, 'mortuary_links') } : {}),
                             };
+                            const remoteCompute = unwrapDataStoreObject(fetchedData.hospital_compute_criteria, 'hospital_compute_criteria');
 
                             next[activeId] = {
                                 ...currentBundle,
                                 config: remoteConfig,
                                 links: remoteLinks,
-                                ...(fetchedData.hospital_compute_criteria ? { compute: fetchedData.hospital_compute_criteria } : {}),
+                                ...(remoteCompute ? { compute: remoteCompute } : {}),
                             };
                             return next;
                         });
+                        loadedRemoteFacilitiesRef.current.add(loadKey);
                         console.info('[AppContext] Remote configuration bundle loaded successfully.');
-                        showToast?.('Remote configuration loaded from DataStore successfully.', 'success');
+                        return { loaded: true, count: Object.keys(fetchedData).length };
                     } else {
                         console.info('[AppContext] No remote configuration found in DataStore. Using built-in baseline.');
+                        showToast?.('No remote configuration found in DHIS2 DataStore.', 'info');
+                        return { loaded: false, count: 0 };
                     }
                 } catch (err) {
                     console.error('[AppContext] Failed to load remote configuration', err);
                     showToast?.('Failed to load remote configuration from DataStore.', 'error');
+                    return { loaded: false, count: 0, error: err };
+                } finally {
+                    setRemoteConfigLoading(false);
                 }
             }, [activeConfigVersionId, showToast]);
 
-            // Automatically fetch latest DHIS2 config when the user logs in 
-            // and the DataStore strategy is selected
+            // Remote facility bundles are loaded when a facility is selected or
+            // opened in App Settings. The local baseline remains immediately
+            // available while avoiding a large all-facility login request.
             useEffect(() => {
-                if (user && configSource === 'datastore') {
-                    loadRemoteConfig();
-                }
-            }, [user, configSource, loadRemoteConfig]);
+                const loadKey = `${user?.id || user?.username || 'anonymous'}:${activeConfigVersionId || 'v1'}`;
+                if (remoteLoadKeyRef.current === loadKey) return;
+                remoteLoadKeyRef.current = loadKey;
+                loadedRemoteFacilitiesRef.current.clear();
+            }, [user, activeConfigVersionId]);
 
 	    // Load initial user session and their facility assignments.
 	    // To avoid unnecessary network traffic on the login page, we only
@@ -506,6 +577,7 @@ export const AppProvider = ({ children }) => {
 		        configBundles,
 		        setConfigBundles,
                 configSource,
+                remoteConfigLoading,
                 setConfigSource,
                 loadRemoteConfig,
 	        showToast,
@@ -523,12 +595,28 @@ export const AppProvider = ({ children }) => {
 		        activeConfigVersionId,
 		        configBundles,
                 configSource,
+                remoteConfigLoading,
                 loadRemoteConfig
 		    ]);
 
     return (
         <AppContext.Provider value={value}>
             {children}
+            <Snackbar
+                open={toast.open}
+                autoHideDuration={5000}
+                onClose={closeToast}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            >
+                <Alert
+                    onClose={closeToast}
+                    severity={toast.type}
+                    variant="filled"
+                    sx={{ width: '100%' }}
+                >
+                    {toast.message}
+                </Alert>
+            </Snackbar>
         </AppContext.Provider>
     );
 };

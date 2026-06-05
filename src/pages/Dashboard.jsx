@@ -53,10 +53,9 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     CLINICS: 'cliStageU11',
     EMS: 'emsStageU11',
     MORTUARY: 'morStageU11',
-    OBGYN: 'obgStageU11',
 };
 
-const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, placeholder, autoOpen, onClose }) => {
+const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, placeholder, autoOpen, onClose, showClearAll = false }) => {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
 
@@ -113,18 +112,33 @@ const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, 
                 }
             }}
         >
-            <div style={{ padding: '8px', position: 'sticky', top: 0, background: '#fff', zIndex: 3, borderBottom: '1px solid #e2e8f0' }} onClick={(e) => e.stopPropagation()}>
+            <div style={{ padding: '8px', position: 'sticky', top: 0, background: '#fff', zIndex: 3, borderBottom: '1px solid #e2e8f0', display: 'flex', gap: 8, alignItems: 'center' }} onClick={(e) => e.stopPropagation()}>
                 <TextField
                     size="small"
-                    fullWidth
                     placeholder="Search..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     onKeyDown={(e) => {
                         e.stopPropagation();
                     }}
+                    style={{ flex: 1 }}
                     autoFocus
                 />
+                {showClearAll && (
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        disabled={(value || []).length === 0}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onChange([]);
+                        }}
+                        onKeyDown={(e) => e.stopPropagation()}
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        Clear all
+                    </Button>
+                )}
             </div>
             {filteredOptions.map((opt) => (
                 <MenuItem key={opt.id} value={opt.id}>
@@ -145,6 +159,133 @@ const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, 
         </Select>
     );
 });
+
+const SETTINGS_TABLE_HEADERS = [
+    { label: 'SE Number', minWidth: 55, align: 'center' },
+    { label: 'SE Description', minWidth: 220, align: 'center' },
+    { label: 'Standard', minWidth: 70, align: 'center' },
+    { label: 'Statement', minWidth: 300, align: 'center' },
+    { label: 'Criterion', minWidth: 80, align: 'center' },
+    { label: 'Criterion Description', minWidth: 280, align: 'center' },
+    { label: 'Root', minWidth: 50, align: 'center' },
+    { label: 'Critical / Non-Critical', minWidth: 110, align: 'center' },
+    { label: 'Linked Criteria', minWidth: 180 },
+    { label: 'Sub-Criteria', minWidth: 180 },
+    { label: 'Guidelines', minWidth: 320, align: 'center' },
+];
+
+const criterionOptionsFor = (serviceElements) => serviceElements.flatMap(se =>
+    (se.sections || []).flatMap(section =>
+        (section.standards || []).flatMap(standard =>
+            (standard.criteria || []).map(criterion => ({ id: criterion.id, name: criterion.id }))
+        )
+    )
+);
+
+const countCriteriaFor = (serviceElements) => serviceElements.reduce((total, se) => (
+    total + (se.sections || []).reduce((sectionTotal, section) => (
+        sectionTotal + (section.standards || []).reduce((standardTotal, standard) => (
+            standardTotal + (standard.criteria || []).length
+        ), 0)
+    ), 0)
+), 0);
+
+const buildRootMap = (computeCriteria) => {
+    const rootMap = {};
+    (computeCriteria?.hospital_standards_config?.service_elements || []).forEach(cse => {
+        (cse.root_criteria || []).forEach(root => {
+            if (root.id) rootMap[root.id] = root.sub_criteria || [];
+        });
+    });
+    return rootMap;
+};
+
+const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, rootMap) => (
+    serviceElements.flatMap(se => {
+        const allStandards = (se.sections || []).flatMap(section =>
+            (section.standards || []).map(standard => ({ id: standard.standard_id, name: standard.standard_id }))
+        );
+        const allCriteriaInSE = criterionOptionsFor([se]);
+        const standardGroups = (se.sections || []).flatMap(section =>
+            (section.standards || []).map(standard => {
+                const standardCriteriaIds = (standard.criteria || []).map(c => c.id).filter(Boolean);
+                const rows = (standard.criteria || []).map(criterion => ({
+                    seId: se.se_id,
+                    seDescription: se.se_description || se.description || se.se_name || se.name || '',
+                    standardId: standard.standard_id,
+                    statement: standard.statement || standard.intent || standard.intent_tooltip || '',
+                    criterionId: criterion.id,
+                    criterionDescription: criterion.description || '',
+                    guidelines: criterion.guidelines || criterion.guideline || '',
+                    isCritical: criterion.is_critical,
+                    linkedCriteria: criterion.linked_criteria || standardCriteriaIds,
+                    isRoot: typeof criterion.is_root === 'boolean'
+                        ? criterion.is_root
+                        : !!rootMap[criterion.id],
+                    subCriteria: rootMap[criterion.id] || [],
+                    allStandards,
+                    allCriteriaInSE,
+                    allCriteriaInFacilityType,
+                    configKey,
+                }));
+                return rows.map((row, index) => ({
+                    ...row,
+                    isFirstStandardRow: index === 0,
+                    standardRowSpan: rows.length,
+                }));
+            })
+        );
+        const rows = standardGroups.flat();
+        return rows.map((row, index) => ({
+            ...row,
+            isFirstSeRow: index === 0,
+            seRowSpan: rows.length,
+        }));
+    })
+);
+
+const EditableTextCell = ({
+    value,
+    active,
+    editable,
+    maxHeight = 90,
+    onOpen,
+    onSave,
+}) => {
+    const displayValue = value || '—';
+    if (editable && active) {
+        return (
+            <TextField
+                value={value || ''}
+                onChange={(e) => onSave(e.target.value)}
+                onBlur={() => onOpen(null)}
+                onKeyDown={(e) => {
+                    if (e.key === 'Escape') onOpen(null);
+                }}
+                multiline
+                minRows={3}
+                maxRows={8}
+                size="small"
+                fullWidth
+                autoFocus
+                onClick={(e) => e.stopPropagation()}
+            />
+        );
+    }
+    return (
+        <div
+            onClick={editable ? onOpen : undefined}
+            style={{
+                maxHeight: `${maxHeight}px`,
+                overflowY: 'auto',
+                cursor: editable ? 'pointer' : 'default',
+                borderBottom: editable ? '1px dashed #cbd5e0' : 'none',
+            }}
+        >
+            {displayValue}
+        </div>
+    );
+};
 
 export function Dashboard() {
 	    const navigate = useNavigate();
@@ -170,7 +311,7 @@ export function Dashboard() {
 	        configBundles,
 	        setConfigBundles,
             configSource,
-            setConfigSource,
+            remoteConfigLoading,
             loadRemoteConfig,
 	    } = useApp();
     const storage = useStorage();
@@ -450,7 +591,6 @@ export function Dashboard() {
 	        if (ns === 'CLINICS') return text.includes('CLINIC') || text.includes('CLINICS');
 	        if (ns === 'EMS') return text.includes('SURV_EMS') || text.includes('SURV-EMS') || /^\s*(EMS|SE)([_\s-]|$)/.test(text);
 	        if (ns === 'MORTUARY') return text.includes('MORTUARY') || text.includes('SURV_MORTUARY') || text.includes('SURV-MORTUARY');
-	        if (ns === 'OBGYN') return text.includes('OBG') || text.includes('OBGYN') || text.includes('SURV_OBG') || text.includes('SURV-OBG');
 	        return false;
 	    };
 
@@ -464,7 +604,7 @@ export function Dashboard() {
 	            if (!seId || optionsById.has(seId)) return;
 	            const rawName = section?.displayName || section?.name || section?.code || '';
 	            const label = String(rawName)
-	                .replace(/^\s*(SURV[-_])?(HOSPITAL|HOSP|CLINICS?|EMS|MORTUARY|OBGYN|OBG)[-_\s]*/i, '')
+	                .replace(/^\s*(SURV[-_])?(HOSPITAL|HOSP|CLINICS?|EMS|MORTUARY)[-_\s]*/i, '')
 	                .replace(/^\s*SE\s*([0-9]+)[-_\s:]*/i, '')
 	                .trim();
 	            optionsById.set(seId, { id: seId, label: `SE ${seId} ${label || ''}`.trim() });
@@ -498,7 +638,6 @@ export function Dashboard() {
         if (t.includes('clinic')) return 'CLINICS';
         if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
         if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
-        if (t.includes('obg')) return 'OBGYN';
         return String(txt || '').toUpperCase().trim();
     }, []);
 
@@ -508,7 +647,7 @@ export function Dashboard() {
 	    }, [configuration, toFacilityGroupKey]);
 
     const getFacilityGroupLabel = React.useCallback((facilityGroupKey) => {
-        const labelMap = { HOSPITAL: 'Hospital', CLINICS: 'Clinics', EMS: 'EMS', MORTUARY: 'Mortuary', OBGYN: 'OBGYN' };
+        const labelMap = { HOSPITAL: 'Hospital', CLINICS: 'Clinics', EMS: 'EMS', MORTUARY: 'Mortuary' };
         return labelMap[String(facilityGroupKey).toUpperCase()] || String(facilityGroupKey || '');
     }, []);
 
@@ -881,6 +1020,7 @@ export function Dashboard() {
 	    const [showSettings, setShowSettings] = useState(false);
 				    const [expandedFacs, setExpandedFacs] = useState({});
 				    const [loadingFacType, setLoadingFacType] = useState(null);
+                    const [settingsFacilityPages, setSettingsFacilityPages] = useState({});
 				    const [configRevision, setConfigRevision] = useState(0);
 				    const [activeCellKey, setActiveCellKey] = useState(null);
 		    const [selectedSE, setSelectedSE] = useState(null);
@@ -915,7 +1055,6 @@ export function Dashboard() {
 			        loading: hookLoading = false,
 				        error: hookError = null,
 				        debug: hookDebug = null,
-				        initialized: hookInitialized = false,
 			        respondToAssignment,
 			    } = assessmentHook || {};
 
@@ -933,7 +1072,7 @@ export function Dashboard() {
 			        completed: 0,
 			        declined: 0,
 			    };
-			    const assessmentsLoading = hookLoading || !hookInitialized;
+			    const assessmentsLoading = hookLoading;
 
   // Load Accreditation assignments for current user from accreditation programme
   useEffect(() => {
@@ -1084,126 +1223,17 @@ export function Dashboard() {
 
 		    React.useEffect(() => {
 		        if (assessmentsLoading) return;
-		        
-		        // 1. Gather all top-level and duplicate sub-assessments
-		        const topLevelList = [
-		            ...(pendingAssessments || []),
-		            ...(upcomingAssessments || []),
-		            ...(accredAssignments || [])
-		        ];
-		        
-		        const allAssessments = [];
-		        topLevelList.forEach(a => {
-		            allAssessments.push(a);
-		            if (Array.isArray(a._duplicates)) {
-		                allAssessments.push(...a._duplicates);
-		            }
-		        });
-		        
-		        // 2. Filter out those that are already checked or currently checking
-		        const seen = new Set();
-		        const toCheck = [];
-		        
-		        allAssessments.forEach(assessment => {
-		            const assocKey = getAssocKey(assessment);
-		            if (!assocKey || seen.has(assocKey)) return;
-		            seen.add(assocKey);
-		            
-		            const current = assessmentEventPresenceByKey?.[assocKey];
-		            if (current && (current.loading || typeof current.hasAssessmentEvent === 'boolean')) {
-		                return;
-		            }
-		            
-		            // Ensure we have a TEI ID before trying to query presence
-		            const teiId = assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
-		            if (!teiId) {
-		                // Set default immediately
-		                setAssessmentEventPresenceByKey(prev => ({
-		                    ...prev,
-		                    [assocKey]: { loading: false, hasAssessmentEvent: false }
-		                }));
-		                return;
-		            }
-		            
-		            toCheck.push(assessment);
-		        });
-		        
-		        if (toCheck.length === 0) return;
-		        
-		        // 3. Perform bulk check
-		        const checkInBulk = async () => {
-		            // Set all to loading state
-		            setAssessmentEventPresenceByKey(prev => {
-		                const next = { ...prev };
-		                toCheck.forEach(a => {
-		                    const assocKey = getAssocKey(a);
-		                    next[assocKey] = { ...(prev[assocKey] || {}), loading: true };
-		                });
-		                return next;
-		            });
-		            
-		            try {
-		                // Group toCheck by program & stage
-		                const groups = {};
-		                toCheck.forEach(a => {
-		                    const stageId = getAssignmentProgramStageId(a);
-		                    const programId = getSurveyEventProgramIdForStage(stageId, a);
-		                    const teiId = a.trackedEntityInstance || a.scheduleTeiId;
-		                    const key = `${programId}-${stageId}`;
-		                    if (!groups[key]) groups[key] = { programId, stageId, teiIds: new Set() };
-		                    groups[key].teiIds.add(teiId);
-		                });
-		                
-		                // Fetch events in parallel for each program/stage group
-		                const results = await Promise.all(Object.values(groups).map(async (g) => {
-		                    const teiIds = [...g.teiIds];
-		                    if (teiIds.length === 0) return [];
-		                    try {
-		                        const events = await api.getEventsList({
-		                            programId: g.programId,
-		                            stageId: g.stageId,
-		                            teiId: teiIds.join(';'),
-		                            ouMode: 'DESCENDANTS',
-		                            fields: 'event,trackedEntityInstance'
-		                        });
-		                        return events || [];
-		                    } catch (err) {
-		                        console.warn(`Bulk presence check failed for program ${g.programId} stage ${g.stageId}`, err);
-		                        return [];
-		                    }
-		                }));
-		                
-		                const allEvents = results.flat();
-		                
-		                // Update presence status for all checked assessments
-		                setAssessmentEventPresenceByKey(prev => {
-		                    const next = { ...prev };
-		                    toCheck.forEach(a => {
-		                        const assocKey = getAssocKey(a);
-		                        const teiId = a.trackedEntityInstance || a.scheduleTeiId;
-		                        const hasEvent = allEvents.some(ev =>
-		                            ev?.event && String(ev?.trackedEntityInstance || '').trim() === String(teiId).trim()
-		                        );
-		                        next[assocKey] = { loading: false, hasAssessmentEvent: hasEvent };
-		                    });
-		                    return next;
-		                });
-		            } catch (err) {
-		                console.error('Failed to run bulk presence check', err);
-		                // Fallback all to loaded=false
-		                setAssessmentEventPresenceByKey(prev => {
-		                    const next = { ...prev };
-		                    toCheck.forEach(a => {
-		                        const assocKey = getAssocKey(a);
-		                        next[assocKey] = { loading: false, hasAssessmentEvent: false };
-		                    });
-		                    return next;
-		                });
-		            }
-		        };
-		        
-		        checkInBulk();
-		    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, assessmentEventPresenceByKey, getAssignmentProgramStageId, getSurveyEventProgramIdForStage]);
+		        const all = [...(pendingAssessments || []), ...(upcomingAssessments || []), ...(accredAssignments || [])];
+	        const seen = new Set();
+	        all.forEach(assessment => {
+	            const assocKey = getAssocKey(assessment);
+	            if (!assocKey || seen.has(assocKey)) return;
+	            seen.add(assocKey);
+	            const current = assessmentEventPresenceByKey?.[assocKey];
+	            if (current && (current.loading || typeof current.hasAssessmentEvent === 'boolean')) return;
+	            checkAssessmentEventPresence(assessment);
+	        });
+		    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, assessmentEventPresenceByKey, checkAssessmentEventPresence]);
 
 	    const toggleExpandAssessment = async (assessment) => {
 	        if (!supportsAssociatedAssessments(assessment)) {
@@ -1275,26 +1305,24 @@ export function Dashboard() {
 	    };
 	};
 
-			function getFacilityGroupKeyFromProgramStageId(stageId) {
+			const getFacilityGroupKeyFromProgramStageId = (stageId) => {
 			    const id = String(stageId || '').trim();
 			    if (!id) return '';
 			    const entry = Object.entries(SURVEY_PROGRAM_STAGE_BY_GROUP).find(([, value]) => value === id);
 			    return entry?.[0] || '';
-			}
+			};
 
-			function getAssignmentFacilityGroupRawValue(assessment) {
-			    return (
-			        assessment?.parentGroupId
-			        || assessment?.facilityGroup
-			        || assessment?.schedule?.parentGroupId
-			        || assessment?.schedule?.facilityGroup
-			        || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
-			        || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
-			        || ''
-			    );
-			}
+			const getAssignmentFacilityGroupRawValue = (assessment) => (
+			    assessment?.parentGroupId
+			    || assessment?.facilityGroup
+			    || assessment?.schedule?.parentGroupId
+			    || assessment?.schedule?.facilityGroup
+			    || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
+			    || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
+			    || ''
+			);
 
-			function getAssessmentFacilityGroupKey(assessment) {
+			const getAssessmentFacilityGroupKey = (assessment) => {
 			    const raw = getAssignmentFacilityGroupRawValue(assessment);
 			    const key = toFacilityGroupKey(raw);
 			    if (key && key !== '-') return key;
@@ -1303,55 +1331,49 @@ export function Dashboard() {
 			        || assessment?.schedule?.programStageId
 			        || assessment?.schedule?.enrollments?.[0]?.programStage
 			    );
-			}
+			};
 
-			function getAssignmentFacilityGroupValue(assessment) {
+			const getAssignmentFacilityGroupValue = (assessment) => {
 			    const raw = getAssignmentFacilityGroupRawValue(assessment);
 			    const key = getAssessmentFacilityGroupKey(assessment);
 			    return key ? getFacilityGroupLabel(key) : (raw || '-');
-			}
+			};
 
-			function getAssignmentTypeValue(assessment) {
-			    return (
-			        assessment?.typeOfAssessment
-			        || assessment?.assessmentType
-			        || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
-			        || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
-			        || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentType, ['assessment type'])
-			        || '-'
-			    );
-			}
+		const getAssignmentTypeValue = (assessment) => (
+		    assessment?.typeOfAssessment
+		    || assessment?.assessmentType
+		    || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
+		    || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected, ['assessment type of assessment selected'])
+		    || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentType, ['assessment type'])
+		    || '-'
+		);
 
-			function getAssignmentProgramId(assessment) {
-			    return (
-			        assessment?.program
-			        || assessment?.programId
-			        || assessment?.schedule?.enrollments?.[0]?.program
-				    || configuration?.program?.id
-				    || SURVEY_ASSESSMENTS_PROGRAM_ID
-			    );
-			}
+		const getAssignmentProgramId = (assessment) => (
+		    assessment?.program
+		    || assessment?.programId
+		    || assessment?.schedule?.enrollments?.[0]?.program
+			    || configuration?.program?.id
+			    || SURVEY_ASSESSMENTS_PROGRAM_ID
+		);
 
 				const ASSOCIATED_ASSESSMENTS_PROGRAM_ID = SURVEY_ASSESSMENTS_PROGRAM_ID;
-			function supportsAssociatedAssessments(assessment) {
-			    return Boolean(resolveOrgUnitForAssessment(assessment));
-			}
+			const supportsAssociatedAssessments = (assessment) => Boolean(resolveOrgUnitForAssessment(assessment));
 
-			function getAssignmentProgramStageId(assessment) {
+			const getAssignmentProgramStageId = (assessment) => {
 			    const facilityGroup = getAssessmentFacilityGroupKey(assessment) || getAssignmentFacilityGroupValue(assessment);
-			    return assessment?.programStageId
-			        || getSurveyProgramStageIdForGroup(facilityGroup)
-			        || configuration?.programStage?.id
-			        || '';
-			}
+		    return assessment?.programStageId
+		        || getSurveyProgramStageIdForGroup(facilityGroup)
+		        || configuration?.programStage?.id
+		        || '';
+		};
 
-			function getSurveyEventProgramIdForStage(stageId, assessment = null) {
+			const getSurveyEventProgramIdForStage = (stageId, assessment = null) => {
 			    const normalizedStageId = String(stageId || '').trim();
 			    const isSurveyStage = Object.values(SURVEY_PROGRAM_STAGE_BY_GROUP).includes(normalizedStageId);
 			    return isSurveyStage
 			        ? SURVEY_ASSESSMENTS_PROGRAM_ID
 			        : (configuration?.program?.id || getAssignmentProgramId(assessment) || SURVEY_ASSESSMENTS_PROGRAM_ID);
-			}
+			};
 		const formatAssignmentStatusLabel = (value) => {
 		    const raw = String(value || '').trim();
 		    const map = {
@@ -1601,10 +1623,10 @@ export function Dashboard() {
                                         className="btn btn-secondary btn-xs"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            openTeamDialog(ev);
+                                            openTeamDialog(assessment);
                                         }}
                                     >
-                                        Team
+                                        Team ({Array.isArray(assessment.team) ? assessment.team.length : 0})
                                     </button>
 	                                </div>
 	                            </td>
@@ -1618,32 +1640,10 @@ export function Dashboard() {
 
 	  // Open a modal to show team members for an assignment
   const openTeamDialog = async (assessment) => {
-    let team = Array.isArray(assessment.team) ? assessment.team : [];
+    const team = Array.isArray(assessment.team) ? assessment.team : [];
     const label = assessment.orgUnitName || assessment.facilityId || assessment.orgUnitId || '';
-    setTeamDialogData({ orgUnitName: label, team: [], loading: true });
+    setTeamDialogData({ orgUnitName: label, team, loading: true });
     setTeamDialogOpen(true);
-
-    try {
-      const teiId = assessment.trackedEntityInstance || assessment.teiId || assessment.scheduleTeiId || '';
-      const facilityGroup = assessment.facilityGroup || getAssociatedAssessmentGroupValue(assessment) || '';
-      if (team.length === 0 && teiId && facilityGroup) {
-        try {
-          const ns = String(facilityGroup).toUpperCase();
-          const plan = await api.getDataStoreItem(ns, teiId);
-          if (plan && Array.isArray(plan.team)) {
-            team = plan.team.map(t => ({
-              assignedUserId: t.userId || t.assignedUserId || '',
-              displayName: t.displayName || '',
-              teamRole: t.role || t.teamRole || ''
-            }));
-          }
-        } catch (dsErr) {
-          console.warn('Failed to load team from DataStore for team dialog', dsErr);
-        }
-      }
-    } catch (err) {
-      console.warn('Failed to resolve DataStore team lookup context', err);
-    }
 
     try {
       // Build list of identifiers (support composite values like "id|username")
@@ -2124,7 +2124,7 @@ export function Dashboard() {
                 return;
             }
 
-            const team = (assessment.team || assessment.teamAssignments || [])
+            const team = (assessment.teamAssignments || [])
                 .filter(m => m && m.assignedUserId)
                 .map(m => ({ ...m }));
 
@@ -3260,21 +3260,81 @@ export function Dashboard() {
 		        });
 		    };
 
-    const handleSaveConfigsToDataStore = async () => {
+    const withCriterionRootFlags = (configList, computeConfig) => {
+        const rootMap = computeConfig ? buildRootMap(computeConfig) : {};
+        const rootIds = new Set(Object.keys(rootMap));
+        const cloned = Array.isArray(configList) ? JSON.parse(JSON.stringify(configList)) : [];
+        cloned.forEach(se => {
+            (se.sections || []).forEach(section => {
+                (section.standards || []).forEach(standard => {
+                    (standard.criteria || []).forEach(criterion => {
+                        criterion.is_root = computeConfig
+                            ? rootIds.has(String(criterion.id || ''))
+                            : criterion.is_root === true;
+                    });
+                });
+            });
+        });
+        return cloned;
+    };
+
+    const exportFacilityConfigsToAssets = async (facilityConfigs) => {
+        const response = await fetch('/__qims/export-facility-config-assets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ configurations: facilityConfigs }),
+        });
+
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) {
+            throw new Error(result?.error || 'Local asset export failed');
+        }
+        return result;
+    };
+
+    const handleSaveConfigsToDataStore = async (facilityType) => {
         const NAMESPACE = 'qims-survey-configs';
+        const normalizedFacility = String(facilityType || '').trim().toLowerCase();
+        const saveTargets = {
+            hospital: {
+                configKey: 'hospital_full_configuration',
+                config: withCriterionRootFlags(currentConfig.hospital_full_configuration, currentComputeCriteria),
+                extras: [
+                    { key: 'hospital_compute_criteria', data: currentComputeCriteria },
+                    { key: 'hospital_links', data: currentLinks.hospital },
+                ],
+            },
+            clinics: {
+                configKey: 'clinics_full_configuration',
+                config: withCriterionRootFlags(currentConfig.clinics_full_configuration, null),
+                extras: [{ key: 'clinics_links', data: currentLinks.clinics }],
+            },
+            ems: {
+                configKey: 'ems_full_configuration',
+                config: withCriterionRootFlags(currentConfig.ems_full_configuration, null),
+                extras: [{ key: 'ems_links', data: currentLinks.ems }],
+            },
+            mortuary: {
+                configKey: 'mortuary_full_configuration',
+                config: withCriterionRootFlags(currentConfig.mortuary_full_configuration, null),
+                extras: [{ key: 'mortuary_links', data: currentLinks.mortuary }],
+            },
+        };
+        const target = saveTargets[normalizedFacility];
+        if (!target) {
+            showToast?.('Open a facility configuration before saving.', 'warning');
+            return;
+        }
+        const facilityConfigs = {
+            [target.configKey]: target.config,
+        };
         const configsToSave = [
-            { key: 'hospital_full_configuration', data: currentConfig.hospital_full_configuration },
-            { key: 'clinics_full_configuration', data: currentConfig.clinics_full_configuration },
-            { key: 'ems_full_configuration', data: currentConfig.ems_full_configuration },
-            { key: 'mortuary_full_configuration', data: currentConfig.mortuary_full_configuration },
-            { key: 'hospital_compute_criteria', data: currentComputeCriteria },
-            { key: 'hospital_links', data: currentLinks.hospital },
-            { key: 'clinics_links', data: currentLinks.clinics },
-            { key: 'ems_links', data: currentLinks.ems },
-            { key: 'mortuary_links', data: currentLinks.mortuary },
+            { key: target.configKey, data: target.config },
+            ...target.extras,
         ];
         let saved = 0;
         let failed = 0;
+        const failedKeys = [];
         for (const { key, data } of configsToSave) {
             try {
                 await api.upsertDataStoreItem(NAMESPACE, key, data);
@@ -3282,21 +3342,41 @@ export function Dashboard() {
             } catch (e) {
                 console.warn(`Failed to save ${key} to DataStore:`, e);
                 failed++;
+                failedKeys.push(key);
             }
         }
-        showToast?.(
-            `Saved ${saved} config(s) to DataStore${failed > 0 ? ` (${failed} failed)` : ''}. Developers can export them from /dev-config-export.`,
-            failed > 0 ? 'warning' : 'success'
-        );
+
+        let exportResult = null;
+        let exportError = null;
+        try {
+            exportResult = await exportFacilityConfigsToAssets(facilityConfigs);
+        } catch (err) {
+            console.warn('Failed to export facility configurations to src/assets:', err);
+            exportError = err;
+        }
+
+        const exportMessage = exportResult?.written?.length
+            ? ` Updated ${exportResult.written.join(', ')}.`
+            : exportError
+                ? ` Local file export failed: ${exportError.message || exportError}.`
+                : '';
+
+        if (failed === 0) {
+            showToast?.(`${facilityType} configuration saved to DHIS2 DataStore (${saved} item(s)).${exportMessage}`, exportError ? 'warning' : 'success');
+        } else if (saved > 0) {
+            showToast?.(`Configuration partially saved to DHIS2 DataStore: ${saved} saved, ${failed} failed.${exportMessage}`, 'warning');
+        } else {
+            showToast?.(`Configuration was not saved to DHIS2 DataStore. ${failed} item(s) failed.${exportMessage}`, 'error');
+        }
     };
 
     const handleResetConfigsToBaseline = async () => {
         const NAMESPACE = 'qims-survey-configs';
         const configsToSave = [
-            { key: 'hospital_full_configuration', data: hospitalConfig },
-            { key: 'clinics_full_configuration', data: clinicsConfig },
-            { key: 'ems_full_configuration', data: emsConfig },
-            { key: 'mortuary_full_configuration', data: mortuaryConfig },
+            { key: 'hospital_full_configuration', data: hospitalConfig.hospital_full_configuration },
+            { key: 'clinics_full_configuration', data: clinicsConfig.clinics_full_configuration },
+            { key: 'ems_full_configuration', data: emsConfig.ems_full_configuration },
+            { key: 'mortuary_full_configuration', data: mortuaryConfig.mortuary_full_configuration },
             { key: 'hospital_compute_criteria', data: hospitalComputeCriteria },
             { key: 'hospital_links', data: hospitalLinks },
             { key: 'clinics_links', data: clinicsLinks },
@@ -3388,6 +3468,60 @@ export function Dashboard() {
         setConfigRevision(r => r + 1);
     };
 
+    const handleUpdateSeDescription = (configKey, seId, value) => {
+        updateActiveConfigBundle((bundle) => {
+            const nextConfig = { ...(bundle.config || {}) };
+            const list = Array.isArray(nextConfig[configKey]) ? JSON.parse(JSON.stringify(nextConfig[configKey])) : [];
+            const se = list.find(s => s.se_id === seId);
+            if (se) {
+                if ('se_description' in se) se.se_description = value;
+                else if ('description' in se) se.description = value;
+                else se.se_name = value;
+            }
+            nextConfig[configKey] = list;
+            return { ...bundle, config: nextConfig };
+        });
+        setConfigRevision(r => r + 1);
+    };
+
+    const handleUpdateStandardText = (configKey, seId, standardId, field, value) => {
+        updateActiveConfigBundle((bundle) => {
+            const nextConfig = { ...(bundle.config || {}) };
+            const list = Array.isArray(nextConfig[configKey]) ? JSON.parse(JSON.stringify(nextConfig[configKey])) : [];
+            const se = list.find(s => s.se_id === seId);
+            if (se) {
+                (se.sections || []).forEach(section => {
+                    (section.standards || []).forEach(std => {
+                        if (std.standard_id === standardId) std[field] = value;
+                    });
+                });
+            }
+            nextConfig[configKey] = list;
+            return { ...bundle, config: nextConfig };
+        });
+        setConfigRevision(r => r + 1);
+    };
+
+    const handleUpdateCriterionText = (configKey, seId, standardId, criterionId, field, value) => {
+        updateActiveConfigBundle((bundle) => {
+            const nextConfig = { ...(bundle.config || {}) };
+            const list = Array.isArray(nextConfig[configKey]) ? JSON.parse(JSON.stringify(nextConfig[configKey])) : [];
+            const se = list.find(s => s.se_id === seId);
+            if (se) {
+                (se.sections || []).forEach(section => {
+                    (section.standards || []).forEach(std => {
+                        if (std.standard_id !== standardId) return;
+                        const crit = (std.criteria || []).find(c => c.id === criterionId);
+                        if (crit) crit[field] = value;
+                    });
+                });
+            }
+            nextConfig[configKey] = list;
+            return { ...bundle, config: nextConfig };
+        });
+        setConfigRevision(r => r + 1);
+    };
+
     const handleUpdateLinkedCriteria = (configKey, seId, standardId, criterionId, linkedCriteria) => {
         updateActiveConfigBundle((bundle) => {
             const nextConfig = { ...(bundle.config || {}) };
@@ -3425,25 +3559,45 @@ export function Dashboard() {
         setConfigRevision(r => r + 1);
     };
 
-    const handleToggleRoot = (seId, criterionId, makeRoot) => {
+    const handleToggleRoot = (configKey, seId, standardId, criterionId, makeRoot) => {
         updateActiveConfigBundle((bundle) => {
+            const nextConfig = { ...(bundle.config || {}) };
+            const configList = Array.isArray(nextConfig[configKey])
+                ? JSON.parse(JSON.stringify(nextConfig[configKey]))
+                : [];
+            const se = configList.find(item => item.se_id === seId);
+            if (se) {
+                (se.sections || []).forEach(section => {
+                    (section.standards || []).forEach(standard => {
+                        if (standard.standard_id !== standardId) return;
+                        const criterion = (standard.criteria || []).find(item => item.id === criterionId);
+                        if (criterion) criterion.is_root = makeRoot;
+                    });
+                });
+            }
+            nextConfig[configKey] = configList;
+
+            if (configKey !== 'hospital_full_configuration') {
+                return { ...bundle, config: nextConfig };
+            }
+
             const nextCompute = JSON.parse(JSON.stringify(bundle.compute || hospitalComputeCriteria));
-            const seList = (nextCompute.hospital_standards_config?.service_elements) || [];
-            const hse = seList.find(s => s.se_id === ('SE ' + seId));
-            if (hse) {
-                if (!hse.root_criteria) hse.root_criteria = [];
-                const idx = hse.root_criteria.findIndex(rc => rc.id === criterionId);
-                if (makeRoot) {
-                    if (idx === -1) {
-                        hse.root_criteria.push({ id: criterionId, sub_criteria: [] });
-                    }
-                } else {
-                    if (idx !== -1) {
-                        hse.root_criteria.splice(idx, 1);
-                    }
+            const computeSeList = (nextCompute.hospital_standards_config?.service_elements) || [];
+            const computeSe = computeSeList.find(item => item.se_id === ('SE ' + seId));
+            if (computeSe) {
+                if (!computeSe.root_criteria) computeSe.root_criteria = [];
+                const idx = computeSe.root_criteria.findIndex(root => root.id === criterionId);
+                if (makeRoot && idx === -1) {
+                    computeSe.root_criteria.push({ id: criterionId, sub_criteria: [] });
+                } else if (!makeRoot && idx !== -1) {
+                    computeSe.root_criteria.splice(idx, 1);
                 }
             }
-            return { ...bundle, compute: nextCompute };
+            return {
+                ...bundle,
+                config: nextConfig,
+                compute: nextCompute,
+            };
         });
         setConfigRevision(r => r + 1);
     };
@@ -3575,6 +3729,46 @@ export function Dashboard() {
 		        persistVersions(updatedVersions, versionId);
 		        showToast(`Active configuration version set to "${target.name}".`, 'info');
 		    };
+
+		    const settingsFacilityTables = useMemo(() => {
+                const pageSize = 5;
+		        const activeConfig = overviewSource === 'active' ? currentConfig : {
+		            hospital_full_configuration: hospitalConfig.hospital_full_configuration,
+		            clinics_full_configuration: clinicsConfig.clinics_full_configuration,
+		            ems_full_configuration: emsConfig.ems_full_configuration,
+		            mortuary_full_configuration: mortuaryConfig.mortuary_full_configuration,
+		        };
+		        const rootMap = buildRootMap(currentComputeCriteria);
+		        return [
+		            { type: 'Hospital', config: activeConfig, key: 'hospital_full_configuration' },
+		            { type: 'Clinics', config: activeConfig, key: 'clinics_full_configuration' },
+		            { type: 'EMS', config: activeConfig, key: 'ems_full_configuration' },
+		            { type: 'Mortuary', config: activeConfig, key: 'mortuary_full_configuration' },
+		        ].map(({ type, config, key }) => {
+		            const seList = Array.isArray(config?.[key]) ? config[key] : [];
+                    const totalPages = Math.max(1, Math.ceil(seList.length / pageSize));
+                    const requestedPage = settingsFacilityPages[type] || 0;
+                    const page = Math.min(requestedPage, totalPages - 1);
+                    const isExpanded = !!expandedFacs[type];
+                    const visibleSeList = isExpanded
+                        ? seList.slice(page * pageSize, (page + 1) * pageSize)
+                        : [];
+		            const allCriteriaInFacilityType = isExpanded ? criterionOptionsFor(seList) : [];
+		            const rows = isExpanded
+                        ? rowsForFacility(visibleSeList, key, allCriteriaInFacilityType, rootMap)
+                        : [];
+		            return {
+		                type,
+		                key,
+		                seList,
+		                rows,
+		                totalCriteria: countCriteriaFor(seList),
+                        page,
+                        pageSize,
+                        totalPages,
+		            };
+		        });
+		    }, [overviewSource, currentConfig, currentComputeCriteria, expandedFacs, settingsFacilityPages]);
 
     // Filter events
     const filteredEvents = useMemo(() => {
@@ -3857,7 +4051,13 @@ export function Dashboard() {
 	                                    const isCheckingPresence = !presence || presence.loading;
 	                                    const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
 	                                    const isLead = /LEAD|LEADER/.test(roleNorm);
-	                                    const singleAssessmentUiState = getAssessmentUiState(assessment);
+	                                    const singleAssessmentUiState = {
+	                                        hasAssessmentEvent,
+	                                        isCheckingPresence,
+	                                        isLead,
+	                                        isInitiating,
+		                                        label: 'Initiate Survey',
+	                                    };
 	                                    const groupedSchedules = assessment._duplicates?.length > 1
 	                                        ? (() => {
 	                                            const uniqueSchedules = [];
@@ -3942,7 +4142,7 @@ export function Dashboard() {
                                                             </>
                                                         )}
                                                     </div>
-	                                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center' }}>
+	                                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
 	                                                        {assessment._duplicates?.length > 1 ? (
 	                                                            <div className="form-status success">{new Set((assessment._duplicates || []).map(item => getAssessmentActionKey(item))).size} UNIQUE SCHEDULES</div>
 	                                                        ) : (
@@ -3959,17 +4159,6 @@ export function Dashboard() {
 	                                                            </>
 	                                                        )}
                                                         {renderAssessmentActionButton(assessment, singleAssessmentUiState)}
-                                                        {assessment._duplicates?.length <= 1 && Array.isArray(assessment.team) && assessment.team.length > 0 && (
-                                                            <button
-                                                                className="btn btn-secondary btn-sm"
-                                                                onClick={(e) => {
-                                                                    e.stopPropagation();
-                                                                    openTeamDialog(assessment);
-                                                                }}
-                                                            >
-                                                                Team ({assessment.team.length})
-                                                            </button>
-                                                        )}
 	                                                    </div>
                                                 </div>
 		                                            {assessment._duplicates?.length > 1 ? (
@@ -4026,19 +4215,20 @@ export function Dashboard() {
 		                                                                                </div>
 		                                                                                <div style={{ fontSize: '0.85em', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
 		                                                                                    {scheduleUi.roleLabel ? <>Role: {scheduleUi.roleLabel}</> : 'Role: N/A'}
-		                                                                                    {renderAssessmentActionButton(scheduledAssessment, scheduleUi)}
-                                                                                            {Array.isArray(scheduledAssessment.team) && scheduledAssessment.team.length > 0 && (
-                                                                                                <button
-                                                                                                    className="btn btn-secondary btn-sm"
-                                                                                                    onClick={(e) => {
-                                                                                                        e.stopPropagation();
-                                                                                                        openTeamDialog(scheduledAssessment);
-                                                                                                    }}
-                                                                                                >
-                                                                                                    Team ({scheduledAssessment.team.length})
-                                                                                                </button>
-                                                                                            )}
+		                                                                                {renderAssessmentActionButton(scheduledAssessment, scheduleUi)}
 		                                                                                </div>
+		                                                                            </div>
+
+		                                                                            <div className="form-actions" style={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+		                                                                                <button
+		                                                                                    className="btn btn-secondary btn-sm"
+	                                                                                    onClick={(e) => {
+	                                                                                        e.stopPropagation();
+	                                                                                        openTeamDialog(scheduledAssessment);
+	                                                                                    }}
+		                                                                                >
+		                                                                                    Team ({Array.isArray(scheduledAssessment.team) ? scheduledAssessment.team.length : 0})
+		                                                                                </button>
 		                                                                            </div>
 		                                                                        </div>
 
@@ -4504,21 +4694,42 @@ export function Dashboard() {
                         </div>
                     ) : 'App Settings'}
                 </DialogTitle>
-                <DialogContent dividers>
+                <DialogContent dividers style={{ position: 'relative' }}>
+                    {remoteConfigLoading && (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                inset: 0,
+                                zIndex: 5,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 12,
+                                background: 'rgba(255, 255, 255, 0.86)',
+                                color: '#0f172a',
+                            }}
+                        >
+                            <CircularProgress />
+                            <div style={{ fontSize: '1rem', fontWeight: 600 }}>
+                                Loading configurations...
+                            </div>
+                        </div>
+                    )}
                     <div className="settings-content">
 	                        {!selectedSE && !showLinksEditor ? (
 	                            <>
 									<div className="settings-section">
 										<h4>Facility Type — SE Criteria Overview</h4>
 										<div style={{ fontSize: '0.85rem', color: '#475569', marginTop: '4px', marginBottom: '12px', padding: '8px 12px', backgroundColor: '#f1f5f9', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
-											<strong>Active App Source Strategy:</strong> {configSource === 'datastore' ? 'Remote DHIS2 DataStore' : 'Local Assets (In-App)'}
+											<strong>Active App Source Strategy:</strong> Remote DHIS2 DataStore
 											<br />
 											<span style={{ fontSize: '0.8rem', color: '#64748b' }}>
 												Note: To compare edits or perform a reset, use the <em>View Configuration Mode</em> selector below.
 											</span>
 										</div>
 
-										<div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px' }}>
+										<div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap' }}>
 											<FormControl size="small" style={{ minWidth: '240px' }}>
 												<InputLabel>View Configuration Mode</InputLabel>
 												<Select
@@ -4538,9 +4749,13 @@ export function Dashboard() {
 												<Button
 													variant='outlined'
 													size='small'
-													onClick={handleSaveConfigsToDataStore}
+                                                    disabled={!Object.keys(expandedFacs).find(type => expandedFacs[type])}
+													onClick={() => {
+                                                        const openFacility = Object.keys(expandedFacs).find(type => expandedFacs[type]);
+                                                        handleSaveConfigsToDataStore(openFacility);
+                                                    }}
 												>
-													Save Config to DataStore
+													Save Open Config to DataStore
 												</Button>
 											) : (
 												<Button
@@ -4561,39 +4776,27 @@ export function Dashboard() {
 											</Button>
 										</div>
 										{(() => {
-											const activeConfig = overviewSource === 'active' ? currentConfig : {
-												hospital_full_configuration: hospitalConfig.hospital_full_configuration,
-												clinics_full_configuration: clinicsConfig.clinics_full_configuration,
-												ems_full_configuration: emsConfig.ems_full_configuration,
-												mortuary_full_configuration: mortuaryConfig.mortuary_full_configuration,
-											};
-											const FACILITY_CONFIGS = [
-												{ type: 'Hospital', config: activeConfig, key: 'hospital_full_configuration' },
-												{ type: 'Clinics', config: activeConfig, key: 'clinics_full_configuration' },
-												{ type: 'EMS', config: activeConfig, key: 'ems_full_configuration' },
-												{ type: 'Mortuary', config: activeConfig, key: 'mortuary_full_configuration' },
-											];
-											const toggleFac = (type) => {
+											const toggleFac = async (type) => {
+                                                const isClosing = !!expandedFacs[type];
+                                                if (isClosing) {
+                                                    setExpandedFacs({});
+                                                    setActiveCellKey(null);
+                                                    return;
+                                                }
 											    setLoadingFacType(type);
-											    setTimeout(() => {
-											        setExpandedFacs(prev => ({ ...prev, [type]: !prev[type] }));
+                                                setActiveCellKey(null);
+                                                try {
+                                                    if (overviewSource === 'active' && configSource === 'datastore' && isOnline) {
+                                                        await loadRemoteConfig(type);
+                                                    }
+                                                    setExpandedFacs({ [type]: true });
+                                                    setSettingsFacilityPages(prev => ({ ...prev, [type]: 0 }));
+                                                } finally {
 											        setLoadingFacType(null);
-											    }, 50);
+                                                }
 											};
-											return FACILITY_CONFIGS.map(({ type, config, key }) => {
-												const seList = config?.[key] || [];
-												let totalCriteria = 0;
-												seList.forEach(se => {
-													(se.sections || []).forEach(section => {
-														(section.standards || []).forEach(standard => {
-															totalCriteria += (standard.criteria || []).length;
-														});
-													});
-												});
+											return settingsFacilityTables.map(({ type, seList, rows, totalCriteria, page, pageSize, totalPages }) => {
 												const isExpanded = !!expandedFacs[type];
-												const allCriteriaInFacilityType = isExpanded 
-													? seList.flatMap(s => (s.sections || []).flatMap(sec => (sec.standards || []).flatMap(st => (st.criteria || []).map(c => ({ id: c.id, name: c.id })))))
-													: [];
 												return (
 													<div key={type} style={{ marginBottom: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
 														<div
@@ -4615,106 +4818,206 @@ export function Dashboard() {
 															</div>
 															{isExpanded && (
 																<div style={{ padding: '8px', maxHeight: '55vh', overflowY: 'auto', overflowX: 'auto' }}>
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                                                        <span style={{ color: '#64748b', fontSize: '0.82em' }}>
+                                                                            Showing SEs {seList.length ? page * pageSize + 1 : 0}-{Math.min((page + 1) * pageSize, seList.length)} of {seList.length}
+                                                                        </span>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="outlined"
+                                                                                disabled={page === 0}
+                                                                                onClick={() => {
+                                                                                    setActiveCellKey(null);
+                                                                                    setSettingsFacilityPages(prev => ({ ...prev, [type]: Math.max(0, page - 1) }));
+                                                                                }}
+                                                                            >
+                                                                                Previous
+                                                                            </Button>
+                                                                            <span style={{ fontSize: '0.82em' }}>Page {page + 1} of {totalPages}</span>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="outlined"
+                                                                                disabled={page >= totalPages - 1}
+                                                                                onClick={() => {
+                                                                                    setActiveCellKey(null);
+                                                                                    setSettingsFacilityPages(prev => ({ ...prev, [type]: Math.min(totalPages - 1, page + 1) }));
+                                                                                }}
+                                                                            >
+                                                                                Next
+                                                                            </Button>
+                                                                        </div>
+                                                                    </div>
 																	<table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em' }}>
 																		<thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
 																			<tr style={{ background: '#edf2f7', textAlign: 'left' }}>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '55px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>SE Number</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '70px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Standard</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '80px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Criterion</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '50px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Root</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '110px', position: 'sticky', top: 0, background: '#edf2f7', textAlign: 'center' }}>Critical / Non-Critical</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '180px', position: 'sticky', top: 0, background: '#edf2f7' }}>Linked Criteria</th>
-																				<th style={{ padding: '8px', border: '1px solid #cbd5e0', minWidth: '180px', position: 'sticky', top: 0, background: '#edf2f7' }}>Sub-Criteria</th>
+																				{SETTINGS_TABLE_HEADERS.map(header => (
+																					<th
+																						key={header.label}
+																						style={{
+																							padding: '8px',
+																							border: '1px solid #cbd5e0',
+																							minWidth: `${header.minWidth}px`,
+																							position: 'sticky',
+																							top: 0,
+																							background: '#edf2f7',
+																							textAlign: header.align || 'center',
+																						}}
+																					>
+																						{header.label}
+																					</th>
+																				))}
 																			</tr>
 																		</thead>
 																		<tbody>
-																			{seList.flatMap(se => {
-																				const allStandardIds = [];
-																				const rootMap = {};
-																				(currentComputeCriteria?.hospital_standards_config?.service_elements || []).forEach(cse => {
-																				    (cse.root_criteria || []).forEach(root => {
-																				        if (root.id) rootMap[root.id] = root.sub_criteria || [];
-																				    });
-																				});
-																				
-																				const allStandards = (se.sections || []).flatMap(sec => (sec.standards || []).map(st => ({ id: st.standard_id, name: st.standard_id })));
-																				const allCriteriaInSE = (se.sections || []).flatMap(sec => (sec.standards || []).flatMap(st => (st.criteria || []).map(c => ({ id: c.id, name: c.id }))));
-																				
-																				const rows = [];
-																				(se.sections || []).forEach(section => {
-																					(section.standards || []).forEach(standard => {
-																						if (standard.standard_id) allStandardIds.push(standard.standard_id);
-																						const standardCriteriaIds = (standard.criteria || []).map(c => c.id).filter(Boolean);
-																						(standard.criteria || []).forEach(c => {
-																							rows.push({
-																								seId: se.se_id,
-																								standardId: standard.standard_id,
-																								criterionId: c.id,
-																								isCritical: c.is_critical,
-																								linkedCriteria: c.linked_criteria || standardCriteriaIds,
-																								isRoot: !!rootMap[c.id],
-																								subCriteria: rootMap[c.id] || [],
-																																					seName: se.se_name || se.se_id,
-																																					standardName: standard.standard_id,
-																																					allStandards,
-																																					allCriteriaInSE,
-																																					allCriteriaInFacilityType,
-																							configKey: key,
-																							seObj: se,
-																							standardObj: standard,
-																							criterionObj: c,
-																							});
-																						});
-																					});
-																				});
-																				return rows.map((row, idx) => (
+																			{rows.map((row, idx) => (
 																					<tr key={`${type}-se-${row.seId}-st-${row.standardId}-c-${row.criterionId}-${idx}`}>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center' }}>{row.seId}</td>
-																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
-																							onClick={() => {
-																								if (overviewSource !== 'local') {
-																									setActiveCellKey(`${row.criterionId}-standard`);
-																								}
-																							}}
-																						>
-																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-standard` ? (
-																								<Select
-																									value={row.standardId}
-																									onChange={(e) => {
-																										handleMoveStandard(row.configKey, row.seId, row.standardId, e.target.value, row.criterionId);
-																										setActiveCellKey(null);
-																									}}
-																									onClose={() => setActiveCellKey(null)}
-																									size="small"
-																									variant="standard"
-																									disableUnderline
-																									style={{ fontFamily: 'monospace', fontSize: '1em' }}
-																									autoFocus
-																									defaultOpen
+																						{row.isFirstSeRow && (
+																							<td
+																								rowSpan={row.seRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																									fontWeight: 700,
+																									background: '#f8fafc',
+																								}}
+																							>
+																								{row.seId}
+																							</td>
+																						)}
+																						{row.isFirstSeRow && (
+																							<td
+																								rowSpan={row.seRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																									background: '#f8fafc',
+																								}}
+																							>
+																								{overviewSource !== 'local' && activeCellKey === `${row.seId}-se-description` ? (
+																									<EditableTextCell
+																										value={row.seDescription}
+																										active
+																										editable
+																										onOpen={() => setActiveCellKey(null)}
+																										onSave={(value) => handleUpdateSeDescription(row.configKey, row.seId, value)}
+																									/>
+																								) : (
+																								<div
+																									onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.seId}-se-description`) : undefined}
+																									style={{ maxHeight: '90px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
 																								>
-																									{row.allStandards.map((std) => (
-																										<MenuItem key={std.id} value={std.id}>{std.name}</MenuItem>
-																									))}
-																								</Select>
+																									{row.seDescription || '—'}
+																								</div>
+																								)}
+																							</td>
+																						)}
+																						{row.isFirstStandardRow && (
+																							<td
+																								rowSpan={row.standardRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																									cursor: overviewSource === 'local' ? 'default' : 'pointer',
+																									background: '#ffffff',
+																								}}
+																								onClick={() => {
+																									if (overviewSource !== 'local') {
+																										setActiveCellKey(`${row.criterionId}-standard`);
+																									}
+																								}}
+																							>
+																								{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-standard` ? (
+																									<Select
+																										value={row.standardId}
+																										onChange={(e) => {
+																											handleMoveStandard(row.configKey, row.seId, row.standardId, e.target.value, row.criterionId);
+																											setActiveCellKey(null);
+																										}}
+																										onClose={() => setActiveCellKey(null)}
+																										size="small"
+																										variant="standard"
+																										disableUnderline
+																										style={{ fontFamily: 'monospace', fontSize: '1em' }}
+																										autoFocus
+																										defaultOpen
+																									>
+																										{row.allStandards.map((std) => (
+																											<MenuItem key={std.id} value={std.id}>{std.name}</MenuItem>
+																										))}
+																									</Select>
+																								) : (
+																									<span style={{ fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>{row.standardId}</span>
+																								)}
+																							</td>
+																						)}
+																						{row.isFirstStandardRow && (
+																							<td
+																								rowSpan={row.standardRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																								}}
+																							>
+																								{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-statement` ? (
+																									<EditableTextCell
+																										value={row.statement}
+																										active
+																										editable
+																										maxHeight={110}
+																										onOpen={() => setActiveCellKey(null)}
+																										onSave={(value) => handleUpdateStandardText(row.configKey, row.seId, row.standardId, 'statement', value)}
+																									/>
+																								) : (
+																								<div
+																									onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-statement`) : undefined}
+																									style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																								>
+																									{row.statement || '—'}
+																								</div>
+																								)}
+																							</td>
+																						)}
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', fontFamily: 'monospace' }}>{row.criterionId}</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle' }}>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-description` ? (
+																								<EditableTextCell
+																									value={row.criterionDescription}
+																									active
+																									editable
+																									onOpen={() => setActiveCellKey(null)}
+																									onSave={(value) => handleUpdateCriterionText(row.configKey, row.seId, row.standardId, row.criterionId, 'description', value)}
+																								/>
 																							) : (
-																								<span style={{ fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>{row.standardId}</span>
+																							<div
+																								onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-description`) : undefined}
+																								style={{ maxHeight: '90px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																							>
+																								{row.criterionDescription || '—'}
+																							</div>
 																							)}
 																						</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', fontFamily: 'monospace' }}>{row.criterionId}</td>
 																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', cursor: (overviewSource === 'local' || row.configKey !== 'hospital_full_configuration') ? 'default' : 'pointer' }}
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
 																							onClick={() => {
-																								if (overviewSource !== 'local' && row.configKey === 'hospital_full_configuration') {
+																								if (overviewSource !== 'local') {
 																									setActiveCellKey(`${row.criterionId}-root`);
 																								}
 																							}}
 																						>
-																							{overviewSource !== 'local' && row.configKey === 'hospital_full_configuration' && activeCellKey === `${row.criterionId}-root` ? (
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-root` ? (
 																								<Select
 																									value={row.isRoot ? 'yes' : 'no'}
 																									onChange={(e) => {
-																										handleToggleRoot(row.seId, row.criterionId, e.target.value === 'yes');
+																										handleToggleRoot(row.configKey, row.seId, row.standardId, row.criterionId, e.target.value === 'yes');
 																										setActiveCellKey(null);
 																									}}
 																									onClose={() => setActiveCellKey(null)}
@@ -4733,7 +5036,7 @@ export function Dashboard() {
 																									style={{ 
 																										fontWeight: 600, 
 																										color: row.isRoot ? '#2b6cb0' : '#718096',
-																										borderBottom: (overviewSource === 'local' || row.configKey !== 'hospital_full_configuration') ? 'none' : '1px dashed currentColor'
+																										borderBottom: overviewSource === 'local' ? 'none' : '1px dashed currentColor'
 																									}}
 																								>
 																									{row.isRoot ? 'Yes' : 'No'}
@@ -4741,7 +5044,7 @@ export function Dashboard() {
 																							)}
 																						</td>
 																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
 																							onClick={() => {
 																								if (overviewSource !== 'local') {
 																									setActiveCellKey(`${row.criterionId}-critical`);
@@ -4790,7 +5093,7 @@ export function Dashboard() {
 																							)}
 																						</td>
 																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
 																							onClick={() => {
 																								if (overviewSource !== 'local' && activeCellKey !== `${row.criterionId}-linked`) {
 																									setActiveCellKey(`${row.criterionId}-linked`);
@@ -4807,9 +5110,10 @@ export function Dashboard() {
 																									onClose={() => setActiveCellKey(null)}
 																									placeholder="—"
 																									autoOpen
+																									showClearAll
 																								/>
 																							) : (
-																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
+																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', textAlign: 'center', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
 																									{row.linkedCriteria.length > 0 ? row.linkedCriteria.map((id, i) => (
 																										<span key={id} style={{ color: id === row.criterionId ? '#c53030' : '#276749' }}>
 																											{id}{i < row.linkedCriteria.length - 1 ? ', ' : ''}
@@ -4819,7 +5123,7 @@ export function Dashboard() {
 																							)}
 																						</td>
 																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', cursor: (!row.isRoot || overviewSource === 'local') ? 'default' : 'pointer' }}
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: (!row.isRoot || overviewSource === 'local') ? 'default' : 'pointer' }}
 																							onClick={() => {
 																								if (row.isRoot && overviewSource !== 'local' && activeCellKey !== `${row.criterionId}-sub`) {
 																									setActiveCellKey(`${row.criterionId}-sub`);
@@ -4840,14 +5144,32 @@ export function Dashboard() {
 																									autoOpen
 																								/>
 																							) : (
-																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
+																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', textAlign: 'center', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
 																									{row.subCriteria.length > 0 ? row.subCriteria.join(', ') : 'None'}
 																								</div>
 																							)}
 																						</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle' }}>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-guidelines` ? (
+																								<EditableTextCell
+																									value={row.guidelines}
+																									active
+																									editable
+																									maxHeight={110}
+																									onOpen={() => setActiveCellKey(null)}
+																									onSave={(value) => handleUpdateCriterionText(row.configKey, row.seId, row.standardId, row.criterionId, 'guidelines', value)}
+																								/>
+																							) : (
+																							<div
+																								onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-guidelines`) : undefined}
+																								style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																							>
+																								{row.guidelines || '—'}
+																							</div>
+																							)}
+																						</td>
 																					</tr>
-																				));
-																			})}
+																				))}
 																		</tbody>
 																	</table>
 																</div>
@@ -5201,7 +5523,7 @@ export function Dashboard() {
 	                                        }
 	                                    }
 	                                    if (configSource === 'datastore' && isOnline) {
-	                                        loadRemoteConfig();
+	                                        loadRemoteConfig(v);
 	                                    }
 	                                } catch (err) {
 	                                    console.error('Failed to load metadata for selected facility type', err);
@@ -5220,7 +5542,6 @@ export function Dashboard() {
                             <MenuItem value={'CLINICS'}>Clinics</MenuItem>
                             <MenuItem value={'EMS'}>EMS</MenuItem>
                             <MenuItem value={'MORTUARY'}>Mortuary</MenuItem>
-                            <MenuItem value={'OBGYN'}>OBGYN</MenuItem>
                         </TextField>
                     </div>
 	                  	                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (

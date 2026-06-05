@@ -1,6 +1,7 @@
 // Consistent base URL for DHIS2 AP// Consistent base URL for DHIS2 API (points to the /qims context on the server)
 const BASE_URL = '/qims';
 const ADMIN_USER_RESOLVER_URL = '/email2/api/admin/resolve-users';
+const CURRENT_USER_FIELDS = 'id,displayName,username';
 
 const getAdminUserResolverUrls = () => {
     const urls = [ADMIN_USER_RESOLVER_URL];
@@ -48,10 +49,7 @@ const filterEventsByExactScope = (events, {
         if (!ev?.event) return false;
         if (programId && ev.program !== programId) return false;
         if (stageId && ev.programStage !== stageId) return false;
-        if (teiId) {
-            const teiIds = String(teiId).split(';').map(id => id.trim()).filter(Boolean);
-            if (!teiIds.includes(ev.trackedEntityInstance)) return false;
-        }
+        if (teiId && ev.trackedEntityInstance !== teiId) return false;
         if (enrollmentId && ev.enrollment !== enrollmentId) return false;
         return true;
     });
@@ -64,7 +62,7 @@ export const api = {
     _userDisplayCache: {},
 
 	    login: async (username, password) => {
-        const url = `${BASE_URL}/api/me?fields=id,displayName,username,organisationUnits[id,name]`;
+        const url = `${BASE_URL}/api/me?fields=${CURRENT_USER_FIELDS}`;
         const response = await fetch(url, {
             headers: getHeaders(username, password)
         });
@@ -78,11 +76,12 @@ export const api = {
         const responseClone = response.clone();
         try {
             const data = await response.json();
+            const user = { organisationUnits: [], ...data };
             // Store credentials for subsequent requests (Basic Auth)
             const authHeader = 'Basic ' + btoa(username + ':' + password);
             localStorage.setItem('dhis2_auth', authHeader);
-            localStorage.setItem('dhis2_user', JSON.stringify(data));
-            return data;
+            localStorage.setItem('dhis2_user', JSON.stringify(user));
+            return user;
         } catch (err) {
             const text = await responseClone.text();
             console.error('Failed to parse login JSON. Raw response:', text);
@@ -686,11 +685,12 @@ export const api = {
   },
 
     getCurrentUser: async () => {
-        const response = await fetch(`${BASE_URL}/api/me?fields=id,displayName,username,organisationUnits[id,name]`, {
+        const response = await fetch(`${BASE_URL}/api/me?fields=${CURRENT_USER_FIELDS}`, {
             headers: getHeaders()
         });
         if (!response.ok) throw new Error('Failed to get user');
-        return await response.json();
+        const data = await response.json();
+        return { organisationUnits: [], ...data };
     },
 
     getFormMetadata: async (programStageId = '') => {
@@ -740,7 +740,7 @@ export const api = {
                 console.log(`[API] Fetching ${missingIds.size} missing data elements for section hydration...`);
                 const deFields = 'id,formName,displayFormName,name,displayName,shortName,code,description,valueType,aggregationType,lastUpdated,optionSet[id,displayName,options[id,displayName,code,sortOrder]]';
                 const deResponse = await fetch(
-                    `${BASE_URL}/api/dataElements?paging=false&filter=id:in:${[...missingIds].join(',')}&fields=${deFields}&_=${Date.now()}`,
+                    `${BASE_URL}/api/dataElements?paging=false&filter=id:in:[${[...missingIds].join(',')}]&fields=${deFields}&_=${Date.now()}`,
                     { headers: { ...getHeaders(), 'Cache-Control': 'no-cache', Pragma: 'no-cache' }, cache: 'no-store' }
                 );
 
@@ -814,9 +814,10 @@ export const api = {
         if (ouIds.length > 0) {
             try {
                 // Fetch details for all encountered org units in one request
-                // Standard filter syntax: filter=id:in:id1,id2,id3
+                // DHIS2 expects bracketed values for the `in` operator.
+                const encodedOuIds = ouIds.map(id => encodeURIComponent(id)).join(',');
                 const ouResponse = await fetch(
-                    `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:${ouIds.join(',')}&fields=id,displayName,name,level,parent[id,displayName,name,level,parent[id,displayName,name,level]]`,
+                    `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:[${encodedOuIds}]&fields=id,displayName,name,level,parent[id,displayName,name,level,parent[id,displayName,name,level]]`,
                     { headers: getHeaders() }
                 );
                 if (ouResponse.ok) {
@@ -1283,7 +1284,7 @@ export const api = {
 		        let ouMap = {};
 		        if (ouIds.length > 0) {
 		            try {
-                const ouUrl = `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:${ouIds.join(',')}` +
+                const ouUrl = `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:[${ouIds.join(',')}]` +
                     `&fields=id,displayName,name,level,parent[id,displayName,name,level,parent[id,displayName,name,level]]`;
 		                const ouResponse = await fetch(
 		                    ouUrl,
@@ -1589,7 +1590,7 @@ export const api = {
             stageId,
             teiId,
             orgUnitId,
-            ouMode: orgUnitId ? 'DESCENDANTS' : 'ALL',
+            ouMode: 'DESCENDANTS',
             order: 'eventDate:desc',
             fields
         });
@@ -1655,7 +1656,7 @@ export const api = {
 	            stageId,
 	            teiId,
 	            orgUnitId,
-	            ouMode: orgUnitId ? 'DESCENDANTS' : 'ALL',
+	            ouMode: 'DESCENDANTS',
 	            order: 'eventDate:desc',
 	            fields,
 	            page,
