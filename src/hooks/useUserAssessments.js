@@ -44,26 +44,8 @@ export const useUserAssessments = (options = {}) => {
         const initServices = async () => {
             try {
                 console.log('[useUserAssessments] Initializing services...');
-                let metadata = null;
-                try {
-                    // Wrap getMetadata in a 5-second timeout so a slow/failing
-                    // network call can never silently block initialization.
-                    const metaWithTimeout = Promise.race([
-                        getMetadata(),
-                        new Promise((_, reject) =>
-                            setTimeout(() => reject(new Error('getMetadata timed out after 5s')), 5000)
-                        )
-                    ]);
-                    metadata = await metaWithTimeout;
-                    console.log('[useUserAssessments] getMetadata resolved ok');
-                } catch (metaErr) {
-                    // Metadata is useful but *not required* just to fetch
-                    // assignments. If it fails (e.g. network hiccup or timeout),
-                    // fall back to an empty object so the rest of the
-                    // assignments pipeline can still run.
-                    console.warn('[useUserAssessments] getMetadata failed during init (non-fatal for assignments):', metaErr.message);
-                    metadata = {};
-                }
+                // Skip metadata fetch on init for faster startup; metadata is not required here.
+                const metadata = {};
                 await AssessmentSchedulingService.init({ metadata });
                 await AssessmentTeamAssignmentService.init({ metadata });
                 console.log('[useUserAssessments] Services initialized — setting initialized=true');

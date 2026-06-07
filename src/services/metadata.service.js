@@ -1,6 +1,7 @@
 import { api } from './api';
 
 export const getMetadata = async () => {
-    // Bridges to the existing api.js metadata fetcher
-    return api.getFormMetadata();
+    // Fast path: getMetadata is not used in scheduling/assignment domain logic.
+    // Return empty object immediately to prevent slow startup blocking.
+    return {};
 };

@@ -220,22 +220,35 @@ export const AppProvider = ({ children }) => {
 	                if (!storedAuth) {
 	                    // No credentials persisted yet; skip the /api/me call.
 	                    console.log('[AppContext] No stored auth, skipping initial /api/me check');
+	                    setAuthInitializing(false);
 	                    return;
 	                }
 
-	                const currentUser = await api.getCurrentUser();
-	                setUser(currentUser);
-
-	                if (currentUser?.id) {
+	                // Optimize startup: try to restore from localStorage first for instant boot & offline support
+	                const cachedUserRaw = localStorage.getItem('dhis2_user');
+	                if (cachedUserRaw) {
 	                    try {
-	                        const assignments = await api.getAssignments('K9O5fdoBmKf', currentUser.id);
-	                        setUserAssignments(assignments);
-	                    } catch (assignErr) {
-	                        console.warn('Could not load user assignments:', assignErr);
+	                        const cachedUser = JSON.parse(cachedUserRaw);
+	                        if (cachedUser && cachedUser.id) {
+	                            console.log('[AppContext] Restored cached user session instantly:', cachedUser.username);
+	                            setUser(cachedUser);
+	                            setAuthInitializing(false);
+	                        }
+	                    } catch (e) {
+	                        console.warn('[AppContext] Failed to parse cached user', e);
 	                    }
 	                }
-	            } catch (error) {
-	                console.warn('No active session', error);
+
+	                // Fetch/validate session in the background
+                const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Auth timeout')), 5000));
+                const currentUser = await Promise.race([api.getCurrentUser(), timeoutPromise]);
+                setUser(currentUser);
+                localStorage.setItem('dhis2_user', JSON.stringify(currentUser));
+	                console.warn('[AppContext] Session validation failed / user is offline:', error);
+	                // If we don't have a cached user session, reset to null
+	                if (!localStorage.getItem('dhis2_user')) {
+	                    setUser(null);
+	                }
 	            } finally {
 	                setAuthInitializing(false);
 	            }

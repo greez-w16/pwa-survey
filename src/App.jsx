@@ -31,16 +31,24 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   EMS: 'emsStageU11',
   MORTUARY: 'morStageU11',
   OBGYN: 'obgStageU11',
+  PHYSIOTHERAPY: 'phyStageU11',
+  RADIOLOGY: 'radStageU11',
+  PRIVATE_LAB: 'prlStageU11',
+  GENERAL_PRACTICE: 'gepStageU11',
+  PRIVATE_DIETETIC: 'prdStageU11',
+  MENTAL_HEALTH: 'mehStageU11',
+  EYE: 'eyeStageU11',
+  HOSPICE_PALLIATIVE: 'hopStageU11',
+  OCCUPATIONAL_HEALTH: 'ochStageU11',
+  UROLOGY_NEPHR: 'urnStageU11',
+  ORAL: 'oraStageU11',
+  IMCI: 'imcStageU11',
+  EMONC: 'emoStageU11'
 };
 
 const getSurveyProgramStageIdForGroupText = (text) => {
-  const value = String(text || '').toLowerCase();
-  if (value.includes('hosp')) return SURVEY_PROGRAM_STAGE_BY_GROUP.HOSPITAL;
-  if (value.includes('clinic')) return SURVEY_PROGRAM_STAGE_BY_GROUP.CLINICS;
-  if (value.includes('ems') || value.startsWith('se') || value.includes(' se')) return SURVEY_PROGRAM_STAGE_BY_GROUP.EMS;
-  if (value.includes('mortu') || value.includes('general')) return SURVEY_PROGRAM_STAGE_BY_GROUP.MORTUARY;
-  if (value.includes('obg')) return SURVEY_PROGRAM_STAGE_BY_GROUP.OBGYN;
-  return '';
+  const key = resolveGroupIdFromText(text);
+  return key && SURVEY_PROGRAM_STAGE_BY_GROUP[key] ? SURVEY_PROGRAM_STAGE_BY_GROUP[key] : '';
 };
 
 const isAssessmentDetailsName = (value) => {
@@ -148,16 +156,30 @@ const PrivateRoute = ({ children }) => {
 	  };
 
   // Map a free-text Assessment Group value to an internal group id
-  const resolveGroupIdFromText = React.useCallback((text) => {
-    if (!text) return null;
-    const t = String(text).toLowerCase();
-    if (t.includes('hosp')) return 'HOSPITAL';
-    if (t.includes('clinic')) return 'CLINICS';
-    if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
-    if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
-    if (t.includes('obg')) return 'OBGYN';
-    return null;
-  }, []);
+const resolveGroupIdFromText = React.useCallback((text) => {
+  if (!text) return null;
+  const t = String(text).toLowerCase();
+  if (t.includes('hosp')) return 'HOSPITAL';
+  if (t.includes('clinic')) return 'CLINICS';
+  if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
+  if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
+  if (t.includes('obg')) return 'OBGYN';
+  // New facility types
+  if (t.includes('physio')) return 'PHYSIOTHERAPY';
+  if (t.includes('radiology') || t.includes('rad')) return 'RADIOLOGY';
+  if (t.includes('private lab') || t.includes('prl')) return 'PRIVATE_LAB';
+  if (t.includes('general practice') || t.includes('gep')) return 'GENERAL_PRACTICE';
+  if (t.includes('private dietetic') || t.includes('prd')) return 'PRIVATE_DIETETIC';
+  if (t.includes('mental health') || t.includes('meh')) return 'MENTAL_HEALTH';
+  if (t.includes('eye')) return 'EYE';
+  if (t.includes('hospice') || t.includes('palliative') || t.includes('hop')) return 'HOSPICE_PALLIATIVE';
+  if (t.includes('occupational health') || t.includes('och')) return 'OCCUPATIONAL_HEALTH';
+  if (t.includes('urology') || t.includes('nephrology') || t.includes('urn')) return 'UROLOGY_NEPHR';
+  if (t.includes('oral')) return 'ORAL';
+  if (t.includes('imci')) return 'IMCI';
+  if (t.includes('emonc') || t.includes('emo')) return 'EMONC';
+  return null;
+}, []);
 
 	  const resolveAssessmentNamespaceFromText = React.useCallback((text) => {
 	    const t = String(text || '').toLowerCase();
@@ -927,50 +949,9 @@ const PrivateRoute = ({ children }) => {
 	  const scoringEventIdsKey = React.useMemo(() => JSON.stringify(scoringEventIds), [scoringEventIds]);
 
 		  useEffect(() => {
-		    if (!user || !scoringEventIds.length) {
-	      setServerAssessmentData({});
-	      return;
-	    }
-	    let cancelled = false;
-	    (async () => {
-	      try {
-	        setIsScoringPending(true);
-	        let loadedEvents = [];
-	        try {
-	          loadedEvents = await api.getEventsList({
-	            eventIds: scoringEventIds,
-	            fields: 'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]'
-	          });
-	        } catch (bulkErr) {
-	          console.warn('App: Bulk scoring fetch failed, falling back to individual fetches', bulkErr);
-	          const batchSize = 5;
-	          for (let i = 0; i < scoringEventIds.length; i += batchSize) {
-	            const batch = scoringEventIds.slice(i, i + batchSize);
-	            const loaded = await Promise.all(batch.map(eventId => api.getEventById(
-	              eventId,
-	              'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]'
-	            ).catch(() => null)));
-	            loaded.forEach(ev => { if (ev?.event) loadedEvents.push(ev); });
-	          }
-	        }
-
-	        if (cancelled) return;
-	        const nextServerData = {};
-	        loadedEvents.forEach(ev => {
-	          (ev?.dataValues || []).forEach(dv => {
-	            if (!dv?.dataElement || dv.value === undefined || dv.value === null) return;
-	            const text = String(dv.value).trim();
-	            if (text === '') return;
-	            nextServerData[dv.dataElement] = dv.value;
-	          });
-	        });
-	        setServerAssessmentData(nextServerData);
-	      } catch (e) {
-	        console.warn('App: Could not refresh server scoring data', e);
-	        if (!cancelled) setServerAssessmentData({});
-	      }
-	    })();
-	    return () => { cancelled = true; };
+		    // DISABLED: Server scoring data fetch temporarily disabled to reduce latency.
+		    setServerAssessmentData({});
+		    setIsScoringPending(false);
 		  }, [user, scoringEventIds, scoringEventIdsKey, serverScoringRefreshTick]);
 
 	  useEffect(() => {

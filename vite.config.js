@@ -7,7 +7,7 @@ export default defineConfig({
   base: '/pwa-survey/',
   server: {
     host: '0.0.0.0', // Expose to network
-    port: 5173,
+    port: 6001,
     strictPort: true, // Fail if port is busy
     allowedHosts: true,
     hmr: true,
