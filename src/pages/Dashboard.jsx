@@ -1,4 +1,28 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+
+/** Catches render errors in a subtree and shows a readable message instead of a blank page. */
+class ErrorBoundary extends React.Component {
+    constructor(props) { super(props); this.state = { error: null }; }
+    static getDerivedStateFromError(error) { return { error }; }
+    componentDidCatch(error, info) { console.error('[ErrorBoundary] Caught render error:', error, info); }
+    render() {
+        if (this.state.error) {
+            return (
+                <div style={{ margin: '1rem', padding: '1rem', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, color: '#991b1b', fontSize: '0.85rem' }}>
+                    <strong>Something went wrong rendering this section.</strong>
+                    <pre style={{ marginTop: 8, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.8rem' }}>
+                        {this.state.error?.message || String(this.state.error)}
+                    </pre>
+                    <button style={{ marginTop: 8, padding: '4px 12px', borderRadius: 4, border: '1px solid #fca5a5', background: '#fff', cursor: 'pointer' }}
+                        onClick={() => this.setState({ error: null })}>
+                        Retry
+                    </button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
@@ -3797,7 +3821,7 @@ export function Dashboard() {
                             transition: 'transform 0.2s ease',
                             display: 'inline-block'
                         }}>▼</span>
-                        <h3>Assigned Assessments</h3>
+                        <h3>Assigned Assessments 2</h3>
                     </div>
 
                 </div>
@@ -3807,6 +3831,7 @@ export function Dashboard() {
 		                    </div>
 		                )}
                 {!isAssessmentsCollapsed && (
+                    <ErrorBoundary>
                     <div className="forms-list">
 	                        {hookError && (
 	                            <div style={{ margin: '0 1rem 0.75rem', padding: '8px 10px', borderRadius: 6, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: '0.85rem' }}>
@@ -4061,17 +4086,28 @@ export function Dashboard() {
 		                                                                );
 		                                                            })}
 			                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-			                                                                <button
-			                                                                    type="button"
-			                                                                    className="btn btn-secondary btn-sm"
-				                                                                    title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
-			                                                                    onClick={(e) => {
-			                                                                        e.stopPropagation();
-			                                                                        toggleExpandAssessment(assessment);
-			                                                                    }}
-			                                                                >
-			                                                                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
-			                                                                </button>
+			                                                                {(() => {
+			                                                                    const _ak = getAssocKey(assessment);
+			                                                                    const _bundle = associatedByEnrollment[_ak];
+			                                                                    const _isLoading = loadingExpandKey === _ak && !(_bundle && !_bundle.loading && Array.isArray(_bundle.survey));
+			                                                                    return (
+			                                                                        <button
+			                                                                            type="button"
+			                                                                            className="btn btn-secondary btn-sm"
+				                                                                            title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
+			                                                                            disabled={_isLoading}
+			                                                                            onClick={(e) => {
+			                                                                                e.stopPropagation();
+			                                                                                toggleExpandAssessment(assessment);
+			                                                                            }}
+			                                                                        >
+			                                                                            {_isLoading
+			                                                                                ? <><span style={{ width: 12, height: 12, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite', marginRight: 6, verticalAlign: 'middle' }} />Loading...</>
+			                                                                                : expandedAssignments[_ak] ? 'Hide Associated Assessments' : 'Show Associated Assessments'
+			                                                                            }
+			                                                                        </button>
+			                                                                    );
+			                                                                })()}
 			                                                            </div>
 			                                                            {supportsAssociatedAssessments(assessment) && expandedAssignments[getAssocKey(assessment)] && (
 				                                                                <div
@@ -4102,13 +4138,24 @@ export function Dashboard() {
 				                                            </p>
 				                                            )}
 	                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-	                                                <button
-	                                                    className="btn btn-secondary btn-sm"
-		                                                    title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
-	                                                    onClick={(e) => { e.stopPropagation(); toggleExpandAssessment(assessment); }}
-	                                                >
-	                                                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
-	                                                </button>
+	                                                {(() => {
+	                                                    const _ak2 = getAssocKey(assessment);
+	                                                    const _bundle2 = associatedByEnrollment[_ak2];
+	                                                    const _isLoading2 = loadingExpandKey === _ak2 && !(_bundle2 && !_bundle2.loading && Array.isArray(_bundle2.survey));
+	                                                    return (
+	                                                        <button
+	                                                            className="btn btn-secondary btn-sm"
+		                                                            title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
+	                                                            disabled={_isLoading2}
+	                                                            onClick={(e) => { e.stopPropagation(); toggleExpandAssessment(assessment); }}
+	                                                        >
+	                                                            {_isLoading2
+	                                                                ? <><span style={{ width: 12, height: 12, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite', marginRight: 6, verticalAlign: 'middle' }} />Loading...</>
+	                                                                : expandedAssignments[_ak2] ? 'Hide Associated Assessments' : 'Show Associated Assessments'
+	                                                            }
+	                                                        </button>
+	                                                    );
+	                                                })()}
 	                                            </div>
 	            {supportsAssociatedAssessments(assessment) && expandedAssignments[getAssocKey(assessment)] && (
 	                <div onClick={(e) => e.stopPropagation()} style={{ marginTop: '10px', width: '100%', background: '#f8f9fa', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
@@ -4366,6 +4413,7 @@ export function Dashboard() {
                             })()
                         )}
                     </div>
+                    </ErrorBoundary>
                 )}
             </div>
 
