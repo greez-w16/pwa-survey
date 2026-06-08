@@ -1,0 +1,228 @@
+{
+  "se_id": 1,
+  "se_name": "Human Resource Management",
+  "source_file": "Personnel Record audit tool- Oral Health version 1 July 2025.xls",
+  "sections": [
+    {
+      "section_pi_id": "1.1",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "1.1.1",
+          "statement": "The practice's clinical and managerial leaders are identified and are collectively responsible for defining the practice's mission and creating the plans and policies needed to fulfil the mission.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.1.1.1",
+              "category": "",
+              "severity": null,
+              "description": "The leaders of the practice are formally or informally identified.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice has a mission statement that reflects its strategic objectives and matches the needs of the community served.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.3",
+              "category": "",
+              "severity": null,
+              "description": "The leaders are collectively responsible for ensuring that the mission statement is known to all personnel, patients, carers and the community served.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The practice participates in community health activities.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.5",
+              "category": "",
+              "severity": null,
+              "description": "The leaders, in liaison with the whole practice team, coordinates the compilation of an annual strategic plan and budget.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.6",
+              "category": "",
+              "severity": null,
+              "description": "The leaders are collectively responsible for implementing the practice's mission and strategic plan.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.7",
+              "category": "",
+              "severity": null,
+              "description": "The strategic plan is evaluated on an annual basis.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.8",
+              "category": "",
+              "severity": null,
+              "description": "Regular monitoring of the implementation of the strategic plan against envisaged timeframes and progress in achieving its objectives is documented at intervals determined by the practice.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.9",
+              "category": "",
+              "severity": null,
+              "description": "Where appropriate, the leadership roles in various positions are documented, agreed to and known by the personnel.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.2",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "1.2.1",
+          "statement": "A manager is responsible for operating the practice within relevant laws and regulations.",
+          "intent_tooltip": "",
+          "criteria": []
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.7",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "1.7.1",
+          "statement": "",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.7.1.1",
+              "category": "",
+              "severity": null,
+              "description": "There are documented risk management processes for identifying all risks relating to practice processes and systems, personnel, patients, visitors to the practice and physical facilities.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.1.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice manager ensures the development and implementation of written policies and procedures for risk management processes and activities.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.1.3",
+              "category": "",
+              "severity": null,
+              "description": "A nominated individual with relevant qualifications, skills and/or experience supervises the implementation of the risk management programme.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Ongoing in-service training of all personnel in risk management policies, procedures and principles is documented.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "1.7.2",
+          "statement": "",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.7.2.1",
+              "category": "",
+              "severity": null,
+              "description": "A nominated individual is responsible for infection control in the practice and practice personnel are aware of the nomination.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.2.2",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.2.3",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.2.4",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.2.5",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.2.6",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.2.7",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.2.8",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.7.2.9",
+              "category": "",
+              "severity": null,
+              "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

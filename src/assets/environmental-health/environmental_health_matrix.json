@@ -1,0 +1,801 @@
+﻿{
+    "environmental_health":  [
+                                 {
+                                     "criteria":  "1.1.1.1",
+                                     "description":  "Documents describe governance accountability and responsibilities.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.1.1.2",
+                                     "description":  "There is an organizational chart or document, which describes both the lines of authority and accountability from governance, and within the service.",
+                                     "linked_criteria":  [
+                                                             "2.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.1.3.1",
+                                     "description":  "The organization has a written document in the official languages regarding the rights of the community to a healthy environment.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.1.1",
+                                     "description":  "A person who is suitably trained and experienced manages the service.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.1",
+                                                             "1.2.2.1",
+                                                             "1.2.3.1",
+                                                             "2.2.2.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.1.2",
+                                     "description":  "The accountabilities and responsibilities of this person are documented.",
+                                     "linked_criteria":  [
+                                                             "2.1.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.1.3",
+                                     "description":  "The manager ensures that approved policies are carried out.",
+                                     "linked_criteria":  [
+                                                             "1.1.3.1",
+                                                             "1.2.2.1",
+                                                             "1.3.1.2",
+                                                             "1.3.1.3",
+                                                             "1.3.1.4",
+                                                             "1.3.1.5",
+                                                             "1.3.1.6",
+                                                             "4.1.1.1",
+                                                             "5.1.1.2",
+                                                             "5.6.1.1",
+                                                             "5.8.1.1",
+                                                             "5.8.2.1",
+                                                             "5.10.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.1.4",
+                                     "description":  "The manager ensures compliance with applicable Laws and Regulations.",
+                                     "linked_criteria":  [
+                                                             "1.1.3.2",
+                                                             "1.2.2.5",
+                                                             "1.2.2.7",
+                                                             "1.3.3.4",
+                                                             "2.3.1.2",
+                                                             "2.3.1.3",
+                                                             "3.1.1.8",
+                                                             "4.2.1.2",
+                                                             "5.1.1.1",
+                                                             "5.1.1.2",
+                                                             "5.1.1.3",
+                                                             "5.1.1.4",
+                                                             "5.2.4.3",
+                                                             "5.2.4.4",
+                                                             "5.6.1.3",
+                                                             "5.7.1.1",
+                                                             "5.7.1.2",
+                                                             "5.7.1.3",
+                                                             "5.7.1.4",
+                                                             "5.7.1.5",
+                                                             "5.7.1.6",
+                                                             "5.7.1.7",
+                                                             "5.7.1.8",
+                                                             "5.7.1.9",
+                                                             "5.7.1.10",
+                                                             "5.7.1.11",
+                                                             "5.11.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.1.5",
+                                     "description":  "The manager plans and implements processes to manage and control human, financial and other resources.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.62",
+                                                             "1.1.12.2",
+                                                             "1.3.1.11",
+                                                             "3.3.11.4",
+                                                             "3.1.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.1.6",
+                                     "description":  "The manager of the environmental health service is involved in the preparation and management of the service’s budget.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.1",
+                                     "description":  "The manager ensures that policies and procedures which guide the environmental health services are implemented.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.3",
+                                     "description":  "A designed stuff member is responsible for compiling and indexing of policies and procedures, and ensuring their circulation, recall and review.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.5",
+                                     "description":  "Policies and procedures, including legislation, are compiled in a comprehensive manual, which is indexed and easily accessible to all personnel.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.7",
+                                     "description":  "There is a mechanism to ensure that legislation and policies and procedures are known to and implemented by personnel working in the environmental health services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.3.1",
+                                     "description":  "The service’s management fosters communication among departments, services, individual staff members and community leaders and groups.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.3.2",
+                                     "description":  "The service’s management fosters Coordination of environmental health services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.1.1",
+                                     "description":  "An individual is designated to control the ordering, storage, distribution and control of equipment and supplies.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.5",
+                                                             "1.3.3.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.1.3",
+                                     "description":  "Policies and procedures guide the ordering of supplies and equipment received.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.1.4",
+                                     "description":  "Policies and procedures guide the safe storage of supplies and equipment.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.1.5",
+                                     "description":  "Policies and procedures guide the issue of supplies and equipment.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.1.6",
+                                     "description":  "Policies and procedures guide the condemning of equipment.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.2.1",
+                                     "description":  "A record is kept of goods received and good issued.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.5",
+                                                             "1.3.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.2.2",
+                                     "description":  "Records are audited.",
+                                     "linked_criteria":  [
+                                                             "1.3.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.2.3",
+                                     "description":  "There is an inventory of all goods stored.",
+                                     "linked_criteria":  [
+
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.2.4",
+                                     "description":  "All losses are investigated, reported and recorded.",
+                                     "linked_criteria":  [
+
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.3.1",
+                                     "description":  "Secure storage facilities are available.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.5",
+                                                             "1.3.1.1",
+                                                             "3.1.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.3.3.4",
+                                     "description":  "Hazardous and flammable materials are stored in accordance with relevant regulations.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.1.1",
+                                     "description":  "There is a documented process for staffing the environmental health service.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.1.3",
+                                     "description":  "Each employee in the service has a written job description, which defines their responsibilities.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.1.3",
+                                     "description":  "The orientation and induction programme explains the relationships and lines of authority and communication within the service and collaboration with other relevant directorates.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.2.1",
+                                     "description":  "There is a system for identifying the needs of environmental health personnelfor in-service training,consistent with environmental health service objectives and development of individual staff members.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.5",
+                                                             "4.1.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.2.2",
+                                     "description":  "There is a written in-service training programme for personnel in the environmental health service, which is co-ordinated with the in-service training programme of the district/region.",
+                                     "linked_criteria":  [
+
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.2.6",
+                                     "description":  "The Environmental Health Manager ensures that personnel attend training on health and safety.",
+                                     "linked_criteria":  [
+
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.3.1",
+                                     "description":  "There is a system of identifying and addressing the training needs of environmental health practitioners consistent with the environmental health service’s objectives.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.5",
+                                                             "2.2.2.6"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.3.1.1",
+                                     "description":  "There are mutual agreed policies and procedures with the personnel for the satisfactory conduct of industrial relations activities.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4",
+                                                             "1.2.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.3.1.2",
+                                     "description":  "Written disciplinary procedures, which meet the requirements of current legislation, are available.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.3.1.3",
+                                     "description":  "There is a grievance procedure in terms of current legislation.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.1.1.1",
+                                     "description":  "Departmental or service managers recommend space and other resources needed by the department or service to the service’s management.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.5",
+                                                             "1.3.3.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.1.1.8",
+                                     "description":  "Facilities and equipment are maintained to provide clean and safe working conditions, which comply with relevant legislation.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "4.1.1.1",
+                                     "description":  "There are documented risk management process for identifying all risks (physical,environmental,medico-legal,operational,etc) relating to organisational processesand systems,personnel, visitors and physical facilities.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3",
+                                                             "4.2.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "4.1.1.2",
+                                     "description":  "Management and leaders ensure the development and implementation of written policies and procedures for risk management processes and activities",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3",
+                                                             "4.1.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "4.1.1.3",
+                                     "description":  "Ongoing in-service training of all personnel in this policies, procedures and risk management principles,including reporting of adverse events, is documented.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3",
+                                                             "2.2.2.1",
+                                                             "4.1.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "4.2.1.1",
+                                     "description":  "There are structured systems and processes in place to ensure that all occupants of the organisation’s facilities are safe from fire or smoke.",
+                                     "linked_criteria":  [
+                                                             "4.1.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "4.2.1.2",
+                                     "description":  "Documented certification is available from the relevant authority to show that the facility complies with applicable laws and regulations in relation to fire safety. (e.g fire clearance certificate)",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.1.1.1",
+                                     "description":  "There is access to hard copies of relevant laws and regulations.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.1.1.2",
+                                     "description":  "There are current written policies and procedures for the management of the environmental health service, which reflect current legislation, standards of practice, and the objectives of the service.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.1.1.3",
+                                     "description":  "There is evidence that processes are in place for the implementation of applicable legislation.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.1.1.4",
+                                     "description":  "There are procedures in place for investigations, inspections and action taken in accordance with relevant legislation.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4",
+                                                             "5.3.1.8"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.2.4.3",
+                                     "description":  "There is documented evidence of inter and intra-sectorial collaboration with or in respect of applicable health legislation, including guidelines, policies and directives.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.2.4.4",
+                                     "description":  "There is documented evidence of inter and intra-sectorial collaboration with or in respect of local authority bylaws.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.2.5.4",
+                                     "description":  "There is documented evidence of inter and intra-sectorial collaboration with or in respect of disposal of the dead.",
+                                     "linked_criteria":  [
+                                                             "5.5.1.3",
+                                                             "5.7.1.10",
+                                                             "5.9.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.3.1.8",
+                                     "description":  "There is documented evidence that the environmental health practitioners utilise standard or prescribed environmental health report forms or recording systems in respect of inspections, investigations and work of a recurring nature, e.g. notifiable disease and medical conditions, food premises activities.",
+                                     "linked_criteria":  [
+                                                             "5.1.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.4.1.7",
+                                     "description":  "The environmental health service identifies informal food vendors and provides them with education on food hygiene.",
+                                     "linked_criteria":  [
+                                                             "5.10.1.9"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.5.1.3",
+                                     "description":  "The environmental health service monitors all environmental health aspects regarding the disposal of the dead human bodies and animal carcasses.",
+                                     "linked_criteria":  [
+                                                             "5.2.5.4",
+                                                             "5.7.1.10",
+                                                             "5.9.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.6.1.1",
+                                     "description":  "There are written policies and procedures relating to the scrutiny and passing of building plans and monitoring of the erection of buildings from a health perspective.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.6.1.3",
+                                     "description":  "There is evidence that environmental health practitioners take appropriate action against illegal buildings for environmental health contraventions.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.1",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding domestic and business refuse removal services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.2",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding garden refuse removal services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.3",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding street cleansing services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.4",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding environmental cleaning services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.5",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding street bin provision and maintenance services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.6",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding public conveniences provision and maintenance services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.7",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding land fill sites.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.8",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding waste handling at recycling plants.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.9",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding health waste management services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.10",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding the removal and disposal of unclaimed animal carcasses.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4",
+                                                             "5.5.1.3",
+                                                             "5.2.5.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.7.1.11",
+                                     "description":  "The environmental health service monitors compliance in accordance with the Waste Management Act and other applicable laws and policies regarding illegal dumping.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.8.1.1",
+                                     "description":  "There are written policies and procedures relating to water sampling.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.8.2.1",
+                                     "description":  "There are written policies and procedures relating to water sampling.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.9.1.1",
+                                     "description":  "The environmental health service monitors the proper and humane burial of pauper and unclaimed corpses.",
+                                     "linked_criteria":  [
+                                                             "5.5.1.3",
+                                                             "5.2.5.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.10.1.1",
+                                     "description":  "There are written policies and procedures relating to foodstuffs, i.e. the inspection of premises and transport vehicles; the sampling, seizing and detention of foodstuffs.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.10.1.7",
+                                     "description":  "The environmental health services interprets the laboratory results against regulatory health standards.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.10.1.9",
+                                     "description":  "The environmental health service ensures that all food handlers are adequately trained in food hygiene.",
+                                     "linked_criteria":  [
+                                                             "5.4.1.7",
+                                                             "2.2.2.1",
+                                                             "2.2.2.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "5.10.1.11",
+                                     "description":  "The environmental health service ensures the registration or issuing of licenses of acceptability for food premises, including milking sheds, where this is required by legislation.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 }
+                             ]
+}

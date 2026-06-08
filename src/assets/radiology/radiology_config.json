@@ -1,0 +1,892 @@
+{
+  "service": "radiology",
+  "service_elements": [
+    {
+      "se_id": 1,
+      "se_name": "Human Resource Management",
+      "source_file": "Personnel Record audit tool- Radiology version1  10 July 2025.xls",
+      "sections": [
+        {
+          "section_pi_id": "1.4",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "1.4.2",
+              "statement": "There is an effective process for gathering, verifying and evaluating the credentials (registration, education, training and experience) of those health care professionals who are permitted to practice independently.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "1.4.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is implementation of a reliable, documented process for evaluating and verifying the credentials of all health professionals.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.4.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Personnel files contain copies of qualifications and licenses/registration from the relevant authority for all health professionals",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.4.2.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is a system to track the annual registration of all health professionals.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.4.2.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "All personnel members with direct contact with the public have had a police check, a copy of which is kept in their personnel file.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "1.4.3",
+              "statement": "Clinical and administrative personnel are orientated to the practice and participate in continuing education, research and other educational experiences to acquire new skills and knowledge and to support job advancement.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "1.4.3.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice supports continuing education for its clinical personnel and maintains records of this in personnel files.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "1.4.3.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Personnel members are informed of opportunities to participate in advanced education, training, research, and other experiences.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "1.5",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "1.5.3",
+              "statement": "The practice provides patient services in line with legally and ethically accepted business and financial standards.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "1.5.3.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "All health professionals provide evidence of professional indemnity insurance.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "1.7",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "1.7.1",
+              "statement": "The practice manager and personnel work collaboratively to develop, implement and maintain effective risk management systems in the practice.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "1.7.1.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Ongoing in-service training of all personnel in risk management policies, procedures and principles is documented.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 3,
+      "se_name": "Radiology Practice",
+      "source_file": "Patient Interview audit tool- Private Radiology Standards NHQS version1 10 July 2025.xls",
+      "sections": [
+        {
+          "section_pi_id": "3.1",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.1.2",
+              "statement": "The practice respects the rights of patients and their families to refuse or discontinue a diagnostic procedure.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.1.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients are informed about their condition and the proposed treatment.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.1.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.1.3",
+              "statement": "The practice takes measures to protect patient privacy.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.1.3.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "When appropriate, patients are permitted to be accompanied by a family member/care-giver during consultations.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.1.5",
+              "statement": "The practice informs patients and their families about the processes which it has instituted to receive and act on complaints, conflicts and differences of opinion about patient care and the patient's right to participate in those processes.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.1.5.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients are aware of their right to voice complaints and the processes by which to do so, internally as well as externally where applicable.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.2",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.2.1",
+              "statement": "Patients are informed of the processes to access the practice services.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.1.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practce renders services based on the needs of the population, during the hours that they publish",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.2",
+              "statement": "The practice has an appointment system and a process for recognising cases requiring more urgent attention and providing patients with longer appointments when appropriate.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.2.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients who are waiting are advised of any delays that may be experienced in receiving attention",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.4",
+              "statement": "Patients are able to obtain advice or information related to their clinical investigation by telephone and electronic means.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.4.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice implements a policy on telephonic and electronic communication with patients that details atleast a-e in the standard intent above",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.5",
+              "statement": "Patient and family education promotes the concept of taking responsibility for one's own health care.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.5.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice offers relevant health education to its patients in a planned and consistent manner which enables patients to meet their ongoing health needs and achieve their health goals.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.5.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Posters and pamphlets regarding high risk and commonly treated conditions relevant to the practice population are visibly displayed and accessible in the waiting room and routinely provided to patients during the consultation when appropriate.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.5.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "Information is provided in a manner and in a language that is understood by those making the care decisions.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.4",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.4.1",
+              "statement": "The diagnostic imaging practice must demonstrate that the services provided are only undertaken where there is an identified clinical need which is consistent with best available evidence",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.4.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The clinical team can demostrate/describe how they ensure consitency in the pre-procedures,imaging,reporting & recording processes of diagnostic services",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.1.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The clinical team can demostrate how they ensure communicate about clinical issues and support systems in the practice",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "se_id": 3,
+      "se_name": "Private Radiology Service",
+      "source_file": "Radiology Patient record audit tool - NHQS version1   11 July 2025.xls",
+      "sections": [
+        {
+          "section_pi_id": "3.1",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.1.2",
+              "statement": "The practice respects the rights of patients and their families to refuse or discontinue treatment.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.1.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients are informed about their condition and the proposed investigation",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.1.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.1.2.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "When patients/carers refuse or discontinue treatment, the consultation regarding their decision is accurately and contemporaneously recorded and includes the details of the discussion regarding the consequences of the decision",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.1.4",
+              "statement": "The practice has a clearly defined process for obtaining consent.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.1.4.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice has a documented policy outlining the procedure for obtaining general consent for treatment",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.1.4.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice has a documented policy outlining the procedure for obtaining consent in the case of patients who are unable to grant consent for themselves by way of age or mental/physical incapacity, which is in accordance with the relevant laws and regulations",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.1.4.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Documented consent is obtained from patients for health information to be provided to a third party",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.1.4.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Where practice members use patient information for research, approval has been obtained from the relevant ethics committee and from patients themselves where required.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.2",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.2.3",
+              "statement": "At registration, sufficient details are taken from the patient to ensure that the patient can be contacted by the practice when necessary and that the clinical team has sufficient background information to provide adequate care to patients.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.3.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "New patients to the practice are asked to complete a form detailing at least a) – k) in the standard intent above.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.3.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients are asked to update the practice if their contact details change.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.3.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Health funder details are accurately recorded for each new patient when required",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.4",
+              "statement": "Patients are able to obtain advice or information related to their clinical care by telephone and electronic means.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.4.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice implements a policy on telephonic and electronic communication with patients that details at least a) – e) in the standard intent above.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.4.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is evidence of practice/patient telephone or electronic advice and information in the patient health records.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.2.5",
+              "statement": "Patient and family education promotes the concept of taking responsibility for one’s own health care.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.2.5.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The practice offers relevant health education to its patients in a planned and consistant manner which enables patiens to meet their ongoing health needs and achieve their health goals",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.5.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Posters and pamphlets regarding high risk and commonly treated conditions relevant to the practice population (e.g. HIV, TB, Diabetes, Hypertension) are visibly displayed and accessible in the waiting room and routinely provided to patients during the consultation when appropriate.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.5.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patient and family education provided is noted in the patient record.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.5.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is documented evidence that patients are referred to these resources, where appropriate.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.2.5.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "Prior to a diagnostic imaging procedure being rendered, except in cases of emergency, the practice must ensure that risks regarding the relevant procedure have been advised to the patient or substitute decision maker where necessary",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.3",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.3.2",
+              "statement": "Patient records contain the required information for the relevant condition",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.3.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "Notes for each consultation contain as a minimum points a)-k above",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.3.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Hand written notes are legible",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.3.2.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Notes are recorded contemporaneously",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.3.2.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "All abbreviations are standardised according to recognised local and national standards",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.3.2.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "The patients’ records, including contact details, are up to date to ensure the transfer of the latest information between care providers.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.3.2.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is evidence of review where applicable of the results of procedures and diagnostic tests performed by a medical practitioner",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.3.2.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "Adverse drug reactions are noted in the patient's record",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.4",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.4.1",
+              "statement": "The diagnostic imaging practice must demostrate that the services provided are only undertaken where there is an identified clinincal need which is consistent with best available evidence",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.4.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "The clinical team uses current clinical guidelines relevant to the diagnosic imaging practices to assist in the diagnosis and management of patients",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The clinical team can demostrate/describe how they ensure consistency in the preprocedre,imaging,reporting and recording processes of the diagnostic service",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.1.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "The clinical team can demonstrate how they communicate about clinical issues and support systems in the practice.",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.4.3",
+              "statement": "The diagnostic imaging practice must ensure that all patients are correctly identified and matched to their intended procedure or treatment",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.4.3.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "At least three (3) approved patient identifiers are used to match a patient to their request or medical record from the time the patient presents and through all stages of the diagnostic imaging service and when transferring responsibility of care.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.3.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Relevant personnel correctly match patients with their intended diagnostic imaging/therapeutic procedure",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.4.3.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Relevant personnel correctly match patients with the correct anatomical site(if applicable) of the diagnostic imaging procedure",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.5",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.5.1",
+              "statement": "There is a process to ensure the safe and legal prescribing, administration and storage of medication",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.5.1.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "The person prescribing and dispensing the medicine has access to patient information that would contraindicate administration of particular medicines",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.1.9",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients at risk from adverse reactions are identified according to practice policy",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.1.10",
+                  "category": "",
+                  "severity": null,
+                  "description": "Medication is administered safely by a qualified individual and the effects of medication is actively monitored with all the relevant details recorded in the patient's records",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.5.1.11",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is a system/mechanism in place for reporting, investigating and responding to incidents arising from adverse reactions",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.6",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.6.1",
+              "statement": "The practice has a system for effective communication of clinical findings,follow up and review of tests and results",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.6.1.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients health records contain evidence that all imaging reports and clinical correspondence received by the practice have been handled according to practice policy",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.1.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is a system to advice patients of the process for the follow up of results",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.1.8",
+                  "category": "",
+                  "severity": null,
+                  "description": "A documented system to identify follow up and recall patients with clinically significant results is implemented",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.1.9",
+                  "category": "",
+                  "severity": null,
+                  "description": "When patients are informed of the results over the telephone, the patient is identified with 3 approved identifiers before the information is given",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.6.2",
+              "statement": "There is a process for appropriate referral of patients for specialised consultation/investigations at other healthcare facilities",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.6.2.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is a documented process to refer patients",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.2.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "The lines of communication between the practice,referral centres and community services are clearly defined",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.2.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Referrals are to specific individuals and or agencies in the patient's home community whereever possible",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.2.5",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients and as appropriate are given follow up instructions which are provided in an understadable form and manner",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.2.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "A copy of the referral note is available in the patient record.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.2.7",
+                  "category": "",
+                  "severity": null,
+                  "description": "The referral is made on appropriate stationery or electronically.",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.2.8",
+                  "category": "",
+                  "severity": null,
+                  "description": "The referral contains as a minimum a) – f) in the standard intent above",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.6.2.11",
+                  "category": "",
+                  "severity": null,
+                  "description": "Follow-up care based on the findings of investigations/consultations performed outside the practice is noted in the patient record",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "3.7",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "3.7.1",
+              "statement": "The practice has an effective clinical handover system that ensures safe and continuing healthcare delivery for patients.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.7.1.1",
+                  "category": "",
+                  "severity": null,
+                  "description": "There is implementation of a documented policy on clinical handover to ensure that standard processes are followed",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.7.1.2",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patients share in decision making regarding the handing over of clinical information",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.7.1.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Handover of clinical information is recorded in the patients' health records",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "3.7.1.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "Information relating to those patients requiring special attention, such as the chronically ill or those with infections which require specific infection control measures, is provided in a patient held letter, a copy of which is kept in the patient record",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            },
+            {
+              "standard_id": "3.7.2",
+              "statement": "The practice ensures safe and reasonable arrangements for clinical care for patients outside of normal opening hours.",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "3.7.2.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Patient health records contain reports or notes of investigations occurring outside normal opening hours by or on behalf of the practice",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "section_pi_id": "4.1",
+          "title": "",
+          "standards": [
+            {
+              "standard_id": "4.1.3",
+              "statement": "There are documented policies and procedures to guide personnel in all aspects of radiation safety within the practice",
+              "intent_tooltip": "",
+              "criteria": [
+                {
+                  "id": "4.1.3.3",
+                  "category": "",
+                  "severity": null,
+                  "description": "Policies and procedures that relate to limiting the irradiation of patients to levels consistent with medical requirements are implemented. The ALARA(as low as reasonable achievable) principle is applied to the calculation,preparation and administration of radioactive doses",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "4.1.3.4",
+                  "category": "",
+                  "severity": null,
+                  "description": "A strict policy on the conditions under which pregnant women may be subjected to a procedure involving radiation exposure is available and implemented",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "4.1.3.6",
+                  "category": "",
+                  "severity": null,
+                  "description": "Policies and procedres that relate to avoiding radioactive contamination and controlling spread should it occur are implemented",
+                  "is_critical": false,
+                  "guideline": ""
+                },
+                {
+                  "id": "4.1.3.9",
+                  "category": "",
+                  "severity": null,
+                  "description": "Policies and procedures are implemented for clinical trials where applicable",
+                  "is_critical": false,
+                  "guideline": ""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

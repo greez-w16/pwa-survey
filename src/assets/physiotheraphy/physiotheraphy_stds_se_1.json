@@ -1,0 +1,215 @@
+{
+  "se_id": 1,
+  "se_name": "Human Resource Management",
+  "source_file": "human-resource-management.xls",
+  "sections": [
+    {
+      "section_pi_id": "1.1",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "1.1.1",
+          "statement": "The practice's clinical and managerial leaders are identified and are collectively responsible for defining the practice's mission and creating the plans and policies needed to fulfil the mission.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.1.1.1",
+              "category": "",
+              "severity": null,
+              "description": "The leaders of the practice are formally or informally identified.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice has a mission statement that reflects its strategic objectives and matches the needs of the community served.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.3",
+              "category": "",
+              "severity": null,
+              "description": "The leaders are collectively responsible for ensuring that the mission statement is known to all personnel, patients, carers and the community served.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The practice participates in community health activities.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.5",
+              "category": "",
+              "severity": null,
+              "description": "The leaders, in liaison with the whole practice team, coordinates the compilation of an annual strategic plan and budget.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.6",
+              "category": "",
+              "severity": null,
+              "description": "The leaders are collectively responsible for implementing the practice's mission and strategic plan.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.7",
+              "category": "",
+              "severity": null,
+              "description": "The strategic plan is evaluated on an annual basis.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.8",
+              "category": "",
+              "severity": null,
+              "description": "Regular monitoring of the implementation of the strategic plan against envisaged timeframes and progress in achieving its objectives is documented at intervals determined by the practice.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.1.1.9",
+              "category": "",
+              "severity": null,
+              "description": "Where appropriate, the leadership roles in various positions are documented, agreed to and known by the personnel.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.2",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "1.2.1",
+          "statement": "A manager is responsible for operating the practice within relevant laws and regulations.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.2.1.1",
+              "category": "",
+              "severity": null,
+              "description": "There are documented risk management processes for identifying all risks relating to practice processes and systems, personnel, patients, visitors to the practice and physical facilities.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.2.1.2",
+              "category": "",
+              "severity": null,
+              "description": "The manager has the education and/or experience necessary to carry out his or her responsibilities.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.2.1.3",
+              "category": "",
+              "severity": null,
+              "description": "The practice is licensed in terms of relevant legislation for the level and type of services provided.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.2.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The manager ensures that there is a system in place to monitor the implementation of applicable laws and regulations.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.2.1.5",
+              "category": "",
+              "severity": null,
+              "description": "There is evidence of response to any reports from inspecting and regulatory authorities.",
+              "is_critical": true,
+              "guideline": ""
+            },
+            {
+              "id": "1.2.1.6",
+              "category": "",
+              "severity": null,
+              "description": "The manager implements processes to manage and control human, financial and other resources.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "1.2.2",
+          "statement": "The practice facilitates communication between teams and individuals within the practice.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.2.2.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice leaders facilitate communication between teams where relevant and between individual personnel members.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.2.2.2",
+              "category": "",
+              "severity": null,
+              "description": "Agendas are prepared for meetings in order to allow those attending to prepare for participation.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.2.2.3",
+              "category": "",
+              "severity": null,
+              "description": "Minutes of meetings are taken and are circulated to all relevant personnel.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.2.2.4",
+              "category": "",
+              "severity": null,
+              "description": "There is a procedure to make sure that important matters resulting from management meetings are communicated to and acted upon by personnel.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "1.2.3",
+          "statement": "The practice engages with a range of health, community and disability services to plan and facilitate optimal patient care.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.2.3.2",
+              "category": "",
+              "severity": null,
+              "description": "Information on services, hours of operation and processes for obtaining care is provided to services in the community who work in collaboration with the practice.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.2.3.3",
+              "category": "",
+              "severity": null,
+              "description": "The practice determines that the receiving individual/organisation can meet the patient’s continuing care needs, and establishes arrangements to ensure continuity.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

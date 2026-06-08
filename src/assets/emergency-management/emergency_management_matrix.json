@@ -1,0 +1,1628 @@
+﻿{
+    "emergency_management":  [
+                                 {
+                                     "criteria":  "1.1.1.2",
+                                     "description":  "There is an organisational chart or document that describes the lines of authority and accountability between the national programme governance structure and the districts’ health management teams.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.1",
+                                                             "2.1.1.1",
+                                                             "2.1.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.1.1.3",
+                                     "description":  "Those responsible for governance (MOH level) approve and make public the programme’s mission statement.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.1.1.4",
+                                     "description":  "Those responsible for governance set the goals for improving the health of all people living in the country through specific programme objectives",
+                                     "linked_criteria":  [
+                                                             "1.2.2.1",
+                                                             "2.1.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.1.1.5",
+                                     "description":  "Those responsible for governance (MOHW level) ensure approval of strategic policies and strategic plans to operate a healthcare programme.",
+                                     "linked_criteria":  [
+                                                             "2.1.2.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.1.1.6",
+                                     "description":  "Those responsible for governance (MOHW level) approve the budget and allocate resources required to meet the programmes’ mission.",
+                                     "linked_criteria":  [
+                                                             "2.1.8.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.1.1.8",
+                                     "description":  "Those responsible for national programme governance receive and act upon reports (measurement and evaluation data) of the programme, at least quarterly.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.9",
+                                                             "2.1.1.4",
+                                                             "2.2.4.5",
+                                                             "2.2.4.6",
+                                                             "2.2.4.7",
+                                                             "2.2.4.8",
+                                                             "2.2.4.11",
+                                                             "2.2.4.12",
+                                                             "3.3.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.1.1.9",
+                                     "description":  "Those responsible for national programme governance receive and act upon reports on the programmes’ risk management data at least quarterly.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.8",
+                                                             "1.2.2.6"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.1.1",
+                                     "description":  "The National Programme Coordinator for the programme has the education and experience to match the requirements in the position description.",
+                                     "linked_criteria":  [
+                                                             "3.2.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.1.3",
+                                     "description":  "The National Programme Coordinator coordinates the development and distribution of policies for programme management and implementation functions.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.5",
+                                                             "2.1.2.1",
+                                                             "2.2.1.2",
+                                                             "3.3.1.1",
+                                                             "3.3.1.2",
+                                                             "3.3.2.1",
+                                                             "3.8.1.3",
+                                                             "3.11.1.4",
+                                                             "3.11.1.3",
+                                                             "3.11.1.7",
+                                                             "3.11.2.1",
+                                                             "3.11.2.4",
+                                                             "3.11.6.1",
+                                                             "3.11.6.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.1.4",
+                                     "description":  "The National Programme Coordinator monitors compliance with applicable laws, regulations and programme-specific policies.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7",
+                                                             "2.1.2.2",
+                                                             "2.2.4.4",
+                                                             "2.2.4.7",
+                                                             "3.7.1.5",
+                                                             "3.7.2.1",
+                                                             "3.7.2.2",
+                                                             "3.7.2.3",
+                                                             "3.10.1.3",
+                                                             "3.11.2.2",
+                                                             "3.11.6.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.1",
+                                     "description":  "The National Programme Coordinator guides the District Health Management Teams in meeting the programme’s mission, goals, and objectives.",
+                                     "linked_criteria":  [
+                                                             "3.2.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.2",
+                                     "description":  "The National Programme Coordinator determines the programme related care, treatment, and services it provides at different levels of care.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.5",
+                                                             "2.1.2.1",
+                                                             "2.2.1.2",
+                                                             "3.3.1.1",
+                                                             "3.3.1.2",
+                                                             "3.3.2.1",
+                                                             "3.8.1.3",
+                                                             "3.11.1.4",
+                                                             "3.11.1.3",
+                                                             "3.11.1.7",
+                                                             "3.11.2.1",
+                                                             "3.11.2.4",
+                                                             "3.11.6.1",
+                                                             "3.11.6.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.3",
+                                     "description":  "The National Programme Coordinator implements processes to manage and control human, financial and other resources required to deliver programme-specific services.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7",
+                                                             "2.1.2.2",
+                                                             "2.2.4.4",
+                                                             "2.2.4.7",
+                                                             "3.7.1.5",
+                                                             "3.7.2.1",
+                                                             "3.7.2.2",
+                                                             "3.7.2.3",
+                                                             "3.10.1.3",
+                                                             "3.11.2.2",
+                                                             "3.11.6.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.4",
+                                     "description":  "The National Programme Coordinator ensures that the required physical facilities, installations and equipment are available to provide the specified programme services.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.2",
+                                                             "1.1.1.3",
+                                                             "1.1.1.4",
+                                                             "2.1.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.5",
+                                     "description":  "There is a documented procedure to guide the delegation of authorities within the programme.",
+                                     "linked_criteria":  [
+                                                             "2.1.2.2",
+                                                             "3.9.1.3",
+                                                             "3.9.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.6",
+                                     "description":  "The National Programme Coordinator ensures the implementation of risk management processes and activities.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.4",
+                                                             "2.1.1.5",
+                                                             "2.1.6.1",
+                                                             "2.1.7.1",
+                                                             "2.1.8.1",
+                                                             "3.2.1.2",
+                                                             "3.1.1.3",
+                                                             "3.2.1.3",
+                                                             "3.5.1.1",
+                                                             "3.5.1.4",
+                                                             "3.6.2.1",
+                                                             "3.6.3.1",
+                                                             "3.7.2.1",
+                                                             "3.8.1.1",
+                                                             "3.9.1.1",
+                                                             "3.11.1.6"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.7",
+                                     "description":  "The National Programme Coordinator ensures implementation of processes for programme-specific quality management and improvement.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3",
+                                                             "3.4.2.1",
+                                                             "3.5.1.1",
+                                                             "3.5.1.2",
+                                                             "3.6.1.1",
+                                                             "3.6.2.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "1.2.2.8",
+                                     "description":  "The National Programme Coordinator implements processes to monitor the quality of programme-specific clinical services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3",
+                                                             "3.1.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.1.1",
+                                     "description":  "The leaders of the programme at national and district level are formally identified.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.1.2",
+                                     "description":  "The leaders of the programme identify the desired or expected programme related services for a specific catchment population within the health district.",
+                                     "linked_criteria":  [
+                                                             "2.1.3.1",
+                                                             "2.1.4.1",
+                                                             "2.1.5.1",
+                                                             "2.1.6.1",
+                                                             "2.1.7.1",
+                                                             "3.1.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.1.3",
+                                     "description":  "The programme leaders work collaboratively to develop and implement the strategic plan and operational goals of the national healthcare programme.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.2",
+                                                             "1.2.2.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.1.4",
+                                     "description":  "Progress in implementing the programme delivery plan is monitored at regular intervals according to national strategic goals and M\u0026E framework.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.4",
+                                                             "1.1.1.8",
+                                                             "2.1.4.5",
+                                                             "2.1.8.2",
+                                                             "3.14.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.1.5",
+                                     "description":  "The programme leaders meet at regular intervals to determine resources required to meet the needs of the catchment population.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.2.1",
+                                     "description":  "The district’s programme leaders ensure that policies and procedures guide and support the operational activities and management of the programme.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.5",
+                                                             "1.2.1.3",
+                                                             "2.1.10.3",
+                                                             "2.2.1.1",
+                                                             "2.2.1.2",
+                                                             "3.3.2.1",
+                                                             "3.6.2.2",
+                                                             "3.6.3.3",
+                                                             "3.7.1.3",
+                                                             "3.11.1.7",
+                                                             "3.11.2.1",
+                                                             "3.11.2.4",
+                                                             "3.11.3.1",
+                                                             "3.11.5.8",
+                                                             "3.11.6.1",
+                                                             "3.11.8.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.2.2",
+                                     "description":  "Policies and procedures guide the development, retention and destruction of all programme documentation including patientrelated information, legal, managerial and research documentation",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4",
+                                                             "1.2.2.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.2.7",
+                                     "description":  "There is a mechanism to ensure that policies are known and implemented.",
+                                     "linked_criteria":  [
+                                                             "3.11.8.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.3.1",
+                                     "description":  "An EmONC programme appropriate diagnostic laboratory service is offered at all levels of health service delivery in the district.",
+                                     "linked_criteria":  [
+                                                             "2.1.1.2",
+                                                             "3.8.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.3.2",
+                                     "description":  "A current manual/guidelines and steps on how to use various EmONC programme specific tests, read different test results and assure quality of services are available, distributed and implemented at all healthcare facilities.",
+                                     "linked_criteria":  [
+                                                             "3.8.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.3.4",
+                                     "description":  "Appropriate laboratory turn-around times for individual facilities have been established and monitored.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7",
+                                                             "3.8.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.3.5",
+                                     "description":  "The district programme leaders have access to regular laboratory quality reports.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.8",
+                                                             "3.1.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.4.1",
+                                     "description":  "An EmONC programme appropriate diagnostic imaging service is accessible at all levels of health service delivery in the district.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7",
+                                                             "2.1.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.4.4",
+                                     "description":  "A referral schedule for a district wide diagnostic imaging system is implemented.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.8"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.4.5",
+                                     "description":  "Appropriate turn-around times for individual facilities have been established and are monitored.",
+                                     "linked_criteria":  [
+                                                             "2.1.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.5.1",
+                                     "description":  "Designated CSS service providers are available for all levels of health service delivery in the district.",
+                                     "linked_criteria":  [
+                                                             "2.1.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.5.5",
+                                     "description":  "Appropriate turn-around times for packs from and to individual CSS service providers have been established and are monitored.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.5.7",
+                                     "description":  "The district programme leaders have access to regular CSS service provider quality reports.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.6.1",
+                                     "description":  "A coordinated, district wide, plan is in place for the allocation, control and use of vehicles required for the programme.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3",
+                                                             "2.1.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.6.5",
+                                     "description":  "Quality management processes are designed and implemented.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.7.1",
+                                     "description":  "A centralised district level plan for the allocation, distribution and control of drugs, medication and consumables required for the programme is in place.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3",
+                                                             "2.1.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.7.2",
+                                     "description":  "A coordinated district wide system for urgent temporary replacement of diagnostic equipment required for the programme is in place.",
+                                     "linked_criteria":  [
+                                                             "3.5.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.7.3",
+                                     "description":  "The ability of the central supply stores to meet the drugs, medication, consumables and equipment needs of the programme is monitored on a regular (at least quarterly) basis.",
+                                     "linked_criteria":  [
+                                                             "3.5.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.7.4",
+                                     "description":  "There is a system for calculating and predicting district-wide programme-specific stock turnover and requirements.",
+                                     "linked_criteria":  [
+                                                             "3.5.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.7.5",
+                                     "description":  "All facilities have access to an electronic as well as a paper-based back up supply chain management system.",
+                                     "linked_criteria":  [
+                                                             "3.5.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.7.6",
+                                     "description":  "Quality management processes are designed and implemented.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.8.1",
+                                     "description":  "There is a mechanism for programme leaders to participate in the development and management of programme related budgets.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.6",
+                                                             "1.2.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.8.2",
+                                     "description":  "Processes are in place to aggregate data required by Programme Coordinators.",
+                                     "linked_criteria":  [
+                                                             "2.1.1.4",
+                                                             "3.14.1.1",
+                                                             "3.1.1.2",
+                                                             "3.3.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.9.3",
+                                     "description":  "Contracts and other arrangements are monitored as part of the programmes’ quality management and improvement programme.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.1.10.3",
+                                     "description":  "Patients are screened and referred as per policies.",
+                                     "linked_criteria":  [
+                                                             "2.1.2.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.1.1",
+                                     "description":  "The programme leaders ensure that programme-specific clinical policies, procedures and forms are compiled and indexed and ensure their circulation, recall, archiving and review.",
+                                     "linked_criteria":  [
+                                                             "2.1.2.1",
+                                                             "2.2.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.1.2",
+                                     "description":  "Programme-specific policies, procedures, protocols and/or forms are available to support its practices across the entire programme care continuum.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3",
+                                                             "2.2.1.1",
+                                                             "2.1.2.1",
+                                                             "2.2.3.2",
+                                                             "3.11.1.7",
+                                                             "3.11.2.1",
+                                                             "3.11.2.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.1.3",
+                                     "description":  "The programme leaders ensure implementation of amendments to clinical protocols, procedures, guidelines and forms in response to changes in evidence based national or international guidelines, systematic review of existing evidence or results of analysed data and clinical audits.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.8"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.2.1",
+                                     "description":  "District programme leaders ensure that a district wide, coordinated orientation plan for the programme’s healthcare professionals is implemented.",
+                                     "linked_criteria":  [
+                                                             "3.2.1.5",
+                                                             "3.2.1.6",
+                                                             "3.2.1.9"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.2.3",
+                                     "description":  "There is a district wide, post-basic training strategy for the programme which ensures that all personnel regularly update their knowledge and skills.",
+                                     "linked_criteria":  [
+                                                             "3.2.1.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.2.4",
+                                     "description":  "Data on training outcomes and competencies are monitored and analysed.",
+                                     "linked_criteria":  [
+                                                             "3.2.1.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.2.5",
+                                     "description":  "Opportunities for quality improvement are identified and action plans implemented.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.3.2",
+                                     "description":  "Compliance with programme-specific guidelines and protocols are audited.",
+                                     "linked_criteria":  [
+                                                             "2.2.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.1",
+                                     "description":  "Information systems for the programme are developed and implemented.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7",
+                                                             "1.2.2.8",
+                                                             "3.14.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.2",
+                                     "description":  "The programme leaders, in collaboration with subject matter experts, identify key indicators and other information required to monitor quality assurance and improvement processes.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.3",
+                                     "description":  "Programme leaders identify key measures to monitor the quality of clinical processes.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.8"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.4",
+                                     "description":  "Confidentiality of data and information is maintained.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.8",
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.5",
+                                     "description":  "Aggregated data and information is used to support management of the programme.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.8",
+                                                             "1.2.2.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.6",
+                                     "description":  "Aggregated data and information is used to identify opportunities for quality improvement.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7",
+                                                             "1.1.1.8",
+                                                             "3.14.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.7",
+                                     "description":  "Data or information is contributed to national programme databases as required by law or regulation, where applicable.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.8",
+                                     "description":  "Clinical audits are performed to evaluate the quality of care provided, drive improvements in service provision and monitor performance over time",
+                                     "linked_criteria":  [
+                                                             "1.1.1.8",
+                                                             "1.2.2.8",
+                                                             "3.3.1.3",
+                                                             "3.3.1.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.9",
+                                     "description":  "Professional performance is monitored as part of clinical monitoring.",
+                                     "linked_criteria":  [
+                                                             "3.2.1.1",
+                                                             "2.2.2.4",
+                                                             "3.3.1.3",
+                                                             "3.3.1.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.11",
+                                     "description":  "Comparisons are made over time within the programme, among districts, and with national M\u0026E goals and targets.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.8",
+                                                             "1.2.2.7",
+                                                             "3.14.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.4.12",
+                                     "description":  "The data collected for monitoring and evaluation purposes is used to inform the development of processes to ensure that improvements are sustained over time.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.8",
+                                                             "1.2.2.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.5.1",
+                                     "description":  "Risk management strategies for the programme are developed and implemented.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.6",
+                                                             "1.1.1.9",
+                                                             "3.13.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.5.2",
+                                     "description":  "A risk register, including programme-specific reportable operational and clinical risk categories, is developed and implemented.",
+                                     "linked_criteria":  [
+                                                             "3.13.1.1",
+                                                             "3.13.1.2",
+                                                             "3.13.1.3",
+                                                             "3.13.1.4",
+                                                             "3.13.1.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "2.2.5.3",
+                                     "description":  "There is evidence of ongoing documented monitoring of risks.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.6"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.1.1.1",
+                                     "description":  "An appropriately qualified and experienced individual (Focal Person) has clearly defined responsibilities and accountability for all aspects of the service.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.2",
+                                                             "1.2.2.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.1.1.2",
+                                     "description":  "The Focal Person compiles and provides reports to the District Programme Coordinator and/or programme leaders for feedback on a regular basis.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.8",
+                                                             "2.1.3.5",
+                                                             "2.1.8.2",
+                                                             "3.5.1.3",
+                                                             "3.14.1.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.1.1.3",
+                                     "description":  "At least one qualified person is available at all times (medical practitioner or midwife) to participate and/or provide guidance in the management of maternal and neonatal emergencies.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3",
+                                                             "2.1.1.2",
+                                                             "3.11.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.1.1.4",
+                                     "description":  "An interdisciplinary programme team has been established and meets at regular intervals.",
+                                     "linked_criteria":  [
+                                                             "3.3.1.5",
+                                                             "1.1.1.7",
+                                                             "3.11.5.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.2.1.1",
+                                     "description":  "Minimum critical competencies required for any/all professional nurses and midwives, medical practitioners and other professionals providing basic, regular perinatal and neonatal support are identified and assessed.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.1",
+                                                             "1.2.2.3",
+                                                             "2.2.2.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.2.1.2",
+                                     "description":  "Staffing norms are determined for the allocation of appropriately trained healthcare professionals required to meet the Perinatal, Maternal Health and EmONC programme’s scope of care, treatment and level of services it provides at all times during official facility hours.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.2.1.3",
+                                     "description":  "The employees rendering perinatal, maternal health and EmONC programme services have education, experience, training and certification consistent with the programme’s scope of care, treatment and services.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.1",
+                                                             "1.2.2.3",
+                                                             "2.2.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.2.1.4",
+                                     "description":  "Responsibilities and accountabilities of the employees rendering maternal health, perinatal and EmONC programme services are defined.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.2.1.5",
+                                     "description":  "EmONC specific orientation and training needs for designated healthcare professionals who render emergency perinatal and maternal health services are identified and communicated to the District Programme Coordinator.",
+                                     "linked_criteria":  [
+                                                             "2.2.2.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.2.1.6",
+                                     "description":  "EmONC specific orientation and training for designated healthcare professionals who render emergency perinatal and maternal health services is implemented.",
+                                     "linked_criteria":  [
+                                                             "2.2.2.1",
+                                                             "3.2.1.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.2.1.7",
+                                     "description":  "Critical competencies of employees that render EmONC services are assessed through observation on an ongoing basis. This assessment is documented.",
+                                     "linked_criteria":  [
+                                                             "2.2.2.3",
+                                                             "2.2.2.4",
+                                                             "3.5.1.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.2.1.9",
+                                     "description":  "Where volunteers are used, they have received the required orientation and training relevant to the functions that they perform within the facility.",
+                                     "linked_criteria":  [
+                                                             "2.2.2.1",
+                                                             "2.2.2.4",
+                                                             "3.2.1.5",
+                                                             "3.3.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.2.1.10",
+                                     "description":  "Where volunteers are used, they work under the guidance of the Facility Manager or his/her delegate in the employ of the facility.",
+                                     "linked_criteria":  [
+                                                             "2.1.9.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.3.1.1",
+                                     "description":  "Clinical practice guidelines and protocols required to meet the perinatal, maternal health and EmONC programme’s scope of care, treatment and level of services are available.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3",
+                                                             "2.2.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.3.1.2",
+                                     "description":  "Clinical practice guidelines and protocols are based on international and national care guidelines, clinical evidence and EmONC subject matter expert teams input.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3",
+                                                             "2.2.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.3.1.3",
+                                     "description":  "The implementation of guidelines and protocols is monitored as part of a structured clinical audit.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.8",
+                                                             "1.2.1.3",
+                                                             "1.2.2.8",
+                                                             "2.2.4.8",
+                                                             "3.18.1.2",
+                                                             "3.18.1.3",
+                                                             "3.18.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.3.1.4",
+                                     "description":  "Results of facility audits are provided to and analysed by the facility’s programme team and provided to district programme leaders.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.8",
+                                                             "1.1.1.9",
+                                                             "1.2.2.7",
+                                                             "1.2.2.8",
+                                                             "2.2.4.1",
+                                                             "2.1.8.2",
+                                                             "3.14.1.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.3.1.5",
+                                     "description":  "Regular M\u0026M (Morbidity and Mortality) meetings to discuss adverse patient outcomes and complications take place.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.8",
+                                                             "1.2.2.8",
+                                                             "2.2.4.1",
+                                                             "2.2.5.1",
+                                                             "3.13.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.3.2.1",
+                                     "description":  "Policies, procedures and forms required to meet the perinatal, maternal health and EmONC programme’s scope of care, treatment and level of services are available and implemented.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.5",
+                                                             "1.2.1.3",
+                                                             "2.1.2.1",
+                                                             "2.2.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.3.2.3",
+                                     "description":  "In-service training is provided to personnel to ensure that they understand the intent and content of the policies and procedures.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7",
+                                                             "2.1.2.1",
+                                                             "2.2.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.4.2.1",
+                                     "description":  "The required furniture for safe labour and delivery practice is available and functional.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.5.1.1",
+                                     "description":  "Medical equipment, instruments and supplies relevant to the level of care rendered at the facility are available according to most current protocol.",
+                                     "linked_criteria":  [
+                                                             "1.1.1.6",
+                                                             "1.2.2.3",
+                                                             "1.2.2.4",
+                                                             "2.1.7.2",
+                                                             "2.1.7.3",
+                                                             "2.1.7.4",
+                                                             "2.1.7.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.5.1.2",
+                                     "description":  "A preventive maintenance programme for all equipment and instruments is in place.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.5.1.3",
+                                     "description":  "Deficiencies and needs are regularly documented and communicated by the Focal Person to facility and programme leaders.",
+                                     "linked_criteria":  [
+                                                             "3.1.1.2",
+                                                             "1.1.1.6",
+                                                             "1.2.2.3",
+                                                             "1.2.2.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.5.1.4",
+                                     "description":  "Turnaround times for ordering and repairs are monitored and analysed.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3",
+                                                             "2.1.7.2",
+                                                             "2.1.7.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.5.1.5",
+                                     "description":  "Staff are trained and competent in the use of specialised medical equipment.",
+                                     "linked_criteria":  [
+                                                             "2.1.7.2",
+                                                             "3.2.1.3",
+                                                             "3.2.1.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.6.1.1",
+                                     "description":  "A functional kitchen with equipment appropriate for the level of the facility and programme services rendered is available.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.6.2.1",
+                                     "description":  "Linen and laundry supplies and facilities are adequate for the level and volume of labour and maternity services provided.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3",
+                                                             "1.2.2.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.6.2.2",
+                                     "description":  "Policies and procedures ensure that personnel receive guidance in the functions to be carried out.",
+                                     "linked_criteria":  [
+                                                             "2.1.2.1",
+                                                             "3.3.2.1",
+                                                             "3.3.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.6.2.3",
+                                     "description":  "A system is in place to ensure that departmental policies and procedures are known and implemented.",
+                                     "linked_criteria":  [
+                                                             "3.3.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.6.2.4",
+                                     "description":  "Patients and families have received orientation on sanitary requirements for linen and clothing and infection prevention and control procedures.",
+                                     "linked_criteria":  [
+                                                             "3.12.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.6.3.1",
+                                     "description":  "There is an adequate number of suitably trained housekeeping personnel to provide a safe and effective service.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.6.3.3",
+                                     "description":  "Housekeeping policies and procedures relevant to cleaning of labour and delivery, neonatal intensive care and operating theatre service areas and equipment are available and implemented.",
+                                     "linked_criteria":  [
+                                                             "2.1.2.1",
+                                                             "3.12.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.6.3.4",
+                                     "description":  "Spill kits for cleaning hazardous material, blood and body fluid spills are available.",
+                                     "linked_criteria":  [
+                                                             "3.12.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.7.1.1",
+                                     "description":  "A designated registered professional has clearly defined responsibilities and accountability for all aspects of the pharmaceutical service.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.7.1.2",
+                                     "description":  "Cooperation exists between the programme’s Focal Person, programme leaders and the pharmacy and/or other relevant staff in the facility to ensure safe prescribing, ordering, storage and dispensing of programme-specific medication.",
+                                     "linked_criteria":  [
+                                                             "2.1.1.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.7.1.3",
+                                     "description":  "There is a collaborative effort to develop and monitor additional medication policies and procedures specific to the EmONC service.",
+                                     "linked_criteria":  [
+                                                             "2.1.2.1",
+                                                             "3.3.2.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.7.1.4",
+                                     "description":  "Pharmaceutical functional refrigerators and/or cool bags designated for storage of vaccines and other temperaturesensitive medication are available and monitored to ensure maintenance of the cold chain.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.7.1.5",
+                                     "description":  "Controlled substances and the documentation thereof are managed according to Botswana laws and regulations.",
+                                     "linked_criteria":  [
+                                                             "3.7.1.3",
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.7.2.1",
+                                     "description":  "Appropriate medication and drugs are stocked and readily available for prescribing and ordering according to the facility’s level of care, mission, patient needs and services provided.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4",
+                                                             "1.2.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.7.2.2",
+                                     "description":  "Appropriate medication and drugs are stocked and readily available for prescribing and ordering according to the facility’s level of care, mission, patient needs and services provided.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.7.2.3",
+                                     "description":  "The facility’s professional staff adhere to laws, regulations and approved practice guidelines when dispensing and administering medication.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.7.2.4",
+                                     "description":  "Medication is stored, dispensed and administered in a manner that ensures safety and effectiveness.",
+                                     "linked_criteria":  [
+
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.7.2.5",
+                                     "description":  "Medication orders shall be recorded in the patient\u0027s file and signed by the ordering person with his/her whole signature, date and time.",
+                                     "linked_criteria":  [
+                                                             "3.10.1.1",
+                                                             "3.11.1.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.8.1.1",
+                                     "description":  "The facility provides basic laboratory services essential to the immediate diagnosis and treatment of the patient.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3",
+                                                             "2.1.3.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.8.1.3",
+                                     "description":  "Protocols for requesting investigations required for the management of specific obstetric and neonatal conditions and complications must be available.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3",
+                                                             "2.1.3.2",
+                                                             "3.11.5.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.8.1.4",
+                                     "description":  "Details including the reason for laboratory tests, type, individuals ordering and collecting the specimens and results must be recorded in the patient’s file.",
+                                     "linked_criteria":  [
+                                                             "2.1.3.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.9.1.1",
+                                     "description":  "All facilities rendering antenatal services have access to basic obstetric ultrasound for all patients in the first trimester.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.9.1.3",
+                                     "description":  "Clinics with obstetric beds and primary hospitals are equipped with portable ultrasound, Doppler and X-ray equipment.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.9.1.4",
+                                     "description":  "Clinics with obstetric beds and primary hospitals have identified and trained professional staff (medical practitioners and midwives) to be competent in performing and interpreting basic ultrasound investigations.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.2",
+                                                             "3.9.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.10.1.1",
+                                     "description":  "Trained Health Education Assistants are available to provide training and support to pregnant women and newborn infants in the facility’s catchment population.",
+                                     "linked_criteria":  [
+                                                             "3.7.2.5",
+                                                             "3.10.1.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.10.1.2",
+                                     "description":  "Orientation and training programmes for EmONC HEAs are provided by the facility’s EmONC team.",
+                                     "linked_criteria":  [
+                                                             "3.10.1.1"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.10.1.3",
+                                     "description":  "The facility’s EmONC team promotes, supports and participates in EmONC related community outreach projects.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.11.1.1",
+                                     "description":  "The obstetric record captures comprehensive information about the mother’s perinatal care.",
+                                     "linked_criteria":  [
+                                                             "3.11.2.1",
+                                                             "3.11.2.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.11.1.2",
+                                     "description":  "The neonatal record captures comprehensive information about the newborn.",
+                                     "linked_criteria":  [
+                                                             "3.1.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.11.1.3",
+                                     "description":  "Where there is an Electronic Health Record system in place, data correlates with the patient–carried BOR.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.11.1.4",
+                                     "description":  "Measures to ensure security and confidentiality of information are implemented according to Botswana laws and regulations.",
+                                     "linked_criteria":  [
+                                                             "1.2.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.11.1.5",
+                                     "description":  "A detailed consent policy considering Botswana acts and regulations guides consent for obstetric and neonatal procedures.",
+                                     "linked_criteria":  [
+                                                             "3.7.2.5",
+                                                             "3.10.1.1",
+                                                             "3.11.3.3",
+                                                             "3.11.5.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.11.1.6",
+                                     "description":  "A current obstetric birth register is available.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.12.1.1",
+                                     "description":  "A comprehensive history is obtained and documented.",
+                                     "linked_criteria":  [
+                                                             "3.6.3.3",
+                                                             "3.6.3.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.12.1.4",
+                                     "description":  "Estimation of gestational age is performed and expected date of delivery calculated.",
+                                     "linked_criteria":  [
+                                                             "3.6.2.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.13.1.1",
+                                     "description":  "On presenting to the facility, a focused history is taken by a BANC and/or EmONC trained nurse, midwife or medical officer and documented in the BOR.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.6",
+                                                             "2.2.5.1",
+                                                             "3.3.1.5"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.14.1.1",
+                                     "description":  "Essential antenatal maternal care measures for preventing foetal complications are in place.",
+                                     "linked_criteria":  [
+                                                             "2.2.4.1",
+                                                             "2.1.8.2",
+                                                             "2.2.4.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.14.1.2",
+                                     "description":  "Protocols for the management of stillbirths and neonatal deaths are in place.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7",
+                                                             "2.1.8.2",
+                                                             "3.3.1.3"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.14.1.3",
+                                     "description":  "Immediate postpartum care is provided to all newborn infants.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7",
+                                                             "2.1.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.14.1.4",
+                                     "description":  "A thorough post-partum routine assessment is provided within the first 24 hours and before discharge.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.8"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.14.1.5",
+                                     "description":  "A follow-up assessment for all healthy mothers and infants is scheduled within 3-5 days’ post-partum.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.14.1.6",
+                                     "description":  "Criteria for babies who require standard in-patient care are in place and implemented.",
+                                     "linked_criteria":  [
+                                                             "1.2.2.7",
+                                                             "3.1.1.2",
+                                                             "3.3.1.4"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 },
+                                 {
+                                     "criteria":  "3.14.1.7",
+                                     "description":  "Criteria for babies who require admission to high care units are in place and implemented.",
+                                     "linked_criteria":  [
+                                                             "2.2.4.1",
+                                                             "2.1.8.2",
+                                                             "2.2.4.2"
+                                                         ],
+                                     "root":  [
+
+                                              ]
+                                 }
+                             ]
+}

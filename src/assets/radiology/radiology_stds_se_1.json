@@ -1,0 +1,117 @@
+{
+  "se_id": 1,
+  "se_name": "Human Resource Management",
+  "source_file": "Personnel Record audit tool- Radiology version1  10 July 2025.xls",
+  "sections": [
+    {
+      "section_pi_id": "1.4",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "1.4.2",
+          "statement": "There is an effective process for gathering, verifying and evaluating the credentials (registration, education, training and experience) of those health care professionals who are permitted to practice independently.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.4.2.1",
+              "category": "",
+              "severity": null,
+              "description": "There is implementation of a reliable, documented process for evaluating and verifying the credentials of all health professionals.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.4.2.2",
+              "category": "",
+              "severity": null,
+              "description": "Personnel files contain copies of qualifications and licenses/registration from the relevant authority for all health professionals",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.4.2.3",
+              "category": "",
+              "severity": null,
+              "description": "There is a system to track the annual registration of all health professionals.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.4.2.4",
+              "category": "",
+              "severity": null,
+              "description": "All personnel members with direct contact with the public have had a police check, a copy of which is kept in their personnel file.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        },
+        {
+          "standard_id": "1.4.3",
+          "statement": "Clinical and administrative personnel are orientated to the practice and participate in continuing education, research and other educational experiences to acquire new skills and knowledge and to support job advancement.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.4.3.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice supports continuing education for its clinical personnel and maintains records of this in personnel files.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "1.4.3.4",
+              "category": "",
+              "severity": null,
+              "description": "Personnel members are informed of opportunities to participate in advanced education, training, research, and other experiences.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.5",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "1.5.3",
+          "statement": "The practice provides patient services in line with legally and ethically accepted business and financial standards.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.5.3.6",
+              "category": "",
+              "severity": null,
+              "description": "All health professionals provide evidence of professional indemnity insurance.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "1.7",
+      "title": "",
+      "standards": [
+        {
+          "standard_id": "1.7.1",
+          "statement": "The practice manager and personnel work collaboratively to develop, implement and maintain effective risk management systems in the practice.",
+          "intent_tooltip": "",
+          "criteria": [
+            {
+              "id": "1.7.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Ongoing in-service training of all personnel in risk management policies, procedures and principles is documented.",
+              "is_critical": false,
+              "guideline": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1238 @@
+{
+  "se_id": 3,
+  "se_name": "Clinical Services and Patient Care",
+  "sections": [
+    {
+      "section_pi_id": "3.1",
+      "title": "Diagnosis and management",
+      "standards": [
+        {
+          "standard_id": "3.1.1",
+          "statement": "In consultation with the patient, the practice provides care that is consistent with best available evidence and in accordance with patient needs and values.",
+          "intent_tooltip": "Clinical guidelines should be selected and agreed by all clinicians. Consideration should be given to providing guidelines for high risk, high volume and high cost conditions. In addition, guidelines should be available for conditions which are rarely seen but may have severe consequences for patients if misdiagnosed or mismanaged, for example, malaria in a nonendemic area. Guidelines are found in the literature under many names including practice parameters, practice guidelines, patient care protocols, standards of practice, care pathways, etc. National guidelines for selected conditions are further provided by the Ministry of Health and Wellness. Regardless of the source, the scientific basis of guidelines should be reviewed and approved by the clinical leaders and clinical practitioners before implementation. This will ensure that they meet the criteria established by the leaders and are adapted to the community, patient needs and practice resources. Once adopted, guidelines should be reviewed on a regular basis to ensure their continued relevance. Consistency in the approach to diagnosis and management of care among those who are involved in the clinical care of an individual patient is an important aspect of continuity of care. Patients value consistency in the quality of treatment they receive from a practice and expect that treatment and advice given by different medical practitioners within the practice will not be in conflict. Clinical practice guidelines provide important recommendations for clinical care and should be accessible at the point of care. Practices need to check that clinical practice guidelines are current.",
+          "criteria": [
+            {
+              "id": "3.1.1.1",
+              "category": "",
+              "severity": null,
+              "description": "The clinical team uses current clinical guidelines relevant its practice, to assist in the diagnosis and management of patients.",
+              "is_critical": false,
+              "guideline": "Guidelines must be available at the point of care and should include high risk, high volume, high cost and rarely seen conditions. The practitioner must consider national guidelines where these are available. The emphasis in this criterion is on the availability and use of clinical guidelines and evidence of both must be provided for compliance."
+            },
+            {
+              "id": "3.1.1.2",
+              "category": "",
+              "severity": null,
+              "description": "The clinical team set criteria to select clinical practice guidelines.",
+              "is_critical": false,
+              "guideline": "Every effort should be made to identify and adopt guidelines that have been rigorously and scientifically developed, internationally accepted and adapted for local use."
+            },
+            {
+              "id": "3.1.1.3",
+              "category": "",
+              "severity": null,
+              "description": "The clinical team can describe how they ensure consistency of diagnosis and management of patients.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured during personnel interviews and the patient record audit."
+            },
+            {
+              "id": "3.1.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The clinical team can demonstrate how they communicate about clinical issues and support systems in the practice.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured during personnel interviews and the patient record audit. 3.2.1. Patients are informed of the range of services and the processes to access the practice services. Intent of 3.2.1 Patients and services working in collaboration with the practice need to know how and when to contact the practice to access care. It is reasonable to expect most practices to offer care during normal office hours. 3.2.2. There is a process for appropriate referral of patients for specialised consultation/investigations at other healthcare facilities. Intent of 3.2.2 In some cases, practitioners refer patients for a secondary consultation to confirm an opinion, to request more extensive diagnostic evaluations than may be available to the practitioner or to have patients receive specialised treatment that the referring practice may be unable to provide. The practice must clearly describe the referral process. Practices may wish to consider the use of a standard referral form which includes a tear off slip for the receiving doctor's response following the consultation. The referral must contain the following as a minimum: a) At least three approved patient identifiers b) Relevant history, examination findings and current management c) Known allergies, adverse drug reactions and current medication d) The name of the referring doctor e) The name of the doctor/service referred to f) Stated purpose of the referral g) Request for feedback following the consultation with the specialist"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.2",
+      "title": "Communication with patients",
+      "standards": [
+        {
+          "standard_id": "3.2.1",
+          "statement": "Patients are informed of the range of services and the processes to access the practice services.",
+          "intent_tooltip": "Patients and services working in collaboration with the practice need to know how and when to contact the practice to access care. It is reasonable to expect most practices to offer care during normal office hours.",
+          "criteria": [
+            {
+              "id": "3.2.1.1",
+              "category": "",
+              "severity": null,
+              "description": "When patients register with the practice they are informed of the range of services offered by the practice, opening hours, contact details and after hours’ care arrangements.",
+              "is_critical": false,
+              "guideline": "It is advisable to provide this information in printed form as patients may not remember what has been told to them. As a minimum, patients must acknowledge receipt of the information by signing (on the registration form) that they have been informed."
+            },
+            {
+              "id": "3.2.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Where the practice has an 'on hold' telephone message, it includes a message for an alternative number to be used in an emergency.",
+              "is_critical": false,
+              "guideline": "This criterion is only applicable to practices where the telephone system diverts to an ‘on hold’ message when the line is busy during business hours. The purpose of this requirement is to assist patients who are dealing with an emergency during peak business hours when it might be difficult to get through to the practice because of the high volume of calls. If the practice does not have an ‘on hold’ system this criterion will be not applicable."
+            },
+            {
+              "id": "3.2.1.3",
+              "category": "",
+              "severity": null,
+              "description": "A message on the practice’s telephone answering machine, call diversion system or paging system provide information to patients on how to obtain care outside the practice’s normal opening hours.",
+              "is_critical": false,
+              "guideline": "The intention of this criterion is to ensure that patients are assisted with the relevant information outside of business hours."
+            },
+            {
+              "id": "3.2.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The practice renders services based on the needs of the population, during the hours that they publish.",
+              "is_critical": false,
+              "guideline": "Documented evidence can be provided by time cards, duty rosters etc. and can also be verified during patient and personnel interviews. 3.2.3. The practice has an appointment system and a process for recognising cases requiring more urgent attention and providing patients with longer appointments when appropriate. Intent of 3.2.3 For efficiency of service delivery, appointment systems are recommended as best practice. The system must be flexible in determining the order in which patients are seen to accommodate patients' needs for urgent care, non-urgent care, complex care, planned chronic disease management, preventive healthcare and longer consultations. Members of the practice team should be sensitive to the need for longer consultations when the need"
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.2",
+          "statement": "There is a process for appropriate referral of patients for specialised consultation/investigations at other healthcare facilities.",
+          "intent_tooltip": "In some cases, practitioners refer patients for a secondary consultation to confirm an opinion, to request more extensive diagnostic evaluations than may be available to the practitioner or to have patients receive specialised treatment that the referring practice may be unable to provide. The practice must clearly describe the referral process. Practices may wish to consider the use of a standard referral form which includes a tear off slip for the receiving doctor's response following the consultation. The referral must contain the following as a minimum: a) At least three approved patient identifiers b) Relevant history, examination findings and current management c) Known allergies, adverse drug reactions and current medication d) The name of the referring doctor e) The name of the doctor/service referred to f) Stated purpose of the referral g) Request for feedback following the consultation with the specialist 3.2.1.1. When patients register with the practice they are informed of the range of services offered by the practice, opening hours, contact details and after hours’ care arrangements. Guideline statement: It is advisable to provide this information in printed form as patients may not remember what has been told to them. As a minimum, patients must acknowledge receipt of the information by signing (on the registration form) that they have been informed. 3.2.1.2. Where the practice has an 'on hold' telephone message, it includes a message for an alternative number to be used in an emergency. Guideline statement: This criterion is only applicable to practices where the telephone system diverts to an ‘on hold’ message when the line is busy during business hours. The purpose of this requirement is to assist patients who are dealing with an emergency during peak business hours when it might be difficult to get through to the practice because of the high volume of calls. If the practice does not have an ‘on hold’ system this criterion will be not applicable. 3.2.1.3. A message on the practice’s telephone answering machine, call diversion system or paging system provide information to patients on how to obtain care outside the practice’s normal opening hours. Guideline statement: The intention of this criterion is to ensure that patients are assisted with the relevant information outside of business hours. 3.2.1.4. The practice renders services based on the needs of the population, during the hours that they publish. Guideline statement: Documented evidence can be provided by time cards, duty rosters etc. and can also be verified during patient and personnel interviews.",
+          "criteria": [
+            {
+              "id": "3.2.2.1",
+              "category": "",
+              "severity": null,
+              "description": "There is a documented process to refer patients.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.2.2",
+              "category": "",
+              "severity": null,
+              "description": "The lines of communication between the practice, referral hospital and community services are clearly defined.",
+              "is_critical": false,
+              "guideline": "Practice personnel must clearly describe the referral process, especially where patients are sent to another healthcare organisation for specialist consultation or special investigations and then return to the referring practice for continuation of treatment. Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.2.3",
+              "category": "",
+              "severity": null,
+              "description": "The doctor informs the patient if he/she has any financial interest in the referral service.",
+              "is_critical": false,
+              "guideline": "Surveyors must pay particular attention to services that are offered in the same facility by different practitioners for example, where a general practitioner refers a patient to a radiology or laboratory practice in the same facility."
+            },
+            {
+              "id": "3.2.2.4",
+              "category": "",
+              "severity": null,
+              "description": "Referrals are to specific individuals and/or agencies in the patient's home community wherever possible.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.2.5",
+              "category": "",
+              "severity": null,
+              "description": "Patients and as appropriate their families are given follow-up instructions which are provided in an understandable form and manner.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.2.6",
+              "category": "",
+              "severity": null,
+              "description": "A copy of the referral note is available in the patient record.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.2.7",
+              "category": "",
+              "severity": null,
+              "description": "The referral is made on appropriate stationery or electronically.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.2.8",
+              "category": "",
+              "severity": null,
+              "description": "The referral contains as a minimum a) – g) in the standard intent above.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.2.9",
+              "category": "",
+              "severity": null,
+              "description": "The practice keeps a record of replies received following the referral of patients.",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided of the system that is used in the practice to record and act upon replies received from referral practitioners."
+            },
+            {
+              "id": "3.2.2.10",
+              "category": "",
+              "severity": null,
+              "description": "There are written guidelines for the referral of emergency patients.",
+              "is_critical": false,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "3.2.2.11",
+              "category": "",
+              "severity": null,
+              "description": "Follow-up care based on the findings of investigations/consultations performed outside the practice are noted in the patient record.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit. for a longer consultation could be anticipated (for example, when the patient is attending for multiple or complex problems, chronic disease management or procedures). Continuity of care is best achieved when a patient has on-going care from the same clinician. The doctor-patient relationship is central to the provision of care. In recognition of this, patients are offered an appointment with their preferred clinician when possible. If the practice is involved in training or research which makes it necessary for third parties to be present during the consultation, the patient is informed of this and given the opportunity to offer or withhold consent. 3.2.4. At registration, sufficient details are taken from the patient to ensure that the patient can be contacted by the practice when necessary and that the medical practitioner seeing the patient for the first time has sufficient background information to provide adequate care to the patient. Intent of 3.2.4 Accurate contact details are essential in order to follow up results, recall patients for chronic disease monitoring and contact patients or nominated next of kin in emergency situations that may arise. Background medical information is essential to the provision of adequate care, but can be adequately obtained by administrative personnel in the first instance with further detail elicited during the consultation if necessary."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.3",
+          "statement": "The practice has an appointment system and a process for recognising cases requiring more urgent attention and providing patients with longer appointments when appropriate.",
+          "intent_tooltip": "For efficiency of service delivery, appointment systems are recommended as best practice. The system must be flexible in determining the order in which patients are seen to accommodate patients' needs for urgent care, non-urgent care, complex care, planned chronic disease management, preventive healthcare and longer consultations. Members of the practice team should be sensitive to the need for longer consultations when the need 3.2.2.1. There is a documented process to refer patients. Guideline statement: Compliance will be verified during the patient record audit. 3.2.2.2. The lines of communication between the practice, referral hospital and community services are clearly defined. Guideline statement: Practice personnel must clearly describe the referral process, especially where patients are sent to another healthcare organisation for specialist consultation or special investigations and then return to the referring practice for continuation of treatment. Compliance will be verified during the patient record audit. 3.2.2.3. The doctor informs the patient if he/she has any financial interest in the referral service. Guideline statement: Surveyors must pay particular attention to services that are offered in the same facility by different practitioners for example, where a general practitioner refers a patient to a radiology or laboratory practice in the same facility. 3.2.2.4. Referrals are to specific individuals and/or agencies in the patient's home community wherever possible. Guideline statement: Compliance will be verified during the patient record audit. 3.2.2.5. Patients and as appropriate their families are given follow-up instructions which are provided in an understandable form and manner. Guideline statement: Compliance will be verified during the patient record audit. 3.2.2.6. A copy of the referral note is available in the patient record. Guideline statement: Compliance will be verified during the patient record audit. 3.2.2.7. The referral is made on appropriate stationery or electronically. Guideline statement: Compliance will be verified during the patient record audit. 3.2.2.8. The referral contains as a minimum a) – g) in the standard intent above. Guideline statement: Compliance will be verified during the patient record audit. 3.2.2.9. The practice keeps a record of replies received following the referral of patients. Guideline statement: Documented evidence must be provided of the system that is used in the practice to record and act upon replies received from referral practitioners. 3.2.2.10. There are written guidelines for the referral of emergency patients. Guideline statement: Documented evidence is required. 3.2.2.11. Follow-up care based on the findings of investigations/consultations performed outside the practice are noted in the patient record. Guideline statement: Compliance will be verified during the patient record audit. for a longer consultation could be anticipated (for example, when the patient is attending for multiple or complex problems, chronic disease management or procedures). Continuity of care is best achieved when a patient has on-going care from the same clinician. The doctor-patient relationship is central to the provision of care. In recognition of this, patients are offered an appointment with their preferred clinician when possible. If the practice is involved in training or research which makes it necessary for third parties to be present during the consultation, the patient is informed of this and given the opportunity to offer or withhold consent.",
+          "criteria": [
+            {
+              "id": "3.2.3.1",
+              "category": "",
+              "severity": null,
+              "description": "There is a flexible appointment system for consultations.",
+              "is_critical": false,
+              "guideline": "This criterion will be scored compliant in practices that do not utilise an appointment system if it can be demonstrated that patients who request a consultation at a specific time (for example, because of business commitments, travel arrangements etc.) are accommodated."
+            },
+            {
+              "id": "3.2.3.2",
+              "category": "",
+              "severity": null,
+              "description": "There is a documented system for fast-tracking the very ill, the elderly, the frail and pregnant women.",
+              "is_critical": false,
+              "guideline": "Both clinical and administrative personnel must be able to describe the practice’s system for fast-tracking patients and the process for seeking urgent medical assistance from a clinical personnel member."
+            },
+            {
+              "id": "3.2.3.3",
+              "category": "",
+              "severity": null,
+              "description": "Patients who are waiting are advised of any delays that may be experienced in receiving attention.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured during patient and personnel interviews."
+            },
+            {
+              "id": "3.2.3.4",
+              "category": "",
+              "severity": null,
+              "description": "There is a system to ensure that patients are seen within the shortest possible time.",
+              "is_critical": false,
+              "guideline": "To be compliant with this criterion personnel must be able to describe the patient journey from arriving at the practice until they leave. Administrative processes must be simple, standardised and streamlined as far as possible."
+            },
+            {
+              "id": "3.2.3.5",
+              "category": "",
+              "severity": null,
+              "description": "Patients are offered longer appointments when clinically indicated.",
+              "is_critical": false,
+              "guideline": "The practice must identify those instances where experience has shown that longer appointments will be required. This criterion links to 3.2.3.4 above where patients will not be seen in the shortest possible time if appointments run over time with preceding patients."
+            },
+            {
+              "id": "3.2.3.6",
+              "category": "",
+              "severity": null,
+              "description": "The patient is offered an appointment with their preferred clinician when possible.",
+              "is_critical": false,
+              "guideline": "This criterion will not be applicable where there is a solo practitioner."
+            },
+            {
+              "id": "3.2.3.7",
+              "category": "",
+              "severity": null,
+              "description": "The patient’s consent is obtained if third parties are expected to be present during the consultation.",
+              "is_critical": false,
+              "guideline": "This can apply to students, researchers, other practice personnel and even to the patient’s family and care- givers. Documented evidence must be provided. The following details should be obtained at registration of a new patient as a minimum: a) Current address b) Telephone numbers c) Next of kin d) Who to contact in an emergency e) Previous medical history f) Previous surgical history g) Current medication (prescribed and over the counter medications) h) Allergies i) Immunisations j) Health risk factors, for example, smoking, alcohol consumption, physical activity k) Patient/guardian signature 3.2.5. Patients can obtain advice or information related to their clinical care by telephone and electronic means. Intent of 3.2.5 Where patients, who are known to a medical practitioner, request information or follow up regarding a condition for which they have previously consulted and the practitioner determines that it is clinically safe not to review the patient in a face to face consultation, the patient has access to the relevant information by telephone or electronic communication. The practice has a documented policy regarding such communication that clearly outlines: a) Limitations of use b) Positive identification of the patient c) Timeframe for a response from a clinician d) That the patient was made aware of any costs involved e) Documentation of the communication in the patient record"
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.4",
+          "statement": "At registration, sufficient details are taken from the patient to ensure that the patient can be contacted by the practice when necessary and that the medical practitioner seeing the patient for the first time has sufficient background information to provide adequate care to the patient.",
+          "intent_tooltip": "Accurate contact details are essential in order to follow up results, recall patients for chronic disease monitoring and contact patients or nominated next of kin in emergency situations that may arise. Background medical information is essential to the provision of adequate care, but can be adequately obtained by administrative personnel in the first instance with further detail elicited during the consultation if necessary. 3.2.3.1. There is a flexible appointment system for consultations. Guideline statement: This criterion will be scored compliant in practices that do not utilise an appointment system if it can be demonstrated that patients who request a consultation at a specific time (for example, because of business commitments, travel arrangements etc.) are accommodated. 3.2.3.2. There is a documented system for fast-tracking the very ill, the elderly, the frail and pregnant women. Guideline statement: Both clinical and administrative personnel must be able to describe the practice’s system for fast-tracking patients and the process for seeking urgent medical assistance from a clinical personnel member. 3.2.3.3. Patients who are waiting are advised of any delays that may be experienced in receiving attention. Guideline statement: Compliance will be measured during patient and personnel interviews. 3.2.3.4. There is a system to ensure that patients are seen within the shortest possible time. Guideline statement: To be compliant with this criterion personnel must be able to describe the patient journey from arriving at the practice until they leave. Administrative processes must be simple, standardised and streamlined as far as possible. 3.2.3.5. Patients are offered longer appointments when clinically indicated. Guideline statement: The practice must identify those instances where experience has shown that longer appointments will be required. This criterion links to 3.2.3.4 above where patients will not be seen in the shortest possible time if appointments run over time with preceding patients. 3.2.3.6. The patient is offered an appointment with their preferred clinician when possible. Guideline statement: This criterion will not be applicable where there is a solo practitioner. 3.2.3.7. The patient’s consent is obtained if third parties are expected to be present during the consultation. Guideline statement: This can apply to students, researchers, other practice personnel and even to the patient’s family and care- givers. Documented evidence must be provided. The following details should be obtained at registration of a new patient as a minimum: a) Current address b) Telephone numbers c) Next of kin d) Who to contact in an emergency e) Previous medical history f) Previous surgical history g) Current medication (prescribed and over the counter medications) h) Allergies i) Immunisations j) Health risk factors, for example, smoking, alcohol consumption, physical activity k) Patient/guardian signature",
+          "criteria": [
+            {
+              "id": "3.2.4.1",
+              "category": "",
+              "severity": null,
+              "description": "New patients to the practice are asked to complete a form detailing at least a) – k) in the standard intent above.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.4.2",
+              "category": "",
+              "severity": null,
+              "description": "Patients are asked to update the practice if their contact details change.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.4.3",
+              "category": "",
+              "severity": null,
+              "description": "Health funder details are accurately recorded for each new patient when required.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.5",
+          "statement": "Patients can obtain advice or information related to their clinical care by telephone and electronic means.",
+          "intent_tooltip": "Where patients, who are known to a medical practitioner, request information or follow up regarding a condition for which they have previously consulted and the practitioner determines that it is clinically safe not to review the patient in a face to face consultation, the patient has access to the relevant information by telephone or electronic communication. The practice has a documented policy regarding such communication that clearly outlines: a) Limitations of use b) Positive identification of the patient c) Timeframe for a response from a clinician d) That the patient was made aware of any costs involved e) Documentation of the communication in the patient record",
+          "criteria": [
+            {
+              "id": "3.2.5.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice implements a policy on telephonic and electronic communication with patients that details at least a) – e) in the standard intent above.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during personnel and patient interviews, patient record audits and by observation."
+            },
+            {
+              "id": "3.2.5.2",
+              "category": "",
+              "severity": null,
+              "description": "There is evidence of practice/patient telephone or electronic advice and information in the patient health records.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit. 3.2.6. The practice has a system for the follow up and review of tests and results. Intent of 3.2.6 The information gained from tests and results can have a considerable impact on the choices patients and medical practitioners make in patient care. There may be considerable risk in not following up clinically significant tests and results. There is a system to track all results and where potentially serious pathology is suspected, doctors have a system to track that the investigation is completed and the result is received and acted upon. To minimise clinical risk, results of investigations are reviewed by the medical practitioner, signed or initialled (or the electronic equivalent), acted on in a timely manner and incorporated into the patient health record. Many practices provide the results of investigations to their patients by telephone. The person responsible for giving the results should ensure that the recipient of the information is correctly identified using three patient identifiers so that patient confidentiality is not compromised. Acceptable patient identifiers are name, date of birth, address, identification number, practice patient number."
+            },
+            {
+              "id": "3.2.5.3",
+              "category": "",
+              "severity": null,
+              "description": "The practice can demonstrate how it receives and returns telephone and electronic messages from patients.",
+              "is_critical": false,
+              "guideline": "Personnel must be able to describe the process detailing which telephone calls are immediately put through to the medical practitioner and what process is followed to ensure that calls are returned timeously when they are not. Electronic messages can take the form of e-mails, text messages or messages received on messaging applications."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.2.6",
+          "statement": "The practice has a system for the follow up and review of tests and results.",
+          "intent_tooltip": "The information gained from tests and results can have a considerable impact on the choices patients and medical practitioners make in patient care. There may be considerable risk in not following up clinically significant tests and results. There is a system to track all results and where potentially serious pathology is suspected, doctors have a system to track that the investigation is completed and the result is received and acted upon. To minimise clinical risk, results of investigations are reviewed by the medical practitioner, signed or initialled (or the electronic equivalent), acted on in a timely manner and incorporated into the patient health record. Many practices provide the results of investigations to their patients by telephone. The person responsible for giving the results should ensure that the recipient of the information is correctly identified using three patient identifiers so that patient confidentiality is not compromised. Acceptable patient identifiers are name, date of birth, address, identification number, practice patient number.",
+          "criteria": [
+            {
+              "id": "3.2.6.1",
+              "category": "",
+              "severity": null,
+              "description": "A documented policy on the review and management of pathology results, imaging reports, investigation reports and other clinical correspondence received by the practice is implemented.",
+              "is_critical": false,
+              "guideline": "The practice needs a documented system for the follow up of all tests and results with a strong focus on risk management. This policy must include that there is documented evidence that every report and result was seen, reviewed and acted upon by a medical practitioner."
+            },
+            {
+              "id": "3.2.6.2",
+              "category": "",
+              "severity": null,
+              "description": "Patient health records contain evidence that all pathology results, imaging reports, investigation reports and clinical correspondence received by the practice have been handled in accordance with practice policy.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record and practice documentation audit."
+            },
+            {
+              "id": "3.2.6.3",
+              "category": "",
+              "severity": null,
+              "description": "There is evidence of review of the results of procedures and diagnostic tests performed by a medical practitioner.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.6.4",
+              "category": "",
+              "severity": null,
+              "description": "There is a system to advise patients of the process to follow up on results.",
+              "is_critical": false,
+              "guideline": "Patients must be encouraged to take responsibility for their own health. The practice must therefore provide the patient with information about what to expect following any investigation. For example, how long it takes to get the results, the method by which the patient will be informed of the results etc. Compliance will be verified during patient interviews and patient record audits."
+            },
+            {
+              "id": "3.2.6.5",
+              "category": "",
+              "severity": null,
+              "description": "A documented system to identify, follow up and recall patients with clinically significant results is implemented.",
+              "is_critical": true,
+              "guideline": "The system must be implemented in such a way that a patient who is not immediately contactable remains flagged for follow up. Documented evidence is required. 3.3.1. Patient and family education promotes the concept of taking responsibility for one’s own health care. Intent of 3.3.1 Every patient is offered the information and education he or she requires. All clinical personnel within the practice work collaboratively to provide education in a coordinated manner. Personnel collaboration helps to ensure that the information patients and families receive is comprehensive, consistent and as effective as possible. Education is focused on the specific knowledge and skills the patient and his or her family will need to make care decisions, participate in care and continue care at home. Variables such as educational literacy, beliefs and limitations are considered. Each practice decides on the placement and format of educational assessment, planning and delivery of information. Education regarding high risk health issues relevant to the local population is routinely provided by the practice. Standardised materials and processes are used where possible. Information provided by the practice may include when to resume daily activities, preventive practices relevant to the patient's condition and, when appropriate, information on coping with disease or disability."
+            },
+            {
+              "id": "3.2.6.6",
+              "category": "",
+              "severity": null,
+              "description": "When patients are informed of results over the telephone, the patient is identified with 3 approved identifiers before the information is given.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.2.6.7",
+              "category": "",
+              "severity": null,
+              "description": "When results are given over the telephone, the result is given to the patient themselves or the patient’s consent is obtained before giving the result to a nominated third party.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.3",
+      "title": "Patient education",
+      "standards": [
+        {
+          "standard_id": "3.3.1",
+          "statement": "Patient and family education promotes the concept of taking responsibility for one’s own health care.",
+          "intent_tooltip": "Every patient is offered the information and education he or she requires. All clinical personnel within the practice work collaboratively to provide education in a coordinated manner. Personnel collaboration helps to ensure that the information patients and families receive is comprehensive, consistent and as effective as possible. Education is focused on the specific knowledge and skills the patient and his or her family will need to make care decisions, participate in care and continue care at home. Variables such as educational literacy, beliefs and limitations are considered. Each practice decides on the placement and format of educational assessment, planning and delivery of information. Education regarding high risk health issues relevant to the local population is routinely provided by the practice. Standardised materials and processes are used where possible. Information provided by the practice may include when to resume daily activities, preventive practices relevant to the patient's condition and, when appropriate, information on coping with disease or disability.",
+          "criteria": [
+            {
+              "id": "3.3.1.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice offers relevant health education to its patients in a planned and consistent manner which enables patients to meet their on-going health needs and achieve their health goals.",
+              "is_critical": false,
+              "guideline": "This will be assessed based on the evaluation of the patient education activities in relation to the services offered as well as the individual patient education during consultation for example, lifestyle advice, when to seek medical attention - how urgently and at what level of care, etc. Compliance will be verified during patient interviews and patient record audits."
+            },
+            {
+              "id": "3.3.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Posters and pamphlets regarding high risk and commonly treated conditions relevant to the practice population (for example, HIV, TB, Diabetes, Hypertension) are visibly displayed and accessible in the waiting room and routinely provided to patients during the consultation when appropriate.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during patient interviews, patient record audits and by observation."
+            },
+            {
+              "id": "3.3.1.3",
+              "category": "",
+              "severity": null,
+              "description": "Patient and family education provided is noted in the patient record.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audits."
+            },
+            {
+              "id": "3.3.1.4",
+              "category": "",
+              "severity": null,
+              "description": "The practice identifies community resources which support continuing health promotion and disease prevention education and has contact details of these resources available.",
+              "is_critical": false,
+              "guideline": "The practice must identify those resources that are specific to its patient population for example, breastfeeding support, mental health support, diabetes society etc. Documented evidence is required. 3.4.1. Patient records contain the required information for the relevant condition. Intent of 3.4.1 Medical records are intended to support patient care and should authentically represent every consultation (including by telephone and electronic mail). The clinical record of each patient, whether handwritten or electronic, needs to contain sufficient information to support the diagnosis and justify the treatment provided. It also needs to document the care given and the course and results of treatment. A standardised format and content of a patient's record will help promote the integration and continuity of care among the various providers of care to the patient. The practice determines the specific data and information recorded in the clinical record but it contains as a minimum for each consultation: a) The date of the consultation b) Who conducted the consultation c) Reason for the consultation d) Relevant clinical findings including documenting the presence or absence of jaundice, anaemia, cyanosis, clubbing, oedema and lymphadenopathy (JACCOL) e) Vital signs, including weight and height. f) Diagnosis g) Recommended management plan and, where appropriate, expected process of review h) Any medication prescribed for the patient (including name, strength, directions for use/dose frequency, number of repeats and date medication started/ceased/changed) i) Complementary medication used by the patient j) All requested investigations and procedures k) Any relevant preventive care undertaken l) Any referral to other healthcare providers or health services m) Any special advice or other instructions n) Follow up instructions given to the patient o) Health education p) For emergency cases, relevant times are recorded, i.e. time patient seen, time drugs administered, etc. Abbreviations and symbols are standardised. Such standardisation is consistent with recognised local and national standards. Patient contact details are kept up to date. All relevant costs are discussed with patients prior to these costs being incurred and the discussion is documented in the patient record."
+            },
+            {
+              "id": "3.3.1.5",
+              "category": "",
+              "severity": null,
+              "description": "There is documented evidence that patients are referred to these resources, where appropriate.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audits."
+            },
+            {
+              "id": "3.3.1.6",
+              "category": "",
+              "severity": null,
+              "description": "Information is provided in a manner and in a language that is understood by those making the care decisions.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during patient interviews. 3.4.2. The practice ensures that all notice of death forms are completed correctly. Intent of 3.4.2 Information from notice of death forms is used to monitor mortality trends in the population which in turn is used to inform planning, monitoring and evaluation of health service provision. It is therefore of national importance that good quality information is provided to ensure that health needs are accurately identified and met. Notice of death forms should contain as a minimum: a) Immediate cause of death b) All identifiable intermediate causes of death c) Underlying cause of death (essential) d) Any co-morbidities suffered by the patient which are contributing causes of death (not the underlying cause or intermediate causes of death in Part 1) e) No abbreviations are used f) The handwriting is legible g) Any relevant occupational history is recorded h) Specifics of cancers and infections must be provided"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.4",
+      "title": "Clinical record keeping",
+      "standards": [
+        {
+          "standard_id": "3.4.1",
+          "statement": "Patient records contain the required information for the relevant condition.",
+          "intent_tooltip": "Medical records are intended to support patient care and should authentically represent every consultation (including by telephone and electronic mail). The clinical record of each patient, whether handwritten or electronic, needs to contain sufficient information to support the diagnosis and justify the treatment provided. It also needs to document the care given and the course and results of treatment. A standardised format and content of a patient's record will help promote the integration and continuity of care among the various providers of care to the patient. The practice determines the specific data and information recorded in the clinical record but it contains as a minimum for each consultation: a) The date of the consultation b) Who conducted the consultation c) Reason for the consultation d) Relevant clinical findings including documenting the presence or absence of jaundice, anaemia, cyanosis, clubbing, oedema and lymphadenopathy (JACCOL) e) Vital signs, including weight and height. f) Diagnosis g) Recommended management plan and, where appropriate, expected process of review h) Any medication prescribed for the patient (including name, strength, directions for use/dose frequency, number of repeats and date medication started/ceased/changed) i) Complementary medication used by the patient j) All requested investigations and procedures k) Any relevant preventive care undertaken l) Any referral to other healthcare providers or health services m) Any special advice or other instructions n) Follow up instructions given to the patient o) Health education p) For emergency cases, relevant times are recorded, i.e. time patient seen, time drugs administered, etc. Abbreviations and symbols are standardised. Such standardisation is consistent with recognised local and national standards. Patient contact details are kept up to date. All relevant costs are discussed with patients prior to these costs being incurred and the discussion is documented in the patient record. 3.3.1.5. There is documented evidence that patients are referred to these resources, where appropriate. Guideline statement: Compliance will be verified during the patient record audits. 3.3.1.6. Information is provided in a manner and in a language that is understood by those making the care decisions. Guideline statement: Compliance will be verified during patient interviews.",
+          "criteria": [
+            {
+              "id": "3.4.1.1",
+              "category": "",
+              "severity": null,
+              "description": "Notes for each consultation contain as a minimum points a) – p) above.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.4.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Handwritten notes are legible.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.4.1.3",
+              "category": "",
+              "severity": null,
+              "description": "Notes are recorded contemporaneously.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.4.1.4",
+              "category": "",
+              "severity": null,
+              "description": "All abbreviations are standardised in accordance with recognised local and national standards.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.4.1.5",
+              "category": "",
+              "severity": null,
+              "description": "The patients’ records, including contact details, are up to date to ensure the transfer of the latest information between care providers.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.4.1.6",
+              "category": "",
+              "severity": null,
+              "description": "Adverse drug reactions are noted in the patient's record.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.4.1.7",
+              "category": "",
+              "severity": null,
+              "description": "The patient is fully informed regarding the estimated costs of any treatment, investigation, procedure or referral and the discussion is documented.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.4.2",
+          "statement": "The practice ensures that all notice of death forms are completed correctly.",
+          "intent_tooltip": "Information from notice of death forms is used to monitor mortality trends in the population which in turn is used to inform planning, monitoring and evaluation of health service provision. It is therefore of national importance that good quality information is provided to ensure that health needs are accurately identified and met. Notice of death forms should contain as a minimum: a) Immediate cause of death b) All identifiable intermediate causes of death c) Underlying cause of death (essential) d) Any co-morbidities suffered by the patient which are contributing causes of death (not the underlying cause or intermediate causes of death in Part 1) e) No abbreviations are used f) The handwriting is legible g) Any relevant occupational history is recorded h) Specifics of cancers and infections must be provided",
+          "criteria": [
+            {
+              "id": "3.4.2.1",
+              "category": "",
+              "severity": null,
+              "description": "Notice of death forms are completed correctly containing at least details a) – h) above.",
+              "is_critical": false,
+              "guideline": "This whole standard will be scored not applicable where no notice of death form has been completed during the preceding survey period. Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.4.2.2",
+              "category": "",
+              "severity": null,
+              "description": "Where the death was not exclusively due to natural causes, the death is referred to the police or forensic pathologist and the referral is recorded in the patient record along with the name, position title and contact details of the person to whom the referral has been made.",
+              "is_critical": true,
+              "guideline": ""
+            },
+            {
+              "id": "3.4.2.3",
+              "category": "",
+              "severity": null,
+              "description": "Copies of notice of death forms completed by the practice are filed in the patient records.",
+              "is_critical": false,
+              "guideline": "This whole standard will be scored not applicable where no notice of death form has been completed during the preceding survey period. Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.4.2.4",
+              "category": "",
+              "severity": null,
+              "description": "Dated entries in the patient record reflect the date the notice of death form was collected and the name of the person to whom the certificate was given.",
+              "is_critical": false,
+              "guideline": "This whole standard will be scored not applicable where no notice of death form has been completed during the preceding survey period. Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.4.2.5",
+              "category": "",
+              "severity": null,
+              "description": "The death notification form is made available for collection within legislated time frames.",
+              "is_critical": false,
+              "guideline": "This whole standard will be scored not applicable where no notice of death form has been completed during the preceding survey period. Compliance will be verified during the patient record audit. 3.5.2. The practice ensures safe and reasonable arrangements for medical care for patients outside of normal opening hours. Intent of 3.5.2 Medical care outside normal opening hours needs to be provided by recognised medical practitioners. The method of providing such care can be achieved in one of the following ways: • The practice's medical practitioners provide their own care for patients outside normal opening hours, either individually or through a roster • Formal arrangements for cooperative care outside the normal opening hours exist through a cooperative of one or more local practices • Formal arrangements exist with a medical deputising (locum) service • Formal arrangements exist with a local hospital or after hours' facility When the practice's medical practitioners cannot safely or reasonably deliver care outside normal opening hours themselves, the practice can clearly document the alternative system of care that is available for their patients. The practice is responsible for ensuring the alternative care provider offers care to an acceptable standard."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.5",
+      "title": "Continuity of care",
+      "standards": [
+        {
+          "standard_id": "3.5.1",
+          "statement": "The practice has an effective clinical handover system that ensures safe and continuing healthcare delivery for patients.",
+          "intent_tooltip": "Clinical handover needs to occur whenever there is an interface of care by different providers. Examples of clinical handover include: • A medical practitioner covering for a fellow medical practitioner who is on leave or is unexpectedly absent • A medical practitioner covering for a part time colleague • A medical practitioner handing over care to another health professional such as a practice nurse physiotherapist, podiatrist or psychologist • A medical practitioner referring a patient to a service outside the practice • A shared care arrangement (for example, team care of a patient with mental health problems) After hours' care providers are at a disadvantage with regards to specific groups of patients requiring special attention such as chronically ill patients. To ensure optimum care provision and a consistent approach from all clinicians, it is to the advantage of both patients and clinicians if relevant information is made available to the clinicians providing after hours' care. The sharing of information relating to infection control (for example, HIV, TB, Hep B, MRSA) will enable those providing care outside the practice (after hours, secondary care, etc.) to offer the patient and persons coming into contact with the affected patient appropriate care and enable them to take precautionary measures. To ensure the transfer of this information, the patient is provided with a letter to present to clinicians providing care outside the practice.",
+          "criteria": [
+            {
+              "id": "3.5.1.1",
+              "category": "",
+              "severity": null,
+              "description": "There is implementation of a documented policy on clinical handover to ensure that standard processes are followed.",
+              "is_critical": false,
+              "guideline": "The complexity and comprehensiveness of the content of handover information required to achieve continuity of care will differ for different types of handover situations. The details to be included in each situation should be agreed upon by all stakeholders and formalised in a practice to ensure a standardised approach at all times. The transfer of information must be documented, preferably using standardised forms (electronic or paper-based) for the various handovers. Compliance will be verified during patient record audit."
+            },
+            {
+              "id": "3.5.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Patients share in decision making regarding the handing over of clinical information.",
+              "is_critical": false,
+              "guideline": "Patients also have a responsibility for their own health and must share in the decision of who will continue with their care. Compliance will be verified by documentation that the patient has been informed and shared in the decision of handing over."
+            },
+            {
+              "id": "3.5.1.3",
+              "category": "",
+              "severity": null,
+              "description": "Handover of clinical information is recorded in the patients' health records.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.5.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Information relating to those patients requiring special attention, such as the chronically ill or those with infections which require specific infection control measures, is provided in a patient held letter, a copy of which is kept in the patient record.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.5.2",
+          "statement": "The practice ensures safe and reasonable arrangements for medical care for patients outside of normal opening hours.",
+          "intent_tooltip": "Medical care outside normal opening hours needs to be provided by recognised medical practitioners. The method of providing such care can be achieved in one of the following ways: • The practice's medical practitioners provide their own care for patients outside normal opening hours, either individually or through a roster • Formal arrangements for cooperative care outside the normal opening hours exist through a cooperative of one or more local practices • Formal arrangements exist with a medical deputising (locum) service • Formal arrangements exist with a local hospital or after hours' facility When the practice's medical practitioners cannot safely or reasonably deliver care outside normal opening hours themselves, the practice can clearly document the alternative system of care that is available for their patients. The practice is responsible for ensuring the alternative care provider offers care to an acceptable standard.",
+          "criteria": [
+            {
+              "id": "3.5.2.1",
+              "category": "",
+              "severity": null,
+              "description": "There is evidence of one (or a combination) of arrangements for patients to access care outside of normal opening hours.",
+              "is_critical": false,
+              "guideline": "Regardless of the arrangements used to provide care outside normal opening hours, documented evidence of the system the practice uses to provide such care needs to be available."
+            },
+            {
+              "id": "3.5.2.2",
+              "category": "",
+              "severity": null,
+              "description": "The credentials of alternative care providers are verified.",
+              "is_critical": false,
+              "guideline": "This criterion will be not applicable where patients are referred to public and private hospitals after hours. Evidence must be provided that the credentials of locums and practitioners in partner practices have been verified. 3.5.3. Home visits are available to regular patients of the practice by a medical practitioner where clinically appropriate. Intent of 3.5.3 Home and other visits such as visits to residential aged care facilities, residential care facilities or hospitals need to be available to regular patients of the practice where such visits are safe, reasonable and clinically necessary. Visits may be performed by, or on behalf of, the practice. The practice policy on home visits must include: a) What factors would necessitate a home visit b) The geographical area in which home visits will be made c) Identification of the practitioner who will do the home visit d) An alternative to home visits if the practitioner cannot reasonably and safely make the visit 3.6.1. The practice provides emergency treatment and care. Intent of 3.6.1 The arrival of emergency patients may be unpredictable, particularly in practices that do not form part of a 24-hour service. The practice must be prepared to provide primary emergency treatment as required to stabilise a patient while waiting for further assistance from emergency medical services."
+            },
+            {
+              "id": "3.5.2.3",
+              "category": "",
+              "severity": null,
+              "description": "Patient health records contain reports or notes of consultations occurring outside normal opening hours by or on behalf of the practice.",
+              "is_critical": false,
+              "guideline": "This criterion will not be applicable to consultations that occur at public health facilities. Evidence must be provided on how and when the practice receives notes of consultations occurring through all other after-hours arrangements. Compliance will be verified during the patient record audit."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.5.3",
+          "statement": "Home visits are available to regular patients of the practice by a medical practitioner where clinically appropriate.",
+          "intent_tooltip": "Home and other visits such as visits to residential aged care facilities, residential care facilities or hospitals need to be available to regular patients of the practice where such visits are safe, reasonable and clinically necessary. Visits may be performed by, or on behalf of, the practice. The practice policy on home visits must include: a) What factors would necessitate a home visit b) The geographical area in which home visits will be made c) Identification of the practitioner who will do the home visit d) An alternative to home visits if the practitioner cannot reasonably and safely make the visit",
+          "criteria": [
+            {
+              "id": "3.5.3.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice has a documented policy on home and other visits available to regular patients of the practice which includes as least a) – d) in the standard intent above.",
+              "is_critical": false,
+              "guideline": "The policy must include at least a) – d) in the standard intent above. Please not that there is an option for alternatives to home visits if the practice cannot reasonably and safely make such visits. Where the practice elects not to undertake home visits, those alternatives must be fully discussed in the policy."
+            },
+            {
+              "id": "3.5.3.2",
+              "category": "",
+              "severity": null,
+              "description": "These visits are available within and outside normal opening hours of the practice.",
+              "is_critical": false,
+              "guideline": "This will be scored not applicable where home visits are not conducted by the practice. Compliance will be verified during the patient record audit in instances where the practice does conduct home visits."
+            },
+            {
+              "id": "3.5.3.3",
+              "category": "",
+              "severity": null,
+              "description": "Where home visits are not deemed safe or reasonable, patients are provided with information on alternative systems of care.",
+              "is_critical": false,
+              "guideline": "Patients must be informed that it is not the policy of the practice to conduct home visits and must be provided with information on alternative systems of care during those time. This can be achieved by providing the patient with an information leaflet on registration. Documented evidence must be provided."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.6",
+      "title": "Emergency care",
+      "standards": [
+        {
+          "standard_id": "3.6.1",
+          "statement": "The practice provides emergency treatment and care.",
+          "intent_tooltip": "The arrival of emergency patients may be unpredictable, particularly in practices that do not form part of a 24-hour service. The practice must be prepared to provide primary emergency treatment as required to stabilise a patient while waiting for further assistance from emergency medical services.",
+          "criteria": [
+            {
+              "id": "3.6.1.1",
+              "category": "",
+              "severity": null,
+              "description": "Written guidelines are available and followed relating to the provision of primary emergency services.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.6.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Guidelines for emergency triage, assessment and treatment are available and followed for all types of patients seen at the practice (for example adult, paediatric and neonatal).",
+              "is_critical": false,
+              "guideline": "The practice’s policy on triage must make distinction between triage undertaken by members of the clinical team and triage undertaken by personnel with non-clinical roles. Appropriate training must be provided to assist both administrative personnel and members of the clinical team to identify patients in need or urgent care. Documented evidence of training must be provided."
+            },
+            {
+              "id": "3.6.1.3",
+              "category": "",
+              "severity": null,
+              "description": "Information on cases and the outcome of emergency treatment are recorded in a register/logbook.",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided."
+            },
+            {
+              "id": "3.6.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Case reviews are undertaken within the practice to assess the quality of treatment and care of patients requiring emergency care.",
+              "is_critical": false,
+              "guideline": "This can take the form of morbidity and mortality meetings or debriefing sessions. Documented evidence must be provided."
+            },
+            {
+              "id": "3.6.1.5",
+              "category": "",
+              "severity": null,
+              "description": "There is a protocol that delineates how the practice evaluates, manages, stabilises and transfers patients with emergency conditions.",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.6.2",
+          "statement": "The practice provides resuscitation in accordance with practice policy.",
+          "intent_tooltip": "Resuscitation policies and equipment should be standardised throughout the practice. Standardised resuscitation processes require: a) The level at which resuscitation is provided and by whom b) Coordination among those who provide and maintain the equipment c) Availability of required equipment d) Availability of required drugs e) Initial and ongoing training of personnel in the use of equipment and execution of procedures f) Maintenance and monitoring of equipment g) Current, evidence-based guidelines for resuscitation Deficiencies in the system regarding equipment, its use and the knowledge and skills required by those who carry out resuscitation should be identified, documented and acted upon. Each practice should identify those members of personnel to be trained in emergency life support and the level of training (basic or advanced) appropriate to their role in the practice. The person(s) providing the training must be currently registered and/or accredited with a recognised body as a resuscitation trainer. Training in many instances can be outsourced.",
+          "criteria": [
+            {
+              "id": "3.6.2.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice has an implemented resuscitation policy.",
+              "is_critical": false,
+              "guideline": "Documented policies and procedures that include at least a) – g) must be available and implemented. Evidence of implementation of all of the listed policies is required for a compliance rating, otherwise this criterion will be scored PC."
+            },
+            {
+              "id": "3.6.2.2",
+              "category": "",
+              "severity": null,
+              "description": "All practice personnel are trained in basic resuscitation techniques at least every two years, with records of their attendance at such training.",
+              "is_critical": false,
+              "guideline": "Documented evidence of nationally accepted training must be provided. 3.6.3. Equipment for resuscitation is available in accordance with the policies of the practice. Intent of 3.6.3 Resuscitation equipment and medication is available at the point of need within 1 minute. In addition, there is access to a defibrillator or automated external defibrillator (AED) within 3 minutes of any patient collapsing. Resuscitation equipment includes at least: a) A defibrillator/AED with adult and infant paddles/pads b) An ECG monitor c) A bag-mask manual ventilator d) A selection of oropharyngeal airways e) Equipment to perform an emergency cricothyroidotomy – (needle and surgical) f) Appropriate facilities for intravenous therapy and drug administration (including paediatric sizes) g) Drugs for cardiac arrest, coma, seizures and states of shock (including paediatric doses) h) Plasma expanders."
+            },
+            {
+              "id": "3.6.2.3",
+              "category": "",
+              "severity": null,
+              "description": "All medical practitioners are updated in medication protocols for resuscitation and resuscitation techniques at least every two years with records of their attendance at such training.",
+              "is_critical": true,
+              "guideline": "Documented evidence of nationally accepted training must be provided."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.6.3",
+          "statement": "Equipment for resuscitation is available in accordance with the policies of the practice.",
+          "intent_tooltip": "Resuscitation equipment and medication is available at the point of need within 1 minute. In addition, there is access to a defibrillator or automated external defibrillator (AED) within 3 minutes of any patient collapsing. Resuscitation equipment includes at least: a) A defibrillator/AED with adult and infant paddles/pads b) An ECG monitor c) A bag-mask manual ventilator d) A selection of oropharyngeal airways e) Equipment to perform an emergency cricothyroidotomy – (needle and surgical) f) Appropriate facilities for intravenous therapy and drug administration (including paediatric sizes) g) Drugs for cardiac arrest, coma, seizures and states of shock (including paediatric doses) h) Plasma expanders.",
+          "criteria": [
+            {
+              "id": "3.6.3.1",
+              "category": "",
+              "severity": null,
+              "description": "There is a designated resuscitation area.",
+              "is_critical": false,
+              "guideline": "This does not have to be an area that is used exclusively for resuscitation, it may be in the normal consulting area. The area must however allow easy access for resuscitation equipment and emergency personnel, have a suitable surface on which to perform resuscitation and ensure the privacy of the patient."
+            },
+            {
+              "id": "3.6.3.2",
+              "category": "",
+              "severity": null,
+              "description": "There is a mechanism for the summoning of medical help in an emergency.",
+              "is_critical": false,
+              "guideline": "This refers to the summoning of medical help both from within the practice itself (to alert personnel that there is an emergency) and from outside the practice. Various methods such as an alarm, intercom, alert button, telephone etc. acceptable. Personnel must be able to demonstrate the procedure to be followed when an emergency situation arises."
+            },
+            {
+              "id": "3.6.3.3",
+              "category": "",
+              "severity": null,
+              "description": "The practice provides resuscitation equipment according to the services provided.",
+              "is_critical": false,
+              "guideline": "Resuscitation equipment and documented evidence of the checking thereof according to the practice’s resuscitation policy must be available but must include at least a) – h) in the standard intent above. Checking must include the identification of expiry dates on consumables such as airways. Documented evidence of this checking is required."
+            },
+            {
+              "id": "3.6.3.4",
+              "category": "",
+              "severity": null,
+              "description": "A designated person documents monthly checks to ensure that resuscitation medication and equipment is available, in working order and that medication is not expired and reports any adverse findings for immediate remediation",
+              "is_critical": false,
+              "guideline": "Documented evidence must be provided."
+            },
+            {
+              "id": "3.6.3.5",
+              "category": "",
+              "severity": null,
+              "description": "Diagnostic and vital sign monitoring equipment is available as per practice policy.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured on physical inspection."
+            },
+            {
+              "id": "3.6.3.6",
+              "category": "",
+              "severity": null,
+              "description": "Equipment for early cardiopulmonary resuscitation is available within one minute in each area of the practice and access to a defibrillator or automated external defibrillator (AED) within three minutes of any patient collapsing.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified by observation."
+            },
+            {
+              "id": "3.6.3.7",
+              "category": "",
+              "severity": null,
+              "description": "The practice has access to Ambulance Services (EMS).",
+              "is_critical": false,
+              "guideline": "The practice personnel must be able to describe the process for contacting ambulance services and the contact details must be readily available at all telephones in the practice. 3.7.1. Prescribing and dispensing of medications adheres to laws, regulations and professional standards of practice. Intent of 3.7.1 The practice must ensure that those responsible for prescribing, dispensing and ordering of medication are suitably qualified and registered. The practice dispenses medication in the most ready-to-administer form possible to minimise opportunities for error during reconstitution and administration. The system supports accurate dispensing of medication in a timely manner. The practice implements systems to ensure that all pharmaceutical practices are in accordance with current legislation."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.7",
+      "title": "Medication management",
+      "standards": [
+        {
+          "standard_id": "3.7.1",
+          "statement": "Prescribing and dispensing of medications adheres to laws, regulations and professional standards of practice.",
+          "intent_tooltip": "The practice must ensure that those responsible for prescribing, dispensing and ordering of medication are suitably qualified and registered. The practice dispenses medication in the most ready-to-administer form possible to minimise opportunities for error during reconstitution and administration. The system supports accurate dispensing of medication in a timely manner. The practice implements systems to ensure that all pharmaceutical practices are in accordance with current legislation.",
+          "criteria": [
+            {
+              "id": "3.7.1.1",
+              "category": "",
+              "severity": null,
+              "description": "A designated individual who is suitably qualified has clearly defined responsibilities and accountability for all aspects of medication management.",
+              "is_critical": false,
+              "guideline": "This requires that an individual in the practice has the officially assigned duties of overseeing and taking responsibility for all aspects of medication management. This may be the practice manager or a suitably qualified health professional."
+            },
+            {
+              "id": "3.7.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Medication is prescribed and dispensed in accordance with legislation and current pharmaceutical, medical and nursing guidelines.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.7.1.3",
+              "category": "",
+              "severity": null,
+              "description": "The scope of and limitations to the responsibilities and activities of the personnel who manage medication are clearly defined in written policies.",
+              "is_critical": false,
+              "guideline": "This is particularly relevant where certain medication may only be prescribed by designated specialists. Compliance will be verified with reference to practice policy and country-specific legislation."
+            },
+            {
+              "id": "3.7.1.4",
+              "category": "",
+              "severity": null,
+              "description": "Dispensed medication is securely and legibly labelled with relevant information as required by practice policy and country specific legislation.",
+              "is_critical": true,
+              "guideline": "Country-specific regulations apply, but must include at least the following: • Name of patient and patient record number (if applicable) • Proprietary name/approved name or name of each active ingredient • Direction with regard to the manner in which medication must be used • Strength and number of dose units in the container • Date of dispensing • Expiry date and batch number • Additional labels with warnings and storage instructions in accordance with practice policy"
+            },
+            {
+              "id": "3.7.1.5",
+              "category": "",
+              "severity": null,
+              "description": "A register is maintained of all medication dispensed.",
+              "is_critical": true,
+              "guideline": "Documented evidence is required."
+            },
+            {
+              "id": "3.7.1.6",
+              "category": "",
+              "severity": null,
+              "description": "The person prescribing and dispensing the medication has access to patient information that would contra-indicate prescription of particular medication.",
+              "is_critical": false,
+              "guideline": "Compliance will be assessed during the patient record audit."
+            },
+            {
+              "id": "3.7.1.7",
+              "category": "",
+              "severity": null,
+              "description": "The person dispensing medication informs the patient of available generic equivalents.",
+              "is_critical": false,
+              "guideline": "Compliance will be assessed during the patient record audit."
+            },
+            {
+              "id": "3.7.1.8",
+              "category": "",
+              "severity": null,
+              "description": "Controlled medication is prescribed and dispensed in accordance with legislation and practice policy.",
+              "is_critical": true,
+              "guideline": ""
+            },
+            {
+              "id": "3.7.1.9",
+              "category": "",
+              "severity": null,
+              "description": "Verbal/telephonic medication orders are documented in the patient’s record.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            },
+            {
+              "id": "3.7.1.10",
+              "category": "",
+              "severity": null,
+              "description": "Prescriptions conform to all legal requirements.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during the patient record audit."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.7.2",
+          "statement": "The practice has a nominated personnel member who is suitably trained to oversee cold chain management.",
+          "intent_tooltip": "The potency of medication depends on suitable storage. Vaccines, in particular, which are exposed to high ambient temperatures and/or freezing will quickly lose their potency. The cold chain is the system of transporting and storing vaccines and other temperature sensitive medication within the safe temperature range of 2 - 8°C. For vaccines to be effective the cold chain must be maintained from the place of manufacture to the point of administration. Each time that vaccines are exposed to the wrong temperature their potency is reduced. To know if vaccines are potent at the time of administration, it is important that they are monitored for exposure to heat and cold as they pass through the cold chain. While domestic refrigerators are not designed to meet the requirements of vaccine storage, safe storage is possible if healthcare facilities follow simple guidelines. Guidelines may be obtained from the health authorities or from the manufacturers and distributors of vaccines. Foodstuffs must not be stored in the medication refrigerator. Deep freeze, refrigeration, cold room and cool area facilities are provided for safe storage of certain medications. There is a mechanism for ensuring that the correct temperature is maintained throughout the life of the medications. Deep freezers and refrigerators are defrosted when necessary. Doors, hinges and seals are all functional.",
+          "criteria": [
+            {
+              "id": "3.7.2.1",
+              "category": "",
+              "severity": null,
+              "description": "Policies and procedures are implemented to ensure that medication is transported to the practice and stored within the practice according to manufacturers’ guidelines, with specific emphasis on maintenance of cold chain requirements.",
+              "is_critical": false,
+              "guideline": "Policies must be available that address the transportation of medication and particularly the maintenance of the cold chain all the way from the manufacturer to the end user. It is the responsibility of the dispensing practitioner to ensure that the cold chain is maintained. Documented evidence of cold-chain monitoring will be required for compliance with this criterion."
+            },
+            {
+              "id": "3.7.2.2",
+              "category": "",
+              "severity": null,
+              "description": "A dedicated refrigerator is available for medication requiring storage at low temperatures.",
+              "is_critical": false,
+              "guideline": "The refrigerator must be used exclusively for the storage of medication. The records should also reflect regular defrosting of the refrigerator with documented evidence of maintenance of the cold chain for medication during the defrosting process."
+            },
+            {
+              "id": "3.7.2.3",
+              "category": "",
+              "severity": null,
+              "description": "A monitoring log is kept of the temperature within the refrigerator and/or cold-chain monitors and is available for inspection.",
+              "is_critical": true,
+              "guideline": "Temperature records should demonstrate maintenance of the temperature between 2 and 8 degrees Celsius."
+            },
+            {
+              "id": "3.7.2.4",
+              "category": "",
+              "severity": null,
+              "description": "The fridge thermometer is calibrated at regular intervals determined by the practice and the calibration is documented.",
+              "is_critical": false,
+              "guideline": "The calibration method will depend on the type of thermometer. Documented evidence is required. 3.7.3. Medication is stored in a secure and clean environment. Intent of 3.7.3 The practice stores and dispenses medication in a clean and secure environment which complies with laws, regulations and professional practice standards. In particular, medication is clearly labelled, which includes the following: • Generic name • Strength of medicine • Dose, frequency and duration of course • Date of dispensing and expiry date • Name of patient • Name/address of supplier • Child safety warning • Batch number Secure storage systems ensure that pharmaceuticals and related substances are held under conditions that conform to statutory requirements and manufacturer's requirements. There are arrangements for ensuring the security of medication including alarm systems, door access controls and safes/vaults for storing controlled medicines. There is a registry, log or other mechanism for monitoring and accounting for controlled substances."
+            },
+            {
+              "id": "3.7.2.5",
+              "category": "",
+              "severity": null,
+              "description": "Any remedial action taken is recorded.",
+              "is_critical": false,
+              "guideline": "When the refrigerator temperature is out of range, appropriate action should be taken and documented, and effectiveness of the action monitored. This will require evidence of action both in relation to the refrigerator and the medication stored in the refrigerator. Medication should be discarded when necessary according to manufacturer’s guidelines. Continued monitoring of refrigerator temperature should demonstrate return to the required range within an expected timeframe, failing which further action should be taken."
+            },
+            {
+              "id": "3.7.2.6",
+              "category": "",
+              "severity": null,
+              "description": "The integrity of door seals, door and hinges is checked at regular intervals and documented accordingly.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation and on documented evidence."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.7.3",
+          "statement": "Medication is stored in a secure and clean environment.",
+          "intent_tooltip": "The practice stores and dispenses medication in a clean and secure environment which complies with laws, regulations and professional practice standards. In particular, medication is clearly labelled, which includes the following: • Generic name • Strength of medicine • Dose, frequency and duration of course • Date of dispensing and expiry date • Name of patient • Name/address of supplier • Child safety warning • Batch number Secure storage systems ensure that pharmaceuticals and related substances are held under conditions that conform to statutory requirements and manufacturer's requirements. There are arrangements for ensuring the security of medication including alarm systems, door access controls and safes/vaults for storing controlled medicines. There is a registry, log or other mechanism for monitoring and accounting for controlled substances.",
+          "criteria": [
+            {
+              "id": "3.7.3.1",
+              "category": "",
+              "severity": null,
+              "description": "Medication storage areas are protected from heat and light and effectively ventilated.",
+              "is_critical": false,
+              "guideline": "Note must be made of provision for medication that should not be exposed to direct sunlight. Where the ambient temperature in the cupboard/room cannot be maintained at 20-25 degrees Celsius there should be evidence that the environmental temperature is monitored and complies with the manufacturer’s requirements for medication storage."
+            },
+            {
+              "id": "3.7.3.2",
+              "category": "",
+              "severity": null,
+              "description": "Stored medication is legibly marked and securely labelled.",
+              "is_critical": false,
+              "guideline": "Country-specific regulations apply, but must include at least the following: • Proprietary name/approved name or name of each active ingredient • Strength and number of dose units in the container • Expiry date and batch number"
+            },
+            {
+              "id": "3.7.3.3",
+              "category": "",
+              "severity": null,
+              "description": "Controlled drugs are stored in a cabinet of substantial construction, for which only authorised personnel have the keys.",
+              "is_critical": false,
+              "guideline": "Country-specific laws and regulations and facility policy will determine the nature of such medication."
+            },
+            {
+              "id": "3.7.3.4",
+              "category": "",
+              "severity": null,
+              "description": "Controlled drugs are stored in suitable facilities which include but are not limited to: lockable storage facilities, ceiling cages, burglar guards and alarm systems with keypads.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.7.3.5",
+              "category": "",
+              "severity": null,
+              "description": "Controlled drugs are accurately accounted for in a specific register which is updated contemporaneously and available for inspection.",
+              "is_critical": true,
+              "guideline": "Compliance will be measured against medication control regulations to ensure that the information in the register is accurate and complies with the requirements."
+            },
+            {
+              "id": "3.7.3.6",
+              "category": "",
+              "severity": null,
+              "description": "Controlled drugs that have expired are disposed of in accordance with legal requirements.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured against medication control regulations to ensure that the information in the register is accurate and complies with the requirements."
+            },
+            {
+              "id": "3.7.3.7",
+              "category": "",
+              "severity": null,
+              "description": "All pharmaceuticals, vaccines and medical consumables are regularly checked for expiry dates and checks are recorded.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured by observation and documented evidence is required."
+            },
+            {
+              "id": "3.7.3.8",
+              "category": "",
+              "severity": null,
+              "description": "An inventory management system either manual (stock cards) or automated, is in place to monitor maximum and minimum stock levels and control stock losses.",
+              "is_critical": false,
+              "guideline": "This requires the practice to identify maximum and minimum stock levels based on records of medication use over time. Compliance will be measured by comparing the actual stock levels to the records."
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "section_pi_id": "3.8",
+      "title": "Patient rights",
+      "standards": [
+        {
+          "standard_id": "3.8.1",
+          "statement": "The practice has a patient rights policy.",
+          "intent_tooltip": "The leaders of a practice are primarily responsible for the way in which that practice treats its patients. The leaders need to know and understand patient and family rights and their practice's responsibilities as specified in laws, charters and regulations. The leaders then provide direction to ensure that personnel throughout the practice assume responsibility for protecting these rights. To protect and advance patient rights effectively, the leaders work collaboratively and seek to understand their responsibilities in relation to the community served by the practice. Patient and family rights are a fundamental element of all contact between the practice personnel and patients and families. Policies and procedures are developed and implemented to ensure that all personnel are aware of and respond to patient and family rights issues including their role in supporting patients' and families' rights to participate in the care process and the right to the provision of all information requested by patients and families to enable them to do so. The patient's rights policy is appropriate to the patient's age, understanding and language. When written communication is not effective or appropriate, the patient and family are informed of their rights in a manner they can understand.",
+          "criteria": [
+            {
+              "id": "3.8.1.1",
+              "category": "",
+              "severity": null,
+              "description": "Patient and family rights are identified in a policy and documented in accordance with relevant and current laws, charters and regulations.",
+              "is_critical": false,
+              "guideline": ""
+            },
+            {
+              "id": "3.8.1.2",
+              "category": "",
+              "severity": null,
+              "description": "Documented evidence of personnel training in relation to these policies and procedures is available.",
+              "is_critical": false,
+              "guideline": "Evidence of such training can exist in various forms such as formal in-service training sessions, meetings where policies and procedures are discussed, personnel acknowledging in writing that they have studied policies and procedures, etc."
+            },
+            {
+              "id": "3.8.1.3",
+              "category": "",
+              "severity": null,
+              "description": "There is a patient rights charter which is prominently displayed and patients are made aware of their rights.",
+              "is_critical": false,
+              "guideline": "Compliance will be measured on observation and by documented evidence that patients are made aware of their rights. This can be achieved by drawing their attention to the poster or by having copies of the charter available."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.8.2",
+          "statement": "The practice respects the rights of patients and their families to refuse or discontinue treatment.",
+          "intent_tooltip": "Patients or those making decisions on their behalf (i.e. in the case of minors or patients who lack mental capacity due to physical or mental illness) may decide not to proceed with the planned care or treatment or not to continue care or treatment after it has been initiated. The practice informs patients and families about their right to make these decisions, about the potential outcomes that could result from these decisions and about their responsibilities related to such decisions. Patients and families are given information on any care and treatment alternatives. Personnel are informed of their responsibility to implement and respect the choices of patients.",
+          "criteria": [
+            {
+              "id": "3.8.2.1",
+              "category": "",
+              "severity": null,
+              "description": "Patients are informed about their condition and the proposed treatment.",
+              "is_critical": false,
+              "guideline": "Compliance will be assessed during the patient record audit and/or patient interviews."
+            },
+            {
+              "id": "3.8.2.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
+              "is_critical": false,
+              "guideline": "Compliance will be assessed during the patient record audit and/or patient interviews."
+            },
+            {
+              "id": "3.8.2.3",
+              "category": "",
+              "severity": null,
+              "description": "When patients/carers refuse or discontinue treatment, the consultation regarding their decision is accurately and contemporaneously recorded and includes the details of the discussion regarding the consequences of the decision.",
+              "is_critical": false,
+              "guideline": "Compliance will be assessed during the patient record audit. Medical and other health information, when documented and collected in a patient record or other form, is important for understanding the patient, his or her needs and for providing care over time. The practice respects such information as confidential and has implemented policies and procedures that protect such information from loss or misuse. The personnel respect the confidentiality of patient information by not leaving patient files, results, etc. where they might be visible to members of the public and by not holding patient-related discussions where they may be overheard by other patients or visitors. Such carelessness with patient information can result in loss of dignity or employment for the patient and may result in damage to personal or family relationships. These consequences can follow carelessness by the personnel of the practice, or by family members or others not authorised to have access to the information who have obtained information due to the carelessness of personnel. 3.8.4. The practice has a clearly defined process for obtaining consent. Intent of 3.8.4 One of the main ways that patients are involved in their care decisions is by granting informed consent. The patient must be provided with all information relating to planned care to enable him or her to make decisions. The consent process is clearly defined by the practice in policies and procedures. Relevant laws and regulations are incorporated into the policies and procedures. Informed consent for care sometimes requires that people other than or in addition to the patient be involved in decisions about the patient's care. This is especially true when the patient does not have the mental or physical capacity to make care decisions, when culture or custom designate that others make care decisions or when the patient is a child. When the patient cannot make decisions regarding"
+            }
+          ]
+        },
+        {
+          "standard_id": "3.8.3",
+          "statement": "The practice takes measures to protect patient privacy.",
+          "intent_tooltip": "The practice ensures that the patient's need for privacy is respected, especially when the patient is providing personal information and undergoing clinical examination. Patients may desire privacy from other personnel, other patients and even from family members. Guideline statement: Patient and family rights are internationally accepted and implemented. Country specific patient rights charters must be referenced in the policy. The practice policy must include at least the right to: • A healthy and safe environment • Participation in decision-making • Access to health care • Ethical health care • Choice of health services • Confidentiality and privacy • Culturally sensitive care • Informed consent • Refusal of treatment • A second opinion • Complaints about health services 3.8.1.2. Documented evidence of personnel training in relation to these policies and procedures is available. Guideline statement: Evidence of such training can exist in various forms such as formal in-service training sessions, meetings where policies and procedures are discussed, personnel acknowledging in writing that they have studied policies and procedures, etc. 3.8.1.3. There is a patient rights charter which is prominently displayed and patients are made aware of their rights. Guideline statement: Compliance will be measured on observation and by documented evidence that patients are made aware of their rights. This can be achieved by drawing their attention to the poster or by having copies of the charter available. 3.8.2.1. Patients are informed about their condition and the proposed treatment. Guideline statement: Compliance will be assessed during the patient record audit and/or patient interviews. 3.8.2.2. The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions. Guideline statement: Compliance will be assessed during the patient record audit and/or patient interviews. 3.8.2.3. When patients/carers refuse or discontinue treatment, the consultation regarding their decision is accurately and contemporaneously recorded and includes the details of the discussion regarding the consequences of the decision. Guideline statement: Compliance will be assessed during the patient record audit. Medical and other health information, when documented and collected in a patient record or other form, is important for understanding the patient, his or her needs and for providing care over time. The practice respects such information as confidential and has implemented policies and procedures that protect such information from loss or misuse. The personnel respect the confidentiality of patient information by not leaving patient files, results, etc. where they might be visible to members of the public and by not holding patient-related discussions where they may be overheard by other patients or visitors. Such carelessness with patient information can result in loss of dignity or employment for the patient and may result in damage to personal or family relationships. These consequences can follow carelessness by the personnel of the practice, or by family members or others not authorised to have access to the information who have obtained information due to the carelessness of personnel.",
+          "criteria": [
+            {
+              "id": "3.8.3.1",
+              "category": "",
+              "severity": null,
+              "description": "The patient’s need for privacy is protected during all examinations, procedures and treatments.",
+              "is_critical": false,
+              "guideline": "This must be evident in all patient care areas."
+            },
+            {
+              "id": "3.8.3.2",
+              "category": "",
+              "severity": null,
+              "description": "Patient privacy is protected when providing personal information.",
+              "is_critical": false,
+              "guideline": "This must be evident in all patient care areas including administrative areas and waiting areas. Patient privacy should be safeguarded at all times, including when providing personal information to nonclinical personnel. It is not always necessary to provide privacy by means of physical barriers such as walls and doors. Distance between waiting patients and those speaking with practice personnel can also provide the required privacy when less sensitive information is being exchanged. For example, a line can be drawn on the floor some distance away from the registration desk or pharmacy counter. Patients can be requested to wait behind the line and approach the counter only when providing their details or receiving their medication. Background noise, for example, music or patient education videos, can help to prevent conversations with patients being overheard."
+            },
+            {
+              "id": "3.8.3.3",
+              "category": "",
+              "severity": null,
+              "description": "The patient’s right to privacy is protected for all forms of counselling.",
+              "is_critical": false,
+              "guideline": "This must be evident in all patient care areas."
+            },
+            {
+              "id": "3.8.3.4",
+              "category": "",
+              "severity": null,
+              "description": "Policies and procedures to prevent the loss or misuse of patient information are implemented.",
+              "is_critical": false,
+              "guideline": "This criterion measures more than just the information contained in the patient record. The confidentiality agreement that is signed by personnel must include the protection of all patient related information including for example, discussing patient details with anyone not involved in the patient’s care, comments on social media etc. Compliance will be measured by evidence of a signed confidentiality agreement and by examining the incident management system in the practice to establish if any complaints or incidents have been reported involving a breach of patient confidentiality."
+            },
+            {
+              "id": "3.8.3.5",
+              "category": "",
+              "severity": null,
+              "description": "When appropriate, patients are permitted to be accompanied by a family member/care-giver during consultations.",
+              "is_critical": false,
+              "guideline": "Compliance will be verified during patient interviews and observation. his or her care a surrogate decision-maker is identified. When someone other than the patient gives consent, that individual is noted in the patient's record. 3.8.5. The practice informs patients and their families about the processes which it has instituted to receive and act on complaints, conflicts and differences of opinion about patient care and the patient’s right to participate in those processes. Intent of 3.8.5 Patients have a right to voice complaints about their care and to have those complaints reviewed and where possible resolved. Decisions regarding care sometimes present questions, conflicts or other dilemmas for the practice and the patient, family or other decision-makers. The practice has established processes for seeking resolution to such dilemmas and complaints. The practice identifies in policies and procedures those who need to be involved in the processes and how the patient and family participate."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.8.4",
+          "statement": "The practice has a clearly defined process for obtaining consent.",
+          "intent_tooltip": "One of the main ways that patients are involved in their care decisions is by granting informed consent. The patient must be provided with all information relating to planned care to enable him or her to make decisions. The consent process is clearly defined by the practice in policies and procedures. Relevant laws and regulations are incorporated into the policies and procedures. Informed consent for care sometimes requires that people other than or in addition to the patient be involved in decisions about the patient's care. This is especially true when the patient does not have the mental or physical capacity to make care decisions, when culture or custom designate that others make care decisions or when the patient is a child. When the patient cannot make decisions regarding 3.8.3.1. The patient’s need for privacy is protected during all examinations, procedures and treatments. Guideline statement: This must be evident in all patient care areas. 3.8.3.2. Patient privacy is protected when providing personal information. Guideline statement: This must be evident in all patient care areas including administrative areas and waiting areas. Patient privacy should be safeguarded at all times, including when providing personal information to nonclinical personnel. It is not always necessary to provide privacy by means of physical barriers such as walls and doors. Distance between waiting patients and those speaking with practice personnel can also provide the required privacy when less sensitive information is being exchanged. For example, a line can be drawn on the floor some distance away from the registration desk or pharmacy counter. Patients can be requested to wait behind the line and approach the counter only when providing their details or receiving their medication. Background noise, for example, music or patient education videos, can help to prevent conversations with patients being overheard. 3.8.3.3. The patient’s right to privacy is protected for all forms of counselling. Guideline statement: This must be evident in all patient care areas. 3.8.3.4. Policies and procedures to prevent the loss or misuse of patient information are implemented. Guideline statement: This criterion measures more than just the information contained in the patient record. The confidentiality agreement that is signed by personnel must include the protection of all patient related information including for example, discussing patient details with anyone not involved in the patient’s care, comments on social media etc. Compliance will be measured by evidence of a signed confidentiality agreement and by examining the incident management system in the practice to establish if any complaints or incidents have been reported involving a breach of patient confidentiality. 3.8.3.5. When appropriate, patients are permitted to be accompanied by a family member/care-giver during consultations. Guideline statement: Compliance will be verified during patient interviews and observation. his or her care a surrogate decision-maker is identified. When someone other than the patient gives consent, that individual is noted in the patient's record.",
+          "criteria": [
+            {
+              "id": "3.8.4.1",
+              "category": "",
+              "severity": null,
+              "description": "The practice has a documented policy outlining the procedure for obtaining general consent for treatment.",
+              "is_critical": false,
+              "guideline": "This can be achieved for example by obtaining general consent for treatment from patients when they register at the practice. Compliance will be assessed during the patient record audit."
+            },
+            {
+              "id": "3.8.4.2",
+              "category": "",
+              "severity": null,
+              "description": "The practice has a documented policy outlining the procedure for obtaining consent in the case of patients who are unable to grant consent for themselves by way of age or mental/physical incapacity, which is in accordance with the relevant laws and regulations.",
+              "is_critical": false,
+              "guideline": "Compliance will be assessed during the patient record audit."
+            },
+            {
+              "id": "3.8.4.3",
+              "category": "",
+              "severity": null,
+              "description": "Documented consent is obtained from patients for health information to be provided to a third party.",
+              "is_critical": false,
+              "guideline": "Evidence of compliance with this criterion may be found in different documents. For example, patients may give consent for information to be shared with health funders as part of their membership registration. Consent is required whenever health information is shared for example with employers, family members or carers, lawyers and insurance companies."
+            },
+            {
+              "id": "3.8.4.4",
+              "category": "",
+              "severity": null,
+              "description": "Where practice members use patient information for research, approval has been obtained from the relevant ethics committee and from patients themselves where required.",
+              "is_critical": false,
+              "guideline": "Documented evidence will be required."
+            }
+          ]
+        },
+        {
+          "standard_id": "3.8.5",
+          "statement": "The practice informs patients and their families about the processes which it has instituted to receive and act on complaints, conflicts and differences of opinion about patient care and the patient’s right to participate in those processes.",
+          "intent_tooltip": "Patients have a right to voice complaints about their care and to have those complaints reviewed and where possible resolved. Decisions regarding care sometimes present questions, conflicts or other dilemmas for the practice and the patient, family or other decision-makers. The practice has established processes for seeking resolution to such dilemmas and complaints. The practice identifies in policies and procedures those who need to be involved in the processes and how the patient and family participate.",
+          "criteria": [
+            {
+              "id": "3.8.5.1",
+              "category": "",
+              "severity": null,
+              "description": "There is a documented policy outlining the mechanism to allow for the hearing of complaints and how to act upon them which is implemented.",
+              "is_critical": false,
+              "guideline": "Documented evidence of implementation of the complaints procedure, for example, complaints log and the documentation relating to the investigation and resolution of complaints, must be made available for assessment."
+            },
+            {
+              "id": "3.8.5.2",
+              "category": "",
+              "severity": null,
+              "description": "Patients are aware of their right to voice complaints and the processes by which to do so, internally as well as externally where applicable.",
+              "is_critical": false,
+              "guideline": "The complaints process must be prominently displayed in the practice. Results obtained from patient interviews and observation will determine the level of compliance."
+            },
+            {
+              "id": "3.8.5.3",
+              "category": "",
+              "severity": null,
+              "description": "A nominated individual within the practice is responsible for managing the complaints and ensuring that the complaints policy is implemented.",
+              "is_critical": false,
+              "guideline": "This should be a senior person in the practice and is usually the solo practitioner or the practice manager."
+            },
+            {
+              "id": "3.8.5.4",
+              "category": "",
+              "severity": null,
+              "description": "A nominated individual within the practice is responsible to oversee the investigation of and response to the complaint.",
+              "is_critical": false,
+              "guideline": "Complainants must be kept informed of the progress of the investigation into the complaint. If there is a legitimate delay, they should be informed of the reason for the delay and provided with regular updates as to the progress of the management of their complaint. Documented evidence is required."
+            },
+            {
+              "id": "3.8.5.5",
+              "category": "",
+              "severity": null,
+              "description": "Complaints are monitored and repetitions or patterns are identified.",
+              "is_critical": false,
+              "guideline": "Documented evidence of such monitoring must be available."
+            },
+            {
+              "id": "3.8.5.6",
+              "category": "",
+              "severity": null,
+              "description": "Any opportunities for improvement identified from the investigation of complaints are implemented.",
+              "is_critical": false,
+              "guideline": "Documented evidence is required."
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

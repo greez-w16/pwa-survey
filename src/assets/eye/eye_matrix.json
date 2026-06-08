@@ -1,0 +1,702 @@
+﻿{
+    "eye":  [
+                {
+                    "criteria":  "1.2.1.3",
+                    "description":  "The practice is licensed in terms of relevant legislation for the level and type of services provided.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.2.1.4",
+                    "description":  "The manager ensures that there is a system in place to monitor the implementation of applicable laws and regulations.",
+                    "linked_criteria":  [
+                                            "1.2.1.3",
+                                            "1.2.1.5",
+                                            "1.2.1.6",
+                                            "1.4.2.1",
+                                            "1.4.2.2",
+                                            "1.5.2.2",
+                                            "1.5.3.3",
+                                            "1.7.2.8",
+                                            "1.7.3.1",
+                                            "1.7.5.2",
+                                            "1.8.1.6",
+                                            "2.4.1.1",
+                                            "2.4.1.6",
+                                            "3.7.1.4",
+                                            "3.7.1.2",
+                                            "3.7.1.5",
+                                            "3.7.1.8",
+                                            "3.7.1.10",
+                                            "3.7.2.1",
+                                            "3.7.3.1",
+                                            "3.7.3.2",
+                                            "3.7.3.3",
+                                            "3.8.1.1",
+                                            "3.8.4.2"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.2.1.5",
+                    "description":  "There is evidence of response to any reports from inspecting and regulatory authorities",
+                    "linked_criteria":  [
+                                            "1.2.1.4",
+                                            "1.5.3.2",
+                                            "1.7.5.2"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.2.1.6",
+                    "description":  "The manager implements processes to manage and control human, financial and other resources.",
+                    "linked_criteria":  [
+                                            "1.2.1.4",
+                                            "1.4.1.1",
+                                            "1.4.1.2",
+                                            "1.4.1.3",
+                                            "1.4.2.1",
+                                            "1.4.2.2",
+                                            "1.4.2.3",
+                                            "1.4.2.4",
+                                            "1.4.3.1",
+                                            "1.4.3.2",
+                                            "1.4.3.3",
+                                            "1.4.3.4",
+                                            "1.5.1.1",
+                                            "1.5.1.2",
+                                            "1.5.1.3",
+                                            "1.5.2.1",
+                                            "1.5.2.2",
+                                            "1.5.2.3",
+                                            "1.5.2.4",
+                                            "1.5.3.1",
+                                            "1.5.3.2",
+                                            "1.5.3.3",
+                                            "1.5.3.4",
+                                            "1.5.3.5",
+                                            "1.5.3.6",
+                                            "1.6.1.1",
+                                            "1.6.1.2",
+                                            "1.6.1.3",
+                                            "1.6.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.2.3.2",
+                    "description":  "Information on services, hours of operation and processes for obtaining care is provided to services in the community who work in collaboration with the practice.",
+                    "linked_criteria":  [
+                                            "2.1.1.1",
+                                            "2.1.1.2",
+                                            "2.1.1.3"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.3.1.5",
+                    "description":  "There is a process to ensure that personnel are familiar with relevant policies and procedures.",
+                    "linked_criteria":  [
+                                            "1.4.3.1"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.1.1",
+                    "description":  "There are documented processes for staffing the practice.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.1.2",
+                    "description":  "The desired education, qualifications, skills and knowledge are defined for personnel.",
+                    "linked_criteria":  [
+                                            "1.2.1.6",
+                                            "1.4.2.3"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.1.3",
+                    "description":  "The process includes measures to improve personnel retention.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.2.1",
+                    "description":  "There is implementation of a reliable, documented process for evaluating and verifying the credentials of all health professionals.",
+                    "linked_criteria":  [
+                                            "1.2.1.4",
+                                            "1.2.1.6",
+                                            "1.4.2.2",
+                                            "1.4.2.3",
+                                            "3.5.2.2"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.2.2",
+                    "description":  "Personnel files contain copies of qualifications and licences/registration from the relevant authority for all health professionals.",
+                    "linked_criteria":  [
+                                            "1.2.1.4",
+                                            "1.2.1.6",
+                                            "1.4.2.1"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.2.3",
+                    "description":  "There is a system to track the annual registration of all health professionals.",
+                    "linked_criteria":  [
+                                            "1.2.1.6",
+                                            "1.4.1.2",
+                                            "1.4.2.1"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.2.4",
+                    "description":  "All personnel with direct contact with the public have had a police check, a copy of which is kept in their personnel file.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.3.1",
+                    "description":  "There are documented processes for orientation of personnel to the practice.",
+                    "linked_criteria":  [
+                                            "1.2.1.6",
+                                            "1.3.1.5",
+                                            "1.4.3.3"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.3.2",
+                    "description":  "The practice supportscontinuing education for its clinical personnel andmaintains records of this in personnel files.",
+                    "linked_criteria":  [
+                                            "1.2.1.6",
+                                            "1.7.2.3",
+                                            "1.8.3.4",
+                                            "3.6.2.2"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.3.3",
+                    "description":  "There is a development strategy for the practice that ensures that the practicemanager and administrative personnel receive the training required to fulfil their responsibilities.",
+                    "linked_criteria":  [
+                                            "1.2.1.6",
+                                            "1.4.3.1"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.4.3.4",
+                    "description":  "Personnel members are informed of opportunities to participate in advanced education, training, research, and other experiences.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.1.1",
+                    "description":  "A designated person is responsible for the implementation and maintenance of a financial strategy.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.1.2",
+                    "description":  "The designated person is suitably qualified and/or experienced in accounting and financial management.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.1.3",
+                    "description":  "The responsibilities of this person include ensuring that policies and procedures for all financial functions are implemented.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.2.1",
+                    "description":  "There is a current budget for the practice.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.2.2",
+                    "description":  "A report is produced at least annually, setting out the financial position to date.",
+                    "linked_criteria":  [
+                                            "1.2.1.4",
+                                            "1.2.1.6",
+                                            "1.5.3.3"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.2.3",
+                    "description":  "There is a mechanism for establishing the reason for budget variation in either income or expenditure.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.2.4",
+                    "description":  "Capital investment proposals are subject to unanimous agreement among the partners or are agreed according to a voting system acceptable to all partners in the service.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.3.1",
+                    "description":  "The practicehave documented ethical and legal policies and procedures for the financial management of the practice that are implemented.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.3.2",
+                    "description":  "Internal and external financial audit systems which meet audit requirements are maintained.",
+                    "linked_criteria":  [
+                                            "1.2.1.5",
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.3.3",
+                    "description":  "Annual audited financial statements are produced within the required time frame.",
+                    "linked_criteria":  [
+                                            "1.2.1.4",
+                                            "1.2.1.6",
+                                            "1.5.2.2"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.3.4",
+                    "description":  "There is a capital asset register, which is routinely maintained.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.3.5",
+                    "description":  "Assets are insured.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.5.3.6",
+                    "description":  "All health professionals provide evidence of professional indemnity insurance.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.6.1.1",
+                    "description":  "An individual is designated to control the ordering, storage, distribution and control of equipment and supplies used in the service practice.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.6.1.2",
+                    "description":  "Policies and procedures relating to all aspects of provisioning/supply chain management are implemented.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.6.1.3",
+                    "description":  "Secure storage facilities are available.",
+                    "linked_criteria":  [
+                                            "1.2.1.6",
+                                            "2.5.1.3"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.6.1.4",
+                    "description":  "Prescription pads, letterheads, investigation request forms, administrative records and other official documents are accessible only to authorised persons.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.7.2.3",
+                    "description":  "Regular in-service training is given to all personnel in the field of infection control and is documented.",
+                    "linked_criteria":  [
+                                            "1.4.3.2"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.7.2.8",
+                    "description":  "The practicereports on notifiable diseases to appropriate external public health agencies.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.7.3.1",
+                    "description":  "The practice has a waste management policy that is consistent with country-specific laws and regulations and includes the safe handling, storing and disposing of all different types of waste.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.7.4.1",
+                    "description":  "Security systems, including guards if required, provide for internal and external security.",
+                    "linked_criteria":  [
+                                            "1.7.4.3",
+                                            "1.7.4.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.7.4.3",
+                    "description":  "There is effective control of access to clinical areas and store areas.",
+                    "linked_criteria":  [
+                                            "1.7.4.1"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.7.4.6",
+                    "description":  "Reasonable measures are taken to ensure the safety of lone workers.",
+                    "linked_criteria":  [
+                                            "1.7.4.1"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.7.5.1",
+                    "description":  "There are structured systems and processes in place to ensure that all occupants of the practice\u0027s facilities are safe from fire or smoke.",
+                    "linked_criteria":  [
+                                            "1.7.6.3"
+                                        ],
+                    "root":  [
+                                 "ROOT"
+                             ]
+                },
+                {
+                    "criteria":  "1.7.5.2",
+                    "description":  "Documented certification is available from the relevant authority to show that the facility complies with applicable laws and regulations in relation to fire safety (Fire clearance certificate).",
+                    "linked_criteria":  [
+                                            "1.2.1.4",
+                                            "1.2.1.5"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.7.6.3",
+                    "description":  "Documented evidence is available to show that the personnel participate in a rehearsal of the emergency plan at least annually.",
+                    "linked_criteria":  [
+                                            "1.7.5.1"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.8.1.6",
+                    "description":  "Documented procedures which outline the processes to provide required information to individuals and agencies outside the practicewhen required by laws or regulations are implemented.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "1.8.3.4",
+                    "description":  "Personnel are trained in the implementation of quality management processes.",
+                    "linked_criteria":  [
+                                            "1.4.3.2"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "2.1.1.1",
+                    "description":  "Directional signs to the practice are clearly readable and up to date.",
+                    "linked_criteria":  [
+                                            "1.2.3.2"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "2.1.1.2",
+                    "description":  "A telephone/emergency number is available and provided to patients on registration and on request.",
+                    "linked_criteria":  [
+                                            "1.2.3.2"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "2.1.1.3",
+                    "description":  "A phone number for the after-hours service of the practice is clearly displayed on the outside of the facility.",
+                    "linked_criteria":  [
+                                            "1.2.3.2"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "2.2.1.4",
+                    "description":  "The supply of medical equipment is adequate to meet the needs of the practice.",
+                    "linked_criteria":  [
+                                            "1.2.1.6"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "2.5.1.3",
+                    "description":  "Adequate, secure and well-ventilated storage areas are available for cleaning and laundry equipment and chemicals.",
+                    "linked_criteria":  [
+                                            "1.6.1.3"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "3.5.2.2",
+                    "description":  "The credentials of alternative care providers are verified.",
+                    "linked_criteria":  [
+                                            "1.4.2.1"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "3.7.1.2",
+                    "description":  "Medication is prescribed and dispensed in accordance with legislation and current pharmaceutical, medical and eye guidelines.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "3.7.1.4",
+                    "description":  "Medication is securely and legibly labelled with relevant information as required by policy.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "3.7.1.5",
+                    "description":  "A register is maintained of all medication dispensed.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "3.7.1.8",
+                    "description":  "Controlled medication is prescribed and dispensed in accordance with legislation and practice policy.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "3.7.1.10",
+                    "description":  "Prescriptions conform to all legal requirements.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "3.7.2.1",
+                    "description":  "Policies and procedures are implemented to ensure that medication is transported to the practiceand stored within the practice according to manufacturers’ guidelines, with specific emphasis on maintenance of cold chain requirements.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+                                 "ROOT"
+                             ]
+                },
+                {
+                    "criteria":  "3.7.3.1",
+                    "description":  "Medication storage areas are protected from heat and light and effectively ventilated.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "3.7.3.2",
+                    "description":  "Stored medication is legibly marked and securely labelled.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "3.7.3.3",
+                    "description":  "All pharmaceuticals and medical consumables are regularly checked for expiry dates and checks are recorded.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                },
+                {
+                    "criteria":  "3.9.1.1",
+                    "description":  "Patient and family rights are identified in a policy and documented in accordance with relevant and current laws, charters and regulations.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+                                 "ROOT"
+                             ]
+                },
+                {
+                    "criteria":  "3.9.4.2",
+                    "description":  "The practice has a documented policy outlining the procedure for obtaining consent in the case of patients who are unable to grant consent for themselves by way of age or mental/physical incapacity, which is in accordance with the relevant laws and regulations.",
+                    "linked_criteria":  [
+                                            "1.2.1.4"
+                                        ],
+                    "root":  [
+
+                             ]
+                }
+            ]
+}
