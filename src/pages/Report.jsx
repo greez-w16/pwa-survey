@@ -42,6 +42,21 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   EMS: 'emsStageU11',
   MORTUARY: 'morStageU11',
   OBGYN: 'obgStageU11',
+  PHYSIOTHERAPY: 'phyStageU11',
+  RADIOLOGY: 'radStageU11',
+  PRIVATE_LAB: 'prlStageU11',
+  GENERAL_PRACTICE: 'gepStageU11',
+  PRIVATE_DIETETIC: 'prdStageU11',
+  MENTAL_HEALTH: 'mehStageU11',
+  EYE: 'eyeStageU11',
+  HOSPICE_PALLIATIVE: 'hopStageU11',
+  OCCUPATIONAL_HEALTH: 'ochStageU11',
+  UROLOGY_NEPHR: 'urnStageU11',
+  ORAL: 'oraStageU11',
+  IMCI: 'imcStageU11',
+  EMONC: 'emoStageU11',
+  ONCOLOGY: 'oncStageU11',
+  PAEDIATRIC: 'paeStageU11'
 };
 
 const toFacilityGroupKey = (value) => {
@@ -52,6 +67,8 @@ const toFacilityGroupKey = (value) => {
   if (t.includes('ems') || t === 'se' || t.includes(' se')) return 'EMS';
   if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
   if (t.includes('obg')) return 'OBGYN';
+  if (t.includes('oncology') || t.includes('onc')) return 'ONCOLOGY';
+  if (t.includes('paediatric') || t.includes('pae') || t.includes('pediatric') || t.includes('ped')) return 'PAEDIATRIC';
   return String(value || '').trim().toUpperCase();
 };
 

@@ -78,6 +78,21 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     EMS: 'emsStageU11',
     MORTUARY: 'morStageU11',
     OBGYN: 'obgStageU11',
+    PHYSIOTHERAPY: 'phyStageU11',
+    RADIOLOGY: 'radStageU11',
+    PRIVATE_LAB: 'prlStageU11',
+    GENERAL_PRACTICE: 'gepStageU11',
+    PRIVATE_DIETETIC: 'prdStageU11',
+    MENTAL_HEALTH: 'mehStageU11',
+    EYE: 'eyeStageU11',
+    HOSPICE_PALLIATIVE: 'hopStageU11',
+    OCCUPATIONAL_HEALTH: 'ochStageU11',
+    UROLOGY_NEPHR: 'urnStageU11',
+    ORAL: 'oraStageU11',
+    IMCI: 'imcStageU11',
+    EMONC: 'emoStageU11',
+    ONCOLOGY: 'oncStageU11',
+    PAEDIATRIC: 'paeStageU11'
 };
 
 const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, placeholder, autoOpen, onClose }) => {
@@ -483,9 +498,11 @@ export function Dashboard() {
 	        if (ns === 'EMS') return text.includes('SURV_EMS') || text.includes('SURV-EMS') || /^\s*(EMS|SE)([_\s-]|$)/.test(text);
 	        if (ns === 'MORTUARY') return text.includes('MORTUARY') || text.includes('SURV_MORTUARY') || text.includes('SURV-MORTUARY');
 	        if (ns === 'OBGYN') return text.includes('OBG') || text.includes('OBGYN') || text.includes('SURV_OBG') || text.includes('SURV-OBG');
-	        return false;
+	        if (ns === 'ONCOLOGY') return text.includes('ONCOLOGY') || text.includes('ONC') || text.includes('SURV_ONC') || text.includes('SURV-ONC');
+	        if (ns === 'PAEDIATRIC') return text.includes('PAEDIATRIC') || text.includes('PAE') || text.includes('SURV_PAE') || text.includes('SURV-PAE') || text.includes('PEDIATRIC') || text.includes('PED') || text.includes('SURV_PED') || text.includes('SURV-PED');
+	        return text.includes(ns);
 	    };
-
+ 
 		    const buildMetadataSeOptions = (groupKey, programStageOverride = null) => {
 		        const programStage = programStageOverride || configuration?.programStage;
 		        const sections = programStage?.programStageSections || [];
@@ -496,7 +513,7 @@ export function Dashboard() {
 	            if (!seId || optionsById.has(seId)) return;
 	            const rawName = section?.displayName || section?.name || section?.code || '';
 	            const label = String(rawName)
-	                .replace(/^\s*(SURV[-_])?(HOSPITAL|HOSP|CLINICS?|EMS|MORTUARY|OBGYN|OBG)[-_\s]*/i, '')
+	                .replace(/^\s*(SURV[-_])?([A-Z_]+)[-_\s]*/i, '')
 	                .replace(/^\s*SE\s*([0-9]+)[-_\s:]*/i, '')
 	                .trim();
 	            optionsById.set(seId, { id: seId, label: `SE ${seId} ${label || ''}`.trim() });
@@ -531,6 +548,8 @@ export function Dashboard() {
         if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
         if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
         if (t.includes('obg')) return 'OBGYN';
+        if (t.includes('oncology') || t.includes('onc')) return 'ONCOLOGY';
+        if (t.includes('paediatric') || t.includes('pae') || t.includes('pediatric') || t.includes('ped')) return 'PAEDIATRIC';
         return String(txt || '').toUpperCase().trim();
     }, []);
 
@@ -540,7 +559,28 @@ export function Dashboard() {
 	    }, [configuration, toFacilityGroupKey]);
 
     const getFacilityGroupLabel = React.useCallback((facilityGroupKey) => {
-        const labelMap = { HOSPITAL: 'Hospital', CLINICS: 'Clinics', EMS: 'EMS', MORTUARY: 'Mortuary', OBGYN: 'OBGYN' };
+        const labelMap = { 
+            HOSPITAL: 'Hospital', 
+            CLINICS: 'Clinics', 
+            EMS: 'EMS', 
+            MORTUARY: 'Mortuary', 
+            OBGYN: 'OBGYN',
+            PHYSIOTHERAPY: 'Physiotherapy',
+            RADIOLOGY: 'Radiology',
+            PRIVATE_LAB: 'Private Lab',
+            GENERAL_PRACTICE: 'General Practice',
+            PRIVATE_DIETETIC: 'Private Dietetic',
+            MENTAL_HEALTH: 'Mental Health',
+            EYE: 'Eye',
+            HOSPICE_PALLIATIVE: 'Hospice & Palliative',
+            OCCUPATIONAL_HEALTH: 'Occupational Health',
+            UROLOGY_NEPHR: 'Urology & Nephrology',
+            ORAL: 'Oral',
+            IMCI: 'IMCI',
+            EMONC: 'EMONC',
+            ONCOLOGY: 'Oncology',
+            PAEDIATRIC: 'Paediatric'
+        };
         return labelMap[String(facilityGroupKey).toUpperCase()] || String(facilityGroupKey || '');
     }, []);
 
@@ -5259,6 +5299,8 @@ export function Dashboard() {
 <MenuItem value={'ORAL'}>Oral</MenuItem>
 <MenuItem value={'IMCI'}>IMCI</MenuItem>
 <MenuItem value={'EMONC'}>EMONC</MenuItem>
+<MenuItem value={'ONCOLOGY'}>Oncology</MenuItem>
+<MenuItem value={'PAEDIATRIC'}>Paediatric</MenuItem>
                         </TextField>
                     </div>
 	                  	                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (

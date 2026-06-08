@@ -43,7 +43,9 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   UROLOGY_NEPHR: 'urnStageU11',
   ORAL: 'oraStageU11',
   IMCI: 'imcStageU11',
-  EMONC: 'emoStageU11'
+  EMONC: 'emoStageU11',
+  ONCOLOGY: 'oncStageU11',
+  PAEDIATRIC: 'paeStageU11'
 };
 
 // Map a free-text Assessment Group value to an internal group id
@@ -69,6 +71,8 @@ const resolveGroupIdFromText = (text) => {
   if (t.includes('oral')) return 'ORAL';
   if (t.includes('imci')) return 'IMCI';
   if (t.includes('emonc') || t.includes('emo')) return 'EMONC';
+  if (t.includes('oncology') || t.includes('onc')) return 'ONCOLOGY';
+  if (t.includes('paediatric') || t.includes('pae') || t.includes('pediatric') || t.includes('ped')) return 'PAEDIATRIC';
   return null;
 };
 
