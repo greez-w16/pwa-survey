@@ -6,10 +6,10 @@ import path from 'node:path'
 const QIMS_HOST = 'https://moh-qimsuat.gov.bw'
 const ASSETS_DIR = path.resolve(process.cwd(), 'src', 'assets')
 const FACILITY_CONFIG_FILES = {
-  hospital_full_configuration: 'hospital_config.json',
-  clinics_full_configuration: 'clinics_config.json',
-  ems_full_configuration: 'ems_config.json',
-  mortuary_full_configuration: 'mortuary_config.json',
+  hospital_full_configuration: 'hospital/hospital_config.json',
+  clinics_full_configuration: 'clinics/clinics_config.json',
+  ems_full_configuration: 'ems/ems_config.json',
+  mortuary_full_configuration: 'mortuary/mortuary_config.json',
 }
 
 const readRequestBody = (req) => new Promise((resolve, reject) => {

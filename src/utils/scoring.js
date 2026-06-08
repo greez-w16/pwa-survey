@@ -1,5 +1,5 @@
 import { normalizeCriterionCode, compareCriterionCodes } from './normalization.js';
-import hospitalComputeCriteria from '../assets/hospital_compute_criteria.json';
+import hospitalComputeCriteria from '../assets/hospital/hospital_compute_criteria.json';
 
 /**
  * Healthcare Accreditation Scoring Module

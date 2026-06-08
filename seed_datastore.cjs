@@ -12,16 +12,16 @@ const PASSWORD = 'Nomisr123$'; // Change if needed
 const NAMESPACE = 'qims-config-assessment';
 
 // Load local assets
-const emsConfig = require('./src/assets/ems_config.json');
-const mortuaryConfig = require('./src/assets/mortuary_config.json');
-const clinicsConfig = require('./src/assets/clinics_config.json');
-const hospitalConfig = require('./src/assets/hospital_config.json');
-const hospitalComputeCriteria = require('./src/assets/hospital_compute_criteria.json');
+const emsConfig = require('./src/assets/ems/ems_config.json');
+const mortuaryConfig = require('./src/assets/mortuary/mortuary_config.json');
+const clinicsConfig = require('./src/assets/clinics/clinics_config.json');
+const hospitalConfig = require('./src/assets/hospital/hospital_config.json');
+const hospitalComputeCriteria = require('./src/assets/hospital/hospital_compute_criteria.json');
 
-const emsLinks = require('./src/assets/ems_links.json');
-const mortuaryLinks = require('./src/assets/mortuary_links.json');
-const clinicsLinks = require('./src/assets/clinics_links.json');
-const hospitalLinks = require('./src/assets/hospital_links.json');
+const emsLinks = require('./src/assets/ems/ems_links.json');
+const mortuaryLinks = require('./src/assets/mortuary/mortuary_links.json');
+const clinicsLinks = require('./src/assets/clinics/clinics_links.json');
+const hospitalLinks = require('./src/assets/hospital/hospital_links.json');
 
 const payloads = {
     'hospital_bundle': {

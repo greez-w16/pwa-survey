@@ -2,15 +2,15 @@ import React, { createContext, useContext, useState, useEffect, useCallback, use
 import { api } from '../services/api';
 import indexedDBService from '../services/indexedDBService';
 import { useStorage } from '../hooks/useStorage';
-import emsConfig from '../assets/ems_config.json';
-import mortuaryConfig from '../assets/mortuary_config.json';
-import clinicsConfig from '../assets/clinics_config.json';
-import hospitalConfig from '../assets/hospital_config.json';
-import emsLinks from '../assets/ems_links.json';
-import mortuaryLinks from '../assets/mortuary_links.json';
-import clinicsLinks from '../assets/clinics_links.json';
-import hospitalLinks from '../assets/hospital_links.json';
-import hospitalComputeCriteria from '../assets/hospital_compute_criteria.json';
+import emsConfig from '../assets/ems/ems_config.json';
+import mortuaryConfig from '../assets/mortuary/mortuary_config.json';
+import clinicsConfig from '../assets/clinics/clinics_config.json';
+import hospitalConfig from '../assets/hospital/hospital_config.json';
+import emsLinks from '../assets/ems/ems_links.json';
+import mortuaryLinks from '../assets/mortuary/mortuary_links.json';
+import clinicsLinks from '../assets/clinics/clinics_links.json';
+import hospitalLinks from '../assets/hospital/hospital_links.json';
+import hospitalComputeCriteria from '../assets/hospital/hospital_compute_criteria.json';
 import { Alert, Snackbar } from '@mui/material';
 
 const APP_CONTEXT_KEY = '__QIMS_APP_CONTEXT__';
