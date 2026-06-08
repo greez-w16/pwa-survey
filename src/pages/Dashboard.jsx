@@ -3469,6 +3469,7 @@ export function Dashboard() {
         ];
         let saved = 0;
         let failed = 0;
+        const failedKeys = [];
         for (const { key, data } of configsToSave) {
             try {
                 await api.upsertDataStoreItem(NAMESPACE, key, data);
@@ -3476,6 +3477,7 @@ export function Dashboard() {
             } catch (e) {
                 console.warn(`Failed to save ${key} to DataStore:`, e);
                 failed++;
+                failedKeys.push(key);
             }
         }
 

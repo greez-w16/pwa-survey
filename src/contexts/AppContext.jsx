@@ -255,6 +255,7 @@ export const AppProvider = ({ children }) => {
                         });
                         loadedRemoteFacilitiesRef.current.add(loadKey);
                         console.info('[AppContext] Remote configuration bundle loaded successfully.');
+                        showToast?.('Remote configuration loaded from DataStore successfully.', 'success');
                         return { loaded: true, count: Object.keys(fetchedData).length };
                     } else {
                         console.info('[AppContext] No remote configuration found in DataStore. Using built-in baseline.');

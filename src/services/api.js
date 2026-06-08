@@ -816,7 +816,7 @@ export const api = {
                 // DHIS2 expects bracketed values for the `in` operator.
                 const encodedOuIds = ouIds.map(id => encodeURIComponent(id)).join(',');
                 const ouResponse = await fetch(
-                    `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:[${ouIds.join(',')}]&fields=id,displayName,name,level,parent[id,displayName,name,level,parent[id,displayName,name,level]]`,
+                    `${BASE_URL}/api/organisationUnits?paging=false&filter=id:in:[${encodedOuIds}]&fields=id,displayName,name,level,parent[id,displayName,name,level,parent[id,displayName,name,level]]`,
                     { headers: getHeaders() }
                 );
                 if (ouResponse.ok) {
