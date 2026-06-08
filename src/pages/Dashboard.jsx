@@ -272,10 +272,15 @@ export function Dashboard() {
 	    const assessmentEventPresenceRef = useRef({});
 	    React.useEffect(() => { assessmentEventPresenceRef.current = assessmentEventPresenceByKey; }, [assessmentEventPresenceByKey]);
 
-    // Stable key for each assignment row (works even if enrollment is missing)
+    // Stable key for each assignment row (works even if enrollment is missing).
+    // Priority order intentionally matches getAssessmentActionKey so that the key
+    // stored during the bulk presence check is the same key looked up at render time,
+    // including for _duplicates sub-schedule items that carry both a scheduling
+    // enrollment ID and a survey TEI ID.
     const getAssocKey = (a) => (
-        a?.enrollment || a?.eventId ||
-        (a?.trackedEntityInstance || a?.scheduleTeiId) ||
+        (a?.scheduleTeiId || a?.trackedEntityInstance) ||
+        a?.enrollment ||
+        a?.eventId ||
         (a?.orgUnitId || (typeof a?.orgUnit === 'string' ? a.orgUnit : a?.orgUnit?.id)) ||
         'unknown'
     );
@@ -1166,10 +1171,9 @@ export function Dashboard() {
 		        
 		        if (toCheck.length === 0) return;
 		        
-		        // 3. Bulk presence check: one request per program+stage using ouMode=ALL,
-		        //    then match locally by TEI ID. This avoids passing multiple TEI IDs
-		        //    in a single URL (unsupported by the legacy /api/events.json endpoint)
-		        //    and removes any per-item sequential API calls.
+		        // 3. Bulk presence check: reuse the proven checkAssessmentEventPresence function
+		        //    (which uses api.getSurveyEventsForTei / api.getEventsList via /api/events.json)
+		        //    in parallel batches of 5 to avoid overwhelming the server.
 		        const checkInBulk = async () => {
 		            // Mark all as loading
 		            setAssessmentEventPresenceByKey(prev => {
@@ -1181,76 +1185,24 @@ export function Dashboard() {
 		                return next;
 		            });
 		            
-		            try {
-		                // Build a set of unique TEI IDs per program+stage bucket
-		                const groups = {};
-		                toCheck.forEach(a => {
-		                    const stageId = getAssignmentProgramStageId(a);
-		                    const programId = getSurveyEventProgramIdForStage(stageId, a);
-		                    const tei = a.trackedEntityInstance || a.scheduleTeiId;
-		                    const key = `${programId}|${stageId}`;
-		                    if (!groups[key]) groups[key] = { programId, stageId, teiSet: new Set() };
-		                    groups[key].teiSet.add(tei);
-		                });
-		                
-		                // One request per unique program+stage, using ouMode=ALL.
-		                // The legacy events API only accepts a single trackedEntityInstance,
-		                // so we omit that param and fetch all events for the stage, then
-		                // filter locally against the TEI IDs we care about.
-		                const results = await Promise.all(
-		                    Object.values(groups).map(async (g) => {
-		                        try {
-		                            const events = await api.getEventsList({
-		                                programId: g.programId,
-		                                stageId: g.stageId,
-		                                ouMode: 'ALL',
-		                                fields: 'event,trackedEntityInstance'
-		                            });
-		                            // Filter to only the TEIs we care about
-		                            return (events || []).filter(ev =>
-		                                ev?.event && g.teiSet.has(String(ev.trackedEntityInstance || '').trim())
-		                            );
-		                        } catch (err) {
-		                            console.warn(`[PresenceCheck] Bulk fetch failed for stage ${g.stageId}`, err);
-		                            return [];
-		                        }
-		                    })
-		                );
-		                
-		                const allEvents = results.flat();
-		                const foundTeis = new Set(
-		                    allEvents.map(ev => String(ev.trackedEntityInstance || '').trim()).filter(Boolean)
-		                );
-		                
-		                // Resolve presence for every checked assessment
-		                setAssessmentEventPresenceByKey(prev => {
-		                    const next = { ...prev };
-		                    toCheck.forEach(a => {
-		                        const k = getAssocKey(a);
-		                        const tei = String(a.trackedEntityInstance || a.scheduleTeiId || '').trim();
-		                        next[k] = { loading: false, hasAssessmentEvent: tei ? foundTeis.has(tei) : false };
-		                    });
-		                    return next;
-		                });
-		                console.log(`[PresenceCheck] Resolved ${toCheck.length} assessments. Events found: ${allEvents.length}`);
-		            } catch (err) {
-		                console.error('[PresenceCheck] Bulk check failed — defaulting all to false', err);
-		                setAssessmentEventPresenceByKey(prev => {
-		                    const next = { ...prev };
-		                    toCheck.forEach(a => {
-		                        next[getAssocKey(a)] = { loading: false, hasAssessmentEvent: false };
-		                    });
-		                    return next;
-		                });
+		            // Process in concurrent batches of 5 to avoid rate-limiting
+		            const CONCURRENT = 5;
+		            for (let i = 0; i < toCheck.length; i += CONCURRENT) {
+		                const batch = toCheck.slice(i, i + CONCURRENT);
+		                await Promise.all(batch.map(a => checkAssessmentEventPresence(a).catch(err => {
+		                    console.warn('[PresenceCheck] Individual check failed for', getAssocKey(a), err);
+		                })));
 		            }
+		            console.log(`[PresenceCheck] Completed presence check for ${toCheck.length} assessment(s).`);
 		        };
 		        
 		        checkInBulk();
 		        // NOTE: assessmentEventPresenceByKey is intentionally NOT in this dependency array.
 		        // Including it would cause an infinite loop (effect sets state → state change triggers effect).
 		        // We use assessmentEventPresenceRef to read current state safely inside the effect.
+		        // checkAssessmentEventPresence is a stable useCallback — safe to include.
 		        // eslint-disable-next-line react-hooks/exhaustive-deps
-		    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, getAssignmentProgramStageId, getSurveyEventProgramIdForStage]);
+		    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, checkAssessmentEventPresence]);
 
 	    const toggleExpandAssessment = async (assessment) => {
 	        if (!supportsAssociatedAssessments(assessment)) {
@@ -1570,15 +1522,13 @@ export function Dashboard() {
 	            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9em' }}>
 	                <thead>
 	                    <tr style={{ textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
-	                        <th style={{ padding: '6px 8px' }}>Assessment_ID</th>
-	                        <th style={{ padding: '6px 8px' }}>Program</th>
-	                        <th style={{ padding: '6px 8px' }}>TEI</th>
 	                        <th style={{ padding: '6px 8px' }}>Assessment date</th>
 	                        <th style={{ padding: '6px 8px' }}>Authorised start</th>
 	                        <th style={{ padding: '6px 8px' }}>Authorised end</th>
 	                        <th style={{ padding: '6px 8px' }}>Type of assessment</th>
 	                        <th style={{ padding: '6px 8px' }}>Facility type</th>
 	                        <th style={{ padding: '6px 8px' }}>Status</th>
+	                        <th style={{ padding: '6px 8px' }}>TEI</th>
 	                        <th style={{ padding: '6px 8px' }}>Actions</th>
 	                    </tr>
 	                </thead>
@@ -1589,17 +1539,17 @@ export function Dashboard() {
 	                            key={`survey-${ev.enrollmentId || ev.enrollment || ev.event || ev.trackedEntityInstance}`}
 	                            onClick={() => openAssociatedSurvey(assessment, ev)}
 	                            style={{ borderTop: '1px dashed #eee', cursor: 'pointer' }}
-	                            title="Open this survey for editing"
+	                            title={`Assessment ID: ${ev._displayEventId || ev.event || '-'}\nProgram: ${ev.programId || '-'}\nTEI: ${ev.trackedEntityInstance || '-'}\n(Click to open this survey for editing)`}
 	                        >
-	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev._displayEventId || ev.event || '-'}</td>
-	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.programId || '-'}</td>
-	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.trackedEntityInstance || '-'}</td>
 	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{ev._assessmentDate ? new Date(ev._assessmentDate).toLocaleDateString() : 'N/A'}</td>
 	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.start || 'N/A'}</td>
 	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.end || 'N/A'}</td>
 	                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
 		                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getAssociatedAssessmentGroupValue(ev)}</td>
 	                            <td style={{ padding: '6px 8px' }}>{getStatusValue(ev)}</td>
+	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', fontSize: '0.8em', color: '#64748b' }} title={ev.trackedEntityInstance || '-'}>
+	                                {ev.trackedEntityInstance || '-'}
+	                            </td>
 	                            <td style={{ padding: '6px 8px' }}>
 	                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 	                                    <button
@@ -1742,10 +1692,13 @@ export function Dashboard() {
 
     // Open a specific main-survey event from the associated-events table for editing
     const openAssociatedSurvey = async (assessment, ev) => {
-        if (!ev?.event) return;
-        const rowKey = ev.event || ev.enrollmentId || ev.enrollment || ev.trackedEntityInstance || '';
+        // Guard: need at least ONE identifier to proceed (event ID, enrollment ID, or TEI)
+        const rowIdentifier = ev?.event || ev?.enrollmentId || ev?.enrollment || ev?.trackedEntityInstance;
+        if (!rowIdentifier) return;
+        const rowKey = rowIdentifier;
         setLoadingSurveyRow(rowKey);
-        const withBaseline = { ...assessment, baselineEventId: ev.event };
+        const withBaseline = { ...assessment, baselineEventId: ev.event || ev.enrollmentId || ev.enrollment || '' };
+
 
         const assocKey = getAssocKey(assessment);
         let relatedEvents = [];
@@ -4031,6 +3984,7 @@ export function Dashboard() {
 			                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px', minWidth: 0, width: '100%' }}>
 		                                                            {uniqueSchedules
                                                                 .filter(scheduledAssessment => {
+                                                                    if (hasAssessmentEvent) return false;
                                                                     const ui = getAssessmentUiState(scheduledAssessment);
                                                                     return ui.isCheckingPresence || !ui.hasAssessmentEvent;
                                                                 })

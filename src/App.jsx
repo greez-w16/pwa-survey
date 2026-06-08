@@ -46,6 +46,32 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   EMONC: 'emoStageU11'
 };
 
+// Map a free-text Assessment Group value to an internal group id
+const resolveGroupIdFromText = (text) => {
+  if (!text) return null;
+  const t = String(text).toLowerCase();
+  if (t.includes('hosp')) return 'HOSPITAL';
+  if (t.includes('clinic')) return 'CLINICS';
+  if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
+  if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
+  if (t.includes('obg')) return 'OBGYN';
+  // New facility types
+  if (t.includes('physio')) return 'PHYSIOTHERAPY';
+  if (t.includes('radiology') || t.includes('rad')) return 'RADIOLOGY';
+  if (t.includes('private lab') || t.includes('prl')) return 'PRIVATE_LAB';
+  if (t.includes('general practice') || t.includes('gep')) return 'GENERAL_PRACTICE';
+  if (t.includes('private dietetic') || t.includes('prd')) return 'PRIVATE_DIETETIC';
+  if (t.includes('mental health') || t.includes('meh')) return 'MENTAL_HEALTH';
+  if (t.includes('eye')) return 'EYE';
+  if (t.includes('hospice') || t.includes('palliative') || t.includes('hop')) return 'HOSPICE_PALLIATIVE';
+  if (t.includes('occupational health') || t.includes('och')) return 'OCCUPATIONAL_HEALTH';
+  if (t.includes('urology') || t.includes('nephrology') || t.includes('urn')) return 'UROLOGY_NEPHR';
+  if (t.includes('oral')) return 'ORAL';
+  if (t.includes('imci')) return 'IMCI';
+  if (t.includes('emonc') || t.includes('emo')) return 'EMONC';
+  return null;
+};
+
 const getSurveyProgramStageIdForGroupText = (text) => {
   const key = resolveGroupIdFromText(text);
   return key && SURVEY_PROGRAM_STAGE_BY_GROUP[key] ? SURVEY_PROGRAM_STAGE_BY_GROUP[key] : '';
@@ -155,31 +181,7 @@ const PrivateRoute = ({ children }) => {
 	    return group.name || group.id || '';
 	  };
 
-  // Map a free-text Assessment Group value to an internal group id
-const resolveGroupIdFromText = React.useCallback((text) => {
-  if (!text) return null;
-  const t = String(text).toLowerCase();
-  if (t.includes('hosp')) return 'HOSPITAL';
-  if (t.includes('clinic')) return 'CLINICS';
-  if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
-  if (t.includes('mortu') || t.includes('general')) return 'GENERAL';
-  if (t.includes('obg')) return 'OBGYN';
-  // New facility types
-  if (t.includes('physio')) return 'PHYSIOTHERAPY';
-  if (t.includes('radiology') || t.includes('rad')) return 'RADIOLOGY';
-  if (t.includes('private lab') || t.includes('prl')) return 'PRIVATE_LAB';
-  if (t.includes('general practice') || t.includes('gep')) return 'GENERAL_PRACTICE';
-  if (t.includes('private dietetic') || t.includes('prd')) return 'PRIVATE_DIETETIC';
-  if (t.includes('mental health') || t.includes('meh')) return 'MENTAL_HEALTH';
-  if (t.includes('eye')) return 'EYE';
-  if (t.includes('hospice') || t.includes('palliative') || t.includes('hop')) return 'HOSPICE_PALLIATIVE';
-  if (t.includes('occupational health') || t.includes('och')) return 'OCCUPATIONAL_HEALTH';
-  if (t.includes('urology') || t.includes('nephrology') || t.includes('urn')) return 'UROLOGY_NEPHR';
-  if (t.includes('oral')) return 'ORAL';
-  if (t.includes('imci')) return 'IMCI';
-  if (t.includes('emonc') || t.includes('emo')) return 'EMONC';
-  return null;
-}, []);
+
 
 	  const resolveAssessmentNamespaceFromText = React.useCallback((text) => {
 	    const t = String(text || '').toLowerCase();
