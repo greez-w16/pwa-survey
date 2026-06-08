@@ -2421,7 +2421,7 @@
                         return `Score: ${pts ? `${pts} pts ` : ''}${status}`.trim();
                     })();
 
-                    return (
+                    const fieldContent = (
                         <div
                             key={field.id}
                             className={`form-field ${isCritical ? 'is-critical' : ''} ${(!isParentAnswered && isCommentField) ? 'field-disabled' : ''}`}
@@ -2858,6 +2858,31 @@
                                 ))}
                     </div>
                 );
+
+                if (isADSection && (isAssessorUserField || isTeiField || isSysTagField)) {
+                    return (
+                        <details
+                            key={field.id}
+                            className="technical-details-collapse"
+                            style={{
+                                marginTop: '12px',
+                                border: '1px solid rgba(148, 163, 184, 0.25)',
+                                borderRadius: '6px',
+                                padding: '10px',
+                                backgroundColor: 'rgba(15, 23, 42, 0.02)'
+                            }}
+                        >
+                            <summary style={{ cursor: 'pointer', fontWeight: 600, color: '#475569', fontSize: '0.9rem', outline: 'none' }}>
+                                🔧 {displayLabel}
+                            </summary>
+                            <div style={{ marginTop: '10px' }}>
+                                {fieldContent}
+                            </div>
+                        </details>
+                    );
+                }
+
+                return fieldContent;
             });
         };
 
@@ -3654,7 +3679,7 @@
                             </button>
                         </div>
                     </div>
-                    <div style={{
+                    <details style={{
                         marginTop: '12px',
                         padding: '12px 14px',
                         borderRadius: '8px',
@@ -3662,7 +3687,10 @@
                         border: '1px solid rgba(148, 163, 184, 0.45)',
                         color: '#e2e8f0'
                     }}>
-                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center', fontSize: '0.92rem' }}>
+                        <summary style={{ cursor: 'pointer', fontWeight: 600, color: '#94a3b8', fontSize: '0.9rem', outline: 'none' }}>
+                            🔧 Technical Event Mapping Metadata
+                        </summary>
+                        <div style={{ marginTop: '12px', display: 'flex', flexWrap: 'wrap', gap: '14px', alignItems: 'center', fontSize: '0.92rem' }}>
                             <div><strong>Expected SYS_TAG:</strong> <code>{activeExpectedSysTag || 'N/A'}</code></div>
                             <div><strong>Mapped Event ID:</strong> <code>{activeSectionEventId || 'Not mapped'}</code></div>
                         </div>
@@ -3700,7 +3728,7 @@
                                 lineHeight: 1.45
                             }}>{JSON.stringify(activeMappedEventPayload || { message: 'No mapped event payload available for this section.' }, null, 2)}</pre>
                         </details>
-                    </div>
+                    </details>
                 </div>
                 <ScoringGuideModal
                     isOpen={isScoringModalOpen}

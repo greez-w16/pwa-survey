@@ -11,7 +11,36 @@ import mortuaryLinks from '../assets/mortuary/mortuary_links.json';
 import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
 import hospitalComputeCriteria from '../assets/hospital/hospital_compute_criteria.json';
+import { cleanStandardStatement } from '../utils/normalization';
 import { Alert, Snackbar } from '@mui/material';
+
+const sanitizeConfig = (config) => {
+    if (!config) return config;
+    const sanitized = JSON.parse(JSON.stringify(config));
+    const facilityKeys = [
+        'hospital_full_configuration',
+        'clinics_full_configuration',
+        'ems_full_configuration',
+        'mortuary_full_configuration'
+    ];
+    facilityKeys.forEach(key => {
+        if (Array.isArray(sanitized[key])) {
+            sanitized[key].forEach(se => {
+                if (Array.isArray(se.sections)) {
+                    se.sections.forEach(sec => {
+                        if (Array.isArray(sec.standards)) {
+                            sec.standards.forEach(std => {
+                                std.statement = cleanStandardStatement(std.statement);
+                            });
+                        }
+                    });
+                }
+            });
+        }
+    });
+    return sanitized;
+};
+
 
 const APP_CONTEXT_KEY = '__QIMS_APP_CONTEXT__';
 const AppContext = globalThis[APP_CONTEXT_KEY] || createContext();
@@ -132,7 +161,7 @@ export const AppProvider = ({ children }) => {
 		        setActiveConfigVersionId(versionsPayload.activeVersionId);
 
 		        // --- Build per-version bundles in memory only ---
-		        const baseConfig = { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig };
+		        const baseConfig = sanitizeConfig({ ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig });
 		        const baseLinks = {
 		            ems: emsLinks,
 		            mortuary: mortuaryLinks,
@@ -228,13 +257,13 @@ export const AppProvider = ({ children }) => {
                             const activeId = activeConfigVersionId || 'v1';
                             const currentBundle = next[activeId] || {};
 
-                            const remoteConfig = {
+                            const remoteConfig = sanitizeConfig({
                                 ...currentBundle.config,
                                 ...(unwrapDataStoreArray(fetchedData.hospital_full_configuration, 'hospital_full_configuration') ? { hospital_full_configuration: unwrapDataStoreArray(fetchedData.hospital_full_configuration, 'hospital_full_configuration') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.clinics_full_configuration, 'clinics_full_configuration') ? { clinics_full_configuration: unwrapDataStoreArray(fetchedData.clinics_full_configuration, 'clinics_full_configuration') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.ems_full_configuration, 'ems_full_configuration') ? { ems_full_configuration: unwrapDataStoreArray(fetchedData.ems_full_configuration, 'ems_full_configuration') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.mortuary_full_configuration, 'mortuary_full_configuration') ? { mortuary_full_configuration: unwrapDataStoreArray(fetchedData.mortuary_full_configuration, 'mortuary_full_configuration') } : {}),
-                            };
+                            });
 
                             const remoteLinks = {
                                 ...currentBundle.links,
