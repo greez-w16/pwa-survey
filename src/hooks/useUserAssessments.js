@@ -43,25 +43,19 @@ export const useUserAssessments = (options = {}) => {
     useEffect(() => {
         const initServices = async () => {
             try {
-	                console.log('[useUserAssessments] Initializing services...');
-	                let metadata = null;
-	                try {
-	                    metadata = await getMetadata();
-	                } catch (metaErr) {
-	                    // Metadata is useful but *not required* just to fetch
-	                    // assignments. If it fails (e.g. network hiccup), fall
-	                    // back to an empty object so the rest of the
-	                    // assignments pipeline can still run.
-	                    console.warn('[useUserAssessments] getMetadata failed during init (non-fatal for assignments)', metaErr);
-	                    metadata = {};
-	                }
-	                await AssessmentSchedulingService.init({ metadata });
-	                await AssessmentTeamAssignmentService.init({ metadata });
-	                setInitialized(true);
-	                console.log('[useUserAssessments] Services initialized (metadata loaded:', !!metadata && Object.keys(metadata).length > 0, ')');
+                console.log('[useUserAssessments] Initializing services...');
+                // Skip metadata fetch on init for faster startup; metadata is not required here.
+                const metadata = {};
+                await AssessmentSchedulingService.init({ metadata });
+                await AssessmentTeamAssignmentService.init({ metadata });
+                console.log('[useUserAssessments] Services initialized — setting initialized=true');
+                setInitialized(true);
             } catch (err) {
-	                console.error('[useUserAssessments] Failed to initialize services', err);
+                console.error('[useUserAssessments] Failed to initialize services', err);
                 setError(err);
+                // Still mark as initialized so the UI shows an error rather than
+                // being stuck on "Loading Assessments..." forever.
+                setInitialized(true);
             }
         };
 
@@ -280,8 +274,13 @@ export const useUserAssessments = (options = {}) => {
 
     // Auto-fetch on mount and when dependencies change
     useEffect(() => {
+        console.log('[useUserAssessments] Auto-fetch effect triggered:', { autoFetch, initialized, userId: user?.id });
         if (autoFetch && initialized && user?.id) {
+            console.log('[useUserAssessments] Starting fetchUserAssessments...');
             fetchUserAssessments();
+        } else {
+            if (!initialized) console.warn('[useUserAssessments] Skipping fetch — not yet initialized');
+            if (!user?.id) console.warn('[useUserAssessments] Skipping fetch — no user id');
         }
     }, [autoFetch, initialized, user?.id, fetchUserAssessments]);
 

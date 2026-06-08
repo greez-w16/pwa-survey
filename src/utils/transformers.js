@@ -30,6 +30,7 @@ export const transformMetadata = (metadata) => {
     }
 
     const isDedicatedHospitalStage = metadata.id === 'hup8BqEe7Mn';
+    const isDedicatedObgynStage = metadata.id === 'obgStageU11';
 
     // 1. Map Data Elements for quick lookup during section transformation
     const deMap = {};
@@ -62,6 +63,11 @@ export const transformMetadata = (metadata) => {
         if (name.includes('SURV_MORTUARY') || name.includes('SURV-MORTUARY') ||
             code.includes('MORTUARY')) {
             return 'MORTUARY';
+        }
+
+        // OBGYN detection
+        if (code.startsWith('OBGYN') || name.startsWith('OBGYN') || code.includes('OBG') || name.includes('OBG')) {
+            return 'OBGYN';
         }
 
 	        // Hospital detection (SURV_HOSPITAL, HOSPITAL_*, etc.)
@@ -102,7 +108,8 @@ export const transformMetadata = (metadata) => {
 	        'MORTUARY': 'Mortuary',
 	        'CLINICS': 'Clinics',
 	        'CLINIC': 'Clinics',
-	        'HOSPITAL': 'Hospital'
+	        'HOSPITAL': 'Hospital',
+	        'OBGYN': 'OBGYN'
 	    };
 
     // Strips prefixes for clean UI display
@@ -288,9 +295,12 @@ export const transformMetadata = (metadata) => {
 	        // as Hospital instead of falling back to Mortuary/GENERAL.
 		        const groupKey = isDedicatedHospitalStage && !isAD
 		            ? 'HOSPITAL'
+		            : isDedicatedObgynStage && !isAD
+		            ? 'OBGYN'
 		            : (prefix === 'SE' || prefix === 'EMS' || (prefix && (prefix.startsWith('SE') || prefix.startsWith('EMS')))) ? 'SE' :
 	            (prefix === 'CLINICS' || prefix === 'CLINIC' ? 'CLINICS' :
-	            (prefix === 'HOSPITAL' || prefix === 'HOSP') ? 'HOSPITAL' : null);
+	            (prefix === 'HOSPITAL' || prefix === 'HOSP' ? 'HOSPITAL' :
+	            (prefix === 'OBGYN' || prefix === 'OBG' ? 'OBGYN' : null)));
 
         if (!groupKey) {
             // console.log(`[Transform] Grouping ${sec.name} into MORTUARY (prefix was ${prefix})`);
@@ -319,10 +329,11 @@ export const transformMetadata = (metadata) => {
     // Ensure sharedSections (Assessment Details) are always at the very beginning
     const finalMortuarySections = [...sharedSections, ...sortedNonSharedMortuarySections];
 
-	    // Construct SE groups (EMS, Clinics, Hospital)
+	    // Construct SE groups (EMS, Clinics, Hospital, OBGYN)
     const emsGroupSections = prefixSectionsByPrefix['SE'] || [];
     const clinicsGroupSections = prefixSectionsByPrefix['CLINICS'] || [];
 	    const hospitalGroupSections = prefixSectionsByPrefix['HOSPITAL'] || [];
+	    const obgynGroupSections = prefixSectionsByPrefix['OBGYN'] || [];
 
     const sortSections = (secs) => [...secs].sort((a, b) => {
         const ex = (sec) => {
@@ -339,6 +350,7 @@ export const transformMetadata = (metadata) => {
 	    const sortedEmsSections = sortSections(emsGroupSections);
 	    const sortedClinicsSections = sortSections(clinicsGroupSections);
 	    const sortedHospitalSections = sortSections(hospitalGroupSections);
+	    const sortedObgynSections = sortSections(obgynGroupSections);
 
     const allGroups = [];
 
@@ -349,6 +361,12 @@ export const transformMetadata = (metadata) => {
 	            id: 'HOSPITAL',
 	            name: PREFIX_NAME_MAP['HOSPITAL'],
 	            sections: [...sharedSections, ...sortedHospitalSections]
+	        });
+	    } else if (isDedicatedObgynStage) {
+	        allGroups.push({
+	            id: 'OBGYN',
+	            name: PREFIX_NAME_MAP['OBGYN'] || 'OBGYN',
+	            sections: [...sharedSections, ...sortedObgynSections]
 	        });
 	    } else {
 	        // Always include Mortuary (General) group for mixed/default stages.
@@ -374,6 +392,15 @@ export const transformMetadata = (metadata) => {
 	            id: 'HOSPITAL',
 	            name: PREFIX_NAME_MAP['HOSPITAL'],
 	            sections: [...sharedSections, ...sortedHospitalSections]
+	        });
+	    }
+
+	    // Add OBGYN group if sections exist on mixed/default stages.
+	    if (!isDedicatedObgynStage && sortedObgynSections.length > 0) {
+	        allGroups.push({
+	            id: 'OBGYN',
+	            name: PREFIX_NAME_MAP['OBGYN'] || 'OBGYN',
+	            sections: [...sharedSections, ...sortedObgynSections]
 	        });
 	    }
 	

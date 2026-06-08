@@ -1,4 +1,28 @@
 import React, { useState, useMemo, useEffect, useRef } from 'react';
+
+/** Catches render errors in a subtree and shows a readable message instead of a blank page. */
+class ErrorBoundary extends React.Component {
+    constructor(props) { super(props); this.state = { error: null }; }
+    static getDerivedStateFromError(error) { return { error }; }
+    componentDidCatch(error, info) { console.error('[ErrorBoundary] Caught render error:', error, info); }
+    render() {
+        if (this.state.error) {
+            return (
+                <div style={{ margin: '1rem', padding: '1rem', background: '#fef2f2', border: '1px solid #fca5a5', borderRadius: 8, color: '#991b1b', fontSize: '0.85rem' }}>
+                    <strong>Something went wrong rendering this section.</strong>
+                    <pre style={{ marginTop: 8, whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontSize: '0.8rem' }}>
+                        {this.state.error?.message || String(this.state.error)}
+                    </pre>
+                    <button style={{ marginTop: 8, padding: '4px 12px', borderRadius: 4, border: '1px solid #fca5a5', background: '#fff', cursor: 'pointer' }}
+                        onClick={() => this.setState({ error: null })}>
+                        Retry
+                    </button>
+                </div>
+            );
+        }
+        return this.props.children;
+    }
+}
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
@@ -53,6 +77,22 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     CLINICS: 'cliStageU11',
     EMS: 'emsStageU11',
     MORTUARY: 'morStageU11',
+    OBGYN: 'obgStageU11',
+    PHYSIOTHERAPY: 'phyStageU11',
+    RADIOLOGY: 'radStageU11',
+    PRIVATE_LAB: 'prlStageU11',
+    GENERAL_PRACTICE: 'gepStageU11',
+    PRIVATE_DIETETIC: 'prdStageU11',
+    MENTAL_HEALTH: 'mehStageU11',
+    EYE: 'eyeStageU11',
+    HOSPICE_PALLIATIVE: 'hopStageU11',
+    OCCUPATIONAL_HEALTH: 'ochStageU11',
+    UROLOGY_NEPHR: 'urnStageU11',
+    ORAL: 'oraStageU11',
+    IMCI: 'imcStageU11',
+    EMONC: 'emoStageU11',
+    ONCOLOGY: 'oncStageU11',
+    PAEDIATRIC: 'paeStageU11'
 };
 
 const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, placeholder, autoOpen, onClose, showClearAll = false }) => {
@@ -385,11 +425,19 @@ export function Dashboard() {
     const [expandedAssignments, setExpandedAssignments] = useState({}); // { [assocKey]: true }
     const [associatedByEnrollment, setAssociatedByEnrollment] = useState({}); // { [assocKey]: { loading, survey:[] } }
 	    const [assessmentEventPresenceByKey, setAssessmentEventPresenceByKey] = useState({}); // { [assocKey]: { loading, hasAssessmentEvent } }
+	    // Ref that always holds the latest assessmentEventPresenceByKey without being a useEffect dependency
+	    const assessmentEventPresenceRef = useRef({});
+	    React.useEffect(() => { assessmentEventPresenceRef.current = assessmentEventPresenceByKey; }, [assessmentEventPresenceByKey]);
 
-    // Stable key for each assignment row (works even if enrollment is missing)
+    // Stable key for each assignment row (works even if enrollment is missing).
+    // Priority order intentionally matches getAssessmentActionKey so that the key
+    // stored during the bulk presence check is the same key looked up at render time,
+    // including for _duplicates sub-schedule items that carry both a scheduling
+    // enrollment ID and a survey TEI ID.
     const getAssocKey = (a) => (
-        a?.enrollment || a?.eventId ||
-        (a?.trackedEntityInstance || a?.scheduleTeiId) ||
+        (a?.scheduleTeiId || a?.trackedEntityInstance) ||
+        a?.enrollment ||
+        a?.eventId ||
         (a?.orgUnitId || (typeof a?.orgUnit === 'string' ? a.orgUnit : a?.orgUnit?.id)) ||
         'unknown'
     );
@@ -591,9 +639,12 @@ export function Dashboard() {
 	        if (ns === 'CLINICS') return text.includes('CLINIC') || text.includes('CLINICS');
 	        if (ns === 'EMS') return text.includes('SURV_EMS') || text.includes('SURV-EMS') || /^\s*(EMS|SE)([_\s-]|$)/.test(text);
 	        if (ns === 'MORTUARY') return text.includes('MORTUARY') || text.includes('SURV_MORTUARY') || text.includes('SURV-MORTUARY');
-	        return false;
+	        if (ns === 'OBGYN') return text.includes('OBG') || text.includes('OBGYN') || text.includes('SURV_OBG') || text.includes('SURV-OBG');
+	        if (ns === 'ONCOLOGY') return text.includes('ONCOLOGY') || text.includes('ONC') || text.includes('SURV_ONC') || text.includes('SURV-ONC');
+	        if (ns === 'PAEDIATRIC') return text.includes('PAEDIATRIC') || text.includes('PAE') || text.includes('SURV_PAE') || text.includes('SURV-PAE') || text.includes('PEDIATRIC') || text.includes('PED') || text.includes('SURV_PED') || text.includes('SURV-PED');
+	        return text.includes(ns);
 	    };
-
+ 
 		    const buildMetadataSeOptions = (groupKey, programStageOverride = null) => {
 		        const programStage = programStageOverride || configuration?.programStage;
 		        const sections = programStage?.programStageSections || [];
@@ -604,7 +655,7 @@ export function Dashboard() {
 	            if (!seId || optionsById.has(seId)) return;
 	            const rawName = section?.displayName || section?.name || section?.code || '';
 	            const label = String(rawName)
-	                .replace(/^\s*(SURV[-_])?(HOSPITAL|HOSP|CLINICS?|EMS|MORTUARY)[-_\s]*/i, '')
+	                .replace(/^\s*(SURV[-_])?([A-Z_]+)[-_\s]*/i, '')
 	                .replace(/^\s*SE\s*([0-9]+)[-_\s:]*/i, '')
 	                .trim();
 	            optionsById.set(seId, { id: seId, label: `SE ${seId} ${label || ''}`.trim() });
@@ -638,6 +689,9 @@ export function Dashboard() {
         if (t.includes('clinic')) return 'CLINICS';
         if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
         if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
+        if (t.includes('obg')) return 'OBGYN';
+        if (t.includes('oncology') || t.includes('onc')) return 'ONCOLOGY';
+        if (t.includes('paediatric') || t.includes('pae') || t.includes('pediatric') || t.includes('ped')) return 'PAEDIATRIC';
         return String(txt || '').toUpperCase().trim();
     }, []);
 
@@ -647,7 +701,28 @@ export function Dashboard() {
 	    }, [configuration, toFacilityGroupKey]);
 
     const getFacilityGroupLabel = React.useCallback((facilityGroupKey) => {
-        const labelMap = { HOSPITAL: 'Hospital', CLINICS: 'Clinics', EMS: 'EMS', MORTUARY: 'Mortuary' };
+        const labelMap = { 
+            HOSPITAL: 'Hospital', 
+            CLINICS: 'Clinics', 
+            EMS: 'EMS', 
+            MORTUARY: 'Mortuary', 
+            OBGYN: 'OBGYN',
+            PHYSIOTHERAPY: 'Physiotherapy',
+            RADIOLOGY: 'Radiology',
+            PRIVATE_LAB: 'Private Lab',
+            GENERAL_PRACTICE: 'General Practice',
+            PRIVATE_DIETETIC: 'Private Dietetic',
+            MENTAL_HEALTH: 'Mental Health',
+            EYE: 'Eye',
+            HOSPICE_PALLIATIVE: 'Hospice & Palliative',
+            OCCUPATIONAL_HEALTH: 'Occupational Health',
+            UROLOGY_NEPHR: 'Urology & Nephrology',
+            ORAL: 'Oral',
+            IMCI: 'IMCI',
+            EMONC: 'EMONC',
+            ONCOLOGY: 'Oncology',
+            PAEDIATRIC: 'Paediatric'
+        };
         return labelMap[String(facilityGroupKey).toUpperCase()] || String(facilityGroupKey || '');
     }, []);
 
@@ -1223,17 +1298,93 @@ export function Dashboard() {
 
 		    React.useEffect(() => {
 		        if (assessmentsLoading) return;
-		        const all = [...(pendingAssessments || []), ...(upcomingAssessments || []), ...(accredAssignments || [])];
-	        const seen = new Set();
-	        all.forEach(assessment => {
-	            const assocKey = getAssocKey(assessment);
-	            if (!assocKey || seen.has(assocKey)) return;
-	            seen.add(assocKey);
-	            const current = assessmentEventPresenceByKey?.[assocKey];
-	            if (current && (current.loading || typeof current.hasAssessmentEvent === 'boolean')) return;
-	            checkAssessmentEventPresence(assessment);
-	        });
-		    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, assessmentEventPresenceByKey, checkAssessmentEventPresence]);
+		        
+		        // 1. Gather all top-level and duplicate sub-assessments
+		        const topLevelList = [
+		            ...(pendingAssessments || []),
+		            ...(upcomingAssessments || []),
+		            ...(accredAssignments || [])
+		        ];
+		        
+		        const allAssessments = [];
+		        topLevelList.forEach(a => {
+		            allAssessments.push(a);
+		            if (Array.isArray(a._duplicates)) {
+		                allAssessments.push(...a._duplicates);
+		            }
+		        });
+		        
+		        // 2. Filter out those that are already checked or currently checking.
+		        // Use the REF (not state) to avoid this effect being a dependency on
+		        // assessmentEventPresenceByKey — reading from state would cause an
+		        // infinite loop because we also SET the state inside this effect.
+		        const currentPresence = assessmentEventPresenceRef.current;
+		        const seen = new Set();
+		        const toCheck = [];
+		        const noTeiItems = [];
+		        
+		        allAssessments.forEach(assessment => {
+		            const assocKey = getAssocKey(assessment);
+		            if (!assocKey || seen.has(assocKey)) return;
+		            seen.add(assocKey);
+		            
+		            const current = currentPresence?.[assocKey];
+		            if (current && (current.loading || typeof current.hasAssessmentEvent === 'boolean')) {
+		                return; // Already checked or in-flight
+		            }
+		            
+		            const teiId = assessment.trackedEntityInstance || assessment.scheduleTeiId || null;
+		            if (!teiId) {
+		                noTeiItems.push(assocKey);
+		                return;
+		            }
+		            
+		            toCheck.push(assessment);
+		        });
+		        
+		        // Immediately resolve items with no TEI (no async needed)
+		        if (noTeiItems.length > 0) {
+		            setAssessmentEventPresenceByKey(prev => {
+		                const next = { ...prev };
+		                noTeiItems.forEach(k => { next[k] = { loading: false, hasAssessmentEvent: false }; });
+		                return next;
+		            });
+		        }
+		        
+		        if (toCheck.length === 0) return;
+		        
+		        // 3. Bulk presence check: reuse the proven checkAssessmentEventPresence function
+		        //    (which uses api.getSurveyEventsForTei / api.getEventsList via /api/events.json)
+		        //    in parallel batches of 5 to avoid overwhelming the server.
+		        const checkInBulk = async () => {
+		            // Mark all as loading
+		            setAssessmentEventPresenceByKey(prev => {
+		                const next = { ...prev };
+		                toCheck.forEach(a => {
+		                    const k = getAssocKey(a);
+		                    next[k] = { ...(prev[k] || {}), loading: true };
+		                });
+		                return next;
+		            });
+		            
+		            // Process in concurrent batches of 5 to avoid rate-limiting
+		            const CONCURRENT = 5;
+		            for (let i = 0; i < toCheck.length; i += CONCURRENT) {
+		                const batch = toCheck.slice(i, i + CONCURRENT);
+		                await Promise.all(batch.map(a => checkAssessmentEventPresence(a).catch(err => {
+		                    console.warn('[PresenceCheck] Individual check failed for', getAssocKey(a), err);
+		                })));
+		            }
+		            console.log(`[PresenceCheck] Completed presence check for ${toCheck.length} assessment(s).`);
+		        };
+		        
+		        checkInBulk();
+		        // NOTE: assessmentEventPresenceByKey is intentionally NOT in this dependency array.
+		        // Including it would cause an infinite loop (effect sets state → state change triggers effect).
+		        // We use assessmentEventPresenceRef to read current state safely inside the effect.
+		        // checkAssessmentEventPresence is a stable useCallback — safe to include.
+		        // eslint-disable-next-line react-hooks/exhaustive-deps
+		    }, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, checkAssessmentEventPresence]);
 
 	    const toggleExpandAssessment = async (assessment) => {
 	        if (!supportsAssociatedAssessments(assessment)) {
@@ -1545,15 +1696,13 @@ export function Dashboard() {
 	            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9em' }}>
 	                <thead>
 	                    <tr style={{ textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
-	                        <th style={{ padding: '6px 8px' }}>Assessment_ID</th>
-	                        <th style={{ padding: '6px 8px' }}>Program</th>
-	                        <th style={{ padding: '6px 8px' }}>TEI</th>
 	                        <th style={{ padding: '6px 8px' }}>Assessment date</th>
 	                        <th style={{ padding: '6px 8px' }}>Authorised start</th>
 	                        <th style={{ padding: '6px 8px' }}>Authorised end</th>
 	                        <th style={{ padding: '6px 8px' }}>Type of assessment</th>
 	                        <th style={{ padding: '6px 8px' }}>Facility type</th>
 	                        <th style={{ padding: '6px 8px' }}>Status</th>
+	                        <th style={{ padding: '6px 8px' }}>TEI</th>
 	                        <th style={{ padding: '6px 8px' }}>Actions</th>
 	                    </tr>
 	                </thead>
@@ -1564,17 +1713,17 @@ export function Dashboard() {
 	                            key={`survey-${ev.enrollmentId || ev.enrollment || ev.event || ev.trackedEntityInstance}`}
 	                            onClick={() => openAssociatedSurvey(assessment, ev)}
 	                            style={{ borderTop: '1px dashed #eee', cursor: 'pointer' }}
-	                            title="Open this survey for editing"
+	                            title={`Assessment ID: ${ev._displayEventId || ev.event || '-'}\nProgram: ${ev.programId || '-'}\nTEI: ${ev.trackedEntityInstance || '-'}\n(Click to open this survey for editing)`}
 	                        >
-	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev._displayEventId || ev.event || '-'}</td>
-	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.programId || '-'}</td>
-	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.trackedEntityInstance || '-'}</td>
 	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{ev._assessmentDate ? new Date(ev._assessmentDate).toLocaleDateString() : 'N/A'}</td>
 	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.start || 'N/A'}</td>
 	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.end || 'N/A'}</td>
 	                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
 		                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getAssociatedAssessmentGroupValue(ev)}</td>
 	                            <td style={{ padding: '6px 8px' }}>{getStatusValue(ev)}</td>
+	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', fontSize: '0.8em', color: '#64748b' }} title={ev.trackedEntityInstance || '-'}>
+	                                {ev.trackedEntityInstance || '-'}
+	                            </td>
 	                            <td style={{ padding: '6px 8px' }}>
 	                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 	                                    <button
@@ -1695,10 +1844,13 @@ export function Dashboard() {
 
     // Open a specific main-survey event from the associated-events table for editing
     const openAssociatedSurvey = async (assessment, ev) => {
-        if (!ev?.event) return;
-        const rowKey = ev.event || ev.enrollmentId || ev.enrollment || ev.trackedEntityInstance || '';
+        // Guard: need at least ONE identifier to proceed (event ID, enrollment ID, or TEI)
+        const rowIdentifier = ev?.event || ev?.enrollmentId || ev?.enrollment || ev?.trackedEntityInstance;
+        if (!rowIdentifier) return;
+        const rowKey = rowIdentifier;
         setLoadingSurveyRow(rowKey);
-        const withBaseline = { ...assessment, baselineEventId: ev.event };
+        const withBaseline = { ...assessment, baselineEventId: ev.event || ev.enrollmentId || ev.enrollment || '' };
+
 
         const assocKey = getAssocKey(assessment);
         let relatedEvents = [];
@@ -3957,7 +4109,7 @@ export function Dashboard() {
                             transition: 'transform 0.2s ease',
                             display: 'inline-block'
                         }}>▼</span>
-                        <h3>Assigned Assessments</h3>
+                        <h3>Assigned Assessments 2</h3>
                     </div>
 
                 </div>
@@ -3967,6 +4119,7 @@ export function Dashboard() {
 		                    </div>
 		                )}
                 {!isAssessmentsCollapsed && (
+                    <ErrorBoundary>
                     <div className="forms-list">
 	                        {hookError && (
 	                            <div style={{ margin: '0 1rem 0.75rem', padding: '8px 10px', borderRadius: 6, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: '0.85rem' }}>
@@ -4138,6 +4291,7 @@ export function Dashboard() {
 			                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px', minWidth: 0, width: '100%' }}>
 		                                                            {uniqueSchedules
                                                                 .filter(scheduledAssessment => {
+                                                                    if (hasAssessmentEvent) return false;
                                                                     const ui = getAssessmentUiState(scheduledAssessment);
                                                                     return ui.isCheckingPresence || !ui.hasAssessmentEvent;
                                                                 })
@@ -4217,17 +4371,28 @@ export function Dashboard() {
 		                                                                );
 		                                                            })}
 			                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-			                                                                <button
-			                                                                    type="button"
-			                                                                    className="btn btn-secondary btn-sm"
-				                                                                    title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
-			                                                                    onClick={(e) => {
-			                                                                        e.stopPropagation();
-			                                                                        toggleExpandAssessment(assessment);
-			                                                                    }}
-			                                                                >
-			                                                                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
-			                                                                </button>
+			                                                                {(() => {
+			                                                                    const _ak = getAssocKey(assessment);
+			                                                                    const _bundle = associatedByEnrollment[_ak];
+			                                                                    const _isLoading = !!_bundle?.loading;
+			                                                                    return (
+			                                                                        <button
+			                                                                            type="button"
+			                                                                            className="btn btn-secondary btn-sm"
+				                                                                            title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
+			                                                                            disabled={_isLoading}
+			                                                                            onClick={(e) => {
+			                                                                                e.stopPropagation();
+			                                                                                toggleExpandAssessment(assessment);
+			                                                                            }}
+			                                                                        >
+			                                                                            {_isLoading
+			                                                                                ? <><span style={{ width: 12, height: 12, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite', marginRight: 6, verticalAlign: 'middle' }} />Loading...</>
+			                                                                                : expandedAssignments[_ak] ? 'Hide Associated Assessments' : 'Show Associated Assessments'
+			                                                                            }
+			                                                                        </button>
+			                                                                    );
+			                                                                })()}
 			                                                            </div>
 			                                                            {supportsAssociatedAssessments(assessment) && expandedAssignments[getAssocKey(assessment)] && (
 				                                                                <div
@@ -4258,13 +4423,24 @@ export function Dashboard() {
 				                                            </p>
 				                                            )}
 	                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-	                                                <button
-	                                                    className="btn btn-secondary btn-sm"
-		                                                    title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
-	                                                    onClick={(e) => { e.stopPropagation(); toggleExpandAssessment(assessment); }}
-	                                                >
-	                                                    {expandedAssignments[getAssocKey(assessment)] ? 'Hide Associated Assessments' : 'Show Associated Assessments'}
-	                                                </button>
+	                                                {(() => {
+	                                                    const _ak2 = getAssocKey(assessment);
+	                                                    const _bundle2 = associatedByEnrollment[_ak2];
+	                                                    const _isLoading2 = !!_bundle2?.loading;
+	                                                    return (
+	                                                        <button
+	                                                            className="btn btn-secondary btn-sm"
+		                                                            title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
+	                                                            disabled={_isLoading2}
+	                                                            onClick={(e) => { e.stopPropagation(); toggleExpandAssessment(assessment); }}
+	                                                        >
+	                                                            {_isLoading2
+	                                                                ? <><span style={{ width: 12, height: 12, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite', marginRight: 6, verticalAlign: 'middle' }} />Loading...</>
+	                                                                : expandedAssignments[_ak2] ? 'Hide Associated Assessments' : 'Show Associated Assessments'
+	                                                            }
+	                                                        </button>
+	                                                    );
+	                                                })()}
 	                                            </div>
 	            {supportsAssociatedAssessments(assessment) && expandedAssignments[getAssocKey(assessment)] && (
 	                <div onClick={(e) => e.stopPropagation()} style={{ marginTop: '10px', width: '100%', background: '#f8f9fa', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
@@ -4522,6 +4698,7 @@ export function Dashboard() {
                             })()
                         )}
                     </div>
+                    </ErrorBoundary>
                 )}
             </div>
 
@@ -5503,11 +5680,27 @@ export function Dashboard() {
                             size="small"
 		                            disabled={isBaselineCreating || initMetadataLoading || lockGroup}
                         >
-                            <MenuItem value="">Select...</MenuItem>
-                            <MenuItem value={'HOSPITAL'}>Hospital</MenuItem>
-                            <MenuItem value={'CLINICS'}>Clinics</MenuItem>
-                            <MenuItem value={'EMS'}>EMS</MenuItem>
-                            <MenuItem value={'MORTUARY'}>Mortuary</MenuItem>
+<MenuItem value="">Select...</MenuItem>
+<MenuItem value={'HOSPITAL'}>Hospital</MenuItem>
+<MenuItem value={'CLINICS'}>Clinics</MenuItem>
+<MenuItem value={'EMS'}>EMS</MenuItem>
+<MenuItem value={'MORTUARY'}>Mortuary</MenuItem>
+<MenuItem value={'OBGYN'}>OBGYN</MenuItem>
+<MenuItem value={'PHYSIOTHERAPY'}>Physiotherapy</MenuItem>
+<MenuItem value={'RADIOLOGY'}>Radiology</MenuItem>
+<MenuItem value={'PRIVATE_LAB'}>Private Lab</MenuItem>
+<MenuItem value={'GENERAL_PRACTICE'}>General Practice</MenuItem>
+<MenuItem value={'PRIVATE_DIETETIC'}>Private Dietetic</MenuItem>
+<MenuItem value={'MENTAL_HEALTH'}>Mental Health</MenuItem>
+<MenuItem value={'EYE'}>Eye</MenuItem>
+<MenuItem value={'HOSPICE_PALLIATIVE'}>Hospice & Palliative</MenuItem>
+<MenuItem value={'OCCUPATIONAL_HEALTH'}>Occupational Health</MenuItem>
+<MenuItem value={'UROLOGY_NEPHR'}>Urology & Nephrology</MenuItem>
+<MenuItem value={'ORAL'}>Oral</MenuItem>
+<MenuItem value={'IMCI'}>IMCI</MenuItem>
+<MenuItem value={'EMONC'}>EMONC</MenuItem>
+<MenuItem value={'ONCOLOGY'}>Oncology</MenuItem>
+<MenuItem value={'PAEDIATRIC'}>Paediatric</MenuItem>
                         </TextField>
                     </div>
 	                  	                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (

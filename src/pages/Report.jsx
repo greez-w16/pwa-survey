@@ -42,6 +42,21 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   EMS: 'emsStageU11',
   MORTUARY: 'morStageU11',
   OBGYN: 'obgStageU11',
+  PHYSIOTHERAPY: 'phyStageU11',
+  RADIOLOGY: 'radStageU11',
+  PRIVATE_LAB: 'prlStageU11',
+  GENERAL_PRACTICE: 'gepStageU11',
+  PRIVATE_DIETETIC: 'prdStageU11',
+  MENTAL_HEALTH: 'mehStageU11',
+  EYE: 'eyeStageU11',
+  HOSPICE_PALLIATIVE: 'hopStageU11',
+  OCCUPATIONAL_HEALTH: 'ochStageU11',
+  UROLOGY_NEPHR: 'urnStageU11',
+  ORAL: 'oraStageU11',
+  IMCI: 'imcStageU11',
+  EMONC: 'emoStageU11',
+  ONCOLOGY: 'oncStageU11',
+  PAEDIATRIC: 'paeStageU11'
 };
 
 const toFacilityGroupKey = (value) => {
@@ -52,6 +67,8 @@ const toFacilityGroupKey = (value) => {
   if (t.includes('ems') || t === 'se' || t.includes(' se')) return 'EMS';
   if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
   if (t.includes('obg')) return 'OBGYN';
+  if (t.includes('oncology') || t.includes('onc')) return 'ONCOLOGY';
+  if (t.includes('paediatric') || t.includes('pae') || t.includes('pediatric') || t.includes('ped')) return 'PAEDIATRIC';
   return String(value || '').trim().toUpperCase();
 };
 
@@ -73,6 +90,7 @@ export default function Report() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [metadataLoading, setMetadataLoading] = useState(false);
+  const [metadataFetchAttempted, setMetadataFetchAttempted] = useState(false);
   const [error, setError] = useState(null);
   const [facilityOptions, setFacilityOptions] = useState([]); // [{id, name}]
   const [selectedFacilityId, setSelectedFacilityId] = useState('');
@@ -126,11 +144,19 @@ export default function Report() {
   const stageIdFromGroup = queryFacilityGroupKey ? getSurveyProgramStageIdForGroup(queryFacilityGroupKey) : '';
   const stageId = reportQueryParams.programStageId || stageIdFromGroup || configuration?.programStage?.id || '';
   const metadataReadyForStage = !stageId || configuration?.programStage?.id === stageId;
+  // True once a metadata fetch attempt has completed (success or failure) — allows
+  // auto-generate to proceed even if the fetch failed and the IDs never matched.
+  const metadataCanProceed = metadataReadyForStage || metadataFetchAttempted;
 
   useEffect(() => {
-    if (!stageId || configuration?.programStage?.id === stageId) return undefined;
+    if (!stageId || configuration?.programStage?.id === stageId) {
+      // Already ready — mark as attempted so auto-generate is unblocked.
+      setMetadataFetchAttempted(true);
+      return undefined;
+    }
     let cancelled = false;
     setMetadataLoading(true);
+    setMetadataFetchAttempted(false);
     api.getFormMetadata(stageId)
       .then((metadata) => {
         if (cancelled) return;
@@ -145,7 +171,11 @@ export default function Report() {
         if (!cancelled) showToast?.('Failed to load the selected programme stage metadata for this report.', 'error');
       })
       .finally(() => {
-        if (!cancelled) setMetadataLoading(false);
+        if (!cancelled) {
+          setMetadataLoading(false);
+          // Allow auto-generate to proceed regardless of fetch outcome.
+          setMetadataFetchAttempted(true);
+        }
       });
     return () => { cancelled = true; };
   }, [stageId, configuration?.programStage?.id, configuration?.program, configuration?.organisationUnits, programId, setConfiguration, showToast]);
@@ -265,6 +295,7 @@ export default function Report() {
     if (t.includes('clinic')) return 'CLINICS';
     if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'EMS';
     if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
+    if (t.includes('obg')) return 'OBGYN';
     return null;
   };
 
@@ -343,7 +374,7 @@ export default function Report() {
   const handleGenerate = () => {
     (async () => {
       if (!selectedFacilityId) { showToast?.('Please select a facility.', 'warning'); return; }
-	      if (!metadataReadyForStage) { showToast?.('Report setup is still loading. Please try again in a moment.', 'info'); return; }
+	      if (!metadataCanProceed) { showToast?.('Report setup is still loading. Please try again in a moment.', 'info'); return; }
       const periodStart = parseDateStart(startDate);
       const periodEnd = parseDateEnd(endDate);
       if (periodStart && periodEnd && periodStart > periodEnd) { showToast?.('Start date must be before end date.', 'warning'); return; }
@@ -843,14 +874,14 @@ export default function Report() {
 	  }, [reportQueryParams]);
 
 	  useEffect(() => {
-	    if (!autoGenerateRequested || !selectedFacilityId || metadataLoading || !metadataReadyForStage) return undefined;
+	    if (!autoGenerateRequested || !selectedFacilityId || metadataLoading || !metadataCanProceed) return undefined;
 	    const t = setTimeout(() => {
 	      handleGenerate();
 	      setAutoGenerateRequested(false);
 	    }, 0);
 	    return () => clearTimeout(t);
 	  // eslint-disable-next-line react-hooks/exhaustive-deps
-	  }, [autoGenerateRequested, selectedFacilityId, startDate, endDate, metadataLoading, metadataReadyForStage]);
+	  }, [autoGenerateRequested, selectedFacilityId, startDate, endDate, metadataLoading, metadataCanProceed]);
 
   const scoring = useAssessmentScoring(reportAssessment || { sections: [] });
   const baselineScoring = useAssessmentScoring(baselineAssessment || { sections: [] });
@@ -1961,7 +1992,7 @@ export default function Report() {
     const baselineOverall = Number.isFinite(baselineScoring?.overall?.percent) ? baselineScoring.overall.percent.toFixed(0) : '';
     const latestOverall = Number.isFinite(scoring?.overall?.percent) ? scoring.overall.percent.toFixed(0) : '';
 
-    const buildCriterionRows = (criteriaList) => criteriaList.map((criterion) => {
+    const buildCriterionRows = (criteriaList, baselineLookup = {}) => criteriaList.map((criterion) => {
       const code = normalizeCriterionCode(criterion?.code || criterion?.id || '');
 	      const label = criterionLabelForCode(code, criterion);
       const response = normalizeResponseLabel(criterion?.response || 'NA');
@@ -1969,9 +2000,31 @@ export default function Report() {
 	      const scoreValue = [scoreInfo.displayPoints, scoreInfo.points, scoreInfo.rootDraftPoints, scoreInfo.draftAvg]
 	        .find(value => value !== undefined && value !== null && value !== '' && Number.isFinite(Number(value)));
 	      const scoreText = scoreValue !== undefined ? Number(scoreValue).toFixed(0) : response;
+      // Baseline data for this criterion
+      const baselineCriterion = baselineLookup[code] || null;
+      const baselineResponse = baselineCriterion ? normalizeResponseLabel(baselineCriterion?.response || 'NA') : '';
+      const baselineDeficiencyText = baselineCriterion
+        ? (baselineResponse === 'C'
+            ? 'Compliant at baseline.'
+            : baselineResponse && baselineResponse !== 'NA'
+              ? `Baseline: ${baselineResponse}. Criterion required follow-up at baseline.`
+              : 'No baseline data.')
+        : 'No baseline data.';
+      const baselineResponseStyle = baselineResponse === 'NC'
+        ? 'background:#fee2e2;color:#991b1b;font-weight:bold;text-align:center;'
+        : baselineResponse === 'PC'
+          ? 'background:#fef3c7;color:#92400e;font-weight:bold;text-align:center;'
+          : baselineResponse === 'C'
+            ? 'background:#d1fae5;color:#065f46;font-weight:bold;text-align:center;'
+            : 'color:#6b7280;text-align:center;font-style:italic;';
+      // Baseline date — shared across the whole assessment
+      const baselineDateText = reportInfo?.baselineDate ? formatCoverDate(reportInfo.baselineDate) : '—';
       return `
         <tr>
 	          <td><div>${escapeHtml(code)}</div><div class="criterion-human-label">${escapeHtml(label)}</div><div>Score: ${escapeHtml(scoreText)}</div></td>
+          <td style="${baselineResponseStyle}">${escapeHtml(baselineResponse || '—')}</td>
+          <td>${escapeHtml(baselineDeficiencyText)}</td>
+          <td style="text-align:center;color:#374151;">${escapeHtml(baselineDateText)}</td>
           <td>${escapeHtml(response === 'C' ? 'Criterion reviewed as compliant.' : `Criterion requires follow-up. Current response: ${response}.`)}</td>
           <td>${escapeHtml(response === 'C' ? 'Maintain compliance and supporting evidence.' : 'Develop and implement corrective action; update evidence for reassessment.')}</td>
           <td></td>
@@ -2059,11 +2112,11 @@ export default function Report() {
       const seBaselineCriteriaByCode = criteriaByCode(seBaselineCriteria);
       const seImmediateCriteria = seCriteria.filter(c => ['NC', 'PC'].includes(normalizeResponseLabel(c?.response)));
       const seReviewCriteria = seCriteria.filter(c => !['NC', 'PC'].includes(normalizeResponseLabel(c?.response))).slice(0, 12);
-      const seImmediateRows = buildCriterionRows(seImmediateCriteria.slice(0, 10)) || `
-        <tr><td colspan="9">No immediate-response criteria identified for this service element.</td></tr>
+      const seImmediateRows = buildCriterionRows(seImmediateCriteria.slice(0, 10), seBaselineCriteriaByCode) || `
+        <tr><td colspan="12">No immediate-response criteria identified for this service element.</td></tr>
       `;
-      const seReviewRows = buildCriterionRows(seReviewCriteria) || `
-        <tr><td colspan="9">No review criteria available for this service element.</td></tr>
+      const seReviewRows = buildCriterionRows(seReviewCriteria, seBaselineCriteriaByCode) || `
+        <tr><td colspan="12">No review criteria available for this service element.</td></tr>
       `;
       const seSummaryRow = `
         <tr>
@@ -2154,8 +2207,11 @@ export default function Report() {
               <thead>
                 <tr>
                   <th class="criterion-col">Criterion</th>
-                  <th class="deficiency-col">Criterion / Deficiency Identified</th>
-                  <th class="action-col">Action / Recommendation</th>
+                  <th class="baseline-response-col">Baseline<br />Response</th>
+                  <th class="baseline-action-col">Baseline<br />Finding</th>
+                  <th class="baseline-date-col">Baseline<br />Date</th>
+                  <th class="deficiency-col">Current Deficiency<br />Identified</th>
+                  <th class="action-col">Current Action /<br />Recommendation</th>
                   <th class="small-col">Responsible</th>
                   <th class="small-col">Date Due</th>
                   <th class="small-col">Date<br />Reassessed</th>
@@ -2171,8 +2227,11 @@ export default function Report() {
               <thead>
                 <tr>
                   <th class="criterion-col">Criterion</th>
-                  <th class="deficiency-col">Criterion / Deficiency Identified</th>
-                  <th class="action-col">Action / Recommendation</th>
+                  <th class="baseline-response-col">Baseline<br />Response</th>
+                  <th class="baseline-action-col">Baseline<br />Finding</th>
+                  <th class="baseline-date-col">Baseline<br />Date</th>
+                  <th class="deficiency-col">Current Deficiency<br />Identified</th>
+                  <th class="action-col">Current Action /<br />Recommendation</th>
                   <th class="small-col">Responsible</th>
                   <th class="small-col">Date Due</th>
                   <th class="small-col">Date<br />Reassessed</th>
@@ -2331,11 +2390,14 @@ export default function Report() {
             .se-output-heading { font-size: 10px; margin: 4px 0 2px; font-weight: bold; }
             .se-output-subheading { font-size: 9px; margin: 2px 0; }
 	            .criterion-human-label { font-size: 6px; line-height: 1.1; color: #374151; margin: 1px 0; }
-            .se-criteria-table .criterion-col { width: 12%; }
-            .se-criteria-table .deficiency-col { width: 20%; }
-            .se-criteria-table .action-col { width: 20%; }
-            .se-criteria-table .small-col { width: 8%; }
-            .se-criteria-table .progress-col { width: 8%; }
+            .se-criteria-table .criterion-col { width: 11%; }
+            .se-criteria-table .deficiency-col { width: 16%; }
+            .se-criteria-table .action-col { width: 16%; }
+            .se-criteria-table .baseline-response-col { width: 4%; text-align: center; }
+            .se-criteria-table .baseline-action-col { width: 13%; }
+            .se-criteria-table .baseline-date-col { width: 6%; text-align: center; }
+            .se-criteria-table .small-col { width: 6%; }
+            .se-criteria-table .progress-col { width: 6%; }
             .se-chart-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; text-align: center; }
             .se-chart-title { font-size: 24px; font-weight: bold; margin: 0 0 4px; }
             .se-chart-wrapper { width: 260mm; height: 138mm; margin: 0 auto; }
@@ -2599,10 +2661,10 @@ export default function Report() {
         <Button
           variant="contained"
           color="primary"
-		          disabled={loading || metadataLoading || !metadataReadyForStage || reportLoading || !selectedFacilityId}
+		          disabled={loading || metadataLoading || !metadataCanProceed || reportLoading || !selectedFacilityId}
           onClick={handleGenerate}
         >
-	          {metadataLoading || !metadataReadyForStage ? 'Loading setup…' : (reportLoading ? 'Generating…' : 'Generate')}
+	          {metadataLoading && !metadataCanProceed ? 'Loading setup…' : (reportLoading ? 'Generating…' : 'Generate')}
         </Button>
         {reportInfo && (
           <Button
