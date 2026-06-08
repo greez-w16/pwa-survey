@@ -25,6 +25,12 @@ const readRequestBody = (req) => new Promise((resolve, reject) => {
   req.on('error', reject)
 })
 
+const isLoopbackAddress = (address = '') => (
+  address === '127.0.0.1'
+  || address === '::1'
+  || address === '::ffff:127.0.0.1'
+)
+
 const attachAssetConfigExportEndpoint = (server) => {
   server.middlewares.use('/__qims/export-facility-config-assets', async (req, res) => {
     if (req.method !== 'POST') {
@@ -32,6 +38,24 @@ const attachAssetConfigExportEndpoint = (server) => {
       res.setHeader('Content-Type', 'application/json')
       res.end(JSON.stringify({ error: 'Method not allowed' }))
       return
+    }
+
+    if (!isLoopbackAddress(req.socket?.remoteAddress)) {
+      res.statusCode = 403
+      res.setHeader('Content-Type', 'application/json')
+      res.end(JSON.stringify({ error: 'Local requests only' }))
+      return
+    }
+
+    const origin = req.headers.origin
+    if (origin) {
+      const expectedOrigin = `http://${req.headers.host}`
+      if (origin !== expectedOrigin) {
+        res.statusCode = 403
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ error: 'Cross-origin requests are not allowed' }))
+        return
+      }
     }
 
     try {
@@ -82,10 +106,10 @@ export default defineConfig({
   ],
   base: '/pwa-survey/',
   server: {
-    host: '0.0.0.0', // Expose to network
+    host: '127.0.0.1',
     port: 5173,
     strictPort: true, // Fail if port is busy
-    allowedHosts: true,
+    allowedHosts: ['localhost', '127.0.0.1'],
     hmr: true,
 
     proxy: {
@@ -118,9 +142,9 @@ export default defineConfig({
     }
   },
   preview: {
-    host: '0.0.0.0',
+    host: '127.0.0.1',
     port: 5173,
-    allowedHosts: true,
+    allowedHosts: ['localhost', '127.0.0.1'],
     proxy: {
       '/qims': {
         target: QIMS_HOST,
