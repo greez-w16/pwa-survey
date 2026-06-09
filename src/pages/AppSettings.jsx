@@ -451,7 +451,7 @@ const EditableTextCell = ({
     );
 };
 
-export function Dashboard() {
+export function AppSettings() {
 	    const navigate = useNavigate();
 	    const [searchParams] = useSearchParams();
 	    const {
@@ -498,7 +498,6 @@ export function Dashboard() {
     const [createErrorInfo, setCreateErrorInfo] = useState(null);
     const [pendingProvisionedBundle, setPendingProvisionedBundle] = useState(null);
     const [repairingAssessments, setRepairingAssessments] = useState({});
-    const [localEditedTeams, setLocalEditedTeams] = useState({});
     // Initiate Survey form state
     const [initSurveyType, setInitSurveyType] = useState('');
     const [initFacilityGroup, setInitFacilityGroup] = useState(''); // HOSPITAL|CLINICS|EMS|MORTUARY
@@ -1014,7 +1013,7 @@ export function Dashboard() {
         const candidates = [];
         const preferred = toFacilityGroupKey(preferredNs);
         if (preferred) candidates.push(preferred);
-        ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY', 'EYE', 'DENTAL', 'PHARMACY', 'LABORATORY', 'OBGYN', 'ONCOLOGY', 'PAEDIATRIC', 'GENERAL'].forEach(ns => { if (!candidates.includes(ns)) candidates.push(ns); });
+        ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].forEach(ns => { if (!candidates.includes(ns)) candidates.push(ns); });
         for (const ns of candidates) {
             try {
                 const value = await api.getDataStoreItem(ns, teiId);
@@ -1260,10 +1259,9 @@ export function Dashboard() {
 			        pending: hookPending = [],
 			        stats: hookStats = null,
 			        loading: hookLoading = false,
-			        error: hookError = null,
-			        debug: hookDebug = null,
+				        error: hookError = null,
+				        debug: hookDebug = null,
 			        respondToAssignment,
-                    refresh: hookRefresh,
 			    } = assessmentHook || {};
 
 			    // Legacy fallback: if the hook hasn't provided any assignments yet
@@ -1452,6 +1450,7 @@ export function Dashboard() {
 		    React.useEffect(() => {
 		        if (assessmentsLoading) return;
 		        
+		        // 1. Gather all top-level and duplicate sub-assessments
 		        const topLevelList = [
 		            ...(pendingAssessments || []),
 		            ...(upcomingAssessments || []),
@@ -1641,40 +1640,6 @@ export function Dashboard() {
 			    const key = getAssessmentFacilityGroupKey(assessment);
 			    return key ? getFacilityGroupLabel(key) : (raw || '-');
 			};
-
-			React.useEffect(() => {
-			    if (assessmentsLoading) return;
-			    const topLevelList = [
-			        ...(pendingAssessments || []),
-			        ...(upcomingAssessments || []),
-			        ...(accredAssignments || [])
-			    ];
-			    const fetchMissingTeams = async () => {
-			        const updates = {};
-			        let changed = false;
-			        const needsFetch = topLevelList.filter(a => !a.team || a.team.length === 0);
-			        if (needsFetch.length === 0) return;
-			        await Promise.all(needsFetch.map(async (a) => {
-			            const teiId = a.scheduleTeiId || a.trackedEntityInstance;
-			            if (!teiId) return;
-			            if (localEditedTeams[teiId] !== undefined) return;
-			            const groupVal = getAssignmentFacilityGroupValue(a);
-			            const { plan } = await findAssessmentPlanForTei({ teiId, preferredNs: groupVal });
-			            if (plan && Array.isArray(plan.team)) {
-			                updates[teiId] = plan.team;
-			                changed = true;
-			            } else {
-			                updates[teiId] = [];
-			                changed = true;
-			            }
-			        }));
-			        if (changed) {
-			            setLocalEditedTeams(prev => ({ ...prev, ...updates }));
-			        }
-			    };
-			    fetchMissingTeams();
-			    // eslint-disable-next-line react-hooks/exhaustive-deps
-			}, [assessmentsLoading, pendingAssessments, upcomingAssessments, accredAssignments, getAssignmentFacilityGroupValue, findAssessmentPlanForTei]);
 
 		const getAssignmentTypeValue = (assessment) => (
 		    assessment?.typeOfAssessment
@@ -1898,12 +1863,6 @@ export function Dashboard() {
 	                        const evTeam = (Array.isArray(ev.team) && ev.team.length > 0)
 	                            ? ev.team
 	                            : (Array.isArray(matchedSchedule.team) ? matchedSchedule.team : []);
-	                        const isUserInTeam = evTeam.length === 0 || evTeam.some(t => {
-	                            const rawId = String(t.assignedUserId || '').toLowerCase();
-	                            const curId = String(user?.id || '').toLowerCase();
-	                            const curUsername = String(user?.username || '').toLowerCase();
-	                            return rawId === curId || rawId.includes(curUsername);
-	                        });
 	                        const evsAuth = Array.isArray(matchedSchedule.team) ? matchedSchedule.team : [];
 	                        const parseD = (d) => (d ? new Date(d) : null);
 	                        const ds = evsAuth.map(e => parseD(e.eventDate || e.occurredAt || e.completedDate || e.scheduledAt || e.updatedAt)).filter(Boolean).sort((a, b) => a - b);
@@ -1914,16 +1873,9 @@ export function Dashboard() {
 	                            <tr
 	                                className={`associated-assessment-row ${loadingSurveyRow === (ev.event || ev.enrollmentId || ev.enrollment || ev.trackedEntityInstance || '') ? 'loading' : ''}`}
 	                                key={`survey-${ev.enrollmentId || ev.enrollment || ev.event || ev.trackedEntityInstance}`}
-	                                onClick={() => { if (isUserInTeam) openAssociatedSurvey(matchedSchedule, ev); }}
-	                                style={{ 
-                                        borderTop: '1px dashed #eee', 
-                                        cursor: isUserInTeam ? 'pointer' : 'not-allowed',
-                                        backgroundColor: isUserInTeam ? 'transparent' : '#fee2e2'
-                                    }}
-	                                title={isUserInTeam 
-                                        ? `Assessment ID: ${ev._displayEventId || ev.event || '-'}\nProgram: ${ev.programId || '-'}\nTEI: ${ev.trackedEntityInstance || '-'}\n(Click to open this survey for editing)`
-                                        : 'You are not a member of the team for this assessment.'
-                                    }
+	                                onClick={() => openAssociatedSurvey(matchedSchedule, ev)}
+	                                style={{ borderTop: '1px dashed #eee', cursor: 'pointer' }}
+	                                title={`Assessment ID: ${ev._displayEventId || ev.event || '-'}\nProgram: ${ev.programId || '-'}\nTEI: ${ev.trackedEntityInstance || '-'}\n(Click to open this survey for editing)`}
 	                            >
 	                                <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{ev._assessmentDate ? new Date(ev._assessmentDate).toLocaleDateString() : 'N/A'}</td>
 	                                <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{rowAuthDates.start || 'N/A'}</td>
@@ -1938,7 +1890,6 @@ export function Dashboard() {
 	                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 	                                        <button
 	                                            className="btn btn-secondary btn-xs"
-                                                disabled={!isUserInTeam}
 	                                            onClick={(e) => {
 	                                                e.stopPropagation();
 	                                                const baselineDate = ev._baselineDate || null;
@@ -1963,18 +1914,15 @@ export function Dashboard() {
 	                                        </button>
 	                                        <button
 	                                            className="btn btn-secondary btn-xs"
-                                                disabled={!isUserInTeam || !isLead}
 	                                            onClick={(e) => {
 	                                                e.stopPropagation();
 		                                                openEditSeAssignments(matchedSchedule, ev, getAssociatedAssessmentGroupValue(ev), getTypeValue(ev));
 	                                            }}
-	                                            title={!isLead ? "Only Team Leads can edit SE Assignments" : undefined}
 	                                        >
 	                                            Edit SE Assignments
 	                                        </button>
                                         <button
                                             className="btn btn-secondary btn-xs"
-                                            disabled={!isUserInTeam}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 openAssociatedSurvey(matchedSchedule, ev);
@@ -2701,7 +2649,7 @@ export function Dashboard() {
             // Try selected group first, else probe all
             const candidates = [];
             if (initFacilityGroup) candidates.push(String(initFacilityGroup).toUpperCase());
-            ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY', 'EYE', 'DENTAL', 'PHARMACY', 'LABORATORY', 'OBGYN', 'ONCOLOGY', 'PAEDIATRIC', 'GENERAL'].forEach(ns => { if (!candidates.includes(ns)) candidates.push(ns); });
+            ['HOSPITAL','CLINICS','EMS','MORTUARY'].forEach(ns => { if (!candidates.includes(ns)) candidates.push(ns); });
             let found = null; let nsHit = null;
             for (const ns of candidates) {
                 try {
@@ -2899,17 +2847,7 @@ export function Dashboard() {
                 createdAt: existingPlan?.createdAt || new Date().toISOString(),
             };
             await api.upsertDataStoreItem(ns, teiId, body);
-            
-            // Clean up duplicates from other namespaces to prevent flip-flopping
-            const candidateNamespaces = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'];
-            for (const otherNs of candidateNamespaces) {
-                if (otherNs !== ns) {
-                    try { await api.deleteDataStoreItem(otherNs, teiId); } catch (_) {}
-                }
-            }
             showToast?.('SE assignments updated. Existing assessment events were not recreated.', 'success');
-            setLocalEditedTeams(prev => ({ ...prev, [teiId]: body.team || [] }));
-            if (hookRefresh) await hookRefresh();
             cancelCreateBaseline();
         } catch (e) {
             console.warn('saveEditedSeAssignments failed', e);
@@ -3101,19 +3039,7 @@ export function Dashboard() {
                 createdByName: user?.displayName || user?.username || null,
                 createdAt: new Date().toISOString(),
             };
-            try { 
-                await api.upsertDataStoreItem(ns, teiId, body); 
-                
-                // Clean up duplicates from other namespaces to prevent flip-flopping
-                const candidateNamespaces = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'];
-                for (const otherNs of candidateNamespaces) {
-                    if (otherNs !== ns) {
-                        try { await api.deleteDataStoreItem(otherNs, teiId); } catch (_) {}
-                    }
-                }
-            } catch (e) { 
-                console.warn('DataStore upsert/cleanup failed (non-fatal)', e); 
-            }
+            try { await api.upsertDataStoreItem(ns, teiId, body); } catch (e) { console.warn('DataStore upsert failed (non-fatal)', e); }
 
             // Prepare Assessment/Facility Details values to stamp onto every created event.
             const assessmentDetailsDataValues = buildAssessmentDetailsDataValues(pendingOpenAssessment, {
@@ -4224,1425 +4150,791 @@ export function Dashboard() {
     };
 
     return (
-        <div className="home-page dashboard-container">
-            {loadingSurveyInfo && (
-                <div className="dashboard-loading-overlay">
-                    <div className="dashboard-loading-card">
-                        <div className="dashboard-loading-spinner" />
-                        <div className="dashboard-loading-message">{loadingSurveyInfo}</div>
-                    </div>
-                </div>
-            )}
-            {/* Program Header */}
-	            <div className="program-header">
-	                <div className="program-info">
-	                    <h1 className="program-title">
-	                        {(configuration?.program?.displayName && configuration.program.displayName !== 'Facility Assessment Data Manifest Version')
-	                            ? configuration.program.displayName
-	                            : 'MOH Survey Dashboard'}
-	                    </h1>
-	                </div>
-                <div className="quick-actions">
-                    <Tooltip title="Refresh/Sync Data">
-                        <IconButton onClick={handleSync} color="primary" className="action-icon-btn">
-                            <CloudSyncIcon />
-                        </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Report">
-                        <IconButton onClick={() => navigate('/report')} color="primary" className="action-icon-btn">
-                            <AssessmentIcon />
-                        </IconButton>
-                    </Tooltip>
+<div className="app-settings-container" style={{ padding: 16 }}>
+<h2>App Settings</h2>
 
-	                    <Tooltip title="Logout">
-	                        <IconButton onClick={handleLogout} color="primary" className="action-icon-btn">
-	                            <LogoutIcon />
-	                        </IconButton>
-	                    </Tooltip>
-                </div>
-            </div>
-
-            {/* Stats Cards */}
-            <div className="stats-dashboard">
-                <div className="stat-card total">
-	                    <div className="stat-icon"><FactCheckIcon fontSize="inherit" /></div>
-                    <div className="stat-content">
-                        <h3>{dashboardStats.totalEvents}</h3>
-                        <p>Total Surveys</p>
-                    </div>
-                </div>
-                <div className="stat-card pending">
-	                    <div className="stat-icon"><EditNoteIcon fontSize="inherit" /></div>
-                    <div className="stat-content">
-                        <h3>{dashboardStats.pendingEvents}</h3>
-                        <p>Drafts</p>
-                    </div>
-                </div>
-                <div className="stat-card upcoming">
-	                    <div className="stat-icon"><EventAvailableIcon fontSize="inherit" /></div>
-                    <div className="stat-content">
-                        <h3>{assessmentStats.upcoming}</h3>
-                        <p>Upcoming Assessments</p>
-                    </div>
-                </div>
-                <div className="stat-card urgent">
-	                    <div className="stat-icon"><NotificationsActiveIcon fontSize="inherit" /></div>
-                    <div className="stat-content">
-                        <h3>{assessmentStats.pending}</h3>
-                        <p>Pending Actions</p>
-                    </div>
-                </div>
-            </div>
-            {/* Accreditation Assessments List */}
-            <div className={`forms-section assessments-section ${isAccredAssessmentsCollapsed ? 'collapsed' : ''}`}>
-                <div className="section-header" onClick={() => setIsAccredAssessmentsCollapsed(!isAccredAssessmentsCollapsed)} style={{ cursor: 'pointer' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{ transform: isAccredAssessmentsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)', transition: 'transform 0.2s ease', display: 'inline-block' }}>▼</span>
-                        <h3>Assigned Accreditation Assessments</h3>
-                    </div>
-                </div>
-                {!isAccredAssessmentsCollapsed && (
-                    <div className="forms-list">
-                        {accredLoading ? (
-                            <div className="loading">Loading Accreditation Assessments...</div>
-                        ) : accredAssignments.length === 0 ? (
-                            <div className="empty-state">No accreditation assessments assigned</div>
-                        ) : (
-                            accredAssignments.map((assessment) => {
-                                const facilityId = assessment.facilityId || assessment.orgUnitId || assessment.orgUnit || '';
-                                const displayId = facilityId && facilityId !== 'N/A' ? ` (${facilityId})` : '';
-                                const isSynced = false;
-	                                const actionKey = getAssessmentActionKey(assessment);
-                                const isInitiating = initiatingAssessmentKey === actionKey;
-	                                const assocKey = getAssocKey(assessment);
-	                                const presence = assessmentEventPresenceByKey?.[assocKey];
-	                                const hasAssessmentEvent = presence?.hasAssessmentEvent === true;
-	                                const isCheckingPresence = !presence || presence.loading;
-		                                const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i, '').toUpperCase();
-		                                const isLead = /LEAD|LEADER/.test(roleNorm);
-                                return (
-                                    <div key={`accred-${assessment.enrollment || assessment.eventId || assessment.trackedEntityInstance}`} className="form-item assessment-item">
-                                        <div className="form-info">
-                                            <div className="form-header-row">
-                                                <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                    <h4>{assessment.orgUnitName}{displayId}</h4>
-                                                    {assessment.parentOrgUnitName && (
-                                                        <>
-                                                            <span style={{ fontSize: '0.85em', color: '#666', marginTop: '-4px' }}>
-                                                                District: {assessment.parentOrgUnitName}
-                                                                {assessment.myTeamRole ? (
-                                                                    <> {' \u2022 '} Role: {String(assessment.myTeamRole).replace(/^FAC_ASS_ROLE_/i,'').replace(/\s+/g,'_').replace(/_/g,' ').toUpperCase()} </>
-                                                                ) : null}
-                                                                {(isCheckingPresence || (!hasAssessmentEvent && isLead)) && (
-                                                                    <button
-                                                                        className="btn btn-primary btn-xs"
-                                                                        disabled={isCheckingPresence || isInitiating}
-                                                                        onClick={() => handleOpenAssessment(assessment, { forceDialog: true })}
-                                                                    >
-                                                                        {isCheckingPresence ? 'Checking assessment\u2026' : (isInitiating ? 'Opening\u2026' : 'Initiate Survey')}
-                                                                    </button>
-                                                                )}
-                                                            </span>
-                                                        </>
-                                                    )}
-                                                </div>
-                                                <div className="form-status success">ACCREDITATION</div>
-                                            </div>
-                                            <p>Enrollment: {assessment.enrollment}</p>
-                                        </div>
-                                    </div>
-                                );
-                            })
-                        )}
-                    </div>
-                )}
-            </div>
-
-            {/* Assessments List */}
-            <div className={`forms-section assessments-section ${isAssessmentsCollapsed ? 'collapsed' : ''}`}>
-                <div className="section-header" onClick={() => setIsAssessmentsCollapsed(!isAssessmentsCollapsed)} style={{ cursor: 'pointer' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                        <span style={{
-                            transform: isAssessmentsCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)',
-                            transition: 'transform 0.2s ease',
-                            display: 'inline-block'
-                        }}>▼</span>
-                        <h3>Assigned Assessments 2</h3>
-                    </div>
-
-                </div>
-		                {!isAssessmentsCollapsed && (
-		                    <div style={{ fontSize: '0.8rem', color: '#666', padding: '0.25rem 1rem' }}>
-		                        <strong>User:</strong> {user?.username || 'unknown'} ({user?.id || 'no-id'})
-		                    </div>
-		                )}
-                {!isAssessmentsCollapsed && (
-                    <ErrorBoundary>
-                    <div className="forms-list">
-	                        {hookError && (
-	                            <div style={{ margin: '0 1rem 0.75rem', padding: '8px 10px', borderRadius: 6, background: '#fef2f2', border: '1px solid #fecaca', color: '#991b1b', fontSize: '0.85rem' }}>
-	                                Failed to load assigned assessments: {hookError.message || String(hookError)}
-	                            </div>
-	                        )}
-	                        {!hookError && hookDebug && hookDebug.teamEventsCount === 0 && (
-	                            <div style={{ margin: '0 1rem 0.75rem', padding: '8px 10px', borderRadius: 6, background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', fontSize: '0.85rem' }}>
-	                                No accepted team-assignment events were found for {user?.username || user?.id || 'this user'}.
-	                            </div>
-	                        )}
-	                        {assessmentsLoading ? (
-                            <div className="loading">Loading Assessments...</div>
-                        ) : (upcomingAssessments.length === 0 && pendingAssessments.length === 0) ? (
-                            <div className="empty-state">No assessments assigned</div>
-                        ) : (
-                            (() => {
-		                                const allUniqueAssessments = [];
-		                                const seenFacilities = new Map();
-	                                [...pendingAssessments, ...upcomingAssessments].forEach(assessment => {
-		                                    const facilityKey =
-		                                        assessment?.facilityId ||
-		                                        assessment?.orgUnitId ||
-		                                        (typeof assessment?.orgUnit === 'string' ? assessment.orgUnit : assessment?.orgUnit?.id) ||
-		                                        assessment?.orgUnitName ||
-		                                        getAssessmentActionKey(assessment);
-		                                    if (!seenFacilities.has(facilityKey)) {
-	                                        const newItem = { ...assessment, _duplicates: [assessment] };
-	                                        allUniqueAssessments.push(newItem);
-		                                        seenFacilities.set(facilityKey, newItem);
-	                                    } else {
-		                                        const existing = seenFacilities.get(facilityKey);
-	                                        if (existing) {
-	                                            existing._duplicates.push(assessment);
-	                                        }
-	                                    }
-	                                });
-
-                                return allUniqueAssessments.map(assessment => {
-                                    const draftId = `draft-assessment-${assessment.eventId}`;
-                                    const existingDraft = events.find(e => e.event === draftId);
-                                    const isSynced = existingDraft?.syncStatus === 'synced';
-	                                    const actionKey = getAssessmentActionKey(assessment);
-                                    const isInitiating = initiatingAssessmentKey === actionKey;
-	                                    const assocKey = getAssocKey(assessment);
-	                                    const presence = assessmentEventPresenceByKey?.[assocKey];
-	                                    const hasAssessmentEvent = presence?.hasAssessmentEvent === true;
-	                                    const isCheckingPresence = !presence || presence.loading;
-	                                    const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
-	                                    const isLead = /LEAD|LEADER/.test(roleNorm);
-	                                    const singleAssessmentUiState = {
-	                                        hasAssessmentEvent,
-	                                        isCheckingPresence,
-	                                        isLead,
-	                                        isInitiating,
-		                                        label: 'Initiate Survey',
-	                                    };
-	                                    const groupedSchedules = assessment._duplicates?.length > 1
-	                                        ? (() => {
-	                                            const uniqueSchedules = [];
-	                                            const seenScheduleKeys = new Map();
-	                                            (assessment._duplicates || []).forEach(item => {
-	                                                const scheduleKey = getAssessmentActionKey(item);
-	                                                const existingSchedule = seenScheduleKeys.get(scheduleKey);
-	                                                if (existingSchedule) {
-	                                                    existingSchedule._duplicates.push(item);
-	                                                    return;
-	                                                }
-	                                                const scheduleItem = { ...item, _duplicates: [item] };
-	                                                uniqueSchedules.push(scheduleItem);
-	                                                seenScheduleKeys.set(scheduleKey, scheduleItem);
-	                                            });
-	                                            return uniqueSchedules;
-	                                        })()
-	                                        : [];
-		                                    const cardOpenTarget = groupedSchedules.find(item => canOpenAssessmentFromUiState(getAssessmentUiState(item), { allowWhileChecking: true }))
-	                                        || groupedSchedules[0]
-	                                        || assessment;
-	                                    const cardOpenUiState = cardOpenTarget === assessment
-	                                        ? singleAssessmentUiState
-	                                        : getAssessmentUiState(cardOpenTarget);
-
-                                    // Robust Facility ID display
-                                    const facilityId = assessment.facilityId || assessment.orgUnitId || assessment.orgUnit || '';
-                                    const displayId = (facilityId && facilityId !== 'N/A')
-                                        ? ` (${facilityId})`
-                                        : '';
-
-		                                    const plannedDate = assessment.scheduledAt
-		                                        ? (assessment.scheduledAt.slice(0, 10))
-		                                        : 'N/A';
-		                                    const lastUpdated = assessment.updatedAt
-		                                        ? (assessment.updatedAt.slice(0, 10))
-		                                        : 'N/A';
-
-                                    return (
-	                                        <div
-	                                            key={assessment.eventId}
-	                                            className="form-item assessment-item"
-		                                            onClick={() => openAssessmentFromUiState(cardOpenTarget, cardOpenUiState, { allowWhileChecking: true })}
-	                                            onKeyDown={(e) => {
-	                                                if (e.key === 'Enter' || e.key === ' ') {
-	                                                    e.preventDefault();
-		                                                    openAssessmentFromUiState(cardOpenTarget, cardOpenUiState, { allowWhileChecking: true });
-	                                                }
-	                                            }}
-	                                            role="button"
-	                                            tabIndex={0}
-		                                            style={{ cursor: canOpenAssessmentFromUiState(cardOpenUiState, { allowWhileChecking: true }) ? 'pointer' : 'default' }}
-	                                        >
-                                            <div className="form-info">
-                                                <div className="form-header-row">
-                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
-                                                        <h4>{assessment.orgUnitName}{displayId}</h4>
-                                                        {assessment.parentOrgUnitName && (
-                                                            <>
-                                                                <span style={{ fontSize: '0.85em', color: '#666', marginTop: '-4px' }}>
-                                                                    District: {assessment.parentOrgUnitName}
-	                                                                    {assessment._duplicates?.length <= 1 && assessment.myTeamRole ? (
-                                                                        <> {' \u2022 '} Role: {String(assessment.myTeamRole).replace(/^FAC_ASS_ROLE_/i,'').replace(/\s+/g,'_').replace(/_/g,' ').toUpperCase()}</>
-                                                                    ) : null}
-                                                                </span>
-	                                                                {assessment._duplicates?.length <= 1 && assessment.isSelfAssessment && (
-                                                                    <div style={{ marginTop: '4px' }}>
-                                                                        <span style={{
-                                                                            fontSize: '0.7em',
-                                                                            fontWeight: 800,
-                                                                            color: '#1e40af',
-                                                                            background: '#dbeafe',
-                                                                            padding: '2px 8px',
-                                                                            borderRadius: '4px',
-                                                                            textTransform: 'uppercase'
-                                                                        }}>
-                                                                            Self Assessment
-                                                                        </span>
-                                                                    </div>
-                                                                )}
-
-                                                            </>
-                                                        )}
-                                                    </div>
-	                                                    <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-	                                                        {assessment._duplicates?.length > 1 ? (
-	                                                            <div className="form-status success">{new Set((assessment._duplicates || []).map(item => getAssessmentActionKey(item))).size} UNIQUE SCHEDULES</div>
-	                                                        ) : (
-	                                                            <>
-	                                                                {assessment.requiresResponse && (
-	                                                                    <div className="form-status error">ACTION REQUIRED</div>
-	                                                                )}
-		                                                            <div className={`form-status ${hasAssessmentEvent ? 'success' : 'warning'}`}>
-		                                                                {isCheckingPresence ? 'CHECKING TEI' : hasAssessmentEvent ? 'SURVEY EXISTS' : 'NEW SCHEDULED TEI'}
-		                                                            </div>
-	                                                                {isSynced && (
-	                                                                    <div className="form-status success">✓ SYNCED</div>
-	                                                                )}
-	                                                            </>
-	                                                        )}
-                                                        {renderAssessmentActionButton(assessment, singleAssessmentUiState)}
-	                                                    </div>
-                                                </div>
-		                                            {assessment._duplicates?.length > 1 ? (
-		                                                (() => {
-		                                                    const uniqueSchedules = groupedSchedules;
-			                                                    const facilityIsLead = uniqueSchedules.some(item => {
-			                                                        const roleNorm = String(item.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i, '').toUpperCase();
-			                                                        return /LEAD|LEADER/.test(roleNorm);
-			                                                    });
-		                                                    return (
-			                                                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '12px', minWidth: 0, width: '100%' }}>
-		                                                            {uniqueSchedules
-                                                                .filter(scheduledAssessment => {
-                                                                    if (hasAssessmentEvent) return false;
-                                                                    const ui = getAssessmentUiState(scheduledAssessment);
-                                                                    return ui.isCheckingPresence || !ui.hasAssessmentEvent;
-                                                                })
-                                                                .map((scheduledAssessment, scheduleIndex) => {
-		                                                                const scheduleUi = getAssessmentUiState(scheduledAssessment);
-		                                                                return (
-		                                                                    <div
-		                                                                        key={`${scheduleUi.actionKey}-${scheduleIndex}`}
-			                                                                        className="assessment-schedule-card"
-		                                                                        onClick={(e) => {
-		                                                                            e.stopPropagation();
-		                                                                            openAssessmentFromUiState(scheduledAssessment, scheduleUi, { allowWhileChecking: true });
-		                                                                        }}
-	                                                                        onKeyDown={(e) => {
-	                                                                            if (e.key === 'Enter' || e.key === ' ') {
-	                                                                                e.preventDefault();
-		                                                                                e.stopPropagation();
-		                                                                                openAssessmentFromUiState(scheduledAssessment, scheduleUi, { allowWhileChecking: true });
-	                                                                            }
-	                                                                        }}
-	                                                                        role="button"
-	                                                                        tabIndex={0}
-		                                                                        style={{ border: '1px solid #e2e8f0', borderRadius: 12, padding: '12px', background: '#f8fafc', minWidth: 0, maxWidth: '100%', boxSizing: 'border-box', cursor: canOpenAssessmentFromUiState(scheduleUi, { allowWhileChecking: true }) ? 'pointer' : 'default' }}
-		                                                                    >
-			                                                                        <div style={{ display: 'flex', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', minWidth: 0 }}>
-			                                                                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', minWidth: 0 }}>
-		                                                                                <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap', alignItems: 'center' }}>
-		                                                                                    <div className="form-status success">SCHEDULE {scheduleIndex + 1}</div>
-		                                                                                    {scheduledAssessment.requiresResponse && (
-		                                                                                        <div className="form-status error">ACTION REQUIRED</div>
-		                                                                                    )}
-		                                                                                    <div className={`form-status ${scheduleUi.hasAssessmentEvent ? 'success' : 'warning'}`}>
-		                                                                                        {scheduleUi.isCheckingPresence ? 'CHECKING TEI' : scheduleUi.hasAssessmentEvent ? 'SURVEY EXISTS' : 'NEW SCHEDULED TEI'}
-		                                                                                    </div>
-		                                                                                    {scheduledAssessment.isSelfAssessment && (
-		                                                                                        <div className="form-status success">SELF ASSESSMENT</div>
-		                                                                                    )}
-		                                                                                    {scheduleUi.isSynced && (
-		                                                                                        <div className="form-status success">✓ SYNCED</div>
-		                                                                                    )}
-		                                                                                </div>
-		                                                                                <div style={{ fontSize: '0.85em', color: '#64748b', display: 'flex', alignItems: 'center', gap: '8px' }}>
-		                                                                                    {scheduleUi.roleLabel ? <>Role: {scheduleUi.roleLabel}</> : 'Role: N/A'}
-		                                                                                {renderAssessmentActionButton(scheduledAssessment, scheduleUi)}
-		                                                                                </div>
-		                                                                            </div>
-
-		                                                                            <div className="form-actions" style={{ flexWrap: 'wrap', justifyContent: 'flex-end' }}>
-		                                                                                <button
-		                                                                                    className="btn btn-secondary btn-sm"
-	                                                                                    onClick={(e) => {
-	                                                                                        e.stopPropagation();
-	                                                                                        openTeamDialog(scheduledAssessment);
-	                                                                                    }}
-		                                                                                >
-		                                                                                    Team ({Array.isArray(localEditedTeams[scheduledAssessment.scheduleTeiId || scheduledAssessment.trackedEntityInstance] || scheduledAssessment.team) ? (localEditedTeams[scheduledAssessment.scheduleTeiId || scheduledAssessment.trackedEntityInstance] || scheduledAssessment.team).length : 0})
-		                                                                                </button>
-		                                                                            </div>
-		                                                                        </div>
-
-				                                                                        {!scheduleUi.hasAssessmentEvent && (
-                                                                        <p className="assessment-details-line" style={{ margin: '10px 0 0', color: '#475569' }}>
-			                                                                            Assessment ID: {scheduledAssessment.enrollment || scheduledAssessment.eventId || '-'}
-			                                                                            {' '}| Program: {getAssignmentProgramId(scheduledAssessment)}
-			                                                                            {' '}| Stage: {getAssignmentProgramStageId(scheduledAssessment)}
-			                                                                            {' '}| TEI: {scheduledAssessment.scheduleTeiId || scheduledAssessment.trackedEntityInstance || '-'}
-			                                                                            {' '}| Date: {scheduleUi.latestAuth}
-			                                                                            {' '}| Authorised: {scheduleUi.authStart} to {scheduleUi.authEnd}
-			                                                                            {' '}| Facility type: {getAssignmentFacilityGroupValue(scheduledAssessment)}
-			                                                                            {' '}| Type: {getAssignmentTypeValue(scheduledAssessment)}
-			                                                                            {' '}| Status: {formatAssignmentStatusLabel(scheduledAssessment.statusCode || scheduledAssessment.status)}
-			                                                                            {' '}| OU: {scheduledAssessment.orgUnit || '-'}
-				                                                                        </p>
-				                                                                        )}
-
-		                                                                    </div>
-		                                                                );
-		                                                            })}
-			                                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
-			                                                                {(() => {
-			                                                                    const _ak = getAssocKey(assessment);
-			                                                                    const _bundle = associatedByEnrollment[_ak];
-			                                                                    const _isLoading = !!_bundle?.loading;
-			                                                                    return (
-			                                                                        <button
-			                                                                            type="button"
-			                                                                            className="btn btn-secondary btn-sm"
-				                                                                            title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
-			                                                                            disabled={_isLoading}
-			                                                                            onClick={(e) => {
-			                                                                                e.stopPropagation();
-			                                                                                toggleExpandAssessment(assessment);
-			                                                                            }}
-			                                                                        >
-			                                                                            {_isLoading
-			                                                                                ? <><span style={{ width: 12, height: 12, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite', marginRight: 6, verticalAlign: 'middle' }} />Loading...</>
-			                                                                                : expandedAssignments[_ak] ? 'Hide Associated Assessments' : 'Show Associated Assessments'
-			                                                                            }
-			                                                                        </button>
-			                                                                    );
-			                                                                })()}
-			                                                            </div>
-			                                                            {supportsAssociatedAssessments(assessment) && expandedAssignments[getAssocKey(assessment)] && (
-				                                                                <div
-				                                                                    className="associated-assessments-panel"
-				                                                                    onClick={(e) => e.stopPropagation()}
-				                                                                    style={{ width: '100%', background: '#ffffff', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}
-				                                                                >
-			                                                                    {renderAssociatedAssessmentsPanel(assessment, facilityIsLead)}
-			                                                                </div>
-			                                                            )}
-		                                                        </div>
-		                                                    );
-		                                                })()
-		                                            ) : (
-		                                                <>
-				                                            {!hasAssessmentEvent && (
-                                                <p className="assessment-details-line">
-				                                                Assessment ID: {assessment.enrollment || assessment.eventId || '-'}
-				                                                {' '}| Program: {getAssignmentProgramId(assessment)}
-				                                                {' '}| Stage: {getAssignmentProgramStageId(assessment)}
-				                                                {' '}| TEI: {assessment.scheduleTeiId || assessment.trackedEntityInstance || '-'}
-				                                                {' '}| Date: {singleAssessmentUiState.latestAuth}
-				                                                {' '}| Authorised: {singleAssessmentUiState.authStart} to {singleAssessmentUiState.authEnd}
-				                                                {' '}| Facility type: {getAssignmentFacilityGroupValue(assessment)}
-				                                                {' '}| Type: {getAssignmentTypeValue(assessment)}
-				                                                {' '}| Status: {formatAssignmentStatusLabel(assessment.statusCode || assessment.status)}
-				                                                {' '}| OU: {assessment.orgUnit || '-'}
-				                                            </p>
-				                                            )}
-	                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-	                                                {(() => {
-	                                                    const _ak2 = getAssocKey(assessment);
-	                                                    const _bundle2 = associatedByEnrollment[_ak2];
-	                                                    const _isLoading2 = !!_bundle2?.loading;
-	                                                    return (
-	                                                        <button
-	                                                            className="btn btn-secondary btn-sm"
-		                                                            title={supportsAssociatedAssessments(assessment) ? undefined : 'Could not resolve the facility org unit for associated assessments'}
-	                                                            disabled={_isLoading2}
-	                                                            onClick={(e) => { e.stopPropagation(); toggleExpandAssessment(assessment); }}
-	                                                        >
-	                                                            {_isLoading2
-	                                                                ? <><span style={{ width: 12, height: 12, border: '2px solid currentColor', borderTopColor: 'transparent', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite', marginRight: 6, verticalAlign: 'middle' }} />Loading...</>
-	                                                                : expandedAssignments[_ak2] ? 'Hide Associated Assessments' : 'Show Associated Assessments'
-	                                                            }
-	                                                        </button>
-	                                                    );
-	                                                })()}
-	                                                <button
-	                                                    type="button"
-	                                                    className="btn btn-secondary btn-sm"
-	                                                    onClick={(e) => {
-	                                                        e.stopPropagation();
-	                                                        openTeamDialog(assessment);
-	                                                    }}
-	                                                >
-	                                                    Team ({Array.isArray(localEditedTeams[assessment.scheduleTeiId || assessment.trackedEntityInstance] || assessment.team) ? (localEditedTeams[assessment.scheduleTeiId || assessment.trackedEntityInstance] || assessment.team).length : 0})
-	                                                </button>
-	                                            </div>
-	            {supportsAssociatedAssessments(assessment) && expandedAssignments[getAssocKey(assessment)] && (
-	                <div onClick={(e) => e.stopPropagation()} style={{ marginTop: '10px', width: '100%', background: '#f8f9fa', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
-                    {assessment._duplicates && assessment._duplicates.length > 1 && (
-                        <div style={{ marginBottom: '10px', borderBottom: '1px solid #e5e7eb', paddingBottom: '8px' }}>
-                            <div style={{ fontWeight: 600, color: '#374151', marginBottom: '4px' }}>
-                                Grouped Assignments ({assessment._duplicates.length})
-                            </div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                                {assessment._duplicates.map(d => (
-                                    <div key={d.eventId} style={{ fontSize: '13px', color: '#4b5563' }}>
-                                        • Status: <span style={{ fontWeight: 500 }}>{d.statusCode === 'FAC_ASS_ASSIGN_ACCEPTED' ? 'Accepted' : 'Pending'}</span> | Date: {d.sortDate} | ID: {d.eventId} | Enr: {d.enrollment || d.schedule?.enrollments?.[0]?.enrollment || 'N/A'} | Prog: {d.program || d.schedule?.enrollments?.[0]?.program || 'N/A'} | TEI: {d.trackedEntityInstance || d.scheduleTeiId || 'N/A'} | Start: {d.scheduledAt ? d.scheduledAt.slice(0,10) : 'N/A'} | End: {d.updatedAt ? d.updatedAt.slice(0,10) : 'N/A'}
-                                    </div>
-                                ))}
-                            </div>
+                    {selectedSE ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Button onClick={() => setSelectedSE(null)} size="small">← Back</Button>
+                            <span>SE {selectedSE.se_id}: {selectedSE.se_name}</span>
                         </div>
-                    )}
-                    {(() => {
-                        const bundle = associatedByEnrollment[getAssocKey(assessment)];
-                        if (!bundle || bundle.loading) return <div style={{ color: '#666' }}>Loading associated events...</div>;
-                        const rawRows = [ ...(bundle.survey||[]) ];
-	                        const groupedByAssessment = rawRows.reduce((acc, ev) => {
-	                            const enrollmentKey = ev?._type === 'Enrollment'
-	                                ? (ev.enrollmentId || ev.enrollment || ev.event)
-	                                : null;
-	                            const tei = ev?.trackedEntityInstance;
-	                            const key = enrollmentKey
-	                                ? `enrollment-${enrollmentKey}`
-	                                : (tei && tei !== 'unknown-tei' ? tei : `event-${ev.event}`);
-                            if (!acc[key]) acc[key] = [];
-                            acc[key].push(ev);
-                            return acc;
-                        }, {});
-	                        let rows = Object.entries(groupedByAssessment).map(([key, evs]) => {
-                            const hasFinal = evs.some(ev => getSysTag(ev) === 'FINAL');
-                            const finalEv = hasFinal
-                                ? evs.find(ev => getSysTag(ev) === 'FINAL')
-                                : null;
-                            const latestWithTypeOrGroup = evs.find(ev => (ev.dataValues || []).some(d => d.dataElement === surveyTypeDeId || d.dataElement === surveyGroupDeId)) || null;
-                            const latestEv = [...evs].sort((a, b) => new Date(b?.eventDate || 0) - new Date(a?.eventDate || 0))[0] || evs[0];
-                            const representative = finalEv || latestWithTypeOrGroup || latestEv;
-	                            const representativeTei = representative?.trackedEntityInstance
-	                                || evs.find(ev => ev?.trackedEntityInstance)?.trackedEntityInstance
-	                                || (key.startsWith('event-') ? 'unknown-tei' : key);
-                            const earliestDate = evs.reduce((acc, cur) => {
-                                if (!cur?.eventDate) return acc;
-                                if (!acc) return cur.eventDate;
-                                return new Date(cur.eventDate) < new Date(acc) ? cur.eventDate : acc;
-                            }, null);
-                            return {
-                                ...representative,
-	                                trackedEntityInstance: representativeTei,
-                                _bundleEvents: evs,
-	                                _displayEventId: representative?.enrollmentId || representative?.event || '-',
-                                _baselineDate: earliestDate,
-                                _assessmentDate: representative?.eventDate || latestEv?.eventDate || earliestDate,
-                            };
-                        }).sort((a, b) => new Date(b?._assessmentDate || 0) - new Date(a?._assessmentDate || 0));
-                        if (rows.length === 0) {
-                            const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
-                            const isLead = /LEAD|LEADER/.test(roleNorm);
-                            return (
-                                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                                    <span style={{ color: '#334155' }}>No baseline survey found</span>
-                                    <span style={{
-                                        display: 'inline-block',
-                                        fontSize: '0.75em',
-                                        fontWeight: 700,
-                                        color: '#9a3412',
-                                        background: '#ffedd5',
-                                        border: '1px solid #fdba74',
-                                        padding: '2px 8px',
-                                        borderRadius: '9999px'
-                                    }}>NO BASELINE</span>
-                                </div>
-                            );
-                        }
-                        const getTypeValue = (ev) => {
-                            if (ev._type === 'Enrollment') {
-	                                return getAttributeValue(
-	                                    ev.attributes,
-	                                    SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentTypeSelected,
-	                                    ['assessment type of assessment selected']
-	                                ) || '-';
-                            }
-                            if (!surveyTypeDeId) return '-';
-                            const sourceEvents = Array.isArray(ev?._bundleEvents) ? ev._bundleEvents : [ev];
-                            const dv = sourceEvents
-                                .flatMap(src => src.dataValues || [])
-                                .find(d => d.dataElement === surveyTypeDeId && d.value !== undefined && String(d.value).trim() !== '');
-                            return dv?.value || '-';
-                        };
-                        const getGroupValue = (ev) => {
-                            if (ev._type === 'Enrollment') {
-	                                return getAttributeValue(
-	                                    ev.attributes,
-	                                    SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType,
-	                                    ['assessment facility type']
-	                                ) || '-';
-                            }
-                            if (!surveyGroupDeId) return '-';
-                            const sourceEvents = Array.isArray(ev?._bundleEvents) ? ev._bundleEvents : [ev];
-                            const dv = sourceEvents
-                                .flatMap(src => src.dataValues || [])
-                                .find(d => d.dataElement === surveyGroupDeId && d.value !== undefined && String(d.value).trim() !== '');
-                            return dv?.value || '-';
-                        };
-                        const formatAssessmentStatusLabel = (value) => {
-                            const raw = String(value || '').trim();
-                            if (!raw) return '-';
-                            if (raw === 'FAC_ASS_STATUS_IN_PROGRESS') return 'In Progress';
-                            return raw;
-                        };
-                        const getStatusValue = (ev) => {
-                            if (ev._type === 'Enrollment') {
-	                                return formatAssessmentStatusLabel(
-	                                    getAttributeValue(
-	                                        ev.attributes,
-	                                        SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityAssessmentStatus,
-	                                        ['facility assessment status']
-	                                    ) || ev.status || '-'
-	                                );
-                            }
-                            return formatAssessmentStatusLabel(ev.status || '-');
-                        };
-
-                        // Authorised window for this OU (from team events)
-                        const authDates = (() => {
-                            const evsAuth = Array.isArray(assessment.team) ? assessment.team : [];
-                            const parseD = (d) => (d ? new Date(d) : null);
-                            const ds = evsAuth.map(e => parseD(e.eventDate || e.occurredAt || e.completedDate || e.scheduledAt || e.updatedAt)).filter(Boolean).sort((a,b)=>a-b);
-                            const start = ds[0] ? ds[0].toISOString().slice(0,10) : '';
-                            const end = ds.length ? ds[ds.length-1].toISOString().slice(0,10) : '';
-                            return { start, end };
-                        })();
-                        return (
-                            <div style={{ overflowX: 'auto' }}>
-                                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9em' }}>
-                                    <thead>
-                                        <tr style={{ textAlign: 'left', borderBottom: '1px solid #e5e7eb' }}>
-                                            <th style={{ padding: '6px 8px' }}>Assessment_ID</th>
-                                            <th style={{ padding: '6px 8px' }}>Program</th>
-                                            <th style={{ padding: '6px 8px' }}>TEI</th>
-                                            <th style={{ padding: '6px 8px' }}>Assessment date</th>
-                                            <th style={{ padding: '6px 8px' }}>Authorised start</th>
-                                            <th style={{ padding: '6px 8px' }}>Authorised end</th>
-                                            <th style={{ padding: '6px 8px' }}>Type of assessment</th>
-	                                            <th style={{ padding: '6px 8px' }}>Facility type</th>
-                                            <th style={{ padding: '6px 8px' }}>Status</th>
-                                            <th style={{ padding: '6px 8px' }}>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-	                                                                        {rows.map(ev => {
-                                                                            const evTeam = (Array.isArray(ev.team) && ev.team.length > 0)
-                                                                                ? ev.team
-                                                                                : (Array.isArray(assessment.team) ? assessment.team : []);
-                                                                            const isUserInTeam = evTeam.length === 0 || evTeam.some(t => {
-                                                                                const rawId = String(t.assignedUserId || '').toLowerCase();
-                                                                                const curId = String(user?.id || '').toLowerCase();
-                                                                                const curUsername = String(user?.username || '').toLowerCase();
-                                                                                return rawId === curId || rawId.includes(curUsername);
-                                                                            });
-                                                                            return (
-                                                                            <tr
-	                                                                                className={`associated-assessment-row ${loadingSurveyRow === (ev.event || ev.enrollmentId || ev.enrollment || ev.trackedEntityInstance || '') ? 'loading' : ''}`}
-	                                                                                key={`survey-${ev.enrollmentId || ev.enrollment || ev.event || ev.trackedEntityInstance}`}
-                                                                                onClick={() => { if (isUserInTeam) openAssociatedSurvey(assessment, ev); }}
-                                                                                style={{ 
-                                                                                    borderTop: '1px dashed #eee', 
-                                                                                    cursor: isUserInTeam ? 'pointer' : 'not-allowed',
-                                                                                    backgroundColor: isUserInTeam ? 'transparent' : '#fee2e2'
-                                                                                }}
-                                                                                title={isUserInTeam ? "Open this survey for editing" : "You are not a member of the team for this assessment."}
-                                                                            >
-	                                                                                <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev._displayEventId || ev.event || '-'}</td>
-	                                                                                <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.programId || '-'}</td>
-	                                                                                <td style={{ padding: '6px 8px', fontFamily: 'monospace' }}>{ev.trackedEntityInstance || '-'}</td>
-                                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{ev._assessmentDate ? new Date(ev._assessmentDate).toLocaleDateString() : 'N/A'}</td>
-                                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.start || 'N/A'}</td>
-                                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.end || 'N/A'}</td>
-                                                                                <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
-	                                                                                <td style={{ padding: '6px 8px', color: '#334155' }}>{getAssociatedAssessmentGroupValue(ev)}</td>
-                                                                                <td style={{ padding: '6px 8px' }}>{getStatusValue(ev)}</td>
-                                                                                <td style={{ padding: '6px 8px' }}>
-                                                                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                                                                                        <button
-                                                                                            className="btn btn-secondary btn-xs"
-                                                                                            disabled={!isUserInTeam}
-                                                                                            onClick={(e) => {
-                                                                                                e.stopPropagation();
-                                                                                                const baselineDate = ev._baselineDate || null;
-                                                                                                const ou = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || '';
-                                                                                                const tei = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
-		                                                                                                const facilityGroup = getAssociatedAssessmentGroupValue(ev);
-	                                                                                                const reportProgramStageId = ev.programStage || ev.programStageId || getSurveyProgramStageIdForGroup(facilityGroup);
-                                                                                                const q = new URLSearchParams({
-                                                                                                    facilityId: ou || '',
-                                                                                                    teiId: tei || '',
-	                                                                                                    programId: ev.programId || getSurveyEventProgramIdForStage(reportProgramStageId, assessment),
-	                                                                                                    programStageId: reportProgramStageId || '',
-	                                                                                                    facilityGroup: facilityGroup || '',
-                                                                                                    start: baselineDate || '',
-                                                                                                    end: ev._assessmentDate || ev.eventDate || '',
-                                                                                                    eventId: ev._displayEventId || ev.event || ''
-                                                                                                }).toString();
-                                                                                                navigate(`/report?${q}`);
-                                                                                            }}
-                                                                                        >
-                                                                                            View Report
-                                                                                        </button>
-                                                                                        <button
-                                                                                            className="btn btn-secondary btn-xs"
-                                                                                            disabled={!isUserInTeam || !isLead}
-                                                                                            onClick={(e) => {
-                                                                                                e.stopPropagation();
-	                                                                                                openEditSeAssignments(assessment, ev, getAssociatedAssessmentGroupValue(ev), getTypeValue(ev));
-                                                                                            }}
-                                                                                            title={!isLead ? "Only Team Leads can edit SE Assignments" : undefined}
-                                                                                        >
-                                                                                            Edit SE Assignments
-                                                                                        </button>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        )})}
-                                    </tbody>
-                                </table>
-                            </div>
-                        );
-                    })()}
-                </div>
-            )}
-                                            {false && (
-                                                (() => {
-		                                                    if (isCheckingPresence) {
-	                                                        return (
-	                                                            <button className="btn btn-secondary btn-sm" disabled>
-	                                                                Checking assessment…
-	                                                            </button>
-	                                                        );
-	                                                    }
-	                                                    const roleNorm = String(assessment.myTeamRole || '').replace(/^FAC_ASS_ROLE_/i,'').toUpperCase();
-	                                                    const isLead = /LEAD|LEADER/.test(roleNorm);
-		                                                    const label = hasAssessmentEvent ? 'Update Survey' : (isSynced ? 'Update Survey' : (existingDraft ? 'Resume Survey' : 'Initiate Survey'));
-		                                                    const selfOnly = hasAssessmentEvent && label === 'Initiate Survey';
-	                                                    const onClick = () => {
-		                                                        return label === 'Initiate Survey' ? handleInitiateSurvey(assessment, { selfOnly }) : handleOpenAssessment(assessment);
-	                                                    };
-                                                    return (
-                                                        <button
-			                                                            className={`btn ${label === 'Initiate Survey' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-		                                                            disabled={label === 'Initiate Survey' && isInitiating}
-	                                                            onClick={(e) => {
-	                                                                e.stopPropagation();
-	                                                                onClick();
-	                                                            }}
-                                                        >
-		                                                            {label === 'Initiate Survey' && isInitiating ? 'Opening…' : label}
-                                                        </button>
-                                                    );
-                                                })()
-                                            )}
-	                                            </>
-	                                            )}
-
-	                                        </div>
-
-                                        </div>
-                                    );
-                                });
-                            })()
-                        )}
-                    </div>
-                    </ErrorBoundary>
-                )}
-            </div>
-
-            {/* Forms List */}
-            <div className="forms-section">
-                <div className="section-header">
-                    <h3>Recent Surveys</h3>
-                    <div className="search-container">
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                        />
-                    </div>
-                </div>
-
-                <div className="forms-list">
-                    {isLoading ? (
-                        <div className="loading">Loading...</div>
-                    ) : filteredEvents.length === 0 ? (
-                        <div className="empty-state">No Survey found</div>
-	                    ) : (
-	                        filteredEvents.map(event => {
-                                const meta = getRecentSurveyMeta(event);
-                                return (
-	                            <div key={event.event} className={`form-item recent-survey-card ${event.syncStatus} group-${meta.groupCode.toLowerCase()}`} onClick={() => handleEditForm(event)}>
-	                                <div className="form-info recent-survey-info">
-	                                    <div className="form-header-row recent-survey-header">
-	                                        <div>
-	                                            <div className="recent-survey-eyebrow">{meta.typeLabel}</div>
-	                                            <h4>{event._draftData?.formData?.facilityName_internal || 'Survey'}</h4>
-	                                        </div>
-	                                        <div className="recent-survey-badges">
-	                                            <span className={`survey-group-chip group-${meta.groupCode.toLowerCase()}`}>{meta.groupLabel}</span>
-	                                            <span className="survey-date-chip">{meta.dateLabel}</span>
-	                                            <div className={`form-status ${event.syncStatus === 'error' ? 'error' : event.syncStatus === 'synced' ? 'success' : 'warning'}`}>
-	                                                {event.syncStatus === 'error' ? 'Failed' : event.syncStatus === 'synced' ? 'Synced' : 'Draft'}
-	                                            </div>
-	                                        </div>
-	                                    </div>
-	                                    <div className="recent-survey-meta">
-	                                        <span>Short ID: <strong>{meta.shortId || 'N/A'}</strong></span>
-	                                        <span className="recent-survey-id-full">Full ID: {event.event}</span>
-	                                        {event.syncError && <span className="error-msg">Error: {event.syncError}</span>}
-	                                    </div>
-	                                </div>
-	                                <div className="form-actions recent-survey-actions">
-                                    {event.syncStatus === 'error' && (
-                                        <button
-                                            className="btn btn-warning btn-sm"
-                                            onClick={async (e) => {
-                                                e.stopPropagation();
-                                                setIsLoading(true);
-                                                await retryEvent(event.event);
-                                                await loadEvents();
-                                                setIsLoading(false);
-                                            }}
-                                            style={{ marginRight: '8px' }}
-                                        >
-                                            Retry Sync
-                                        </button>
-                                    )}
-                                    <button
-                                        className="btn btn-primary btn-sm"
-                                        onClick={(e) => { e.stopPropagation(); setPreviewEvent(event); }}
-                                    >
-                                        Preview
-                                    </button>
-                                </div>
-                            </div>
-	                                );
-                            })
-                    )}
-                </div>
-            </div>
-
-            {/* Dialogs */}
-            <Dialog open={showClearConfirm} onClose={() => setShowClearConfirm(false)}>
-                <DialogTitle>Confirm Data Wipe</DialogTitle>
-                <DialogContent>Are you sure you want to delete all data?</DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setShowClearConfirm(false)}>Cancel</Button>
-                    <Button onClick={handleConfirmClear} color="error">Delete All</Button>
-                </DialogActions>
-            </Dialog>
-
-            {/* Reset Baseline Confirmation Dialog */}
-            <Dialog open={showResetConfirmDialog} onClose={() => setShowResetConfirmDialog(false)}>
-                <DialogTitle>Confirm Reset to Code Baseline</DialogTitle>
-                <DialogContent dividers>
-                    Are you sure you want to reset the remote DataStore configuration to match the local code baseline?
-                    This will completely overwrite and erase all remote edits currently saved in the DataStore.
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setShowResetConfirmDialog(false)}>Cancel</Button>
-                    <Button
-                        onClick={async () => {
-                            setShowResetConfirmDialog(false);
-                            await handleResetConfigsToBaseline();
-                        }}
-                        color="error"
-                        variant="contained"
-                    >
-                        Reset to Baseline
-                    </Button>
-                </DialogActions>
-            </Dialog>
-
-            
-
-            {/* Initiate Survey Dialog */}
-            <Dialog open={showCreateBaselineDialog} onClose={cancelCreateBaseline} fullWidth maxWidth="md">
-                <DialogTitle>{initEditAssignmentsOnly ? 'Edit SE Assignments' : 'Initiate Survey'}</DialogTitle>
-                <DialogContent dividers>
-                    {initEditAssignmentsOnly && (
-                        <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 8, background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a' }}>
-                            Update the SE assignees for this assessment. Existing DHIS2 assessment events will not be recreated.
+                    ) : showLinksEditor ? (
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <Button onClick={() => setShowLinksEditor(false)} size="small">← Back</Button>
+                            <span>Criteria Linking Configuration</span>
                         </div>
-                    )}
-	                    {!initEditAssignmentsOnly && !forceSelfOnly && (
-	                        <div style={{ marginBottom: 12, padding: '10px 12px', borderRadius: 8, background: '#f8fafc', border: '1px solid #cbd5e1', color: '#334155' }}>
-	                            Non-self survey types can only be initiated from a new TEI created by the scheduling programme. Existing TEIs can be opened or resumed, but not reused for another non-self survey.
-	                        </div>
-	                    )}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                        <TextField
-                            select
-                            label="Type of Survey"
-                            value={initSurveyType}
-	                            onChange={async e => {
-                                const next = e.target.value;
-	                                const opt = (initSurveyTypeOptions || []).find(o => o.value === next);
-	                                if (isSupportiveSurveyType(opt?.label || opt?.value || next)) {
-	                                    showToast?.('Supportive is no longer available as a Type of Survey. Please choose another Type of Survey.', 'error');
-	                                    return;
-	                                }
-                                if (initHasExistingBaseline && isBaselineSurveyType(opt?.label || opt?.value || next)) {
-                                    showToast?.('A Baseline survey already exists for this facility. Please choose a different Type of Survey.', 'error');
-                                    return;
-                                }
-                                setInitSurveyType(next);
-	                                if (isSelfSurveyType(opt?.label || opt?.value || next)) {
-	                                    await loadSelfAssessmentAssessors(pendingOpenAssessment);
-	                                }
+                    ) : 'App Settings'}
+                
+                <DialogContent dividers style={{ position: 'relative' }}>
+                    {remoteConfigLoading && (
+                        <div
+                            style={{
+                                position: 'absolute',
+                                inset: 0,
+                                zIndex: 5,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                gap: 12,
+                                background: 'rgba(255, 255, 255, 0.86)',
+                                color: '#0f172a',
                             }}
-	                            size="small"
-	                            disabled={isBaselineCreating || (lockType && !forceSelfOnly)}
                         >
-	                            {(() => {
-	                                const baselineOnly = initMode === 'BASELINE' && !initHasExistingBaseline;
-		                                const optionsForTypeBase = forceSelfOnly
-		                                    ? initSurveyTypeOptions.filter(opt => isSelfSurveyType(opt.label || opt.value))
-		                                    : (baselineOnly ? initBaselineSurveyTypeOptions : initSurveyTypeOptions);
-		                                const optionsForType = initSurveyType && !optionsForTypeBase.some(opt => opt.value === initSurveyType)
-		                                    ? [{ value: initSurveyType, label: initSurveyType }, ...optionsForTypeBase]
-		                                    : optionsForTypeBase;
-	                                const menuItems = optionsForType.map(opt => {
-	                                    const blockedBaseline = initHasExistingBaseline && isBaselineSurveyType(opt.label || opt.value);
-	                                    return (
-	                                        <MenuItem key={opt.value} value={opt.value} disabled={blockedBaseline}>
-	                                            {opt.label}{blockedBaseline ? ' (already exists)' : ''}
-	                                        </MenuItem>
-	                                    );
-	                                });
-	                                if (!forceSelfOnly && !baselineOnly) {
-	                                    menuItems.unshift(<MenuItem key="__empty" value="">Select...</MenuItem>);
-	                                }
-	                                return menuItems;
-	                            })()}
-                        </TextField>
-                        <TextField
-                            select
-	                            label="Facility Type"
-                            value={initFacilityGroup}
-	                            onChange={async e => {
-	                                const v = e.target.value;
-	                                setInitFacilityGroup(v);
-	                                setInitAssignments({});
-	                                setInitMetadataLoading(true);
-	                                try {
-		                                    const metadata = await ensureSurveyMetadataForGroup(v);
-		                                    setInitProgramStageMetadata(metadata);
-		                                    setInitSeOptions(buildSeOptions(v, metadata));
-	                                    if (initMode === 'BASELINE' && !initHasExistingBaseline && !initSurveyType) {
-	                                        const loadedOptions = getSurveyTypeOptionsFromMetadata(metadata);
-	                                        const baselineOpt = (loadedOptions.length > 0 ? loadedOptions : surveyTypeOptions)
-	                                            .find(opt => isBaselineSurveyType(opt.label || opt.value));
-	                                        if (baselineOpt) {
-	                                            setInitSurveyType(baselineOpt.value);
-	                                        }
-	                                    }
-	                                    if (configSource === 'datastore' && isOnline) {
-	                                        loadRemoteConfig(v);
-	                                    }
-	                                } catch (err) {
-	                                    console.error('Failed to load metadata for selected facility type', err);
-		                                    showToast?.('Failed to load survey questions for the selected Facility Type.', 'error');
-		                                    setInitProgramStageMetadata(null);
-		                                    setInitSeOptions(buildSeOptions(v));
-	                                } finally {
-	                                    setInitMetadataLoading(false);
-	                                }
-	                            }}
-                            size="small"
-		                            disabled={isBaselineCreating || initMetadataLoading || lockGroup}
-                        >
-<MenuItem value="">Select...</MenuItem>
-<MenuItem value={'HOSPITAL'}>Hospital</MenuItem>
-<MenuItem value={'CLINICS'}>Clinics</MenuItem>
-<MenuItem value={'EMS'}>EMS</MenuItem>
-<MenuItem value={'MORTUARY'}>Mortuary</MenuItem>
-<MenuItem value={'OBGYN'}>OBGYN</MenuItem>
-<MenuItem value={'PHYSIOTHERAPY'}>Physiotherapy</MenuItem>
-<MenuItem value={'RADIOLOGY'}>Radiology</MenuItem>
-<MenuItem value={'PRIVATE_LAB'}>Private Lab</MenuItem>
-<MenuItem value={'GENERAL_PRACTICE'}>General Practice</MenuItem>
-<MenuItem value={'PRIVATE_DIETETIC'}>Private Dietetic</MenuItem>
-<MenuItem value={'MENTAL_HEALTH'}>Mental Health</MenuItem>
-<MenuItem value={'EYE'}>Eye</MenuItem>
-<MenuItem value={'HOSPICE_PALLIATIVE'}>Hospice & Palliative</MenuItem>
-<MenuItem value={'OCCUPATIONAL_HEALTH'}>Occupational Health</MenuItem>
-<MenuItem value={'UROLOGY_NEPHR'}>Urology & Nephrology</MenuItem>
-<MenuItem value={'ORAL'}>Oral</MenuItem>
-<MenuItem value={'IMCI'}>IMCI</MenuItem>
-<MenuItem value={'EMONC'}>EMONC</MenuItem>
-<MenuItem value={'ONCOLOGY'}>Oncology</MenuItem>
-<MenuItem value={'PAEDIATRIC'}>Paediatric</MenuItem>
-                        </TextField>
-                    </div>
-	                  	                    {(isBaselineCreating && createProgress) || createDetails.length > 0 || createErrorInfo ? (
-		                        <div className="create-progress-overlay">
-		                            <div className={`create-progress-card ${isBaselineCreating ? 'is-running' : ''}`}>
-	                                {createProgress && (() => {
-	                                    const progressPercent = createProgress.total > 0
-	                                        ? Math.min(100, Math.max(0, Math.round((createProgress.current / createProgress.total) * 100)))
-	                                        : 0;
-	                                    const displayStep = createProgress.total > 0
-	                                        ? Math.min(createProgress.total, Math.max(1, createProgress.current))
-	                                        : createProgress.current;
-				                                    const progressMessage = String(createProgress.message || 'Working...');
-				                                    const isFinalizingSetup =
-				                                        displayStep >= 3 ||
-				                                        /setup check|remaining setup|still preparing|setup complete|automatic setup completion|not available in dhis2/i.test(`${progressMessage} ${createDetails.join(' ')}`);
-		                                    const latestDetail = createDetails[createDetails.length - 1] || progressMessage;
-		                                    const elapsedLabel = createElapsedSeconds >= 60
-		                                        ? `${Math.floor(createElapsedSeconds / 60)}m ${createElapsedSeconds % 60}s`
-		                                        : `${createElapsedSeconds}s`;
-				                                    const phaseLabel = isFinalizingSetup
-				                                        ? 'Preparing remaining assessment sections'
-		                                        : progressPercent >= 67
-		                                            ? 'Verifying DHIS2 event visibility'
-		                                            : 'Creating enrollment and event bundle';
-	                                    return (
-		                                        <div className="create-progress-main">
-		                                            <div className="create-progress-header">
-		                                                <div className="create-progress-title-wrap">
-		                                                    <div className="create-progress-spinner" aria-hidden="true" />
-		                                                    <div>
-		                                                        <div className="create-progress-title">
-		                                                            {isBaselineCreating ? 'Creating assessment in DHIS2' : 'Assessment setup'}
-		                                                        </div>
-		                                                        <div className="create-progress-message">
-		                                                            {progressMessage}
-		                                                        </div>
-		                                                    </div>
-		                                                </div>
-		                                                <div className="create-progress-badge">
-		                                                    <span className="create-progress-live-dot" />
-		                                                    {progressPercent}% · Step {displayStep} of {createProgress.total}
-		                                                </div>
-		                                            </div>
-		                                            <LinearProgress
-		                                                variant="determinate"
-		                                                value={progressPercent}
-		                                                className={`create-progress-bar ${isBaselineCreating ? 'is-running' : ''}`}
-		                                            />
-		                                            <div className="create-progress-meta-grid">
-		                                                <div className="create-progress-meta-card">
-		                                                    <span>Current phase</span>
-		                                                    <strong>{phaseLabel}</strong>
-		                                                </div>
-		                                                <div className="create-progress-meta-card">
-		                                                    <span>Elapsed time</span>
-		                                                    <strong>{elapsedLabel}</strong>
-		                                                </div>
-		                                            </div>
-		                                            <div className="create-progress-latest">
-		                                                <span className="create-progress-latest-label">Latest update</span>
-		                                                <span>{latestDetail}</span>
-		                                            </div>
-		                                            <div className="create-progress-hint">
-		                                                Please keep this window open. DHIS2 can take a moment to index events; the app is still working and will open the assessment automatically.
-		                                            </div>
-	                                        </div>
-	                                    );
-	                                })()}
-
-		                                {createErrorInfo && (
-		                                    <div style={{ marginTop: 16, padding: '12px 14px', borderRadius: 8, background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e' }}>
-		                                        <div style={{ fontWeight: 700, marginBottom: 6 }}>Setup needs a little longer</div>
-	                                        <div style={{ marginBottom: 6 }}>{createErrorInfo.message}</div>
-	                                        {Array.isArray(createErrorInfo.missingTags) && createErrorInfo.missingTags.length > 0 && (
-	                                            <div style={{ fontSize: '0.9rem' }}>
-		                                                <div><strong>Sections still being prepared:</strong> {createErrorInfo.missingTags.join(', ')}</div>
-	                                                {Number.isFinite(createErrorInfo.verifiedCount) && Number.isFinite(createErrorInfo.expectedCount) && (
-		                                                    <div style={{ marginTop: 4 }}><strong>Ready so far:</strong> {createErrorInfo.verifiedCount} / {createErrorInfo.expectedCount}</div>
-	                                                )}
-	                                            </div>
-	                                        )}
-	                                        {createErrorInfo.payload && (
-	                                            <div style={{ marginTop: 10 }}>
-	                                                <div style={{ fontWeight: 700, marginBottom: 4, color: '#0f172a' }}>Payload:</div>
-	                                                <pre style={{ margin: 0, padding: 8, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 4, fontSize: '0.75rem', overflowX: 'auto', color: '#334155', maxHeight: '150px' }}>
-	                                                    {JSON.stringify(createErrorInfo.payload, null, 2)}
-	                                                </pre>
-	                                            </div>
-	                                        )}
-	                                        {createErrorInfo.data && (
-	                                            <div style={{ marginTop: 10 }}>
-	                                                <div style={{ fontWeight: 700, marginBottom: 4, color: '#0f172a' }}>Response Data:</div>
-	                                                <pre style={{ margin: 0, padding: 8, background: '#ffffff', border: '1px solid #cbd5e1', borderRadius: 4, fontSize: '0.75rem', overflowX: 'auto', color: '#334155', maxHeight: '150px' }}>
-	                                                    {JSON.stringify(createErrorInfo.data, null, 2)}
-	                                                </pre>
-	                                            </div>
-	                                        )}
-	                                        <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-		                                            {pendingProvisionedBundle && (
-		                                                <Button size="small" variant="outlined" color="primary" onClick={handleRepairProvisionedBundle} disabled={isBaselineCreating}>
-		                                                    {isBaselineCreating ? 'Finishing setup…' : 'Continue setup & open'}
-	                                                </Button>
-	                                            )}
-	                                            <Button size="small" variant="outlined" style={{ color: '#64748b', borderColor: '#cbd5e1' }} onClick={() => { setIsBaselineCreating(false); setCreateErrorInfo(null); setCreateDetails([]); }}>
-	                                                Close
-	                                            </Button>
-	                                        </div>
-	                                    </div>
-	                                )}
-
-		                                {createDetails.length > 0 && (
-		                                    <div className="create-progress-activity">
-		                                        <div className="create-progress-activity-header">
-		                                            <div>Live activity</div>
-		                                            {isBaselineCreating && (
-		                                                <div className="create-progress-running-label">
-		                                                    <span className="create-progress-live-dot" /> Running<span className="create-progress-dots">...</span>
-		                                                </div>
-		                                            )}
-		                                        </div>
-		                                        <div className="create-progress-log" role="log" aria-live="polite">
-		                                            {createDetails.slice(-80).map((line, idx) => (
-		                                                <div className="create-progress-log-line" key={`create-detail-top-${idx}`}>
-		                                                    <span className="create-progress-log-bullet" />
-		                                                    <span>{line}</span>
-		                                                </div>
-		                                            ))}
-		                                            <div ref={createDetailsEndRef} />
-		                                        </div>
-		                                    </div>
-		                                )}
-	                            </div>
-	                        </div>
-	                    ) : null}
-                    {initFacilityGroup && initSeOptions.length > 0 && (
-                        <div style={{ marginTop: 16 }}>
-	                            <div style={{ fontWeight: 600, color: '#374151', marginBottom: 8 }}>
-	                                Assign Sections (SE) to Team Members{initTeamLoading ? ' — loading Self Assessment assessors…' : ''}
-	                            </div>
-	                            {initAssessorLookupInfo && initTeamOptions.length === 0 && (
-	                                <div style={{ marginBottom: 10, padding: '8px 10px', borderRadius: 6, background: '#fffbeb', border: '1px solid #fde68a', color: '#92400e', fontSize: '0.85rem' }}>
-	                                    No Self Assessment assessors loaded for OU {initAssessorLookupInfo.orgUnitId || 'unknown'}.
-	                                    {initAssessorLookupInfo.reason ? ` ${initAssessorLookupInfo.reason}` : ''}
-	                                </div>
-	                            )}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
-                                {initSeOptions.map(se => {
-                                    const assigned = Array.isArray(initAssignments[se.id]) && initAssignments[se.id].length > 0;
-                                    const bg = assigned ? '#ecfdf5' : '#fef2f2';
-                                    const fg = assigned ? '#065f46' : '#991b1b';
-                                    const bd = assigned ? '#10b981' : '#ef4444';
-                                    return (
-                                        <div key={se.id} style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'stretch' }}>
-                                            <div style={{ padding: '6px 10px', borderRadius: 4, backgroundColor: bg, color: fg, border: `1px solid ${bd}`, fontSize: '0.85rem', fontWeight: 500, lineHeight: 1.3 }}>
-                                                {se.label}
-                                            </div>
-                                            <Autocomplete
-                                                multiple
-                                                options={initTeamOptions}
-                                                disabled={isBaselineCreating || initTeamLoading}
-                                                getOptionLabel={(o) => o.displayName || o.id}
-                                                onChange={(e, newVal) => setInitAssignments(prev => ({ ...prev, [se.id]: newVal.map(v => v.id) }))}
-                                                renderInput={(params) => <TextField {...params} size="small" label="Assignees" placeholder="Select" />}
-                                                value={(initAssignments[se.id] || []).map(id => initTeamOptions.find(t => t.id === id)).filter(Boolean)}
-                                                style={{ width: '100%' }}
-                                            />
-                                        </div>
-                                    );
-                                })}
+                            <CircularProgress />
+                            <div style={{ fontSize: '1rem', fontWeight: 600 }}>
+                                Loading configurations...
                             </div>
                         </div>
                     )}
+                    <div className="settings-content">
+	                        {!selectedSE && !showLinksEditor ? (
+	                            <>
+									<div className="settings-section">
+										<h4>Facility Type — SE Criteria Overview</h4>
+										<div style={{ fontSize: '0.85rem', color: '#475569', marginTop: '4px', marginBottom: '12px', padding: '8px 12px', backgroundColor: '#f1f5f9', borderRadius: '4px', border: '1px solid #e2e8f0' }}>
+											<strong>Active App Source Strategy:</strong> Remote DHIS2 DataStore
+											<br />
+											<span style={{ fontSize: '0.8rem', color: '#64748b' }}>
+												Note: To compare edits or perform a reset, use the <em>View Configuration Mode</em> selector below.
+											</span>
+										</div>
+
+										<div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap' }}>
+											<FormControl size="small" style={{ minWidth: '240px' }}>
+												<InputLabel>View Configuration Mode</InputLabel>
+												<Select
+													value={overviewSource}
+													label="View Configuration Mode"
+													onChange={(e) => setOverviewSource(e.target.value)}
+												>
+													<MenuItem value="active">Active/Remote Config</MenuItem>
+													<MenuItem value="local">Local Baseline (In-App JSONs)</MenuItem>
+												</Select>
+											</FormControl>
+										</div>
+
+										<p className="settings-subtitle">Expand a facility type to view its criteria.</p>
+										<div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+											{overviewSource === 'active' ? (
+												<Button
+													variant='outlined'
+													size='small'
+                                                    disabled={!Object.keys(expandedFacs).find(type => expandedFacs[type])}
+													onClick={() => {
+                                                        const openFacility = Object.keys(expandedFacs).find(type => expandedFacs[type]);
+                                                        handleSaveConfigsToDataStore(openFacility);
+                                                    }}
+												>
+													Save Open Config to DataStore
+												</Button>
+											) : (
+												<Button
+													variant='outlined'
+													size='small'
+													color='error'
+													onClick={() => setShowResetConfirmDialog(true)}
+												>
+													Reset DataStore to Local Baseline
+												</Button>
+											)}
+											<Button
+												variant='outlined'
+												size='small'
+												onClick={() => navigate('/dev-config-export')}
+											>
+												Export Configs
+											</Button>
+										</div>
+										{(() => {
+											const toggleFac = async (type) => {
+                                                const isClosing = !!expandedFacs[type];
+                                                if (isClosing) {
+                                                    setExpandedFacs({});
+                                                    setActiveCellKey(null);
+                                                    return;
+                                                }
+											    setLoadingFacType(type);
+                                                setActiveCellKey(null);
+                                                try {
+                                                    if (overviewSource === 'active' && configSource === 'datastore' && isOnline) {
+                                                        await loadRemoteConfig(type);
+                                                    }
+                                                    setExpandedFacs({ [type]: true });
+                                                    setSettingsFacilityPages(prev => ({ ...prev, [type]: 0 }));
+                                                } finally {
+											        setLoadingFacType(null);
+                                                }
+											};
+											return settingsFacilityTables.map(({ type, seList, filteredSeList, rows, totalCriteria, matchingCriteria, searchQuery, page, pageSize, totalPages }) => {
+												const isExpanded = !!expandedFacs[type];
+												return (
+													<div key={type} style={{ marginBottom: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
+														<div
+															onClick={() => toggleFac(type)}
+															style={{
+																padding: '10px 16px',
+																background: isExpanded ? '#ebf8ff' : '#f7fafc',
+																cursor: 'pointer',
+																display: 'flex',
+																justifyContent: 'space-between',
+																alignItems: 'center',
+																fontWeight: 600,
+																fontSize: '0.95em',
+																userSelect: 'none',
+															}}
+															>
+																<span>{type} <span style={{ color: '#718096', fontWeight: 400, fontSize: '0.85em' }}>({seList.length} SEs, {totalCriteria} criteria)</span></span>
+																<span style={{ fontSize: '0.8em', color: '#718096', display: 'flex', alignItems: 'center', gap: 6 }}>{loadingFacType === type ? <CircularProgress size={14} /> : (isExpanded ? '  Collapse' : '  Expand')}</span>
+															</div>
+															{isExpanded && (
+																<div style={{ padding: '8px', maxHeight: '55vh', overflowY: 'auto', overflowX: 'auto' }}>
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+																			<TextField
+																				size="small"
+																				value={settingsFacilitySearches[type] || ''}
+																				onChange={(event) => {
+																					const value = event.target.value;
+																					setSettingsFacilitySearches(prev => ({ ...prev, [type]: value }));
+																					setSettingsFacilityPages(prev => ({ ...prev, [type]: 0 }));
+																					setActiveCellKey(null);
+																				}}
+																				placeholder="Search criterion"
+																				inputProps={{ 'aria-label': `Search ${type} criteria` }}
+																				style={{ width: 190, background: '#fff' }}
+																			/>
+																			{searchQuery && (
+																				<span style={{ color: '#64748b', fontSize: '0.82em' }}>
+																					{matchingCriteria} match{matchingCriteria === 1 ? '' : 'es'}
+																				</span>
+																			)}
+																			<span style={{ color: '#64748b', fontSize: '0.82em' }}>
+																				Showing SEs {filteredSeList.length ? page * pageSize + 1 : 0}-{Math.min((page + 1) * pageSize, filteredSeList.length)} of {filteredSeList.length}
+																			</span>
+																		</div>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="outlined"
+                                                                                disabled={page === 0}
+                                                                                onClick={() => {
+                                                                                    setActiveCellKey(null);
+                                                                                    setSettingsFacilityPages(prev => ({ ...prev, [type]: Math.max(0, page - 1) }));
+                                                                                }}
+                                                                            >
+                                                                                Previous
+                                                                            </Button>
+                                                                            <span style={{ fontSize: '0.82em' }}>Page {page + 1} of {totalPages}</span>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant="outlined"
+                                                                                disabled={page >= totalPages - 1}
+                                                                                onClick={() => {
+                                                                                    setActiveCellKey(null);
+                                                                                    setSettingsFacilityPages(prev => ({ ...prev, [type]: Math.min(totalPages - 1, page + 1) }));
+                                                                                }}
+                                                                            >
+                                                                                Next
+                                                                            </Button>
+                                                                        </div>
+                                                                    </div>
+																	<table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em' }}>
+																		<thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
+																			<tr style={{ background: '#edf2f7', textAlign: 'left' }}>
+																				{SETTINGS_TABLE_HEADERS.map(header => (
+																					<th
+																						key={header.label}
+																						style={{
+																							padding: '8px',
+																							border: '1px solid #cbd5e0',
+																							minWidth: `${header.minWidth}px`,
+																							position: 'sticky',
+																							top: 0,
+																							background: '#edf2f7',
+																							textAlign: header.align || 'center',
+																						}}
+																					>
+																						{header.label}
+																					</th>
+																				))}
+																			</tr>
+																		</thead>
+																		<tbody>
+																			{rows.map((row, idx) => (
+																					<tr key={`${type}-se-${row.seId}-st-${row.standardId}-c-${row.criterionId}-${idx}`}>
+																						{row.isFirstSeRow && (
+																							<td
+																								rowSpan={row.seRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																									fontWeight: 700,
+																									background: '#f8fafc',
+																								}}
+																							>
+																								{row.seId}
+																							</td>
+																						)}
+																						{row.isFirstSeRow && (
+																							<td
+																								rowSpan={row.seRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																									background: '#f8fafc',
+																								}}
+																							>
+																								{overviewSource !== 'local' && activeCellKey === `${row.seId}-se-description` ? (
+																									<EditableTextCell
+																										value={row.seDescription}
+																										active
+																										editable
+																										onOpen={() => setActiveCellKey(null)}
+																										onSave={(value) => handleUpdateSeDescription(row.configKey, row.seId, value)}
+																									/>
+																								) : (
+																								<div
+																									onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.seId}-se-description`) : undefined}
+																									style={{ maxHeight: '90px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																								>
+																									{row.seDescription || '—'}
+																								</div>
+																								)}
+																							</td>
+																						)}
+																						{row.isFirstStandardRow && (
+																							<td
+																								rowSpan={row.standardRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																									cursor: overviewSource === 'local' ? 'default' : 'pointer',
+																									background: '#ffffff',
+																								}}
+																								onClick={() => {
+																									if (overviewSource !== 'local') {
+																										setActiveCellKey(`${row.criterionId}-standard`);
+																									}
+																								}}
+																							>
+																								{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-standard` ? (
+																									<Select
+																										value={row.standardId}
+																										onChange={(e) => {
+																											handleMoveStandard(row.configKey, row.seId, row.standardId, e.target.value, row.criterionId);
+																											setActiveCellKey(null);
+																										}}
+																										onClose={() => setActiveCellKey(null)}
+																										size="small"
+																										variant="standard"
+																										disableUnderline
+																										style={{ fontFamily: 'monospace', fontSize: '1em' }}
+																										autoFocus
+																										defaultOpen
+																									>
+																										{row.allStandards.map((std) => (
+																											<MenuItem key={std.id} value={std.id}>{std.name}</MenuItem>
+																										))}
+																									</Select>
+																								) : (
+																									<span style={{ fontFamily: 'monospace', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>{row.standardId}</span>
+																								)}
+																							</td>
+																						)}
+																						{row.isFirstStandardRow && (
+																							<td
+																								rowSpan={row.standardRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																								}}
+																							>
+																								{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-statement` ? (
+																									<EditableTextCell
+																										value={row.statement}
+																										active
+																										editable
+																										maxHeight={110}
+																										onOpen={() => setActiveCellKey(null)}
+																										onSave={(value) => handleUpdateStandardText(row.configKey, row.seId, row.standardId, 'statement', value)}
+																									/>
+																								) : (
+																								<div
+																									onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-statement`) : undefined}
+																									style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																								>
+																									{row.statement || '—'}
+																								</div>
+																								)}
+																							</td>
+																						)}
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', fontFamily: 'monospace' }}>{row.criterionId}</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle' }}>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-description` ? (
+																								<EditableTextCell
+																									value={row.criterionDescription}
+																									active
+																									editable
+																									onOpen={() => setActiveCellKey(null)}
+																									onSave={(value) => handleUpdateCriterionText(row.configKey, row.seId, row.standardId, row.criterionId, 'description', value)}
+																								/>
+																							) : (
+																							<div
+																								onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-description`) : undefined}
+																								style={{ maxHeight: '90px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																							>
+																								{row.criterionDescription || '—'}
+																							</div>
+																							)}
+																						</td>
+																						<td 
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							onClick={() => {
+																								if (overviewSource !== 'local') {
+																									setActiveCellKey(`${row.criterionId}-root`);
+																								}
+																							}}
+																						>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-root` ? (
+																								<Select
+																									value={row.isRoot ? 'yes' : 'no'}
+																									onChange={(e) => {
+																										handleToggleRoot(row.configKey, row.seId, row.standardId, row.criterionId, e.target.value === 'yes');
+																										setActiveCellKey(null);
+																									}}
+																									onClose={() => setActiveCellKey(null)}
+																									size="small"
+																									variant="standard"
+																									disableUnderline
+																									style={{ fontWeight: 600, color: row.isRoot ? '#2b6cb0' : '#718096' }}
+																									autoFocus
+																									defaultOpen
+																								>
+																									<MenuItem value="yes" style={{ color: '#2b6cb0', fontWeight: 600 }}>Yes</MenuItem>
+																									<MenuItem value="no" style={{ color: '#718096', fontWeight: 600 }}>No</MenuItem>
+																								</Select>
+																							) : (
+																								<span 
+																									style={{ 
+																										fontWeight: 600, 
+																										color: row.isRoot ? '#2b6cb0' : '#718096',
+																										borderBottom: overviewSource === 'local' ? 'none' : '1px dashed currentColor'
+																									}}
+																								>
+																									{row.isRoot ? 'Yes' : 'No'}
+																								</span>
+																							)}
+																						</td>
+																						<td 
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							onClick={() => {
+																								if (overviewSource !== 'local') {
+																									setActiveCellKey(`${row.criterionId}-critical`);
+																								}
+																							}}
+																						>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-critical` ? (
+																								<Select
+																									value={row.isCritical ? 'critical' : 'non-critical'}
+																									onChange={() => {
+																										handleToggleCritical(row.configKey, row.seId, row.standardId, row.criterionId);
+																										setActiveCellKey(null);
+																									}}
+																									onClose={() => setActiveCellKey(null)}
+																									size="small"
+																									variant="standard"
+																									disableUnderline
+																									style={{
+																										color: row.isCritical ? '#c53030' : '#2f855a',
+																										fontWeight: 600,
+																										backgroundColor: row.isCritical ? '#fff5f5' : '#f0fff4',
+																										padding: '2px 8px',
+																										borderRadius: '4px',
+																										fontSize: '0.9em',
+																									}}
+																									autoFocus
+																									defaultOpen
+																								>
+																									<MenuItem value="critical" style={{ color: '#c53030', fontWeight: 600 }}>Critical</MenuItem>
+																									<MenuItem value="non-critical" style={{ color: '#2f855a', fontWeight: 600 }}>Non-Critical</MenuItem>
+																								</Select>
+																							) : (
+																								<span
+																									style={{
+																										color: row.isCritical ? '#c53030' : '#2f855a',
+																										fontWeight: 600,
+																										background: row.isCritical ? '#fff5f5' : '#f0fff4',
+																										padding: '2px 8px',
+																										borderRadius: '4px',
+																										fontSize: '0.85em',
+																										borderBottom: overviewSource === 'local' ? 'none' : '1px dashed currentColor',
+																									}}
+																								>
+																									{row.isCritical ? 'Critical' : 'Non-Critical'}
+																								</span>
+																							)}
+																						</td>
+																						<td 
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							onClick={() => {
+																								if (overviewSource !== 'local' && activeCellKey !== `${row.criterionId}-linked`) {
+																									setActiveCellKey(`${row.criterionId}-linked`);
+																								}
+																							}}
+																						>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-linked` ? (
+																								<LinkedCriteriaMultiSelect
+																									value={row.linkedCriteria}
+																									options={row.allCriteriaInFacilityType}
+																									onChange={(val) => {
+																										handleUpdateLinkedCriteria(row.configKey, row.seId, row.standardId, row.criterionId, val);
+																									}}
+																									onClose={() => setActiveCellKey(null)}
+																									placeholder="—"
+																									autoOpen
+																								/>
+																							) : (
+																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', textAlign: 'center', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 4 }}>
+																									{normalizeLinkedCriteria(row.linkedCriteria).length > 0 ? normalizeLinkedCriteria(row.linkedCriteria).map(value => {
+																										const linked = parseLinkedCriterion(value);
+																										return (
+																											<span
+																												key={value}
+																												style={{
+																													color: linked.color === 'G' ? '#166534' : linked.color === 'B' ? '#1d4ed8' : (linked.id === row.criterionId ? '#c53030' : '#276749'),
+																													background: linked.color === 'G' ? '#dcfce7' : linked.color === 'B' ? '#dbeafe' : 'transparent',
+																													padding: linked.color ? '1px 4px' : 0,
+																													borderRadius: 4,
+																												}}
+																											>
+																												{value}
+																											</span>
+																										);
+																									}) : '—'}
+																								</div>
+																							)}
+																						</td>
+																						<td 
+																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: (!row.isRoot || overviewSource === 'local') ? 'default' : 'pointer' }}
+																							onClick={() => {
+																								if (row.isRoot && overviewSource !== 'local' && activeCellKey !== `${row.criterionId}-sub`) {
+																									setActiveCellKey(`${row.criterionId}-sub`);
+																								}
+																							}}
+																						>
+																							{!row.isRoot ? (
+																								<span style={{ color: '#a0aec0' }}>—</span>
+																							) : overviewSource !== 'local' && activeCellKey === `${row.criterionId}-sub` ? (
+																								<SearchableMultiSelect
+																									value={row.subCriteria}
+																									options={row.allCriteriaInSE}
+																									onChange={(val) => {
+																										handleUpdateSubCriteria(row.seId, row.criterionId, val);
+																									}}
+																									onClose={() => setActiveCellKey(null)}
+																									placeholder="None"
+																									autoOpen
+																								/>
+																							) : (
+																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', textAlign: 'center', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
+																									{row.subCriteria.length > 0 ? row.subCriteria.join(', ') : 'None'}
+																								</div>
+																							)}
+																						</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle' }}>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-guidelines` ? (
+																								<EditableTextCell
+																									value={row.guidelines}
+																									active
+																									editable
+																									maxHeight={110}
+																									onOpen={() => setActiveCellKey(null)}
+																									onSave={(value) => handleUpdateCriterionText(row.configKey, row.seId, row.standardId, row.criterionId, 'guidelines', value)}
+																								/>
+																							) : (
+																							<div
+																								onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-guidelines`) : undefined}
+																								style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																							>
+																								{row.guidelines || '—'}
+																							</div>
+																							)}
+																						</td>
+																					</tr>
+																				))}
+																		</tbody>
+																	</table>
+																</div>
+															)}
+														</div>
+													);
+												});
+											})()}
+											</div>
+
+                            </>
+                        ) : selectedSE ? (
+                            <div className="se-details-view raw-json-container">
+                                <div className="json-header-actions">
+                                    {isEditingJson ? (
+                                        <>
+                                            {jsonError && <span className="error-text json-error-msg">{jsonError}</span>}
+                                            <Button
+                                                size="small"
+                                                variant="contained"
+                                                color="success"
+                                                onClick={() => {
+		                                                    try {
+		                                                        const parsed = JSON.parse(editedJson);
+		                                                        const typeToKeyMap = {
+		                                                            ems: 'ems_full_configuration',
+		                                                            mortuary: 'mortuary_full_configuration',
+		                                                            clinics: 'clinics_full_configuration',
+		                                                            hospital: 'hospital_full_configuration',
+		                                                        };
+		                                                        const key = typeToKeyMap[selectedSE._type] || 'ems_full_configuration';
+
+		                                                        updateActiveConfigBundle((bundle) => {
+		                                                            const newConfig = { ...(bundle.config || {}) };
+		                                                            const list = Array.isArray(newConfig[key]) ? [...newConfig[key]] : [];
+		                                                            const index = list.findIndex(se => se.se_id === selectedSE.se_id);
+		                                                            if (index === -1) {
+		                                                                return bundle;
+		                                                            }
+		                                                            list[index] = parsed;
+		                                                            newConfig[key] = list;
+		                                                            return { ...bundle, config: newConfig };
+		                                                        });
+
+		                                                        setSelectedSE({ ...parsed, _type: selectedSE._type });
+		                                                        setIsEditingJson(false);
+		                                                        setJsonError(null);
+		                                                        showToast('Configuration saved successfully!', 'success');
+		                                                    } catch (e) {
+		                                                        setJsonError('Invalid JSON format');
+		                                                    }
+                                                }}
+                                                style={{ marginRight: '10px' }}
+                                            >
+                                                Save Changes
+                                            </Button>
+	                                            <Button
+	                                                size="small"
+	                                                variant="outlined"
+	                                                onClick={() => {
+	                                                    setIsEditingJson(false);
+	                                                    setEditedJson(JSON.stringify(selectedSE, null, 2));
+	                                                    setJsonError(null);
+	                                                }}
+	                                            >
+	                                                Cancel
+	                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+	                                            <Button
+	                                                size="small"
+	                                                variant="outlined"
+	                                                onClick={() => setIsEditingJson(true)}
+	                                                style={{ marginRight: '10px' }}
+	                                            >
+	                                                Edit Mode
+	                                            </Button>
+	                                            <Button
+	                                                size="small"
+	                                                variant="outlined"
+	                                                onClick={() => {
+	                                                    navigator.clipboard.writeText(JSON.stringify(selectedSE, null, 2));
+	                                                    showToast('JSON copied to clipboard!', 'success');
+	                                                }}
+	                                                style={{ marginRight: '10px' }}
+	                                            >
+	                                                Copy JSON
+	                                            </Button>
+	                                            <Button
+	                                                size="small"
+	                                                variant="outlined"
+	                                                color="error"
+	                                                onClick={() => {
+	                                                    if (window.confirm('Are you sure you want to reset this SE to default?')) {
+	                                                        const typeToKeyMap = {
+	                                                            ems: 'ems_full_configuration',
+	                                                            mortuary: 'mortuary_full_configuration',
+	                                                            clinics: 'clinics_full_configuration',
+	                                                            hospital: 'hospital_full_configuration',
+	                                                        };
+	                                                        const key = typeToKeyMap[selectedSE._type] || 'ems_full_configuration';
+	                                                        const defaultSourceMap = {
+	                                                            ems: emsConfig,
+	                                                            mortuary: mortuaryConfig,
+	                                                            clinics: clinicsConfig,
+	                                                            hospital: hospitalConfig,
+	                                                        };
+	                                                        const defaultSource = defaultSourceMap[selectedSE._type] || emsConfig;
+	                                                        const defaultListKey = key;
+	                                                        const defaultConfig = (defaultSource[defaultListKey] || []).find(se => se.se_id === selectedSE.se_id);
+
+	                                                        if (!defaultConfig) {
+	                                                            showToast('Default configuration not found for this SE.', 'error');
+	                                                            return;
+	                                                        }
+
+	                                                        updateActiveConfigBundle((bundle) => {
+	                                                            const newConfig = { ...(bundle.config || {}) };
+	                                                            const list = Array.isArray(newConfig[key]) ? [...newConfig[key]] : [];
+	                                                            const index = list.findIndex(se => se.se_id === selectedSE.se_id);
+	                                                            if (index === -1) {
+	                                                                return bundle;
+	                                                            }
+	                                                            list[index] = defaultConfig;
+	                                                            newConfig[key] = list;
+	                                                            return { ...bundle, config: newConfig };
+	                                                        });
+
+	                                                        setSelectedSE({ ...defaultConfig, _type: selectedSE._type });
+	                                                        setEditedJson(JSON.stringify(defaultConfig, null, 2));
+	                                                        showToast('Reset to default', 'info');
+	                                                    }
+	                                                }}
+	                                            >
+	                                                Reset
+	                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+                                {isEditingJson ? (
+                                    <textarea
+                                        className="raw-json-editor"
+                                        value={editedJson}
+                                        onChange={(e) => setEditedJson(e.target.value)}
+                                        spellCheck="false"
+                                    />
+                                ) : (
+                                    <pre className="raw-json-viewer">
+                                        {JSON.stringify(selectedSE, null, 2)}
+                                    </pre>
+                                )}
+                            </div>
+                        ) : showLinksEditor ? (
+                            <div className="se-details-view raw-json-container">
+                                <div className="json-header-actions">
+                                    {isEditingLinks ? (
+                                        <>
+                                            {jsonError && <span className="error-text json-error-msg">{jsonError}</span>}
+                                            <Button
+                                                size="small"
+                                                variant="contained"
+                                                color="success"
+                                                onClick={() => {
+		                                                    try {
+		                                                        const parsed = JSON.parse(editedLinksJson);
+		                                                        updateActiveConfigBundle((bundle) => {
+		                                                            const newLinks = { ...(bundle.links || {}) };
+		                                                            newLinks[showLinksEditor] = parsed;
+		                                                            return { ...bundle, links: newLinks };
+		                                                        });
+		                                                        setIsEditingLinks(false);
+		                                                        setJsonError(null);
+		                                                        showToast(`${showLinksEditor.toUpperCase()} linking configuration saved!`, 'success');
+		                                                    } catch (e) {
+		                                                        setJsonError('Invalid JSON format');
+		                                                    }
+                                                }}
+                                                style={{ marginRight: '10px' }}
+                                            >
+                                                Save Changes
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => {
+                                                    setIsEditingLinks(false);
+	                                                    setEditedLinksJson(JSON.stringify(currentLinks, null, 2));
+                                                    setJsonError(null);
+                                                }}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Button
+                                                size="small"
+                                                variant="outlined"
+                                                onClick={() => setIsEditingLinks(true)}
+                                                style={{ marginRight: '10px' }}
+                                            >
+                                                Edit Mode
+                                            </Button>
+	                                            <Button
+	                                                size="small"
+	                                                variant="outlined"
+	                                                onClick={() => {
+	                                                    navigator.clipboard.writeText(JSON.stringify(currentLinks, null, 2));
+	                                                    showToast('Links JSON copied!', 'success');
+	                                                }}
+	                                                style={{ marginRight: '10px' }}
+	                                            >
+	                                                Copy JSON
+	                                            </Button>
+	                                            <Button
+	                                                size="small"
+	                                                variant="outlined"
+	                                                color="error"
+	                                                onClick={() => {
+	                                                    if (window.confirm('Reset linking configuration to default?')) {
+	                                                        const defaultLinksMap = {
+	                                                            ems: emsLinks,
+	                                                            hospital: hospitalLinks,
+	                                                            mortuary: mortuaryLinks,
+	                                                            clinics: clinicsLinks,
+	                                                        };
+	                                                        const defaultForType = defaultLinksMap[showLinksEditor] || emsLinks;
+
+	                                                        updateActiveConfigBundle((bundle) => {
+	                                                            const newLinks = { ...(bundle.links || {}) };
+	                                                            newLinks[showLinksEditor] = defaultForType;
+	                                                            return { ...bundle, links: newLinks };
+	                                                        });
+
+	                                                        setEditedLinksJson(JSON.stringify(defaultForType, null, 2));
+	                                                        showToast('Reset to default', 'info');
+	                                                    }
+	                                                }}
+	                                            >
+	                                                Reset
+	                                            </Button>
+                                        </>
+                                    )}
+                                </div>
+                                {isEditingLinks ? (
+                                    <textarea
+                                        className="raw-json-editor"
+                                        value={editedLinksJson}
+                                        onChange={(e) => setEditedLinksJson(e.target.value)}
+                                        spellCheck="false"
+                                        style={{ minHeight: '400px' }}
+                                    />
+                                ) : (
+                                    <pre className="raw-json-viewer" style={{ minHeight: '400px' }}>
+                                        {JSON.stringify(currentLinks, null, 2)}
+                                    </pre>
+                                )}
+                            </div>
+                        ) : null}
+                    </div>
                 </DialogContent>
-                <DialogActions>
-	                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 4 }}>
-	                        <Button onClick={randomizeSeAssignments} disabled={isBaselineCreating || initTeamLoading || (initTeamOptions.length===0 || initSeOptions.length===0)}>
-	                            Randomize assignments
-	                        </Button>
-	                        {(initTeamOptions.length === 0 || initSeOptions.length === 0 || initTeamLoading) && (
-	                            <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
-	                                {initTeamLoading
-	                                    ? 'Loading assessors…'
-	                                    : initTeamOptions.length === 0
-	                                        ? `No assessors loaded${initAssessorLookupInfo?.orgUnitId ? ` for OU ${initAssessorLookupInfo.orgUnitId}` : ''}.`
-	                                        : 'Select a Facility Type to load SEs.'}
-	                            </span>
-	                        )}
-	                    </div>
-                    {!initEditAssignmentsOnly && <Button onClick={loadPreviousPlan} disabled={isBaselineCreating || initPlanLoading}>
-                        {initPlanLoading ? 'Loading…' : 'Load previous plan'}
-                    </Button>}
-                    <Button onClick={cancelCreateBaseline} disabled={isBaselineCreating}>Cancel</Button>
-                    <Button
-                        onClick={initEditAssignmentsOnly ? saveEditedSeAssignments : (pendingProvisionedBundle ? handleRepairProvisionedBundle : confirmCreateBaseline)}
-                        color="primary"
-	                        disabled={isBaselineCreating || initTeamLoading || (!pendingProvisionedBundle && (!initFacilityGroup || !allSeAssigned || (!initEditAssignmentsOnly && !initSurveyType)))}
-                    >
-                        {initEditAssignmentsOnly
-                            ? (isBaselineCreating ? 'Saving…' : 'Save Assignments')
-	                            : (isBaselineCreating ? (pendingProvisionedBundle ? 'Finishing setup…' : 'Creating...') : (pendingProvisionedBundle ? 'Continue setup & open' : 'Create & Open'))}
-                    </Button>
-                </DialogActions>
-            </Dialog>
+                
+            </div>
+  );
 
-  {/* Team Members Modal */}
-  <Dialog open={teamDialogOpen} onClose={() => setTeamDialogOpen(false)}>
-    <DialogTitle>Team for {teamDialogData.orgUnitName || 'Facility'}</DialogTitle>
-    <DialogContent dividers>
-      {teamDialogData.loading ? (
-        <div style={{ color: '#4b5563' }}>Loading team...</div>
-      ) : (!teamDialogData.team || teamDialogData.team.length === 0) ? (
-        <div style={{ color: '#4b5563' }}>No team members found for this assessment.</div>
-      ) : (
-        <ul style={{ margin: 0, paddingLeft: '1.1rem' }}>
-          {teamDialogData.team.map((m, idx) => {
-            const roleRaw = String(m.teamRole || 'Member').trim();
-            const roleClean = roleRaw.replace(/^FAC_ASS_ROLE_/i, '').replace(/\s+/g, '_');
-            const roleText = roleClean.replace(/_/g, ' ').toUpperCase();
-            return (
-              <li key={`team-${idx}`} style={{ marginBottom: 6 }}>
-                <strong>{m.displayName || m.assignedUserId || 'Unknown user'}</strong>
-                {`, Role: ${roleText}`}
-              </li>
-            );
-          })}
-        </ul>
-      )}
-    </DialogContent>
-    <DialogActions>
-      <Button onClick={() => setTeamDialogOpen(false)}>Close</Button>
-    </DialogActions>
-  </Dialog>
-	            {/* Hospital computation mapping editor for the active configuration version */}
-	            <Dialog
-	                open={showComputeEditor}
-	                onClose={handleCloseComputeEditor}
-	                fullScreen
-	            >
-	                <DialogTitle>Configure Hospital computation mapping for active version</DialogTitle>
-	                <DialogContent dividers>
-	                    {draftComputeConfig ? (
-	                        <div style={{ display: 'flex', height: '100%', gap: '16px' }}>
-	                            {/* Left: Service Elements list */}
-	                            <div style={{ width: '260px', borderRight: '1px solid #e2e8f0', paddingRight: '12px', overflowY: 'auto' }}>
-	                                <h4 style={{ marginTop: 0 }}>Service Elements</h4>
-	                                {hospitalComputeServiceElements.map(se => {
-	                                    const isSelected = (selectedComputeSeId || (hospitalComputeServiceElements[0] && hospitalComputeServiceElements[0].se_id)) === se.se_id;
-	                                    return (
-	                                        <div
-	                                            key={`compute-se-${se.se_id}`}
-	                                            onClick={() => setSelectedComputeSeId(se.se_id)}
-	                                            style={{
-	                                                padding: '6px 8px',
-	                                                marginBottom: '4px',
-	                                                cursor: 'pointer',
-	                                                borderRadius: '4px',
-	                                                backgroundColor: isSelected ? '#edf2f7' : 'transparent',
-	                                            }}
-	                                        >
-	                                            <div style={{ fontWeight: 600 }}>{se.se_id}</div>
-	                                            <div style={{ fontSize: '0.8em', color: '#4a5568' }}>{se.name}</div>
-	                                        </div>
-	                                    );
-	                                })}
-	                                {hospitalComputeServiceElements.length === 0 && (
-	                                    <div style={{ fontSize: '0.85em', color: '#718096' }}>
-	                                        No Hospital computation configuration found.
-	                                    </div>
-	                                )}
-	                            </div>
-
-	                            {/* Right: Root criteria and sub-criteria checkboxes */}
-	                            <div style={{ flex: 1, overflowY: 'auto' }}>
-	                                {(() => {
-	                                    const effectiveSeId = selectedComputeSeId || (hospitalComputeServiceElements[0] && hospitalComputeServiceElements[0].se_id);
-	                                    const seList = (draftComputeConfig.hospital_standards_config?.service_elements) || [];
-	                                    const selectedSe = seList.find(se => se.se_id === effectiveSeId) || null;
-	                                    if (!effectiveSeId || !selectedSe) {
-	                                        return (
-	                                            <div style={{ fontSize: '0.9em', color: '#718096' }}>
-	                                                Select a Service Element on the left to configure its root criteria.
-	                                            </div>
-	                                        );
-	                                    }
-	                                    const candidateCriteria = getHospitalCriteriaForSe(effectiveSeId);
-	                                    return (
-	                                        <div>
-	                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-	                                                <div>
-	                                                    <h4 style={{ margin: 0 }}>{effectiveSeId} – {selectedSe.name}</h4>
-	                                                    <p style={{ margin: 0, fontSize: '0.85em', color: '#4a5568' }}>
-	                                                        Tick which criteria under this SE should be included in the helper average for each root criterion.
-	                                                    </p>
-	                                                </div>
-	                                                <Button
-	                                                    size="small"
-	                                                    variant="outlined"
-	                                                    color="error"
-	                                                    onClick={() => handleResetComputeForSe(effectiveSeId)}
-	                                                >
-	                                                    Reset this SE to default
-	                                                </Button>
-	                                            </div>
-	                                            {(selectedSe.root_criteria || []).map(root => {
-	                                                const selectedSet = new Set(root.sub_criteria || []);
-	                                                return (
-	                                                    <div key={root.id} style={{ border: '1px solid #e2e8f0', borderRadius: '4px', padding: '8px 10px', marginBottom: '10px' }}>
-	                                                        <div style={{ fontWeight: 600, marginBottom: '4px' }}>
-	                                                            {root.id}: {root.description}
-	                                                        </div>
-	                                                        <div style={{ fontSize: '0.8em', color: '#4a5568', marginBottom: '4px' }}>
-	                                                            Select sub-criteria to include in the average for this root.
-	                                                        </div>
-	                                                        <div style={{ maxHeight: '220px', overflowY: 'auto', paddingLeft: '4px' }}>
-	                                                            {candidateCriteria.length === 0 && (
-	                                                                <div style={{ fontSize: '0.85em', color: '#718096' }}>
-	                                                                    No criteria found for this Service Element in the Hospital config.
-	                                                                </div>
-	                                                            )}
-	                                                            {candidateCriteria.map(c => {
-	                                                                const critId = c.id;
-	                                                                const isChecked = selectedSet.has(critId);
-	                                                                return (
-	                                                                    <label
-	                                                                        key={`${root.id}-${critId}`}
-	                                                                        style={{ display: 'flex', alignItems: 'flex-start', gap: '4px', fontSize: '0.85em', marginBottom: '2px' }}
-	                                                                    >
-	                                                                        <Checkbox
-	                                                                            size="small"
-	                                                                            checked={isChecked}
-	                                                                            onChange={(e) => handleToggleSubCriterion(effectiveSeId, root.id, critId, e.target.checked)}
-	                                                                        />
-	                                                                        <span>
-	                                                                            <strong>{critId}</strong> – {c.description}
-	                                                                        </span>
-	                                                                    </label>
-	                                                                );
-	                                                            })}
-	                                                        </div>
-	                                                    </div>
-	                                                );
-	                                            })}
-	                                        </div>
-	                                    );
-	                                })()}
-	                            </div>
-	                        </div>
-	                    ) : (
-	                        <div style={{ fontSize: '0.9em', color: '#718096' }}>
-	                            Loading computation configuration...
-	                        </div>
-	                    )}
-	                </DialogContent>
-	                <DialogActions>
-	                    <Button onClick={handleCloseComputeEditor}>Cancel</Button>
-	                    <Button
-	                        onClick={() => {
-	                            if (!draftComputeConfig) {
-	                                handleCloseComputeEditor();
-	                                return;
-	                            }
-	                            updateActiveConfigBundle((bundle) => ({
-	                                ...bundle,
-	                                compute: draftComputeConfig,
-	                            }));
-	                            showToast('Hospital computation mapping updated for active version.', 'success');
-	                            handleCloseComputeEditor();
-	                        }}
-	                        variant="contained"
-	                        color="primary"
-	                    >
-	                        Save
-	                    </Button>
-	                </DialogActions>
-	            </Dialog>
-	            {/* New Configuration Version Dialog */}
-	            <Dialog
-	                open={showNewVersionDialog}
-	                onClose={() => setShowNewVersionDialog(false)}
-	                fullScreen
-	            >
-	                <DialogTitle>Create new configuration version</DialogTitle>
-	                <DialogContent dividers>
-	                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-	                        <div>
-	                            <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9em' }}>Version name</label>
-	                            <input
-	                                type="text"
-	                                value={newVersionName}
-	                                onChange={e => setNewVersionName(e.target.value)}
-	                                placeholder="e.g. V2 \\u2013 2026 update"
-	                                style={{ width: '100%', padding: '6px 8px', marginTop: '4px' }}
-	                            />
-	                        </div>
-	                        <div>
-	                            <label style={{ display: 'block', fontWeight: 600, fontSize: '0.9em' }}>Description</label>
-	                            <textarea
-	                                value={newVersionDescription}
-	                                onChange={e => setNewVersionDescription(e.target.value)}
-	                                placeholder="Short explanation of what this version changes or focuses on."
-	                                rows={3}
-	                                style={{ width: '100%', padding: '6px 8px', marginTop: '4px', resize: 'vertical' }}
-	                            />
-	                        </div>
-	                        <div style={{ fontSize: '0.85em', color: '#4a5568' }}>
-	                            This version will include:
-	                            <ul style={{ marginTop: '4px', paddingLeft: '18px' }}>
-	                                <li>Service Element Configuration</li>
-	                                <li>Criteria Linkage Configuration</li>
-	                                <li>Criteria and Sub Criteria for Computation</li>
-	                            </ul>
-	                            In future, these versions will be loaded from DHIS2 dataStore and can be
-	                            activated per assessment programme.
-	                        </div>
-	                    </div>
-	                </DialogContent>
-	                <DialogActions>
-	                    <Button onClick={() => setShowNewVersionDialog(false)}>Cancel</Button>
-	                    <Button onClick={handleCreateNewVersion} variant="contained" color="primary">
-	                        Create draft version
-	                    </Button>
-	                </DialogActions>
-	            </Dialog>
-
-            {/* Preview Modal */}
-            {
-                previewEvent && (
-                    <SurveyPreview event={previewEvent} onClose={() => setPreviewEvent(null)} />
-                )
-            }
-        </div>
-    );
 }

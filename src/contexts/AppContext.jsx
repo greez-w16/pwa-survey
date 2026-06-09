@@ -342,14 +342,17 @@ export const AppProvider = ({ children }) => {
 
 	                // Fetch/validate session in the background
                 const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error('Auth timeout')), 5000));
-                const currentUser = await Promise.race([api.getCurrentUser(), timeoutPromise]);
-                setUser(currentUser);
-                localStorage.setItem('dhis2_user', JSON.stringify(currentUser));
+                try {
+                    const currentUser = await Promise.race([api.getCurrentUser(), timeoutPromise]);
+                    setUser(currentUser);
+                    localStorage.setItem('dhis2_user', JSON.stringify(currentUser));
+                } catch (error) {
 	                console.warn('[AppContext] Session validation failed / user is offline:', error);
 	                // If we don't have a cached user session, reset to null
 	                if (!localStorage.getItem('dhis2_user')) {
 	                    setUser(null);
 	                }
+                }
 	            } finally {
 	                setAuthInitializing(false);
 	            }

@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
-import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete, CircularProgress } from '@mui/material';
+import { Button, TextField, Dialog, DialogTitle, DialogContent, DialogActions, Autocomplete, CircularProgress, Tabs, Tab, Box } from '@mui/material';
+import { AppSettings } from './AppSettings';
 
 export default function Admin() {
   const { configuration, showToast, userAssignments } = useApp();
   const defaultProgramId = configuration?.program?.id || 'G2gULe4jsfs';
 
+  const [currentTab, setCurrentTab] = useState(0);
   const [programId, setProgramId] = useState(defaultProgramId);
   const [orgUnitId, setOrgUnitId] = useState('');
   const [useAllAssignmentOus, setUseAllAssignmentOus] = useState(true);
@@ -299,9 +301,24 @@ export default function Admin() {
   };
 
   return (
-    <div style={{ maxWidth: 820, margin: '20px auto', padding: 16 }}>
-      <h2>Admin Utilities</h2>
+    <div style={{ maxWidth: 1200, margin: '20px auto', padding: 16 }}>
+      <h2 style={{ marginBottom: 16 }}>Administration</h2>
       
+      <Box sx={{ borderBottom: 1, borderColor: 'divider', marginBottom: 3 }}>
+        <Tabs value={currentTab} onChange={(e, val) => setCurrentTab(val)} aria-label="admin tabs">
+          <Tab label="App Settings" />
+          <Tab label="Admin Utilities" />
+        </Tabs>
+      </Box>
+
+      {currentTab === 0 && (
+        <Box>
+          <AppSettings />
+        </Box>
+      )}
+
+      {currentTab === 1 && (
+        <div style={{ maxWidth: 820 }}>
       {/* Search Filters shared by utilities */}
       <div style={{ marginTop: 8, padding: 12, border: '1px solid #e5e7eb', borderRadius: 6, marginBottom: 16 }}>
         <h3>Target Filter</h3>
@@ -624,6 +641,8 @@ export default function Admin() {
           <Button color="error" variant="contained" onClick={performDelete} disabled={!canDelete || loading}>Delete</Button>
         </DialogActions>
       </Dialog>
+        </div>
+      )}
     </div>
   );
 }

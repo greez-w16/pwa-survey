@@ -168,15 +168,7 @@
 		            >
 			              <div className="section-info">
 					                <span className="section-label">{label}</span>
-				                {isADSection && (assessmentTeiId || assessmentEnrollmentId || assessmentProgramStageId) && (
-				                  <span className="assessment-identity">
-				                    {assessmentTeiId && <>TEI: <code>{assessmentTeiId}</code></>}
-				                    {assessmentTeiId && assessmentEnrollmentId && <span className="identity-separator"> | </span>}
-				                    {assessmentEnrollmentId && <>Enrollment: <code>{assessmentEnrollmentId}</code></>}
-				                    {(assessmentTeiId || assessmentEnrollmentId) && assessmentProgramStageId && <span className="identity-separator"> | </span>}
-				                    {assessmentProgramStageId && <>Program Stage ID: <code>{assessmentProgramStageId}</code></>}
-				                  </span>
-				                )}
+
 			              </div>
 		              <span className="status">
                         {(() => {

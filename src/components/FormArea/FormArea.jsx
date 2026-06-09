@@ -3673,13 +3673,20 @@
                                 📊 Scoring Logic
                             </button>
                             <button
-                                className="scoring-logic-btn"
+                                className="nav-btn"
                                 onClick={randomizeAllAnswers}
-                                disabled={!randomizeStatus.enabled || isRandomizing}
-                                title={isRandomizing ? 'Randomization in progress…' : randomizeStatus.reason}
-                                style={{ marginLeft: 8, background: (randomizeStatus.enabled && !isRandomizing) ? '#374151' : '#9ca3af', color: '#fff', cursor: (randomizeStatus.enabled && !isRandomizing) ? 'pointer' : 'not-allowed' }}
+                                disabled={true}
+                                title="Randomization is disabled during pretesting."
+                                style={{ 
+                                    marginLeft: 8, 
+                                    background: 'transparent', 
+                                    color: '#d1d5db', 
+                                    border: '1px dashed #e5e7eb',
+                                    fontSize: '0.8em',
+                                    cursor: 'not-allowed' 
+                                }}
                             >
-                                {isRandomizing ? '⏳ Randomizing…' : '🎲 Randomize Answers'}
+                                {isRandomizing ? 'Randomizing...' : 'Randomize Answers'}
                             </button>
                         </div>
                     </div>
@@ -4029,11 +4036,18 @@
                             <button
                                 className="nav-btn"
                                 onClick={randomizeAllAnswers}
-                                disabled={!randomizeStatus.enabled || isRandomizing}
-                                title={isRandomizing ? 'Randomization in progress…' : randomizeStatus.reason}
-                                style={{ marginLeft: '8px', background: (randomizeStatus.enabled && !isRandomizing) ? '#374151' : '#9ca3af', color: '#fff', cursor: (randomizeStatus.enabled && !isRandomizing) ? 'pointer' : 'not-allowed' }}
+                                disabled={true}
+                                title="Randomization is disabled during pretesting."
+                                style={{ 
+                                    marginLeft: '8px', 
+                                    background: 'transparent', 
+                                    color: '#d1d5db', 
+                                    border: '1px dashed #e5e7eb',
+                                    fontSize: '0.8em',
+                                    cursor: 'not-allowed' 
+                                }}
                             >
-                                {isRandomizing ? 'Randomizing…' : 'Randomize Answers (all SEs)'}
+                                {isRandomizing ? 'Randomizing...' : 'Randomize Answers (all SEs)'}
                             </button>
                         </div>
                     )}

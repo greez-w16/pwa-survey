@@ -627,6 +627,17 @@ export const api = {
     return await resp.json().catch(() => null);
   },
 
+  deleteDataStoreItem: async (namespace, key) => {
+    const url = `${BASE_URL}/api/dataStore/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
+    const resp = await fetch(url, { method: 'DELETE', headers: getHeaders() });
+    if (!resp.ok && resp.status !== 404) {
+      const text = await resp.text().catch(() => '');
+      console.warn(`DataStore delete failed: ${resp.status} ${text}`);
+      return false;
+    }
+    return true;
+  },
+
   /**
    * PUT data values to a specific DHIS2 event using the supplied user credentials.
    * This does NOT change the current user's session in localStorage – it creates
