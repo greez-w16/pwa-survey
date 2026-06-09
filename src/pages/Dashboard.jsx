@@ -95,6 +95,12 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     PAEDIATRIC: 'paeStageU11'
 };
 
+const normalizeSelectedIds = (selectedIds) => (
+    Array.isArray(selectedIds)
+        ? [...new Set(selectedIds.filter(id => typeof id === 'string' && id.trim() !== ''))]
+        : []
+);
+
 const parseLinkedCriterion = (value) => {
     const normalized = String(value || '').trim();
     const match = normalized.match(/^(.*?)-([GB])$/i);
@@ -1292,7 +1298,7 @@ export function Dashboard() {
   }, [user]);
 
     const handleLogout = async () => {
-        const confirmed = window.confirm('Logout now? Unsynced drafts will be lost.');
+        const confirmed = window.confirm('Are you sure you want to log out?');
         if (!confirmed) return;
         try {
             await logout();
@@ -5177,7 +5183,7 @@ export function Dashboard() {
 																				Showing SEs {filteredSeList.length ? page * pageSize + 1 : 0}-{Math.min((page + 1) * pageSize, filteredSeList.length)} of {filteredSeList.length}
 																			</span>
 																		</div>
-                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>isplay: 'flex', alignItems: 'center', gap: 8 }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                                                                             <Button
                                                                                 size="small"
                                                                                 variant="outlined"

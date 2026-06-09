@@ -372,41 +372,6 @@ export const AppProvider = ({ children }) => {
             console.warn('AppContext.logout: localStorage cleanup failed (non-fatal)', e);
         }
 
-        // Also clear any IndexedDB data related to saved form drafts and cached app data
-        try {
-            // Clear InspectionFormDB/formData via our service
-            await indexedDBService.clearStore();
-        } catch (e) {
-            console.warn('AppContext.logout: clearing InspectionFormDB failed (non-fatal)', e);
-        }
-
-        try {
-            // Best-effort clear of other app stores in DHIS2PWA (events, metadata, configuration, stats)
-            await new Promise((resolve) => {
-                const request = indexedDB.open('DHIS2PWA');
-                request.onsuccess = () => {
-                    const db = request.result;
-                    const stores = ['events', 'metadata', 'configuration', 'stats'].filter((name) =>
-                        db.objectStoreNames && db.objectStoreNames.contains(name)
-                    );
-                    if (stores.length === 0) {
-                        db.close();
-                        resolve();
-                        return;
-                    }
-                    const tx = db.transaction(stores, 'readwrite');
-                    stores.forEach((name) => {
-                        try { tx.objectStore(name).clear(); } catch (_) { /* ignore */ }
-                    });
-                    tx.oncomplete = () => { db.close(); resolve(); };
-                    tx.onerror = () => { db.close(); resolve(); };
-                };
-                request.onerror = () => resolve();
-                request.onblocked = () => resolve();
-            });
-        } catch (e) {
-            console.warn('AppContext.logout: clearing DHIS2PWA stores failed (non-fatal)', e);
-        }
 
         // Clear Service Worker caches to remove any offline data/assets
         try {

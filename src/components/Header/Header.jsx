@@ -16,7 +16,7 @@ import { useApp } from '../../contexts/AppContext';
 	    const [showSettings, setShowSettings] = React.useState(false);
 
     const handleLogout = async () => {
-        const confirmed = window.confirm('Logout now? Unsynced drafts will be lost.');
+        const confirmed = window.confirm('Are you sure you want to log out?');
         if (!confirmed) return;
         try {
             await logout();
