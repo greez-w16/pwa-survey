@@ -79,6 +79,40 @@ export default function DevConfigExport() {
         URL.revokeObjectURL(url);
     };
 
+    const handleOverwriteLocal = async () => {
+        if (!window.confirm('This will backup your existing local configuration JSON files and overwrite them with the data currently shown on this page from the DHIS2 DataStore. Are you sure you want to proceed?')) {
+            return;
+        }
+        try {
+            setLoading(true);
+            const payload = { configurations: {} };
+            for (const { key } of CONFIG_KEYS) {
+                const storedValue = configs[key];
+                if (storedValue !== null && storedValue !== undefined) {
+                    payload.configurations[key] = unwrapDataStoreValue(storedValue, key);
+                }
+            }
+
+            const response = await fetch('/__qims/export-facility-config-assets', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                const err = await response.json();
+                throw new Error(err.error || 'Failed to overwrite local files');
+            }
+
+            const data = await response.json();
+            alert(`Success! Backups created and overwrote the following files:\n${data.written.join('\n')}`);
+        } catch (err) {
+            alert(err.message);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     if (loading) {
         return (
             <Box display="flex" alignItems="center" justifyContent="center" minHeight="100vh">
@@ -93,6 +127,15 @@ export default function DevConfigExport() {
             <Typography variant="body1" color="text.secondary" gutterBottom>
                 DataStore namespace: <code>{NAMESPACE}</code>. This page is hidden and only accessible by developers who know the route.
             </Typography>
+
+            <Button 
+                variant="contained" 
+                color="secondary" 
+                sx={{ mt: 2, mb: 4 }} 
+                onClick={handleOverwriteLocal}
+            >
+                Backup & Overwrite Local Workspace Files
+            </Button>
 
             {error && (
                 <Alert severity="error" sx={{ mb: 3 }}>

@@ -95,6 +95,124 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     PAEDIATRIC: 'paeStageU11'
 };
 
+const parseLinkedCriterion = (value) => {
+    const normalized = String(value || '').trim();
+    const match = normalized.match(/^(.*?)-([GB])$/i);
+    return {
+        id: match ? match[1] : normalized,
+        color: match ? match[2].toUpperCase() : '',
+    };
+};
+
+const normalizeLinkedCriteria = (linkedCriteria) => {
+    const uniqueById = new Map();
+    normalizeSelectedIds(linkedCriteria).forEach(value => {
+        const parsed = parseLinkedCriterion(value);
+        if (parsed.id) uniqueById.set(parsed.id, parsed.color ? `${parsed.id}-${parsed.color}` : parsed.id);
+    });
+    return [...uniqueById.values()];
+};
+
+const LinkedCriteriaMultiSelect = React.memo(({ value, options, onChange, disabled, placeholder, autoOpen, onClose }) => {
+    const [open, setOpen] = useState(Boolean(autoOpen));
+    const [search, setSearch] = useState('');
+    const [hoveredId, setHoveredId] = useState(null);
+    const linkedCriteria = useMemo(() => normalizeLinkedCriteria(value), [value]);
+    const parsedCriteria = useMemo(() => linkedCriteria.map(parseLinkedCriterion), [linkedCriteria]);
+    const selectedIds = useMemo(() => parsedCriteria.map(item => item.id), [parsedCriteria]);
+
+    const filteredOptions = useMemo(() => {
+        const query = search.trim().toLowerCase();
+        if (!query) {
+            const selectedSet = new Set(selectedIds);
+            return [
+                ...options.filter(option => selectedSet.has(option.id)),
+                ...options.filter(option => !selectedSet.has(option.id)).slice(0, 100),
+            ];
+        }
+        return options.filter(option => (
+            option.id.toLowerCase().includes(query)
+            || (option.name && option.name.toLowerCase().includes(query))
+        )).slice(0, 100);
+    }, [options, search, selectedIds]);
+
+    const handleSelectionChange = (nextSelectedIds) => {
+        const colorsById = new Map(parsedCriteria.map(item => [item.id, item.color]));
+        onChange(normalizeSelectedIds(nextSelectedIds).map(id => {
+            const color = colorsById.get(id);
+            return color ? `${id}-${color}` : id;
+        }));
+    };
+
+    const handleColorChange = (criterionId, color) => {
+        onChange(parsedCriteria.map(item => {
+            if (item.id !== criterionId) return item.color ? `${item.id}-${item.color}` : item.id;
+            return color ? `${item.id}-${color}` : item.id;
+        }));
+    };
+
+    const handleClose = () => {
+        setOpen(false);
+        setSearch('');
+        setHoveredId(null);
+        onClose?.();
+    };
+
+    return (
+        <div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 4, marginBottom: parsedCriteria.length ? 6 : 0 }}>
+                {parsedCriteria.map(item => (
+                    <span
+                        key={item.id}
+                        style={{
+                            background: item.color === 'G' ? '#dcfce7' : item.color === 'B' ? '#dbeafe' : '#edf2f7',
+                            color: item.color === 'G' ? '#166534' : item.color === 'B' ? '#1d4ed8' : '#2d3748',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '0.9em',
+                            fontFamily: 'monospace',
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: '4px'
+                        }}
+                    >
+                        {item.id}
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleColorChange(item.id, item.color === 'G' ? 'B' : item.color === 'B' ? '' : 'G');
+                            }}
+                            style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '0 2px', opacity: 0.6 }}
+                            title="Toggle color tag (Green/Blue)"
+                        >
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                        </button>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                handleSelectionChange(selectedIds.filter(id => id !== item.id));
+                            }}
+                            style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '0 2px', color: '#e53e3e' }}
+                        >
+                            &times;
+                        </button>
+                    </span>
+                ))}
+            </div>
+            
+            <SearchableMultiSelect
+                value={selectedIds}
+                options={options}
+                onChange={handleSelectionChange}
+                disabled={disabled}
+                placeholder={placeholder || "Select linked criteria..."}
+                autoOpen={open}
+                onClose={handleClose}
+            />
+        </div>
+    );
+});
+
 const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, placeholder, autoOpen, onClose, showClearAll = false }) => {
     const [open, setOpen] = useState(false);
     const [search, setSearch] = useState('');
@@ -356,6 +474,7 @@ export function Dashboard() {
 	    } = useApp();
     const storage = useStorage();
     const [searchTerm, setSearchTerm] = useState('');
+    const [settingsFacilitySearches, setSettingsFacilitySearches] = useState({});
     const [overviewSource, setOverviewSource] = useState('active'); // 'active' | 'local'
     const [showResetConfirmDialog, setShowResetConfirmDialog] = useState(false);
     const [events, setEvents] = useState([]);
@@ -1195,20 +1314,20 @@ export function Dashboard() {
     const loadAssociatedEvents = async (assessment) => {
         const assocKey = getAssocKey(assessment);
         setAssociatedByEnrollment(prev => ({ ...prev, [assocKey]: { ...(prev[assocKey]||{}), loading: true } }));
-				        try {
-				            const stageId = getAssignmentProgramStageId(assessment);
-				            const programId = SURVEY_ASSESSMENTS_PROGRAM_ID;
+        try {
+            const stageId = getAssignmentProgramStageId(assessment);
+            const programId = SURVEY_ASSESSMENTS_PROGRAM_ID;
             // Prefer facility orgUnit id for event lookup; fall back to program OU
-	            const orgUnitId = resolveOrgUnitForAssessment(assessment);
+            const orgUnitId = resolveOrgUnitForAssessment(assessment);
 
-	            if (!orgUnitId) {
-	                showToast?.('Could not resolve the facility org unit for associated assessments.', 'warning');
-	                setAssociatedByEnrollment(prev => ({
-	                    ...prev,
-	                    [assocKey]: { loading: false, survey: [] }
-	                }));
-	                return;
-	            }
+            if (!orgUnitId) {
+                showToast?.('Could not resolve the facility org unit for associated assessments.', 'warning');
+                setAssociatedByEnrollment(prev => ({
+                    ...prev,
+                    [assocKey]: { loading: false, survey: [] }
+                }));
+                return;
+            }
 
             // fetch all survey events for this Org Unit (regardless of TEI) to capture both
             // scheduled and self-initiated assessments in the history table.
@@ -1219,25 +1338,45 @@ export function Dashboard() {
             ).catch(() => []);
             console.log('[AssocEvents] fetched enrollments', { assocKey, count: Array.isArray(enrollments) ? enrollments.length : 0 });
 
+            // Enrich each enrollment with the team loaded from the DataStore plan
+            const enriched = await Promise.all((enrollments || []).map(async e => {
+                const assessmentStartDate = getAttributeValue(
+                    e.attributes,
+                    SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentStartDate,
+                    ['assessment start date']
+                );
+                let team = [];
+                try {
+                    const teiId = e.teiId;
+                    if (teiId) {
+                        const { plan } = await findAssessmentPlanForTei({ teiId });
+                        if (plan && Array.isArray(plan.team)) {
+                            team = plan.team.map(t => ({
+                                assignedUserId: t.userId || t.id,
+                                displayName: t.displayName || t.userId || t.id,
+                                teamRole: t.role
+                            }));
+                        }
+                    }
+                } catch (err) {
+                    console.warn('[AssocEvents] Failed to load team for enrollment', e.enrollmentId, err);
+                }
+                return {
+                    ...e,
+                    _type: 'Enrollment',
+                    event: e.enrollmentId,
+                    enrollment: e.enrollmentId,
+                    trackedEntityInstance: e.teiId,
+                    eventDate: assessmentStartDate || e.enrollmentDate,
+                    team
+                };
+            }));
+
             setAssociatedByEnrollment(prev => ({
                 ...prev,
                 [assocKey]: {
                     loading: false,
-                    survey: (enrollments||[]).map(e => {
-	                        const assessmentStartDate = getAttributeValue(
-	                            e.attributes,
-	                            SURVEY_PROGRAM_ATTRIBUTE_IDS.assessmentStartDate,
-	                            ['assessment start date']
-	                        );
-                        return {
-                            ...e,
-                            _type: 'Enrollment',
-	                            event: e.enrollmentId,
-	                            enrollment: e.enrollmentId,
-                            trackedEntityInstance: e.teiId,
-		                            eventDate: assessmentStartDate || e.enrollmentDate
-                        };
-                    })
+                    survey: enriched
                 }
             }));
 
@@ -1695,15 +1834,6 @@ export function Dashboard() {
 	        return formatAssessmentStatusLabel(ev.status || '-');
 	    };
 
-	    const authDates = (() => {
-	        const evsAuth = Array.isArray(assessment.team) ? assessment.team : [];
-	        const parseD = (d) => (d ? new Date(d) : null);
-	        const ds = evsAuth.map(e => parseD(e.eventDate || e.occurredAt || e.completedDate || e.scheduledAt || e.updatedAt)).filter(Boolean).sort((a, b) => a - b);
-	        const start = ds[0] ? ds[0].toISOString().slice(0, 10) : '';
-	        const end = ds.length ? ds[ds.length - 1].toISOString().slice(0, 10) : '';
-	        return { start, end };
-	    })();
-
 	    return (
 	        <div style={{ overflowX: 'auto' }}>
 	            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.9em' }}>
@@ -1720,80 +1850,97 @@ export function Dashboard() {
 	                    </tr>
 	                </thead>
 	                <tbody>
-	                    {rows.map(ev => (
-	                        <tr
-	                            className={`associated-assessment-row ${loadingSurveyRow === (ev.event || ev.enrollmentId || ev.enrollment || ev.trackedEntityInstance || '') ? 'loading' : ''}`}
-	                            key={`survey-${ev.enrollmentId || ev.enrollment || ev.event || ev.trackedEntityInstance}`}
-	                            onClick={() => openAssociatedSurvey(assessment, ev)}
-	                            style={{ borderTop: '1px dashed #eee', cursor: 'pointer' }}
-	                            title={`Assessment ID: ${ev._displayEventId || ev.event || '-'}\nProgram: ${ev.programId || '-'}\nTEI: ${ev.trackedEntityInstance || '-'}\n(Click to open this survey for editing)`}
-	                        >
-	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{ev._assessmentDate ? new Date(ev._assessmentDate).toLocaleDateString() : 'N/A'}</td>
-	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.start || 'N/A'}</td>
-	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{authDates.end || 'N/A'}</td>
-	                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
-		                            <td style={{ padding: '6px 8px', color: '#334155' }}>{getAssociatedAssessmentGroupValue(ev)}</td>
-	                            <td style={{ padding: '6px 8px' }}>{getStatusValue(ev)}</td>
-	                            <td style={{ padding: '6px 8px', fontFamily: 'monospace', fontSize: '0.8em', color: '#64748b' }} title={ev.trackedEntityInstance || '-'}>
-	                                {ev.trackedEntityInstance || '-'}
-	                            </td>
-	                            <td style={{ padding: '6px 8px' }}>
-	                                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-	                                    <button
-	                                        className="btn btn-secondary btn-xs"
-	                                        onClick={(e) => {
-	                                            e.stopPropagation();
-	                                            const baselineDate = ev._baselineDate || null;
-	                                            const ou = ev.orgUnit || assessment.orgUnitId || (typeof assessment.orgUnit === 'string' ? assessment.orgUnit : assessment.orgUnit?.id) || '';
-	                                            const tei = ev.trackedEntityInstance || assessment.trackedEntityInstance || assessment.scheduleTeiId || '';
-			                                            const facilityGroup = getAssociatedAssessmentGroupValue(ev);
-		                                            const reportProgramStageId = ev.programStage || ev.programStageId || getSurveyProgramStageIdForGroup(facilityGroup);
-	                                            const q = new URLSearchParams({
-	                                                facilityId: ou || '',
-	                                                teiId: tei || '',
-		                                                programId: ev.programId || getSurveyEventProgramIdForStage(reportProgramStageId, assessment),
-		                                                programStageId: reportProgramStageId || '',
-		                                                facilityGroup: facilityGroup || '',
-	                                                start: baselineDate || '',
-	                                                end: ev._assessmentDate || ev.eventDate || '',
-	                                                eventId: ev._displayEventId || ev.event || ''
-	                                            }).toString();
-	                                            navigate(`/report?${q}`);
-	                                        }}
-	                                    >
-	                                        View Report
-	                                    </button>
-	                                    <button
-	                                        className="btn btn-secondary btn-xs"
-	                                        onClick={(e) => {
-	                                            e.stopPropagation();
-		                                            openEditSeAssignments(assessment, ev, getAssociatedAssessmentGroupValue(ev), getTypeValue(ev));
-	                                        }}
-	                                    >
-	                                        Edit SE Assignments
-	                                    </button>
-                                    <button
-                                        className="btn btn-secondary btn-xs"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            openAssociatedSurvey(assessment, ev);
-                                        }}
-                                    >
-                                        Update Survey
-                                    </button>
-                                    <button
-                                        className="btn btn-secondary btn-xs"
-                                        onClick={(e) => {
-                                            e.stopPropagation();
-                                            openTeamDialog(assessment);
-                                        }}
-                                    >
-                                        Team ({Array.isArray(assessment.team) ? assessment.team.length : 0})
-                                    </button>
-	                                </div>
-	                            </td>
-	                        </tr>
-	                    ))}
+	                    {rows.map(ev => {
+	                        const matchedSchedule = (assessment?._duplicates || [assessment]).find(d => 
+	                            (d?.trackedEntityInstance || d?.scheduleTeiId) === ev.trackedEntityInstance
+	                        ) || assessment;
+	                        const evTeam = (Array.isArray(ev.team) && ev.team.length > 0)
+	                            ? ev.team
+	                            : (Array.isArray(matchedSchedule.team) ? matchedSchedule.team : []);
+	                        const evsAuth = Array.isArray(matchedSchedule.team) ? matchedSchedule.team : [];
+	                        const parseD = (d) => (d ? new Date(d) : null);
+	                        const ds = evsAuth.map(e => parseD(e.eventDate || e.occurredAt || e.completedDate || e.scheduledAt || e.updatedAt)).filter(Boolean).sort((a, b) => a - b);
+	                        const start = ds[0] ? ds[0].toISOString().slice(0, 10) : (ev._baselineDate || ev.eventDate || ev.enrollmentDate || '').slice(0, 10);
+	                        const end = ds.length ? ds[ds.length - 1].toISOString().slice(0, 10) : (ev._assessmentDate || ev.eventDate || ev.enrollmentDate || '').slice(0, 10);
+	                        const rowAuthDates = { start, end };
+	                        return (
+	                            <tr
+	                                className={`associated-assessment-row ${loadingSurveyRow === (ev.event || ev.enrollmentId || ev.enrollment || ev.trackedEntityInstance || '') ? 'loading' : ''}`}
+	                                key={`survey-${ev.enrollmentId || ev.enrollment || ev.event || ev.trackedEntityInstance}`}
+	                                onClick={() => openAssociatedSurvey(matchedSchedule, ev)}
+	                                style={{ borderTop: '1px dashed #eee', cursor: 'pointer' }}
+	                                title={`Assessment ID: ${ev._displayEventId || ev.event || '-'}\nProgram: ${ev.programId || '-'}\nTEI: ${ev.trackedEntityInstance || '-'}\n(Click to open this survey for editing)`}
+	                            >
+	                                <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{ev._assessmentDate ? new Date(ev._assessmentDate).toLocaleDateString() : 'N/A'}</td>
+	                                <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{rowAuthDates.start || 'N/A'}</td>
+	                                <td style={{ padding: '6px 8px', fontFamily: 'monospace', color: '#475569' }}>{rowAuthDates.end || 'N/A'}</td>
+	                                <td style={{ padding: '6px 8px', color: '#334155' }}>{getTypeValue(ev)}</td>
+		                                <td style={{ padding: '6px 8px', color: '#334155' }}>{getAssociatedAssessmentGroupValue(ev)}</td>
+	                                <td style={{ padding: '6px 8px' }}>{getStatusValue(ev)}</td>
+	                                <td style={{ padding: '6px 8px', fontFamily: 'monospace', fontSize: '0.8em', color: '#64748b' }} title={ev.trackedEntityInstance || '-'}>
+	                                    {ev.trackedEntityInstance || '-'}
+	                                </td>
+	                                <td style={{ padding: '6px 8px' }}>
+	                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+	                                        <button
+	                                            className="btn btn-secondary btn-xs"
+	                                            onClick={(e) => {
+	                                                e.stopPropagation();
+	                                                const baselineDate = ev._baselineDate || null;
+	                                                const ou = ev.orgUnit || matchedSchedule.orgUnitId || (typeof matchedSchedule.orgUnit === 'string' ? matchedSchedule.orgUnit : matchedSchedule.orgUnit?.id) || '';
+	                                                const tei = ev.trackedEntityInstance || matchedSchedule.trackedEntityInstance || matchedSchedule.scheduleTeiId || '';
+			                                                const facilityGroup = getAssociatedAssessmentGroupValue(ev);
+		                                                const reportProgramStageId = ev.programStage || ev.programStageId || getSurveyProgramStageIdForGroup(facilityGroup);
+	                                                const q = new URLSearchParams({
+	                                                    facilityId: ou || '',
+	                                                    teiId: tei || '',
+		                                                    programId: ev.programId || getSurveyEventProgramIdForStage(reportProgramStageId, matchedSchedule),
+		                                                    programStageId: reportProgramStageId || '',
+		                                                    facilityGroup: facilityGroup || '',
+	                                                    start: baselineDate || '',
+	                                                    end: ev._assessmentDate || ev.eventDate || '',
+	                                                    eventId: ev._displayEventId || ev.event || ''
+	                                                }).toString();
+	                                                navigate(`/report?${q}`);
+	                                            }}
+	                                        >
+	                                            View Report
+	                                        </button>
+	                                        <button
+	                                            className="btn btn-secondary btn-xs"
+	                                            onClick={(e) => {
+	                                                e.stopPropagation();
+		                                                openEditSeAssignments(matchedSchedule, ev, getAssociatedAssessmentGroupValue(ev), getTypeValue(ev));
+	                                            }}
+	                                        >
+	                                            Edit SE Assignments
+	                                        </button>
+                                        <button
+                                            className="btn btn-secondary btn-xs"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openAssociatedSurvey(matchedSchedule, ev);
+                                            }}
+                                        >
+                                            Update Survey
+                                        </button>
+                                        <button
+                                            className="btn btn-secondary btn-xs"
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                openTeamDialog({
+                                                    ...matchedSchedule,
+                                                    team: evTeam
+                                                });
+                                            }}
+                                        >
+                                            Team ({evTeam.length})
+                                        </button>
+	                                    </div>
+	                                </td>
+	                            </tr>
+	                        );
+	                    })}
 	                </tbody>
 	            </table>
 	        </div>
@@ -3879,12 +4026,29 @@ export function Dashboard() {
 		            { type: 'Mortuary', config: activeConfig, key: 'mortuary_full_configuration' },
 		        ].map(({ type, config, key }) => {
 		            const seList = Array.isArray(config?.[key]) ? config[key] : [];
-                    const totalPages = Math.max(1, Math.ceil(seList.length / pageSize));
+                    const searchQuery = String(settingsFacilitySearches[type] || '').trim().toLowerCase();
+                    const filteredSeList = searchQuery
+                        ? seList.map(se => ({
+                            ...se,
+                            sections: (se.sections || []).map(section => ({
+                                ...section,
+                                standards: (section.standards || []).map(standard => ({
+                                    ...standard,
+                                    criteria: (standard.criteria || []).filter(criterion => (
+                                        String(criterion.id || '').toLowerCase().includes(searchQuery)
+                                        || String(criterion.description || '').toLowerCase().includes(searchQuery)
+                                    )),
+                                })).filter(standard => standard.criteria.length > 0),
+                            })).filter(section => section.standards.length > 0),
+                        })).filter(se => se.sections.length > 0)
+                        : seList;
+                    const matchingCriteria = countCriteriaFor(filteredSeList);
+                    const totalPages = Math.max(1, Math.ceil(filteredSeList.length / pageSize));
                     const requestedPage = settingsFacilityPages[type] || 0;
                     const page = Math.min(requestedPage, totalPages - 1);
                     const isExpanded = !!expandedFacs[type];
                     const visibleSeList = isExpanded
-                        ? seList.slice(page * pageSize, (page + 1) * pageSize)
+                        ? filteredSeList.slice(page * pageSize, (page + 1) * pageSize)
                         : [];
 		            const allCriteriaInFacilityType = isExpanded ? criterionOptionsFor(seList) : [];
 		            const rows = isExpanded
@@ -3894,14 +4058,17 @@ export function Dashboard() {
 		                type,
 		                key,
 		                seList,
+                        filteredSeList,
 		                rows,
 		                totalCriteria: countCriteriaFor(seList),
+                        matchingCriteria,
+                        searchQuery,
                         page,
                         pageSize,
                         totalPages,
 		            };
 		        });
-		    }, [overviewSource, currentConfig, currentComputeCriteria, expandedFacs, settingsFacilityPages]);
+		    }, [overviewSource, currentConfig, currentComputeCriteria, expandedFacs, settingsFacilityPages, settingsFacilitySearches]);
 
     // Filter events
     const filteredEvents = useMemo(() => {
@@ -4963,7 +5130,7 @@ export function Dashboard() {
 											        setLoadingFacType(null);
                                                 }
 											};
-											return settingsFacilityTables.map(({ type, seList, rows, totalCriteria, page, pageSize, totalPages }) => {
+											return settingsFacilityTables.map(({ type, seList, filteredSeList, rows, totalCriteria, matchingCriteria, searchQuery, page, pageSize, totalPages }) => {
 												const isExpanded = !!expandedFacs[type];
 												return (
 													<div key={type} style={{ marginBottom: '12px', border: '1px solid #e2e8f0', borderRadius: '6px', overflow: 'hidden' }}>
@@ -4982,15 +5149,35 @@ export function Dashboard() {
 															}}
 															>
 																<span>{type} <span style={{ color: '#718096', fontWeight: 400, fontSize: '0.85em' }}>({seList.length} SEs, {totalCriteria} criteria)</span></span>
-																<span style={{ fontSize: '0.8em', color: '#718096', display: 'flex', alignItems: 'center', gap: 6 }}>{loadingFacType === type ? <CircularProgress size={14} /> : (isExpanded ? '▲ Collapse' : '▼ Expand')}</span>
+																<span style={{ fontSize: '0.8em', color: '#718096', display: 'flex', alignItems: 'center', gap: 6 }}>{loadingFacType === type ? <CircularProgress size={14} /> : (isExpanded ? '  Collapse' : '  Expand')}</span>
 															</div>
 															{isExpanded && (
 																<div style={{ padding: '8px', maxHeight: '55vh', overflowY: 'auto', overflowX: 'auto' }}>
                                                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                                                                        <span style={{ color: '#64748b', fontSize: '0.82em' }}>
-                                                                            Showing SEs {seList.length ? page * pageSize + 1 : 0}-{Math.min((page + 1) * pageSize, seList.length)} of {seList.length}
-                                                                        </span>
-                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+																			<TextField
+																				size="small"
+																				value={settingsFacilitySearches[type] || ''}
+																				onChange={(event) => {
+																					const value = event.target.value;
+																					setSettingsFacilitySearches(prev => ({ ...prev, [type]: value }));
+																					setSettingsFacilityPages(prev => ({ ...prev, [type]: 0 }));
+																					setActiveCellKey(null);
+																				}}
+																				placeholder="Search criterion"
+																				inputProps={{ 'aria-label': `Search ${type} criteria` }}
+																				style={{ width: 190, background: '#fff' }}
+																			/>
+																			{searchQuery && (
+																				<span style={{ color: '#64748b', fontSize: '0.82em' }}>
+																					{matchingCriteria} match{matchingCriteria === 1 ? '' : 'es'}
+																				</span>
+																			)}
+																			<span style={{ color: '#64748b', fontSize: '0.82em' }}>
+																				Showing SEs {filteredSeList.length ? page * pageSize + 1 : 0}-{Math.min((page + 1) * pageSize, filteredSeList.length)} of {filteredSeList.length}
+																			</span>
+																		</div>
+                                                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>isplay: 'flex', alignItems: 'center', gap: 8 }}>
                                                                             <Button
                                                                                 size="small"
                                                                                 variant="outlined"
@@ -5269,7 +5456,7 @@ export function Dashboard() {
 																							}}
 																						>
 																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-linked` ? (
-																								<SearchableMultiSelect
+																								<LinkedCriteriaMultiSelect
 																									value={row.linkedCriteria}
 																									options={row.allCriteriaInFacilityType}
 																									onChange={(val) => {
@@ -5278,15 +5465,25 @@ export function Dashboard() {
 																									onClose={() => setActiveCellKey(null)}
 																									placeholder="—"
 																									autoOpen
-																									showClearAll
 																								/>
 																							) : (
-																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', textAlign: 'center', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
-																									{row.linkedCriteria.length > 0 ? row.linkedCriteria.map((id, i) => (
-																										<span key={id} style={{ color: id === row.criterionId ? '#c53030' : '#276749' }}>
-																											{id}{i < row.linkedCriteria.length - 1 ? ', ' : ''}
-																										</span>
-																									)) : '—'}
+																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', textAlign: 'center', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0', display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: 4 }}>
+																									{normalizeLinkedCriteria(row.linkedCriteria).length > 0 ? normalizeLinkedCriteria(row.linkedCriteria).map(value => {
+																										const linked = parseLinkedCriterion(value);
+																										return (
+																											<span
+																												key={value}
+																												style={{
+																													color: linked.color === 'G' ? '#166534' : linked.color === 'B' ? '#1d4ed8' : (linked.id === row.criterionId ? '#c53030' : '#276749'),
+																													background: linked.color === 'G' ? '#dcfce7' : linked.color === 'B' ? '#dbeafe' : 'transparent',
+																													padding: linked.color ? '1px 4px' : 0,
+																													borderRadius: 4,
+																												}}
+																											>
+																												{value}
+																											</span>
+																										);
+																									}) : '—'}
 																								</div>
 																							)}
 																						</td>

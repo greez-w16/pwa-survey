@@ -48,6 +48,10 @@ const attachAssetConfigExportEndpoint = (server) => {
           throw new Error('Resolved export path is outside src/assets')
         }
 
+        if (fs.existsSync(targetPath)) {
+          const backupPath = targetPath.replace(/\.json$/, `_backup_${Date.now()}.json`)
+          fs.copyFileSync(targetPath, backupPath)
+        }
         fs.writeFileSync(targetPath, JSON.stringify({ [configKey]: configurations[configKey] }, null, 2), 'utf8')
         written.push(path.join('src', 'assets', fileName).replace(/\\/g, '/'))
       }

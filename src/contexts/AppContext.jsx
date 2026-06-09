@@ -91,7 +91,7 @@ export const AppProvider = ({ children }) => {
 	    const [configVersions, setConfigVersions] = useState([]);
 	    const [activeConfigVersionId, setActiveConfigVersionId] = useState(null);
 	    const [configBundles, setConfigBundles] = useState({});
-        const [configSource, setConfigSource] = useState('datastore'); // 'datastore'
+        const [configSource, setConfigSource] = useState('datastore'); // 'datastore' | 'local'
         const [remoteConfigLoading, setRemoteConfigLoading] = useState(false);
         const [appMetadata, setAppMetadata] = useState(null);
         const remoteLoadKeyRef = useRef(null);

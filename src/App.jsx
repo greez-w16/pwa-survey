@@ -1088,10 +1088,10 @@ const PrivateRoute = ({ children }) => {
       ? 'obgyn'
       : 'ems';
 
-    // Use precomputed lookups for this programme type from the
-    // programmeScoringMeta map instead of rebuilding them on each render.
+    // Use precomputed lookups for Hospital from the programmeScoringMeta map
+    // globally for all facility types as requested.
     const { linksDataLookup, severityLookup, criticalLookup } =
-      programmeScoringMeta[programmeType] || programmeScoringMeta.ems;
+      programmeScoringMeta.hospital;
 
 	    // Only include sections for the *active* group in scoring so that
 	    // switching groups does not require recomputing scores for every other

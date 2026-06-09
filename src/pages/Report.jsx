@@ -617,8 +617,8 @@ export default function Report() {
 	        } : null);
 
         // Build assessment structure for scoring based on facility group
-        const programmeType = (groupId === 'HOSPITAL') ? 'hospital' : (groupId === 'CLINICS') ? 'clinics' : (groupId === 'EMS') ? 'ems' : (groupId === 'MORTUARY') ? 'mortuary' : (groupId === 'OBGYN') ? 'obgyn' : 'mortuary';
-        const { linksDataLookup, severityLookup } = programmeScoringMeta[programmeType] || programmeScoringMeta.ems;
+        // Use precomputed lookups for Hospital globally for all facility types as requested.
+        const { linksDataLookup, severityLookup, criticalLookup } = programmeScoringMeta.hospital;
 
         // Under the new model, each SE lives in its own event tagged as SYS_TAG:<seNum>
         const sectionTagMap = Object.fromEntries(
@@ -666,12 +666,21 @@ export default function Report() {
 	                  const effectiveLinks = rawLinks.filter(l => !String(l || '').trim().match(/-(G|B)$/i));
 	                  const isRoot = effectiveLinks.length > 0;
                   const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
+                  const isCritical = (function() {
+                    const uiToggle = f.commentFieldId ? formDataForSection[`is_critical_${f.commentFieldId}`] : undefined;
+                    if (uiToggle !== undefined && uiToggle !== null && String(uiToggle).trim() !== '') {
+                      return (uiToggle === true || String(uiToggle).toLowerCase() === 'true' || uiToggle === 1 || String(uiToggle) === '1');
+                    }
+                    const commentVal = f.commentFieldId ? String(formDataForSection[f.commentFieldId] || '') : '';
+                    if (commentVal.includes('[CRITICAL]')) return true;
+                    return Boolean(criticalLookup[normalizedCode] || criticalLookup[code]);
+                  })();
                   return {
                     id: f.id,
                     code,
 	                    label: f.label || f.displayName || f.name || code,
                     response: formDataForSection[f.id] || 'NA',
-                    isCritical: false,
+                    isCritical,
                     isRoot,
 	                    links: effectiveLinks,
                     roots: linksData.roots,
@@ -1014,9 +1023,8 @@ export default function Report() {
       }, 0);
 
       // Critical criteria counts
-      // Try to detect programme type from reportInfo.groupId
-      const programmeType = (reportInfo.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo.groupId === 'CLINICS') ? 'clinics' : (reportInfo.groupId === 'EMS') ? 'ems' : (reportInfo.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo.groupId === 'OBGYN') ? 'obgyn' : 'mortuary';
-      const criticalLookup = (programmeScoringMeta[programmeType] && programmeScoringMeta[programmeType].criticalLookup) || {};
+      // Critical criteria counts: use precomputed Hospital criticalLookup globally
+      const criticalLookup = programmeScoringMeta.hospital.criticalLookup || {};
       const getCritical = (list) => list.filter(c => {
         const code = String(c.code || '').trim();
         const n = normalizeCriterionCode(code);
