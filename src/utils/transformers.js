@@ -29,8 +29,73 @@ export const transformMetadata = (metadata) => {
         return [];
     }
 
+    const STAGE_TO_GROUP_MAP = {
+        'hup8BqEe7Mn': 'HOSPITAL',
+        'cliStageU11': 'CLINICS',
+        'emsStageU11': 'SE',
+        'morStageU11': 'GENERAL',
+        'obgStageU11': 'OBGYN',
+        'phyStageU11': 'PHYSIOTHERAPY',
+        'radStageU11': 'RADIOLOGY',
+        'prlStageU11': 'PRIVATE_LAB',
+        'gepStageU11': 'GENERAL_PRACTICE',
+        'prdStageU11': 'PRIVATE_DIETETIC',
+        'mehStageU11': 'MENTAL_HEALTH',
+        'eyeStageU11': 'EYE',
+        'hopStageU11': 'HOSPICE_PALLIATIVE',
+        'ochStageU11': 'OCCUPATIONAL_HEALTH',
+        'urnStageU11': 'UROLOGY_NEPHR',
+        'oraStageU11': 'ORAL',
+        'imcStageU11': 'IMCI',
+        'emoStageU11': 'EMONC',
+        'oncStageU11': 'ONCOLOGY',
+        'paeStageU11': 'PAEDIATRIC'
+    };
+
+    const PREFIX_TO_GROUP_MAP = {
+        'SE': 'SE',
+        'EMS': 'SE',
+        'CLINICS': 'CLINICS',
+        'CLINIC': 'CLINICS',
+        'HOSPITAL': 'HOSPITAL',
+        'HOSP': 'HOSPITAL',
+        'OBGYN': 'OBGYN',
+        'OBG': 'OBGYN',
+        'PHYSIOTHERAPY': 'PHYSIOTHERAPY',
+        'PHYSIO': 'PHYSIOTHERAPY',
+        'PHY': 'PHYSIOTHERAPY',
+        'RADIOLOGY': 'RADIOLOGY',
+        'RAD': 'RADIOLOGY',
+        'PRIVATE_LAB': 'PRIVATE_LAB',
+        'PRL': 'PRIVATE_LAB',
+        'GENERAL_PRACTICE': 'GENERAL_PRACTICE',
+        'GEP': 'GENERAL_PRACTICE',
+        'PRIVATE_DIETETIC': 'PRIVATE_DIETETIC',
+        'PRD': 'PRIVATE_DIETETIC',
+        'MENTAL_HEALTH': 'MENTAL_HEALTH',
+        'MEH': 'MENTAL_HEALTH',
+        'EYE': 'EYE',
+        'HOSPICE_PALLIATIVE': 'HOSPICE_PALLIATIVE',
+        'HOP': 'HOSPICE_PALLIATIVE',
+        'OCCUPATIONAL_HEALTH': 'OCCUPATIONAL_HEALTH',
+        'OCH': 'OCCUPATIONAL_HEALTH',
+        'UROLOGY_NEPHR': 'UROLOGY_NEPHR',
+        'URN': 'UROLOGY_NEPHR',
+        'ORAL': 'ORAL',
+        'ORA': 'ORAL',
+        'IMCI': 'IMCI',
+        'IMC': 'IMCI',
+        'EMONC': 'EMONC',
+        'EMO': 'EMONC',
+        'ONCOLOGY': 'ONCOLOGY',
+        'ONC': 'ONCOLOGY',
+        'PAEDIATRIC': 'PAEDIATRIC',
+        'PAE': 'PAEDIATRIC'
+    };
+
     const isDedicatedHospitalStage = metadata.id === 'hup8BqEe7Mn';
     const isDedicatedObgynStage = metadata.id === 'obgStageU11';
+    const dedicatedGroup = STAGE_TO_GROUP_MAP[metadata.id] || null;
 
     // 1. Map Data Elements for quick lookup during section transformation
     const deMap = {};
@@ -106,10 +171,26 @@ export const transformMetadata = (metadata) => {
 	    const PREFIX_NAME_MAP = {
 	        'SE': 'EMS',
 	        'MORTUARY': 'Mortuary',
+	        'GENERAL': 'Mortuary',
 	        'CLINICS': 'Clinics',
 	        'CLINIC': 'Clinics',
 	        'HOSPITAL': 'Hospital',
-	        'OBGYN': 'OBGYN'
+	        'OBGYN': 'OBGYN',
+	        'PHYSIOTHERAPY': 'Physiotherapy',
+	        'RADIOLOGY': 'Radiology',
+	        'PRIVATE_LAB': 'Private Lab',
+	        'GENERAL_PRACTICE': 'General Practice',
+	        'PRIVATE_DIETETIC': 'Private Dietetic',
+	        'MENTAL_HEALTH': 'Mental Health',
+	        'EYE': 'Eye',
+	        'HOSPICE_PALLIATIVE': 'Hospice Palliative',
+	        'OCCUPATIONAL_HEALTH': 'Occupational Health',
+	        'UROLOGY_NEPHR': 'Urology Nephrology',
+	        'ORAL': 'Oral',
+	        'IMCI': 'IMCI',
+	        'EMONC': 'EMONC',
+	        'ONCOLOGY': 'Oncology',
+	        'PAEDIATRIC': 'Paediatric'
 	    };
 
     // Strips prefixes for clean UI display
@@ -293,14 +374,9 @@ export const transformMetadata = (metadata) => {
 	        // The dedicated Hospital program stage does not consistently prefix all
 	        // sections, so treat every non-Assessment-Details section from that stage
 	        // as Hospital instead of falling back to Mortuary/GENERAL.
-		        const groupKey = isDedicatedHospitalStage && !isAD
-		            ? 'HOSPITAL'
-		            : isDedicatedObgynStage && !isAD
-		            ? 'OBGYN'
-		            : (prefix === 'SE' || prefix === 'EMS' || (prefix && (prefix.startsWith('SE') || prefix.startsWith('EMS')))) ? 'SE' :
-	            (prefix === 'CLINICS' || prefix === 'CLINIC' ? 'CLINICS' :
-	            (prefix === 'HOSPITAL' || prefix === 'HOSP' ? 'HOSPITAL' :
-	            (prefix === 'OBGYN' || prefix === 'OBG' ? 'OBGYN' : null)));
+		        const groupKey = (dedicatedGroup && dedicatedGroup !== 'GENERAL' && !isAD)
+		            ? dedicatedGroup
+		            : (prefix && PREFIX_TO_GROUP_MAP[prefix.toUpperCase()]) || null;
 
         if (!groupKey) {
             // console.log(`[Transform] Grouping ${sec.name} into MORTUARY (prefix was ${prefix})`);
@@ -347,71 +423,53 @@ export const transformMetadata = (metadata) => {
         return ex(a) - ex(b);
     });
 
-	    const sortedEmsSections = sortSections(emsGroupSections);
-	    const sortedClinicsSections = sortSections(clinicsGroupSections);
-	    const sortedHospitalSections = sortSections(hospitalGroupSections);
-	    const sortedObgynSections = sortSections(obgynGroupSections);
-
     const allGroups = [];
 
-	    // The dedicated Hospital stage should open as Hospital, not as the fallback
-	    // Mortuary/GENERAL group.
-	    if (isDedicatedHospitalStage) {
-	        allGroups.push({
-	            id: 'HOSPITAL',
-	            name: PREFIX_NAME_MAP['HOSPITAL'],
-	            sections: [...sharedSections, ...sortedHospitalSections]
-	        });
-	    } else if (isDedicatedObgynStage) {
-	        allGroups.push({
-	            id: 'OBGYN',
-	            name: PREFIX_NAME_MAP['OBGYN'] || 'OBGYN',
-	            sections: [...sharedSections, ...sortedObgynSections]
-	        });
-	    } else {
-	        // Always include Mortuary (General) group for mixed/default stages.
-	        allGroups.push({
-	            id: 'GENERAL',
-	            name: PREFIX_NAME_MAP['MORTUARY'],
-	            sections: finalMortuarySections
-	        });
-	    }
-
-	    // Add EMS group if sections exist
-    if (sortedEmsSections.length > 0) {
+    // First, push the primary dedicated group (if on a dedicated stage)
+    if (dedicatedGroup && dedicatedGroup !== 'GENERAL') {
+        const primarySections = prefixSectionsByPrefix[dedicatedGroup] || [];
         allGroups.push({
-            id: 'SE',
-            name: PREFIX_NAME_MAP['SE'],
-            sections: [...sharedSections, ...sortedEmsSections]
+            id: dedicatedGroup,
+            name: PREFIX_NAME_MAP[dedicatedGroup] || dedicatedGroup,
+            sections: [...sharedSections, ...sortSections(primarySections)]
+        });
+    } else {
+        // Always include Mortuary (General) group for mixed/default stages.
+        allGroups.push({
+            id: 'GENERAL',
+            name: PREFIX_NAME_MAP['MORTUARY'] || 'Mortuary',
+            sections: finalMortuarySections
         });
     }
 
-	    // Add Hospital group if sections exist on mixed/default stages.
-	    if (!isDedicatedHospitalStage && sortedHospitalSections.length > 0) {
-	        allGroups.push({
-	            id: 'HOSPITAL',
-	            name: PREFIX_NAME_MAP['HOSPITAL'],
-	            sections: [...sharedSections, ...sortedHospitalSections]
-	        });
-	    }
+    // Sort and add other groups if they have sections and weren't already added
+    const GROUP_ORDER = [
+        'SE', 'HOSPITAL', 'OBGYN', 'CLINICS', 'MORTUARY', 'PHYSIOTHERAPY',
+        'RADIOLOGY', 'PRIVATE_LAB', 'GENERAL_PRACTICE', 'PRIVATE_DIETETIC',
+        'MENTAL_HEALTH', 'EYE', 'HOSPICE_PALLIATIVE', 'OCCUPATIONAL_HEALTH',
+        'UROLOGY_NEPHR', 'ORAL', 'IMCI', 'EMONC', 'ONCOLOGY', 'PAEDIATRIC'
+    ];
 
-	    // Add OBGYN group if sections exist on mixed/default stages.
-	    if (!isDedicatedObgynStage && sortedObgynSections.length > 0) {
-	        allGroups.push({
-	            id: 'OBGYN',
-	            name: PREFIX_NAME_MAP['OBGYN'] || 'OBGYN',
-	            sections: [...sharedSections, ...sortedObgynSections]
-	        });
-	    }
-	
-    // Add Clinics group if sections exist
-    if (sortedClinicsSections.length > 0) {
-        allGroups.push({
-            id: 'CLINICS',
-            name: PREFIX_NAME_MAP['CLINICS'],
-            sections: [...sharedSections, ...sortedClinicsSections]
+    const otherGroupKeys = Object.keys(prefixSectionsByPrefix)
+        .filter(key => key !== dedicatedGroup)
+        .sort((a, b) => {
+            const idxA = GROUP_ORDER.indexOf(a);
+            const idxB = GROUP_ORDER.indexOf(b);
+            const valA = idxA !== -1 ? idxA : 999;
+            const valB = idxB !== -1 ? idxB : 999;
+            return valA - valB;
         });
-    }
+
+    otherGroupKeys.forEach(key => {
+        const sections = prefixSectionsByPrefix[key] || [];
+        if (sections.length > 0) {
+            allGroups.push({
+                id: key,
+                name: PREFIX_NAME_MAP[key] || key,
+                sections: [...sharedSections, ...sortSections(sections)]
+            });
+        }
+    });
 
     // Final pass for linking comments and questions
     allGroups.forEach(group => {

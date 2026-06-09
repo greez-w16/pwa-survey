@@ -630,12 +630,18 @@ export function Dashboard() {
 	        return null;
 	    };
 
-	    const stageSectionMatchesFacilityGroup = (section, groupKey, programStage = null) => {
-	        const rawNs = String(groupKey || '').toUpperCase();
-	        const ns = rawNs === 'SE' ? 'EMS' : (rawNs === 'GENERAL' ? 'MORTUARY' : rawNs);
-	        const text = `${section?.displayName || ''} ${section?.name || ''} ${section?.code || ''}`.toUpperCase();
-	        if (isAssessmentDetailsStageSection(section)) return false;
-	        if (ns === 'HOSPITAL') return isDedicatedHospitalProgramStage(programStage) || text.includes('HOSP') || text.includes('HOSPITAL');
+    const stageSectionMatchesFacilityGroup = (section, groupKey, programStage = null) => {
+        const rawNs = String(groupKey || '').toUpperCase();
+        const ns = rawNs === 'SE' ? 'EMS' : (rawNs === 'GENERAL' ? 'MORTUARY' : rawNs);
+        const text = `${section?.displayName || ''} ${section?.name || ''} ${section?.code || ''}`.toUpperCase();
+        if (isAssessmentDetailsStageSection(section)) return false;
+
+        const expectedStageId = SURVEY_PROGRAM_STAGE_BY_GROUP[ns];
+        if (expectedStageId && programStage?.id === expectedStageId) {
+            return true;
+        }
+
+        if (ns === 'HOSPITAL') return isDedicatedHospitalProgramStage(programStage) || text.includes('HOSP') || text.includes('HOSPITAL');
 	        if (ns === 'CLINICS') return text.includes('CLINIC') || text.includes('CLINICS');
 	        if (ns === 'EMS') return text.includes('SURV_EMS') || text.includes('SURV-EMS') || /^\s*(EMS|SE)([_\s-]|$)/.test(text);
 	        if (ns === 'MORTUARY') return text.includes('MORTUARY') || text.includes('SURV_MORTUARY') || text.includes('SURV-MORTUARY');
@@ -1541,6 +1547,7 @@ export function Dashboard() {
 		const canOpenAssessmentFromUiState = (uiState, { allowWhileChecking = false } = {}) => {
 		    if (!uiState) return false;
 		    if (!allowWhileChecking && uiState.isCheckingPresence) return false;
+		    if (!uiState.hasAssessmentEvent && !uiState.isLead && uiState.label === 'Initiate Survey') return false;
 		    return true;
 		};
 
@@ -1560,11 +1567,17 @@ export function Dashboard() {
 	        );
 	    }
 
+	    // Hide the button if the role isn't lead and no baseline survey exists yet
+	    if (!uiState.hasAssessmentEvent && !uiState.isLead && uiState.label === 'Initiate Survey') {
+	        return null;
+	    }
+
+	    const isDisabled = uiState.isInitiating;
 
 	    return (
 	        <button
 	            className={`btn ${uiState.label === 'Initiate Survey' ? 'btn-primary' : 'btn-secondary'} btn-sm`}
-	            disabled={uiState.isInitiating}
+	            disabled={isDisabled}
 	            onClick={(e) => {
 	                e.stopPropagation();
 	                openAssessmentFromUiState(assessment, uiState);
@@ -2276,7 +2289,7 @@ export function Dashboard() {
                 return;
             }
 
-            const team = (assessment.teamAssignments || [])
+            const team = (assessment.team || assessment.teamAssignments || [])
                 .filter(m => m && m.assignedUserId)
                 .map(m => ({ ...m }));
 
@@ -4077,7 +4090,7 @@ export function Dashboard() {
                                                                 {assessment.myTeamRole ? (
                                                                     <> {' \u2022 '} Role: {String(assessment.myTeamRole).replace(/^FAC_ASS_ROLE_/i,'').replace(/\s+/g,'_').replace(/_/g,' ').toUpperCase()} </>
                                                                 ) : null}
-                                                                {(isCheckingPresence || !hasAssessmentEvent) && (
+                                                                {(isCheckingPresence || (!hasAssessmentEvent && isLead)) && (
                                                                     <button
                                                                         className="btn btn-primary btn-xs"
                                                                         disabled={isCheckingPresence || isInitiating}
@@ -4443,6 +4456,16 @@ export function Dashboard() {
 	                                                        </button>
 	                                                    );
 	                                                })()}
+	                                                <button
+	                                                    type="button"
+	                                                    className="btn btn-secondary btn-sm"
+	                                                    onClick={(e) => {
+	                                                        e.stopPropagation();
+	                                                        openTeamDialog(assessment);
+	                                                    }}
+	                                                >
+	                                                    Team ({Array.isArray(assessment.team) ? assessment.team.length : 0})
+	                                                </button>
 	                                            </div>
 	            {supportsAssociatedAssessments(assessment) && expandedAssignments[getAssocKey(assessment)] && (
 	                <div onClick={(e) => e.stopPropagation()} style={{ marginTop: '10px', width: '100%', background: '#f8f9fa', border: '1px solid #e5e7eb', borderRadius: 6, padding: '8px 12px' }}>
@@ -5849,28 +5872,30 @@ export function Dashboard() {
 	                                    {initAssessorLookupInfo.reason ? ` ${initAssessorLookupInfo.reason}` : ''}
 	                                </div>
 	                            )}
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
                                 {initSeOptions.map(se => {
                                     const assigned = Array.isArray(initAssignments[se.id]) && initAssignments[se.id].length > 0;
                                     const bg = assigned ? '#ecfdf5' : '#fef2f2';
                                     const fg = assigned ? '#065f46' : '#991b1b';
                                     const bd = assigned ? '#10b981' : '#ef4444';
                                     return (
-                                    <div key={se.id} style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                                        <div style={{ minWidth: 220, padding: '4px 8px', borderRadius: 4, backgroundColor: bg, color: fg, border: `1px solid ${bd}` }}>
-                                            {se.label}
+                                        <div key={se.id} style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'stretch' }}>
+                                            <div style={{ padding: '6px 10px', borderRadius: 4, backgroundColor: bg, color: fg, border: `1px solid ${bd}`, fontSize: '0.85rem', fontWeight: 500, lineHeight: 1.3 }}>
+                                                {se.label}
+                                            </div>
+                                            <Autocomplete
+                                                multiple
+                                                options={initTeamOptions}
+                                                disabled={isBaselineCreating || initTeamLoading}
+                                                getOptionLabel={(o) => o.displayName || o.id}
+                                                onChange={(e, newVal) => setInitAssignments(prev => ({ ...prev, [se.id]: newVal.map(v => v.id) }))}
+                                                renderInput={(params) => <TextField {...params} size="small" label="Assignees" placeholder="Select" />}
+                                                value={(initAssignments[se.id] || []).map(id => initTeamOptions.find(t => t.id === id)).filter(Boolean)}
+                                                style={{ width: '100%' }}
+                                            />
                                         </div>
-                                        <Autocomplete
-                                            multiple
-                                            options={initTeamOptions}
-	                                            disabled={isBaselineCreating || initTeamLoading}
-                                            getOptionLabel={(o) => o.displayName || o.id}
-                                            onChange={(e, newVal) => setInitAssignments(prev => ({ ...prev, [se.id]: newVal.map(v => v.id) }))}
-                                            renderInput={(params) => <TextField {...params} size="small" label="Assignees" placeholder="Select" />}
-                                            value={(initAssignments[se.id] || []).map(id => initTeamOptions.find(t => t.id === id)).filter(Boolean)}
-                                        />
-                                    </div>
-                                );})}
+                                    );
+                                })}
                             </div>
                         </div>
                     )}

@@ -2261,26 +2261,30 @@
                     const labelLower = rawLabel.toLowerCase();
                     const labelUpper = rawLabel.toUpperCase();
                     const isEnrollmentField = labelLower.includes('enrollment');
-                    const isTeiField = labelLower.includes('tei id');
-	                    const isProgramStageIdField =
-	                        labelLower.includes('program stage id') ||
-	                        labelUpper.includes('PROGRAM_STAGE');
+                    const isTeiField = labelLower.includes('tei id') || labelLower.includes('tei_id') || labelLower.includes('tei');
+                    const isProgramStageIdField =
+                        labelLower.includes('program stage id') ||
+                        labelUpper.includes('PROGRAM_STAGE');
                     const isAssessorUserField =
                         labelUpper.includes('FAC_ASS_ASSESSOR_USER_ID') ||
-                        labelUpper.includes('ASSESSOR USER ID');
+                        labelUpper.includes('ASSESSOR USER ID') ||
+                        labelLower.includes('assessor');
                 const isFacilityGroupField =
                     field.id === 'pzenrgsSny3' ||
                         /facility assessment (group|type)/.test(labelLower);
-	                const isHospitalAssessmentTypeField = Boolean(
-	                    isADSection && /hospital assessment type/.test(labelLower)
-	                );
-	                const isSysTagField = Boolean(
-	                    isADSection && (
-	                        field.id === SYS_TAG_DE_ID ||
-	                        /^tag$/.test(labelLower) ||
-	                        /\bsys[ _-]?tag\b/i.test(rawLabel)
-	                    )
-	                );
+                    const isHospitalAssessmentTypeField = Boolean(
+                        isADSection && /hospital assessment type/.test(labelLower)
+                    );
+                    const isSysTagField = Boolean(
+                        isADSection && (
+                            field.id === SYS_TAG_DE_ID ||
+                            labelLower === 'tag' ||
+                            labelLower.includes('sys_tag') ||
+                            labelLower.includes('sys-tag') ||
+                            labelLower.includes('systag') ||
+                            /\b(sys[ _-]?tag|tag)\b/i.test(rawLabel)
+                        )
+                    );
 	                const isTypeOfAssessmentField = Boolean(
 	                    isADSection &&
 	                    (
