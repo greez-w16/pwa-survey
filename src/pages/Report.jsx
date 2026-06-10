@@ -111,6 +111,61 @@ export default function Report() {
     const selected = facilityOptions.find(opt => opt.id === selectedFacilityId);
     return selected?.name || selectedFacilityId || 'Selected Facility';
   }, [facilityOptions, selectedFacilityId]);
+
+  const activeConfig = useMemo(() => {
+    if (!activeConfigVersionId || !configBundles[activeConfigVersionId]) {
+      return {
+        hospital_full_configuration: hospitalConfig.hospital_full_configuration,
+        clinics_full_configuration: clinicsConfig.clinics_full_configuration,
+        ems_full_configuration: emsConfig.ems_full_configuration,
+        mortuary_full_configuration: mortuaryConfig.mortuary_full_configuration,
+      };
+    }
+    return configBundles[activeConfigVersionId].config || {};
+  }, [activeConfigVersionId, configBundles]);
+
+  const criterionIndex = useMemo(() => {
+    const index = {};
+    try {
+      const possibleKeys = [
+        'ems_full_configuration',
+        'mortuary_full_configuration',
+        'clinics_full_configuration',
+        'hospital_full_configuration',
+        'eye_full_configuration',
+      ];
+
+      possibleKeys.forEach((key) => {
+        const arr = activeConfig[key];
+        if (Array.isArray(arr)) {
+          arr.forEach(se => {
+            (se.sections || []).forEach(section => {
+              (section.standards || []).forEach(standard => {
+                const stdId = (standard.standard_id || standard.standardId || '').trim();
+                if (stdId && !index[stdId]) {
+                  index[stdId] = {
+                    statement: standard.statement || '',
+                    description: standard.statement || '',
+                  };
+                }
+                (standard.criteria || []).forEach(crit => {
+                  if (crit && crit.id) {
+                    index[crit.id] = {
+                      statement: standard.statement || '',
+                      description: crit.description || '',
+                    };
+                  }
+                });
+              });
+            });
+          });
+        }
+      });
+    } catch (e) {
+      console.error('Report: Failed to build criterion index', e);
+    }
+    return index;
+  }, [activeConfig]);
   // Helper: identify the non-SE metadata section often named "Assessment Details"
   const isAssessmentDetailsSection = (section) => {
     if (!section) return false;
@@ -730,14 +785,14 @@ export default function Report() {
         // Build section label map for display (exclude Assessment Details; prefer SE name)
         const labels = {};
         const chartLabels = {};
-        // Build a quick se_id -> se_name map from on-disk configs for friendly names
+        // Build a quick se_id -> se_name map from active config for friendly names
         const seNameMap = (() => {
           try {
             let arr = [];
-            if (programmeType === 'hospital') arr = hospitalConfig.hospital_full_configuration || [];
-            else if (programmeType === 'clinics') arr = clinicsConfig.clinics_full_configuration || [];
-            else if (programmeType === 'ems') arr = emsConfig.ems_full_configuration || [];
-            else if (programmeType === 'mortuary') arr = mortuaryConfig.mortuary_full_configuration || [];
+            if (programmeType === 'hospital') arr = activeConfig.hospital_full_configuration || [];
+            else if (programmeType === 'clinics') arr = activeConfig.clinics_full_configuration || [];
+            else if (programmeType === 'ems') arr = activeConfig.ems_full_configuration || [];
+            else if (programmeType === 'mortuary') arr = activeConfig.mortuary_full_configuration || [];
             else if (programmeType === 'obgyn') arr = [];
             const map = {};
             (arr || []).forEach(se => {
@@ -1415,8 +1470,20 @@ export default function Report() {
 	  };
 
 	  const criterionLabelForCode = (code, ...criteria) => {
-	    const criterion = criteria.find(Boolean) || null;
-	    const raw = criterion?.label || criterion?.displayName || criterion?.name || criterion?.code || code;
+	    const normalizedCode = normalizeCriterionCode(code || '');
+	    const configEntry = normalizedCode ? (criterionIndex[normalizedCode] || null) : null;
+	    
+	    let raw = '';
+	    if (configEntry) {
+	      const isStandardCode = /^\d+(\.\d+){2}$/.test(normalizedCode);
+	      raw = isStandardCode ? configEntry.statement : configEntry.description;
+	    }
+	    
+	    if (!raw) {
+	      const criterion = criteria.find(Boolean) || null;
+	      raw = criterion?.label || criterion?.displayName || criterion?.name || criterion?.code || code;
+	    }
+	    
 	    return cleanCriterionLabel(code, raw);
 	  };
 
@@ -1440,11 +1507,11 @@ export default function Report() {
     if (!piCode) return '';
     const programmeType = (reportInfo?.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo?.groupId === 'CLINICS') ? 'clinics' : (reportInfo?.groupId === 'EMS') ? 'ems' : (reportInfo?.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo?.groupId === 'OBGYN') ? 'obgyn' : 'mortuary';
     const configMap = {
-      hospital: hospitalConfig?.hospital_full_configuration,
-      mortuary: mortuaryConfig?.mortuary_full_configuration,
-      clinics: clinicsConfig?.clinics_full_configuration,
-      ems: emsConfig?.ems_full_configuration,
-      obgyn: []
+      hospital: activeConfig?.hospital_full_configuration,
+      mortuary: activeConfig?.mortuary_full_configuration,
+      clinics: activeConfig?.clinics_full_configuration,
+      ems: activeConfig?.ems_full_configuration,
+      obgyn: activeConfig?.obgyn_full_configuration || []
     };
     const config = configMap[programmeType] || [];
     for (const se of config) {
@@ -1461,11 +1528,11 @@ export default function Report() {
     if (!standardCode) return '';
     const programmeType = (reportInfo?.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo?.groupId === 'CLINICS') ? 'clinics' : (reportInfo?.groupId === 'EMS') ? 'ems' : (reportInfo?.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo?.groupId === 'OBGYN') ? 'obgyn' : 'mortuary';
     const configMap = {
-      hospital: hospitalConfig?.hospital_full_configuration,
-      mortuary: mortuaryConfig?.mortuary_full_configuration,
-      clinics: clinicsConfig?.clinics_full_configuration,
-      ems: emsConfig?.ems_full_configuration,
-      obgyn: []
+      hospital: activeConfig?.hospital_full_configuration,
+      mortuary: activeConfig?.mortuary_full_configuration,
+      clinics: activeConfig?.clinics_full_configuration,
+      ems: activeConfig?.ems_full_configuration,
+      obgyn: activeConfig?.obgyn_full_configuration || []
     };
     const config = configMap[programmeType] || [];
     for (const se of config) {

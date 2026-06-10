@@ -267,7 +267,7 @@ const PrivateRoute = ({ children }) => {
 		  const locallyEditedFieldIdsRef = React.useRef(new Set());
 
 		  const saveField = React.useCallback((fieldKey, fieldValue) => {
-		    console.log(`[App Debug] saveField called: key="${fieldKey}", value=`, fieldValue, new Error().stack);
+		    console.log(`[App Debug] saveField called: key="${fieldKey}"`);
 		    if (fieldKey) locallyEditedFieldIdsRef.current.add(fieldKey);
 		    baseSaveField(fieldKey, fieldValue);
 		  }, [baseSaveField]);
@@ -937,33 +937,62 @@ const PrivateRoute = ({ children }) => {
 	    null
 	  ), [formData?.teiId_internal, selectedFacility]);
 
+	  const prevCandidatesRef = React.useRef([]);
 	  const scoringNamespaceCandidates = React.useMemo(() => {
 	    const preferred = resolveAssessmentNamespaceFromText(
 	      formData?.[FACILITY_GROUP_DE_ID] || activeGroup?.name || activeGroup?.id || ''
 	    );
-	    return Array.from(new Set([preferred, 'HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].filter(Boolean)));
+	    const next = Array.from(new Set([preferred, 'HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].filter(Boolean)));
+	    if (
+	      prevCandidatesRef.current.length === next.length &&
+	      prevCandidatesRef.current.every((val, i) => val === next[i])
+	    ) {
+	      return prevCandidatesRef.current;
+	    }
+	    prevCandidatesRef.current = next;
+	    return next;
 	  }, [formData?.[FACILITY_GROUP_DE_ID], activeGroup, resolveAssessmentNamespaceFromText]);
 
 		  useEffect(() => {
 		    if (!user || !scoringTeiId || scoringNamespaceCandidates.length === 0) {
-	      setDataStoreScoringEventIdMap({});
+	      setDataStoreScoringEventIdMap(prev => {
+	        if (Object.keys(prev || {}).length === 0) return prev;
+	        return {};
+	      });
 	      return;
 	    }
 	    let cancelled = false;
 	    (async () => {
+	      const isEquivalent = (a, b) => {
+	        const keysA = Object.keys(a || {});
+	        const keysB = Object.keys(b || {});
+	        if (keysA.length !== keysB.length) return false;
+	        return keysA.every(k => a[k] === b[k]);
+	      };
+
 	      for (const nsKey of scoringNamespaceCandidates) {
 	        try {
 	          const plan = await api.getDataStoreItem(nsKey, scoringTeiId);
 	          const map = parseEventIdMap(plan?.eventIdMap);
 	          if (Object.keys(map).length > 0) {
-	            if (!cancelled) setDataStoreScoringEventIdMap(map);
+	            if (!cancelled) {
+	              setDataStoreScoringEventIdMap(prev => {
+	                if (isEquivalent(prev, map)) return prev;
+	                return map;
+	              });
+	            }
 	            return;
 	          }
 	        } catch (_) {
 	          // Keep probing candidate namespaces.
 	        }
 	      }
-	      if (!cancelled) setDataStoreScoringEventIdMap({});
+	      if (!cancelled) {
+	        setDataStoreScoringEventIdMap(prev => {
+	          if (Object.keys(prev || {}).length === 0) return prev;
+	          return {};
+	        });
+	      }
 	    })();
 	    return () => { cancelled = true; };
 		  }, [user, scoringTeiId, scoringNamespaceCandidates, parseEventIdMap]);

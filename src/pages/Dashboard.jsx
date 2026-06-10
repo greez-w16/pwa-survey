@@ -478,6 +478,17 @@ export function Dashboard() {
             remoteConfigLoading,
             loadRemoteConfig,
 	    } = useApp();
+    const activeConfig = useMemo(() => {
+        if (!activeVersionId || !configBundles[activeVersionId]) {
+            return {
+                hospital_full_configuration: hospitalConfig.hospital_full_configuration,
+                clinics_full_configuration: clinicsConfig.clinics_full_configuration,
+                ems_full_configuration: emsConfig.ems_full_configuration,
+                mortuary_full_configuration: mortuaryConfig.mortuary_full_configuration,
+            };
+        }
+        return configBundles[activeVersionId].config || {};
+    }, [activeVersionId, configBundles]);
     const storage = useStorage();
     const [searchTerm, setSearchTerm] = useState('');
     const [settingsFacilitySearches, setSettingsFacilitySearches] = useState({});
@@ -806,10 +817,10 @@ export function Dashboard() {
 	            if (metadataSeList.length > 0) return metadataSeList;
 
 	            let arr = [];
-	            if (ns === 'HOSPITAL') arr = hospitalConfig.hospital_full_configuration || [];
-	            else if (ns === 'CLINICS') arr = clinicsConfig.clinics_full_configuration || [];
-	            else if (ns === 'EMS') arr = emsConfig.ems_full_configuration || [];
-	            else if (ns === 'MORTUARY') arr = mortuaryConfig.mortuary_full_configuration || [];
+	            if (ns === 'HOSPITAL') arr = activeConfig.hospital_full_configuration || [];
+	            else if (ns === 'CLINICS') arr = activeConfig.clinics_full_configuration || [];
+	            else if (ns === 'EMS') arr = activeConfig.ems_full_configuration || [];
+	            else if (ns === 'MORTUARY') arr = activeConfig.mortuary_full_configuration || [];
 	            const seList = (arr || []).map(se => ({ id: String(se.se_id), label: `SE ${se.se_id} ${se.se_name || se.name || ''}`.trim() }));
 	            return seList.sort((a, b) => Number(a.id) - Number(b.id));
 	        } catch (_) { return []; }
@@ -1615,7 +1626,7 @@ export function Dashboard() {
 			    return entry?.[0] || '';
 			};
 
-			const getAssignmentFacilityGroupRawValue = (assessment) => (
+			const getAssignmentFacilityGroupRawValue = React.useCallback((assessment) => (
 			    assessment?.parentGroupId
 			    || assessment?.facilityGroup
 			    || assessment?.schedule?.parentGroupId
@@ -1623,9 +1634,9 @@ export function Dashboard() {
 			    || getAttributeValue(assessment?.schedule?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
 			    || getAttributeValue(assessment?.attributes, SURVEY_PROGRAM_ATTRIBUTE_IDS.facilityType, ['assessment facility type'])
 			    || ''
-			);
+			), []);
 
-			const getAssessmentFacilityGroupKey = (assessment) => {
+			const getAssessmentFacilityGroupKey = React.useCallback((assessment) => {
 			    const raw = getAssignmentFacilityGroupRawValue(assessment);
 			    const key = toFacilityGroupKey(raw);
 			    if (key && key !== '-') return key;
@@ -1634,13 +1645,13 @@ export function Dashboard() {
 			        || assessment?.schedule?.programStageId
 			        || assessment?.schedule?.enrollments?.[0]?.programStage
 			    );
-			};
+			}, [toFacilityGroupKey, getAssignmentFacilityGroupRawValue]);
 
-			const getAssignmentFacilityGroupValue = (assessment) => {
+			const getAssignmentFacilityGroupValue = React.useCallback((assessment) => {
 			    const raw = getAssignmentFacilityGroupRawValue(assessment);
 			    const key = getAssessmentFacilityGroupKey(assessment);
 			    return key ? getFacilityGroupLabel(key) : (raw || '-');
-			};
+			}, [getAssignmentFacilityGroupRawValue, getAssessmentFacilityGroupKey, getFacilityGroupLabel]);
 
 			React.useEffect(() => {
 			    if (assessmentsLoading) return;

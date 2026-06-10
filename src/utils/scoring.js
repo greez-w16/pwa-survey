@@ -101,8 +101,6 @@ export const normalizeCriterionPoints = (points) => {
 export const computeGraphScores = (criteriaMap) => {
     const globalScores = {};
     const currentlyResolving = new Set(); // To detect circular dependencies
-
-    const warnedCircular = new Set();
     const computeCriterion = (code) => {
         if (globalScores[code]) return globalScores[code];
 
@@ -112,10 +110,8 @@ export const computeGraphScores = (criteriaMap) => {
         }
 
         if (currentlyResolving.has(code)) {
-            if (!warnedCircular.has(code)) {
-                console.warn(`Circular dependency detected involving ${code}. Breaking loop.`);
-                warnedCircular.add(code);
-            }
+            // Silence warning to prevent performance degradation from browser console spam.
+            // Circular dependencies are expected in the accreditation matrix and cleanly broken by returning NA.
             return { points: null, response: 'NA', rawResponse: 'NA', isRoot: false, isDraft: true, criticalFail: false, isScored: false };
         }
 

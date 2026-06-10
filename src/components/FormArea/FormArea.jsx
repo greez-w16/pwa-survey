@@ -529,6 +529,8 @@
         );
     };
 
+    const EMPTY_MAP = {};
+
     const FormArea = ({
         activeSection: propsActiveSection,
         selectedFacility,
@@ -545,7 +547,7 @@
         onCriterionChange
     }) => {
         const saveField = React.useCallback((key, val) => {
-            console.log(`[FormArea Debug] saveField called: key="${key}", value=`, val, new Error().stack);
+            console.log(`[FormArea Debug] saveField called: key="${key}"`);
             rawSaveField(key, val);
         }, [rawSaveField]);
 
@@ -1008,6 +1010,11 @@
                 hydratedServerFieldIdsRef.current = new Set();
             }, [activeEventId]);
 
+            const lastSavedEventIdMapRef = React.useRef('');
+            React.useEffect(() => {
+                lastSavedEventIdMapRef.current = '';
+            }, [activeEventId]);
+
         React.useEffect(() => {
             if (!scoringResults?.sections || !activeSection?.fields) return;
 
@@ -1160,27 +1167,30 @@
 
         const draftEventIdMap = React.useMemo(() => {
             try {
-                return formData?.eventIdMap_internal ? (JSON.parse(formData.eventIdMap_internal) || {}) : {};
+                return formData?.eventIdMap_internal ? (JSON.parse(formData.eventIdMap_internal) || EMPTY_MAP) : EMPTY_MAP;
             } catch (_) {
-                return {};
+                return EMPTY_MAP;
             }
         }, [formData?.eventIdMap_internal]);
 
             const dataStoreEventIdMap = React.useMemo(() => {
                 try {
                     const raw = assignmentPlan?.eventIdMap;
-                    if (!raw) return {};
-                    if (typeof raw === 'string') return JSON.parse(raw) || {};
-                    return typeof raw === 'object' ? raw : {};
+                    if (!raw) return EMPTY_MAP;
+                    if (typeof raw === 'string') return JSON.parse(raw) || EMPTY_MAP;
+                    return typeof raw === 'object' ? raw : EMPTY_MAP;
                 } catch (_) {
-                    return {};
+                    return EMPTY_MAP;
                 }
             }, [assignmentPlan?.eventIdMap]);
 
-            const authoritativeEventIdMap = React.useMemo(() => ({
-                ...(draftEventIdMap || {}),
-                ...(dataStoreEventIdMap || {}),
-            }), [draftEventIdMap, dataStoreEventIdMap]);
+            const authoritativeEventIdMap = React.useMemo(() => {
+                if (draftEventIdMap === EMPTY_MAP && dataStoreEventIdMap === EMPTY_MAP) return EMPTY_MAP;
+                return {
+                    ...(draftEventIdMap || {}),
+                    ...(dataStoreEventIdMap || {}),
+                };
+            }, [draftEventIdMap, dataStoreEventIdMap]);
 
         const effectiveEventIdMap = React.useMemo(() => {
 		        // Server-read SYS_TAG mappings must override local/DataStore mappings.
@@ -1296,7 +1306,7 @@
 
                     if (!teiId || !orgUnitId || targetSections.length === 0) {
                         if (!cancelled) {
-                            setResolvedEventIdMap({});
+                            setResolvedEventIdMap(EMPTY_MAP);
                             setEventMapResolving(false);
                         }
                         return;
@@ -1357,11 +1367,14 @@
                         setResolvedSurveyEventsById(surveyEventsById);
                         setResolvedEventIdMap(mergedMap);
                         setEventMapResolving(false);
-                    }
 
-                        if (Object.keys(mergedMap || {}).length > 0 && JSON.stringify(mergedMap) !== JSON.stringify(draftEventIdMap || {})) {
-                        saveField('eventIdMap_internal', JSON.stringify(mergedMap));
-                    }
+                        const mergedMapStr = JSON.stringify(mergedMap);
+                        if (Object.keys(mergedMap || {}).length > 0 && 
+                            mergedMapStr !== JSON.stringify(draftEventIdMap || {}) &&
+                            mergedMapStr !== lastSavedEventIdMapRef.current) {
+                            lastSavedEventIdMapRef.current = mergedMapStr;
+                            saveField('eventIdMap_internal', mergedMapStr);
+                        }
 
                         const shouldHydrateServerValues = Boolean(
                             selectedFacility?.hydrateAll ||
@@ -1374,20 +1387,21 @@
                         );
 
                         if (shouldHydrateServerValues) {
-                        serverFieldValues.forEach((value, fieldId) => {
-                            const currentValue = latestFormDataRef.current?.[fieldId];
-                            const currentText = currentValue === undefined || currentValue === null ? '' : String(currentValue).trim();
+                            serverFieldValues.forEach((value, fieldId) => {
+                                const currentValue = latestFormDataRef.current?.[fieldId];
+                                const currentText = currentValue === undefined || currentValue === null ? '' : String(currentValue).trim();
                                 if (currentText === '' && !hydratedServerFieldIdsRef.current.has(fieldId)) {
                                     hydratedServerFieldIdsRef.current.add(fieldId);
-                                saveField(fieldId, value);
-                            }
-                        });
+                                    saveField(fieldId, value);
+                                }
+                            });
+                        }
                     }
                 } catch (e) {
                     console.warn('FormArea: Could not resolve SE event mapping automatically', e);
                     if (!cancelled) {
-                        setResolvedSurveyEventsById({});
-                        setResolvedEventIdMap({});
+                        setResolvedSurveyEventsById(EMPTY_MAP);
+                        setResolvedEventIdMap(EMPTY_MAP);
                         setEventMapResolving(false);
                     }
                 }
@@ -2385,16 +2399,21 @@
 	                            return friendlyLabel(rawLabel) || 'Unnamed Field';
                         }
 
-                        // For other sections, optionally prepend the
-                        // cleaned criterion number (without any
-                        // SURV_/FAC_/etc. prefixes) if it adds
-                        // information and does not duplicate the
-                        // start of the label.
-                        if (shouldShowCode && rawLabel && !rawLabel.startsWith(cleanedCode)) {
-                            return `${cleanedCode} ${rawLabel}`;
+                        // For other sections, retrieve standard statement or criterion
+                        // description from active DataStore configuration when available,
+                        // falling back to metadata rawLabel.
+                        let targetText = rawLabel;
+                        if (isStandardCriterion && configEntry.statement) {
+                            targetText = configEntry.statement;
+                        } else if (isCriterionQuestion && configEntry.description) {
+                            targetText = configEntry.description;
                         }
 
-                        return rawLabel || 'Unnamed Field';
+                        if (shouldShowCode && targetText && !targetText.startsWith(cleanedCode)) {
+                            return `${cleanedCode} ${targetText}`;
+                        }
+
+                        return targetText || 'Unnamed Field';
                     })();
 
                     // For comment rows, prepare a short score label to display next

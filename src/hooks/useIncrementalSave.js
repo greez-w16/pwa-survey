@@ -83,11 +83,9 @@ export const useIncrementalSave = (eventId, options = {}) => {
                 console.log(`💾 Saving ${updates.length} field(s) to IndexedDB. User:`, currentUser?.username || 'anonymous');
             }
 
-            // Save each field individually
-            for (const [fieldKey, fieldValue] of updates) {
-                // Pass user explicitly to service to ensure correct owner
-                await indexedDBService.saveFormData(eventId, fieldKey, fieldValue, {}, currentUser);
-            }
+            // Save all fields at once in a single transaction
+            const fieldsMap = Object.fromEntries(updates);
+            await indexedDBService.saveFormDataMultiple(eventId, fieldsMap, {}, currentUser);
             // Clear pending saves
             pendingSaves.current.clear();
 

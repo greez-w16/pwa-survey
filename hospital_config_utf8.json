@@ -1098,7 +1098,7 @@
               "criteria": [
                 {
                   "id": "2.5.1.1",
-                  "description": "The organisation identifies the types of healthcare professionals who are permitted to provide patient care without clinical supervision.",
+                  "description": "Those permitted by law, regulation and the organisation to provide patient care without supervision are identified.",
                   "is_critical": false,
                   "category": "Basic Process + Efficiency",
                   "severity": 4,
@@ -1106,7 +1106,7 @@
                 },
                 {
                   "id": "2.5.1.2",
-                  "description": "There is a defined process for gathering the credentials of healthcare professionals.",
+                  "description": "The registration, education, training and experience of these individuals are documented.",
                   "is_critical": false,
                   "category": "Basic Process + Efficiency",
                   "severity": 4,
@@ -1114,7 +1114,7 @@
                 },
                 {
                   "id": "2.5.1.3",
-                  "description": "Credentials of healthcare professionals are verified with the original source, where applicable.",
+                  "description": "Such information is verified from the original sources.",
                   "is_critical": false,
                   "category": "Basic Process + Efficiency",
                   "severity": 4,
@@ -1122,7 +1122,7 @@
                 },
                 {
                   "id": "2.5.1.4",
-                  "description": "Professional registration is verified with the relevant professional body and is current.",
+                  "description": "The personnel record contains copies of any required registration certificate(s).",
                   "is_critical": true,
                   "category": "Basic Process + Efficiency",
                   "severity": 4,
@@ -1130,7 +1130,7 @@
                 },
                 {
                   "id": "2.5.1.5",
-                  "description": "Healthcare professional credentials are reviewed at least annually.",
+                  "description": "There is a process to review the personnel records annually.",
                   "is_critical": false,
                   "category": "Basic Process + Efficiency",
                   "severity": 3,
@@ -1138,7 +1138,7 @@
                 },
                 {
                   "id": "2.5.1.6",
-                  "description": "The organisation ensures that those who provide clinical care are registered with the relevant professional council.",
+                  "description": "The organisation has a process to ensure that nurses and other professionals who are not employees of the organisation, but provide services to the organisation’s patients, have valid credentials.",
                   "is_critical": false,
                   "category": "Basic Process + Efficiency",
                   "severity": 4,
@@ -1146,7 +1146,7 @@
                 },
                 {
                   "id": "2.5.1.7",
-                  "description": "Personnel files of all healthcare professionals are updated annually.",
+                  "description": "The services to be provided are made known to appropriate individuals and units of the organisation.",
                   "is_critical": false,
                   "category": "Basic Process + Efficiency",
                   "severity": 3,

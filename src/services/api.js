@@ -3,6 +3,8 @@ const BASE_URL = '/qims';
 const ADMIN_USER_RESOLVER_URL = '/email2/api/admin/resolve-users';
 const CURRENT_USER_FIELDS = 'id,displayName,username';
 
+const datastoreMemoryCache = new Map();
+
 const getAdminUserResolverUrls = () => {
     const urls = [ADMIN_USER_RESOLVER_URL];
     if (typeof window !== 'undefined' && /^localhost$|^127\.0\.0\.1$/.test(window.location.hostname)) {
@@ -611,20 +613,41 @@ export const api = {
     const headers = getHeaders();
     // Try PUT (works as upsert on newer DHIS2). If fails 404, try POST.
     let resp = await fetch(url, { method: 'PUT', headers, body: JSON.stringify(valueObj) });
-    if (resp.ok) return 'OK';
+    if (resp.ok) {
+      datastoreMemoryCache.set(`${namespace}:${key}`, valueObj);
+      return 'OK';
+    }
     if (resp.status === 404) {
       resp = await fetch(url, { method: 'POST', headers, body: JSON.stringify(valueObj) });
-      if (resp.ok) return 'OK';
+      if (resp.ok) {
+        datastoreMemoryCache.set(`${namespace}:${key}`, valueObj);
+        return 'OK';
+      }
     }
     const text = await resp.text().catch(() => '');
     throw new Error(`DataStore upsert failed: ${resp.status} ${text}`);
   },
 
   getDataStoreItem: async (namespace, key) => {
+    const cacheKey = `${namespace}:${key}`;
+    if (datastoreMemoryCache.has(cacheKey)) {
+      return datastoreMemoryCache.get(cacheKey);
+    }
     const url = `${BASE_URL}/api/dataStore/${encodeURIComponent(namespace)}/${encodeURIComponent(key)}`;
-    const resp = await fetch(url, { headers: getHeaders() });
-    if (!resp.ok) return null;
-    return await resp.json().catch(() => null);
+    try {
+      const resp = await fetch(url, { headers: getHeaders() });
+      if (!resp.ok) {
+        // Cache the fact that this is not found (404/not ok) to prevent loops
+        datastoreMemoryCache.set(cacheKey, null);
+        return null;
+      }
+      const val = await resp.json().catch(() => null);
+      datastoreMemoryCache.set(cacheKey, val);
+      return val;
+    } catch (err) {
+      // Don't cache network errors, so we can retry on next request if connection is restored.
+      return null;
+    }
   },
 
   deleteDataStoreItem: async (namespace, key) => {
@@ -635,6 +658,7 @@ export const api = {
       console.warn(`DataStore delete failed: ${resp.status} ${text}`);
       return false;
     }
+    datastoreMemoryCache.delete(`${namespace}:${key}`);
     return true;
   },
 
@@ -705,6 +729,62 @@ export const api = {
     },
 
     getFormMetadata: async (programStageId = '') => {
+        if (!programStageId) throw new Error('getFormMetadata: programStageId is required');
+
+        let indexedDBService = null;
+        try {
+            const mod = await import('./indexedDBService');
+            indexedDBService = mod.default || mod;
+        } catch (e) {
+            console.warn('[API] Could not import indexedDBService', e);
+        }
+
+        const cacheKey = `metadata_${programStageId}`;
+
+        // Try getting cached metadata
+        if (indexedDBService) {
+            try {
+                const cached = await indexedDBService.getConfig(cacheKey);
+                if (cached) {
+                    console.log(`[API] Loaded form metadata for ${programStageId} from IndexedDB cache`);
+                    // Trigger a background refresh to keep cache fresh if online
+                    if (typeof navigator !== 'undefined' && navigator.onLine) {
+                        api.refreshFormMetadataBackground(programStageId, cacheKey, indexedDBService).catch(() => {});
+                    }
+                    return cached;
+                }
+            } catch (err) {
+                console.warn('[API] Failed to retrieve cached form metadata', err);
+            }
+        }
+
+        const metadata = await api.fetchFormMetadataFromServer(programStageId);
+
+        // Cache the newly fetched metadata
+        if (indexedDBService && metadata) {
+            try {
+                await indexedDBService.saveConfig(cacheKey, metadata);
+            } catch (err) {
+                console.warn('[API] Failed to cache form metadata', err);
+            }
+        }
+
+        return metadata;
+    },
+
+    refreshFormMetadataBackground: async (programStageId, cacheKey, indexedDBService) => {
+        try {
+            const metadata = await api.fetchFormMetadataFromServer(programStageId);
+            if (metadata && indexedDBService) {
+                await indexedDBService.saveConfig(cacheKey, metadata);
+                console.log(`[API] Background refresh completed and cached for ${programStageId}`);
+            }
+        } catch (err) {
+            console.warn(`[API] Background metadata refresh failed for ${programStageId}`, err);
+        }
+    },
+
+    fetchFormMetadataFromServer: async (programStageId) => {
         const params = [
             // Include program + its trackedEntityType so we can use them when
             // submitting tracker payloads (TEI + enrollment + event).

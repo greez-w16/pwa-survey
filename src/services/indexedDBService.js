@@ -5,34 +5,46 @@
 class IndexedDBService {
     constructor() {
         this.dbName = 'InspectionFormDB';
-        this.version = 6; // BUMP TO 6 TO RE-TRIGGER UPGRADE AND FIX VERSIONERROR
+        this.version = 7; // BUMP TO 7 FOR CONFIG FALLBACK STORE
         this.storeName = 'formData';
+        this.configStoreName = 'surveyConfigs';
         this.db = null;
+        this.initPromise = null;
     }
 
     /**
      * Initialize IndexedDB connection
      */
     async init() {
-        return new Promise((resolve, reject) => {
+        if (this.db) return this.db;
+        if (this.initPromise) return this.initPromise;
+
+        this.initPromise = new Promise((resolve, reject) => {
             const request = indexedDB.open(this.dbName, this.version);
 
             request.onerror = () => {
                 console.error('❌ IndexedDB failed to open:', request.error);
+                this.initPromise = null;
                 reject(request.error);
             };
 
-	            request.onsuccess = () => {
-	                this.db = request.result;
-	                console.log(`✅ IndexedDB initialized successfully (Version ${this.db.version})`);
-	                // Opportunistic cleanup of old synced records to keep storage
-	                // usage under control. This runs in the background and does
-	                // not block the caller.
-	                this.cleanupSyncedRecords().catch((err) => {
-	                    console.warn('⚠️ IndexedDB cleanup failed (non-fatal):', err);
-	                });
-	                resolve(this.db);
-	            };
+            request.onblocked = () => {
+                console.warn('⚠️ IndexedDB open blocked. Please close other tabs of this app.');
+                this.initPromise = null;
+                reject(new Error('IndexedDB open blocked'));
+            };
+
+            request.onsuccess = () => {
+                this.db = request.result;
+                console.log(`✅ IndexedDB initialized successfully (Version ${this.db.version})`);
+                // Opportunistic cleanup of old synced records to keep storage
+                // usage under control. This runs in the background and does
+                // not block the caller.
+                this.cleanupSyncedRecords().catch((err) => {
+                    console.warn('⚠️ IndexedDB cleanup failed (non-fatal):', err);
+                });
+                resolve(this.db);
+            };
 
             request.onupgradeneeded = (event) => {
                 console.log(`🔄 IndexedDB Upgrade Needed: ${event.oldVersion} -> ${event.newVersion}`);
@@ -65,8 +77,16 @@ class IndexedDBService {
                         console.log('📦 Added userIdAndDraft compound index to existing store');
                     }
                 }
+
+                // Create config store if it doesn't exist
+                if (!db.objectStoreNames.contains(this.configStoreName)) {
+                    db.createObjectStore(this.configStoreName, { keyPath: 'key' });
+                    console.log('📦 Created IndexedDB object store:', this.configStoreName);
+                }
             };
         });
+
+        return this.initPromise;
     }
 
     /**
@@ -210,6 +230,93 @@ class IndexedDBService {
 	                }
 	            };
 	        });
+    }
+
+    /**
+     * Save multiple form data fields at once in a single transaction
+     */
+    async saveFormDataMultiple(eventId, fieldsMap, metadata = {}, user = null) {
+        if (!this.db) {
+            await this.init();
+        }
+
+        let currentUser = user;
+        if (!currentUser) {
+            currentUser = await this.getCurrentUser();
+        }
+
+        const userId = currentUser?.username || currentUser?.id || 'anonymous';
+
+        let existingData = null;
+        try {
+            existingData = await this.getFormData(eventId);
+        } catch (readErr) {
+            console.warn('⚠️ saveFormDataMultiple: failed to read existing draft, treating as new.', readErr);
+        }
+
+        const isExistingDraft = Boolean(existingData);
+
+        if (!isExistingDraft) {
+            await this.enforceDraftLimitForUser(currentUser, 5);
+        }
+
+        const baseData = existingData || {
+            eventId: eventId,
+            userId: userId,
+            userDisplayName: currentUser?.displayName || userId,
+            formData: {},
+            syncStatus: 'pending',
+            syncError: null,
+            syncedAt: null,
+            metadata: {
+                isDraft: true,
+                completedSections: [],
+                currentSection: null,
+                ...metadata
+            },
+            createdAt: new Date().toISOString(),
+            lastUpdated: new Date().toISOString()
+        };
+
+        if (userId !== 'anonymous') {
+            baseData.userId = userId;
+            baseData.userDisplayName = currentUser?.displayName || userId;
+        }
+
+        // Apply all field updates at once
+        Object.entries(fieldsMap).forEach(([fieldKey, fieldValue]) => {
+            baseData.formData[fieldKey] = fieldValue;
+        });
+        baseData.lastUpdated = new Date().toISOString();
+
+        if (metadata) {
+            baseData.metadata = { ...baseData.metadata, ...metadata };
+        }
+
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.storeName], 'readwrite');
+            const store = transaction.objectStore(this.storeName);
+
+            const putRequest = store.put(baseData);
+
+            putRequest.onsuccess = () => {
+                console.log(`💾 Saved ${Object.keys(fieldsMap).length} fields to IndexedDB for event ${eventId}`);
+                resolve(baseData);
+            };
+
+            putRequest.onerror = () => {
+                const err = putRequest.error;
+                console.error('❌ Failed to save fields:', err);
+                if (err && (err.name === 'QuotaExceededError' || /quota/i.test(err.message || ''))) {
+                    const friendly = new Error('LOCAL_QUOTA_EXCEEDED');
+                    friendly.code = 'LOCAL_QUOTA_EXCEEDED';
+                    friendly.originalError = err;
+                    reject(friendly);
+                } else {
+                    reject(err);
+                }
+            };
+        });
     }
 
     /**
@@ -524,6 +631,46 @@ class IndexedDBService {
                 putReq.onerror = () => reject(putReq.error);
             };
             getReq.onerror = () => reject(getReq.error);
+        });
+    }
+
+    /**
+     * Save a configuration item (e.g. hospital_full_configuration)
+     */
+    async saveConfig(key, value) {
+        if (!this.db) {
+            await this.init();
+        }
+        return new Promise((resolve, reject) => {
+            const transaction = this.db.transaction([this.configStoreName], 'readwrite');
+            const store = transaction.objectStore(this.configStoreName);
+            const data = { key, value, lastUpdated: new Date().toISOString() };
+            const request = store.put(data);
+            request.onsuccess = () => {
+                console.log(`💾 Cached configuration key ${key} in IndexedDB`);
+                resolve(data);
+            };
+            request.onerror = () => reject(request.error);
+        });
+    }
+
+    /**
+     * Get a configuration item by key
+     */
+    async getConfig(key) {
+        if (!this.db) {
+            await this.init();
+        }
+        return new Promise((resolve, reject) => {
+            if (!this.db.objectStoreNames.contains(this.configStoreName)) {
+                resolve(null);
+                return;
+            }
+            const transaction = this.db.transaction([this.configStoreName], 'readonly');
+            const store = transaction.objectStore(this.configStoreName);
+            const request = store.get(key);
+            request.onsuccess = () => resolve(request.result?.value || null);
+            request.onerror = () => reject(request.error);
         });
     }
 }

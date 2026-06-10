@@ -239,18 +239,33 @@ export const AppProvider = ({ children }) => {
                     setRemoteConfigLoading(true);
                     console.info(`[AppContext] Fetching ${loadScope} configuration from DataStore...`);
                     const fetchedData = {};
+                    let loadedFromCache = false;
                     for (const { key } of keys) {
                         try {
                             const val = await api.getDataStoreItem(NAMESPACE, key);
                             if (val) {
                                 fetchedData[key] = val;
+                                // Save to IndexedDB configuration cache
+                                await indexedDBService.saveConfig(key, val).catch(err => {
+                                    console.warn(`[AppContext] Failed to cache key ${key} in IndexedDB`, err);
+                                });
                             }
                         } catch (e) {
-                            console.warn(`[AppContext] Failed to fetch key ${key} from DataStore`, e);
+                            console.warn(`[AppContext] Failed to fetch key ${key} from DataStore, trying local IndexedDB cache`, e);
+                            try {
+                                const cachedVal = await indexedDBService.getConfig(key);
+                                if (cachedVal) {
+                                    fetchedData[key] = cachedVal;
+                                    loadedFromCache = true;
+                                    console.info(`[AppContext] Loaded key ${key} from local IndexedDB cache`);
+                                }
+                            } catch (cacheErr) {
+                                console.warn(`[AppContext] Failed to read key ${key} from local IndexedDB cache`, cacheErr);
+                            }
                         }
                     }
 
-                    // Only update if we successfully fetched at least some remote configuration
+                    // Only update if we successfully fetched at least some configuration
                     if (Object.keys(fetchedData).length > 0) {
                         setConfigBundles(prev => {
                             const next = { ...prev };
@@ -283,8 +298,12 @@ export const AppProvider = ({ children }) => {
                             return next;
                         });
                         loadedRemoteFacilitiesRef.current.add(loadKey);
-                        console.info('[AppContext] Remote configuration bundle loaded successfully.');
-                        showToast?.('Remote configuration loaded from DataStore successfully.', 'success');
+                        console.info('[AppContext] Configuration bundle loaded successfully.');
+                        if (loadedFromCache) {
+                            showToast?.('Configuration loaded from local offline cache.', 'info');
+                        } else {
+                            showToast?.('Remote configuration loaded from DataStore successfully.', 'success');
+                        }
                         return { loaded: true, count: Object.keys(fetchedData).length };
                     } else {
                         console.info('[AppContext] No remote configuration found in DataStore. Using built-in baseline.');
