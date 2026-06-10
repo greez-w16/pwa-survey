@@ -86,7 +86,7 @@ const getFacilityGroupKeyFromProgramStageId = (stageId) => {
 };
 
 export default function Report() {
-  const { user, configuration, setConfiguration, showToast, configBundles, activeConfigVersionId, userAssignments } = useApp();
+  const { user, configuration, setConfiguration, showToast, configBundles, activeConfigVersionId, userAssignments, configSource, loadRemoteConfig } = useApp();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [metadataLoading, setMetadataLoading] = useState(false);
@@ -140,6 +140,26 @@ export default function Report() {
 	  }, []);
 
   const queryFacilityGroupKey = useMemo(() => toFacilityGroupKey(reportQueryParams.facilityGroup), [reportQueryParams.facilityGroup]);
+
+  const pType = useMemo(() => {
+    const groupId = queryFacilityGroupKey;
+    return groupId === 'HOSPITAL'
+      ? 'hospital'
+      : groupId === 'CLINICS'
+      ? 'clinics'
+      : groupId === 'MORTUARY'
+      ? 'mortuary'
+      : groupId ? 'ems' : '';
+  }, [queryFacilityGroupKey]);
+
+  useEffect(() => {
+    if (configSource === 'datastore' && pType) {
+      console.log(`[Report] Auto-loading remote configuration for ${pType}...`);
+      loadRemoteConfig(pType).catch((err) => {
+        console.warn('[Report] Failed to auto-load remote configuration', err);
+      });
+    }
+  }, [configSource, pType, loadRemoteConfig]);
   const programId = reportQueryParams.programId || configuration?.program?.id || 'G2gULe4jsfs';
   const stageIdFromGroup = queryFacilityGroupKey ? getSurveyProgramStageIdForGroup(queryFacilityGroupKey) : '';
   const stageId = reportQueryParams.programStageId || stageIdFromGroup || configuration?.programStage?.id || '';
@@ -203,7 +223,12 @@ export default function Report() {
       const linksDataLookup = {};
       (links || []).forEach(linkObj => {
         if (!linkObj || !linkObj.criteria) return;
-        linksDataLookup[linkObj.criteria] = { roots: linkObj.root || [], linked_criteria: linkObj.linked_criteria || [] };
+        const val = { roots: linkObj.root || [], linked_criteria: linkObj.linked_criteria || [] };
+        linksDataLookup[linkObj.criteria] = val;
+        const normKey = normalizeCriterionCode(linkObj.criteria);
+        if (normKey && normKey !== linkObj.criteria) {
+          linksDataLookup[normKey] = val;
+        }
       });
       const severityLookup = {};
       const criticalLookup = {};
@@ -617,8 +642,14 @@ export default function Report() {
 	        } : null);
 
         // Build assessment structure for scoring based on facility group
-        // Use precomputed lookups for Hospital globally for all facility types as requested.
-        const { linksDataLookup, severityLookup, criticalLookup } = programmeScoringMeta.hospital;
+        const pType = groupId === 'HOSPITAL'
+          ? 'hospital'
+          : groupId === 'CLINICS'
+          ? 'clinics'
+          : groupId === 'MORTUARY'
+          ? 'mortuary'
+          : 'ems';
+        const { linksDataLookup, severityLookup, criticalLookup } = programmeScoringMeta[pType] || programmeScoringMeta.hospital;
 
         // Under the new model, each SE lives in its own event tagged as SYS_TAG:<seNum>
         const sectionTagMap = Object.fromEntries(
@@ -1023,8 +1054,14 @@ export default function Report() {
       }, 0);
 
       // Critical criteria counts
-      // Critical criteria counts: use precomputed Hospital criticalLookup globally
-      const criticalLookup = programmeScoringMeta.hospital.criticalLookup || {};
+      const reportPType = reportInfo?.groupId === 'HOSPITAL'
+        ? 'hospital'
+        : reportInfo?.groupId === 'CLINICS'
+        ? 'clinics'
+        : reportInfo?.groupId === 'MORTUARY'
+        ? 'mortuary'
+        : 'ems';
+      const criticalLookup = (programmeScoringMeta[reportPType] || programmeScoringMeta.hospital).criticalLookup || {};
       const getCritical = (list) => list.filter(c => {
         const code = String(c.code || '').trim();
         const n = normalizeCriterionCode(code);

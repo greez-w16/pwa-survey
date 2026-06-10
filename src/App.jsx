@@ -93,10 +93,15 @@ const buildScoringMeta = (config, configKey, links) => {
   const linksDataLookup = {};
   (links || []).forEach(linkObj => {
     if (!linkObj || !linkObj.criteria) return;
-    linksDataLookup[linkObj.criteria] = {
+    const val = {
       roots: linkObj.root || [],
       linked_criteria: linkObj.linked_criteria || []
     };
+    linksDataLookup[linkObj.criteria] = val;
+    const normKey = normalizeCriterionCode(linkObj.criteria);
+    if (normKey && normKey !== linkObj.criteria) {
+      linksDataLookup[normKey] = val;
+    }
   });
 
   const severityLookup = {};
@@ -145,6 +150,8 @@ const PrivateRoute = ({ children }) => {
 		    showToast,
 		    configBundles,
 		    activeConfigVersionId,
+		    configSource,
+		    loadRemoteConfig,
 		  } = useApp();
 	  const [searchParams] = useSearchParams();
   const [isLoading, setIsLoading] = useState(false);
@@ -344,6 +351,37 @@ const PrivateRoute = ({ children }) => {
 
 		  const location = useLocation();
 	  const assessmentIdParam = searchParams.get('assessmentId');
+
+  const isMortuary =
+    activeGroup?.id === 'GENERAL' ||
+    activeGroup?.id === 'MORTUARY' ||
+    activeGroup?.name === 'Mortuary';
+  const isClinics =
+    activeGroup?.id === 'CLINICS' || activeGroup?.name === 'Clinics';
+  const isHospital =
+    activeGroup?.id === 'HOSPITAL' || activeGroup?.name === 'Hospital';
+  const isObgyn =
+    activeGroup?.id === 'OBGYN' || activeGroup?.name === 'OBGYN';
+
+  const programmeType = isMortuary
+    ? 'mortuary'
+    : isClinics
+    ? 'clinics'
+    : isHospital
+    ? 'hospital'
+    : isObgyn
+    ? 'obgyn'
+    : 'ems';
+
+  // Auto-load remote configuration when on the form page and configSource is 'datastore'
+  useEffect(() => {
+    if (location.pathname === '/form' && configSource === 'datastore' && programmeType) {
+      console.log(`[App] Auto-loading remote configuration for ${programmeType}...`);
+      loadRemoteConfig(programmeType).catch(err => {
+        console.warn('[App] Failed to auto-load remote configuration', err);
+      });
+    }
+  }, [location.pathname, configSource, programmeType, loadRemoteConfig]);
 
 		  // Build programme-specific scoring metadata (links + severity) based on
 		  // the currently active configuration version. Falls back to on-disk JSON
@@ -1088,10 +1126,9 @@ const PrivateRoute = ({ children }) => {
       ? 'obgyn'
       : 'ems';
 
-    // Use precomputed lookups for Hospital from the programmeScoringMeta map
-    // globally for all facility types as requested.
-    const { linksDataLookup, severityLookup, criticalLookup } =
-      programmeScoringMeta.hospital;
+    // Use precomputed lookups for the active programme type from the programmeScoringMeta map.
+    const activeScoringMeta = programmeScoringMeta[programmeType] || programmeScoringMeta.hospital;
+    const { linksDataLookup, severityLookup, criticalLookup } = activeScoringMeta;
 
 	    // Only include sections for the *active* group in scoring so that
 	    // switching groups does not require recomputing scores for every other
