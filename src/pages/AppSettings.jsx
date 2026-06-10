@@ -259,13 +259,26 @@ const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, 
             disabled={disabled}
             onChange={(e) => onChange(e.target.value)}
             renderValue={(selected) => (
-                <span style={{ fontFamily: 'monospace', fontSize: '0.95em' }}>
+                <div style={{ 
+                    fontFamily: 'monospace', 
+                    fontSize: '0.95em',
+                    whiteSpace: 'normal',
+                    wordBreak: 'break-word',
+                    textAlign: 'left'
+                }}>
                     {selected.length > 0 ? selected.join(', ') : (placeholder || 'None')}
-                </span>
+                </div>
             )}
             variant="standard"
             disableUnderline
             fullWidth
+            style={{ maxWidth: '100%' }}
+            SelectDisplayProps={{
+                style: {
+                    whiteSpace: 'normal',
+                    wordBreak: 'break-word',
+                }
+            }}
             MenuProps={{
                 autoFocus: false,
                 PaperProps: {
@@ -333,8 +346,8 @@ const SETTINGS_TABLE_HEADERS = [
     { label: 'Criterion Description', minWidth: 280, align: 'center' },
     { label: 'Root', minWidth: 50, align: 'center' },
     { label: 'Critical / Non-Critical', minWidth: 110, align: 'center' },
-    { label: 'Linked Criteria', minWidth: 180 },
-    { label: 'Sub-Criteria', minWidth: 180 },
+    { label: 'Linked Criteria', minWidth: 180, maxWidth: 220 },
+    { label: 'Sub-Criteria', minWidth: 180, maxWidth: 220 },
     { label: 'Guidelines', minWidth: 320, align: 'center' },
 ];
 
@@ -364,8 +377,24 @@ const buildRootMap = (computeCriteria) => {
     return rootMap;
 };
 
-const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, rootMap) => (
-    serviceElements.flatMap(se => {
+const CONFIG_KEY_TO_LINKS_KEY = {
+    'hospital_full_configuration': 'hospital',
+    'clinics_full_configuration': 'clinics',
+    'ems_full_configuration': 'ems',
+    'mortuary_full_configuration': 'mortuary'
+};
+
+const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, rootMap, currentLinks) => {
+    const linksKey = CONFIG_KEY_TO_LINKS_KEY[configKey];
+    const linksList = currentLinks?.[linksKey] || [];
+    const linksLookup = {};
+    linksList.forEach(l => {
+        if (l && l.criteria) {
+            linksLookup[l.criteria] = l.linked_criteria || [];
+        }
+    });
+
+    return serviceElements.flatMap(se => {
         const allStandards = (se.sections || []).flatMap(section =>
             (section.standards || []).map(standard => ({ id: standard.standard_id, name: standard.standard_id }))
         );
@@ -373,16 +402,18 @@ const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, 
         const standardGroups = (se.sections || []).flatMap(section =>
             (section.standards || []).map(standard => {
                 const standardCriteriaIds = (standard.criteria || []).map(c => c.id).filter(Boolean);
-                const rows = (standard.criteria || []).map(criterion => ({
-                    seId: se.se_id,
-                    seDescription: se.se_description || se.description || se.se_name || se.name || '',
-                    standardId: standard.standard_id,
-                    statement: standard.statement || standard.intent || standard.intent_tooltip || '',
-                    criterionId: criterion.id,
-                    criterionDescription: criterion.description || '',
-                    guidelines: criterion.guidelines || criterion.guideline || '',
-                    isCritical: criterion.is_critical,
-                    linkedCriteria: criterion.linked_criteria || standardCriteriaIds,
+                const rows = (standard.criteria || []).map(criterion => {
+                    const linkedCriteriaFromLinks = linksLookup[criterion.id];
+                    return {
+                        seId: se.se_id,
+                        seDescription: se.se_description || se.description || se.se_name || se.name || '',
+                        standardId: standard.standard_id,
+                        statement: standard.statement || standard.intent || standard.intent_tooltip || '',
+                        criterionId: criterion.id,
+                        criterionDescription: criterion.description || '',
+                        guidelines: criterion.guidelines || criterion.guideline || '',
+                        isCritical: criterion.is_critical,
+                        linkedCriteria: criterion.linked_criteria || linkedCriteriaFromLinks || standardCriteriaIds,
                     isRoot: typeof criterion.is_root === 'boolean'
                         ? criterion.is_root
                         : !!rootMap[criterion.id],
@@ -391,7 +422,8 @@ const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, 
                     allCriteriaInSE,
                     allCriteriaInFacilityType,
                     configKey,
-                }));
+                    };
+                });
                 return rows.map((row, index) => ({
                     ...row,
                     isFirstStandardRow: index === 0,
@@ -405,8 +437,8 @@ const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, 
             isFirstSeRow: index === 0,
             seRowSpan: rows.length,
         }));
-    })
-);
+    });
+};
 
 const EditableTextCell = ({
     value,
@@ -3824,7 +3856,27 @@ export function AppSettings() {
                 });
             }
             nextConfig[configKey] = list;
-            return { ...bundle, config: nextConfig };
+
+            const nextLinks = { ...(bundle.links || {}) };
+            const linksKey = CONFIG_KEY_TO_LINKS_KEY[configKey];
+            if (linksKey) {
+                const linksList = Array.isArray(nextLinks[linksKey]) ? JSON.parse(JSON.stringify(nextLinks[linksKey])) : [];
+                const linkIndex = linksList.findIndex(l => l.criteria === criterionId);
+                if (linkIndex >= 0) {
+                    linksList[linkIndex] = {
+                        ...linksList[linkIndex],
+                        linked_criteria: linkedCriteria
+                    };
+                } else {
+                    linksList.push({
+                        criteria: criterionId,
+                        linked_criteria: linkedCriteria
+                    });
+                }
+                nextLinks[linksKey] = linksList;
+            }
+
+            return { ...bundle, config: nextConfig, links: nextLinks };
         });
         setConfigRevision(r => r + 1);
     };
@@ -4058,7 +4110,7 @@ export function AppSettings() {
                         : [];
 		            const allCriteriaInFacilityType = isExpanded ? criterionOptionsFor(seList) : [];
 		            const rows = isExpanded
-                        ? rowsForFacility(visibleSeList, key, allCriteriaInFacilityType, rootMap)
+                        ? rowsForFacility(visibleSeList, key, allCriteriaInFacilityType, rootMap, currentLinks)
                         : [];
 		            return {
 		                type,
@@ -4349,6 +4401,7 @@ export function AppSettings() {
 																							padding: '8px',
 																							border: '1px solid #cbd5e0',
 																							minWidth: `${header.minWidth}px`,
+																							maxWidth: header.maxWidth ? `${header.maxWidth}px` : undefined,
 																							position: 'sticky',
 																							top: 0,
 																							background: '#edf2f7',
@@ -4584,7 +4637,15 @@ export function AppSettings() {
 																							)}
 																						</td>
 																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: overviewSource === 'local' ? 'default' : 'pointer' }}
+																							style={{ 
+																								padding: '8px', 
+																								border: '1px solid #e2e8f0', 
+																								textAlign: 'center', 
+																								verticalAlign: 'middle', 
+																								cursor: overviewSource === 'local' ? 'default' : 'pointer',
+																								maxWidth: '220px',
+																								width: '220px',
+																							}}
 																							onClick={() => {
 																								if (overviewSource !== 'local' && activeCellKey !== `${row.criterionId}-linked`) {
 																									setActiveCellKey(`${row.criterionId}-linked`);
@@ -4624,7 +4685,15 @@ export function AppSettings() {
 																							)}
 																						</td>
 																						<td 
-																							style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', cursor: (!row.isRoot || overviewSource === 'local') ? 'default' : 'pointer' }}
+																							style={{ 
+																								padding: '8px', 
+																								border: '1px solid #e2e8f0', 
+																								textAlign: 'center', 
+																								verticalAlign: 'middle', 
+																								cursor: (!row.isRoot || overviewSource === 'local') ? 'default' : 'pointer',
+																								maxWidth: '220px',
+																								width: '220px',
+																							}}
 																							onClick={() => {
 																								if (row.isRoot && overviewSource !== 'local' && activeCellKey !== `${row.criterionId}-sub`) {
 																									setActiveCellKey(`${row.criterionId}-sub`);
