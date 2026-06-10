@@ -1173,6 +1173,78 @@ const PrivateRoute = ({ children }) => {
 	    }
 	  };
 
+  const validateSectionLead = React.useCallback((section) => {
+    if (!section) return true;
+    const isAD = isAssessmentDetailsName(section.name || section.code || section.id);
+    if (isAD) return true;
+
+    // Check if the section has any entered data in displayFormData
+    const fields = section.fields || [];
+    const hasData = fields.some(field => {
+      const val = displayFormData?.[field.id];
+      if (val !== undefined && val !== null && String(val).trim() !== '') return true;
+      const isCritical = displayFormData?.[`is_critical_${field.id}`];
+      if (isCritical !== undefined && isCritical !== null && isCritical !== '') return true;
+      const override = displayFormData?.[`override_${field.id}`];
+      if (override !== undefined && override !== null && override !== '') return true;
+      return false;
+    });
+
+    if (!hasData) return true;
+
+    // Has data, verify Lead Interviewee Name
+    const rawSummary = displayFormData?.[`se_summary_${section.id}`] || '';
+    let leadName = '';
+    try {
+      const parsed = JSON.parse(rawSummary);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        leadName = parsed.leadInterviewee || '';
+      }
+    } catch (e) {}
+
+    if (!leadName.trim()) {
+      showToast?.('Please enter the Lead Interviewee Name in the "Overview" panel of this section before leaving.', 'warning');
+      return false;
+    }
+    return true;
+  }, [displayFormData, showToast]);
+
+  const handleSectionSelect = React.useCallback((nextSection) => {
+    if (activeSection && activeSection.id !== nextSection?.id) {
+      if (!validateSectionLead(activeSection)) {
+        return;
+      }
+    }
+    setActiveSection(nextSection);
+  }, [activeSection, validateSectionLead]);
+
+  const handleGroupSelect = React.useCallback((group) => {
+    if (activeSection) {
+      if (!validateSectionLead(activeSection)) {
+        return;
+      }
+    }
+    handleGroupChange(group);
+  }, [activeSection, validateSectionLead]);
+
+  const handleFacilitySelect = React.useCallback((facility) => {
+    if (activeSection) {
+      if (!validateSectionLead(activeSection)) {
+        return;
+      }
+    }
+    setSelectedFacility(facility);
+  }, [activeSection, validateSectionLead]);
+
+  const handleNavigateToDashboard = React.useCallback((go) => {
+    if (activeSection) {
+      if (!validateSectionLead(activeSection)) {
+        return;
+      }
+    }
+    go();
+  }, [activeSection, validateSectionLead]);
+
   return (
     <Routes>
       <Route path="/login" element={<Login onLogin={setUser} />} />
@@ -1206,15 +1278,16 @@ const PrivateRoute = ({ children }) => {
                 // Navigation Props
                 groups={groups}
                 activeGroup={activeGroup}
-                onSelectGroup={handleGroupChange}
+                onSelectGroup={handleGroupSelect}
                 activeSection={activeSection}
-                onSelectSection={setActiveSection}
+                onSelectSection={handleSectionSelect}
 			                isADComplete={isADComplete}
+                onNavigate={handleNavigateToDashboard}
 
                 // Header Props
                 assignments={assignments}
                 selectedFacility={selectedFacility}
-			                onSelectFacility={setSelectedFacility}
+			                onSelectFacility={handleFacilitySelect}
 				                formData={displayFormData}
 		                scoringEventIdMap={scoringEventIdMap}
 				                scoringResults={scoringResults}

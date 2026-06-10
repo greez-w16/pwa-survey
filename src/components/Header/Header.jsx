@@ -10,7 +10,7 @@ import ScoreBadge from '../ScoreBadge';
 import { classifyAssessment } from '../../utils/classification';
 import { useApp } from '../../contexts/AppContext';
 
-	const Header = ({ assignments = [], selectedFacility, onSelectFacility, scoringResults, isAssignedAssessment, isScoringPending }) => {
+	const Header = ({ assignments = [], selectedFacility, onSelectFacility, scoringResults, isAssignedAssessment, isScoringPending, onNavigate }) => {
 		    const navigate = useNavigate();
 		    const { user, logout } = useApp();
 	    const [showSettings, setShowSettings] = React.useState(false);
@@ -90,7 +90,13 @@ import { useApp } from '../../contexts/AppContext';
 	                    </div>
 	                )}
 	                <nav className="header-nav">
-	                    <button className="nav-link-btn" onClick={() => navigate('/')}>Dashboard</button>
+	                    <button className="nav-link-btn" onClick={() => {
+	                        if (typeof onNavigate === 'function') {
+	                            onNavigate(() => navigate('/'));
+	                        } else {
+	                            navigate('/');
+	                        }
+	                    }}>Dashboard</button>
 	                    <button className="action-btn sync-btn">↻ Sync</button>
 	                    <Tooltip title="App Settings">
 	                        <IconButton onClick={() => setShowSettings(true)} size="small" style={{ color: 'white', margin: '0 10px' }}>

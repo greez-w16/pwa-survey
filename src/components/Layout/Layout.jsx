@@ -18,7 +18,8 @@ const Layout = ({
     scoringResults,
     formData,
     isAssignedAssessment,
-    isScoringPending
+    isScoringPending,
+    onNavigate
 		}) => {
 		    // Start with the sidebar expanded by default; user can collapse it if needed.
 		    const [isSidebarCollapsed, setIsSidebarCollapsed] = React.useState(false);
@@ -32,6 +33,7 @@ const Layout = ({
                 scoringResults={scoringResults}
                 isAssignedAssessment={isAssignedAssessment}
                 isScoringPending={isScoringPending}
+                onNavigate={onNavigate}
             />
             <div className="layout-body">
                 <Sidebar

@@ -3845,28 +3845,68 @@
                                             <span>Overview</span>
                                             <span>{isSeSummaryOpen ? '▾' : '▸'}</span>
                                         </button>
-                                        {isSeSummaryOpen && (
-                                            <div className="standard-summary-body">
-                                                <label
-                                                    htmlFor={`se-summary-${activeSection?.id || 'unknown'}`}
-                                                    className="standard-summary-label"
-                                                >
-                                                    Overview for this SE
-                                                </label>
-                                                <textarea
-                                                    id={`se-summary-${activeSection?.id || 'unknown'}`}
-                                                    className="form-control se-summary-textarea"
-                                                    rows={4}
-                                                    value={formData[`se_summary_${activeSection?.id}`] || ''}
-                                                    onChange={(e) => {
-                                                        const key = `se_summary_${activeSection?.id}`;
-                                                        saveField(key, e.target.value);
-                                                    }}
-                                                    placeholder="Type an overview or concise narrative for this SE..."
-                                                    disabled={isSectionLocked}
-                                                />
-                                            </div>
-                                        )}
+                                        {isSeSummaryOpen && (() => {
+                                            const rawVal = formData[`se_summary_${activeSection?.id}`] || '';
+                                            let leadInterviewee = '';
+                                            let overview = '';
+                                            try {
+                                                const parsed = JSON.parse(rawVal);
+                                                if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                                                    leadInterviewee = parsed.leadInterviewee || '';
+                                                    overview = parsed.overview || '';
+                                                } else {
+                                                    overview = rawVal;
+                                                }
+                                            } catch (e) {
+                                                overview = rawVal;
+                                            }
+
+                                            return (
+                                                <div className="standard-summary-body" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem', maxHeight: 'none' }}>
+                                                    <div>
+                                                        <label
+                                                            htmlFor={`se-lead-${activeSection?.id || 'unknown'}`}
+                                                            className="standard-summary-label"
+                                                        >
+                                                            Lead Interviewee Name
+                                                        </label>
+                                                        <input
+                                                            id={`se-lead-${activeSection?.id || 'unknown'}`}
+                                                            type="text"
+                                                            className="form-control"
+                                                            style={{ fontSize: '0.85rem', padding: '0.5rem 0.75rem' }}
+                                                            value={leadInterviewee}
+                                                            onChange={(e) => {
+                                                                const key = `se_summary_${activeSection?.id}`;
+                                                                saveField(key, JSON.stringify({ leadInterviewee: e.target.value, overview }));
+                                                            }}
+                                                            placeholder="Type lead interviewee name..."
+                                                            disabled={isSectionLocked}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label
+                                                            htmlFor={`se-summary-${activeSection?.id || 'unknown'}`}
+                                                            className="standard-summary-label"
+                                                        >
+                                                            Overview for this SE
+                                                        </label>
+                                                        <textarea
+                                                            id={`se-summary-${activeSection?.id || 'unknown'}`}
+                                                            className="form-control se-summary-textarea"
+                                                            rows={4}
+                                                            value={overview}
+                                                            onChange={(e) => {
+                                                                const key = `se_summary_${activeSection?.id}`;
+                                                                saveField(key, JSON.stringify({ leadInterviewee, overview: e.target.value }));
+                                                            }}
+                                                            placeholder="Type an overview or concise narrative for this SE..."
+                                                            disabled={isSectionLocked}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
                                     </div>
 
                                     {/* 2. PI (x.x) aggregate summary for this section */}
