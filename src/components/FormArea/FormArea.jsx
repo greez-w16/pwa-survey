@@ -35,6 +35,7 @@
                             'mortuary_full_configuration',
                             'clinics_full_configuration',
                             'hospital_full_configuration',
+                            'eye_full_configuration',
                         ];
                         possibleKeys.forEach((key) => {
                             if (Array.isArray(configData[key])) {
@@ -619,6 +620,7 @@
                 mortuary: 'mortuary_full_configuration',
                 clinics: 'clinics_full_configuration',
                 hospital: 'hospital_full_configuration',
+                eye: 'eye_full_configuration',
             };
             const key = configKeyMap[programmeType];
             if (configuration && key && Array.isArray(configuration[key])) {

@@ -240,13 +240,13 @@ const SearchableMultiSelect = React.memo(({ value, options, onChange, disabled, 
         if (!query) {
             const selectedSet = new Set(value || []);
             const selectedList = options.filter(opt => selectedSet.has(opt.id));
-            const remainingList = options.filter(opt => !selectedSet.has(opt.id)).slice(0, 100);
+            const remainingList = options.filter(opt => !selectedSet.has(opt.id));
             return [...selectedList, ...remainingList];
         }
         return options.filter(opt => 
             opt.id.toLowerCase().includes(query) || 
             (opt.name && opt.name.toLowerCase().includes(query))
-        ).slice(0, 100);
+        );
     }, [search, options, value]);
 
     return (
