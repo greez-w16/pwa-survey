@@ -2523,20 +2523,7 @@
                                             Capped ({subsectionStandardScore.cappedByCritical})
                                         </span>
                                     )}
-                                        {isStandardCriterion && standardSummaryCommentId && (
-                                            <button
-                                                type="button"
-                                                className="standard-summary-icon"
-                                                onClick={() => {
-                                                    setOpenStandardSummaries(prev => ({
-                                                        ...prev,
-                                                        [field.id]: !prev[field.id],
-                                                    }));
-                                                }}
-                                            >
-                                                Standard summary
-                                            </button>
-                                        )}
+
 	                                {hasCriterionInfo && (
                                     <button
                                         type="button"
@@ -2558,23 +2545,7 @@
                                 </div>
                                 {isCritical && <span className="critical-badge">CRITICAL</span>}
                             </div>
-                                {isStandardCriterion && standardSummaryCommentId && isStandardSummaryOpen && (
-                                    <div className="standard-summary-editor">
-                                        <label className="standard-summary-label" htmlFor={`standard-summary-${standardSummaryCommentId}`}>
-                                            Standard summary
-                                        </label>
-                                        <textarea
-                                            id={`standard-summary-${standardSummaryCommentId}`}
-                                            className="form-control standard-summary-textarea"
-                                            value={standardSummaryValue}
-                                            onChange={(e) => {
-                                                const newVal = e.target.value;
-                                                saveField(standardSummaryCommentId, newVal);
-                                            }}
-                                            rows={3}
-                                        />
-                                    </div>
-                                )}
+
                             {formData[`is_critical_${field.id}`] && isCommentField && (
                                 <div className="mandatory-label">Comment is required for Critical issues.</div>
                             )}
@@ -3122,6 +3093,61 @@
                 if (typeof showToast === 'function') showToast('Randomize failed (see console).', 'error');
             }
         }, [assessmentScopedSections, assessmentScopedSeSections, assessmentNamespaceKey, effectiveEventIdMap, assignmentPlanSource?.teiId, assignmentPlan, loadAssignmentPlanForAssessment, randomizeUserMap, saveField, showToast, formData, selectedFacility, configuration, eventMapResolving, extractSeNum, isAssessmentDetailsSection]);
+
+        const performBackgroundSync = React.useCallback(async () => {
+            if (!configuration || !formData || Object.keys(formData).length === 0) return;
+            const orgUnit = selectedFacility?.orgUnitId || (typeof selectedFacility?.orgUnit === 'string' ? selectedFacility.orgUnit : selectedFacility?.orgUnit?.id) || selectedFacility?.facilityId || selectedFacility?.programOrgUnitId;
+            if (!orgUnit) return;
+
+            try {
+                const enrichedData = {
+                    ...formData,
+                    teiId_internal: selectedFacility?.trackedEntityInstance || formData.teiId_internal,
+                    enrollmentId_internal: formData.enrollmentId_internal,
+                    scoringSnapshot: createAssessmentSnapshot(scoringResults)
+                };
+
+                const programId = configuration?.program?.id || 'G2gULe4jsfs';
+                const stageId = configuration?.programStage?.id || 'HpHD6u6MV37';
+                const teiId = enrichedData.teiId_internal;
+                if (!teiId) return;
+
+                let latestEventId = null;
+                try {
+                    latestEventId = await api.getLatestSurveyEventId({ programId, stageId, teiId, orgUnitId: orgUnit });
+                } catch (resolveErr) {}
+
+                const putEventId = formData.eventId_internal || formData.event || formData.eventId || latestEventId;
+                if (!putEventId) return;
+
+                try { saveField('eventId_internal', putEventId); } catch (_) {}
+                const payloadData = { ...enrichedData, eventId_internal: putEventId };
+
+                await (api.submitEventPutBatched
+                    ? api.submitEventPutBatched(payloadData, configuration, orgUnit, { batchSize: 150, interChunkDelayMs: 75 })
+                    : api.submitEventPut(payloadData, configuration, orgUnit));
+
+                if (activeEventId) {
+                    await indexedDBService.markAsSynced(activeEventId, putEventId || 'synced');
+                }
+                console.log('✅ Background sync on section change successful.');
+            } catch (err) {
+                console.warn('⚠️ Background sync failed (data remains safe in IndexedDB):', err);
+            }
+        }, [configuration, formData, selectedFacility, scoringResults, activeEventId, saveField]);
+
+        const previousSectionRef = React.useRef(activeSection?.id);
+        React.useEffect(() => {
+            if (activeSection && previousSectionRef.current && activeSection.id !== previousSectionRef.current) {
+                const prevId = previousSectionRef.current;
+                previousSectionRef.current = activeSection.id;
+                console.log(`🔄 Section changed from ${prevId} to ${activeSection.id}. Triggering background sync...`);
+                performBackgroundSync();
+            } else if (activeSection && !previousSectionRef.current) {
+                previousSectionRef.current = activeSection.id;
+            }
+        }, [activeSection, performBackgroundSync]);
+
         if (!activeSection) {
             if (!selectedFacility) {
                 return <div className="form-area-empty">Please select a facility and a section</div>;
