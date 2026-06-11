@@ -495,16 +495,101 @@ export function Dashboard() {
     const [takeoverFacilityName, setTakeoverFacilityName] = useState('');
     const [takeoverFacilityGroup, setTakeoverFacilityGroup] = useState('');
     const [takeoverOtp, setTakeoverOtp] = useState('');
+    const [takeoverUseCustom, setTakeoverUseCustom] = useState(false);
+    const [offlineFacilities, setOfflineFacilities] = useState([]);
+    const [loadingFacilities, setLoadingFacilities] = useState(false);
+    const [takeoverSelectedFacilityId, setTakeoverSelectedFacilityId] = useState('');
 
     const [generatorOpen, setGeneratorOpen] = useState(false);
-    const [generatorTargetAssessor, setGeneratorTargetAssessor] = useState('');
+    const [generatorUseCustomId, setGeneratorUseCustomId] = useState(false);
     const [generatorSelectedFacilityId, setGeneratorSelectedFacilityId] = useState('');
     const [generatorCustomFacilityId, setGeneratorCustomFacilityId] = useState('');
-    const [generatorUseCustomId, setGeneratorUseCustomId] = useState(false);
+    const [generatorTargetAssessor, setGeneratorTargetAssessor] = useState('');
     const [generatorOtp, setGeneratorOtp] = useState('');
 
+    const loadOfflineFacilities = async () => {
+        setLoadingFacilities(true);
+        try {
+            const list = [];
+            const seen = new Set();
+
+            // Helper to get group from stage ID
+            const getGroupFromStage = (stageId) => {
+                const normalized = String(stageId || '').trim();
+                const entry = Object.entries(SURVEY_PROGRAM_STAGE_BY_GROUP).find(([group, id]) => id === normalized);
+                return entry ? entry[0] : null;
+            };
+
+            // 1. Load from configuration organisation units
+            if (Array.isArray(configuration?.organisationUnits)) {
+                configuration.organisationUnits.forEach(ou => {
+                    const id = ou?.id || ou;
+                    const name = ou?.displayName || ou?.name || id;
+                    if (id && !seen.has(id)) {
+                        seen.add(id);
+                        list.push({
+                            id,
+                            name,
+                            facilityGroup: null
+                        });
+                    }
+                });
+            }
+
+            // 2. Load from active user assignments (upcoming/pending in hook)
+            const activeAssignments = [...hookUpcoming, ...hookPending];
+            activeAssignments.forEach(a => {
+                const id = resolveOrgUnitForAssessment(a);
+                const name = a.orgUnitName || id;
+                const group = getAssessmentFacilityGroupKey(a) || toFacilityGroupKey(getAssignmentFacilityGroupValue(a));
+                if (id) {
+                    const existing = list.find(item => item.id === id);
+                    if (existing) {
+                        if (group && group !== '-') existing.facilityGroup = group;
+                    } else if (!seen.has(id)) {
+                        seen.add(id);
+                        list.push({ id, name, facilityGroup: group });
+                    }
+                }
+            });
+
+            // 3. Load from IndexedDB drafts (formData store)
+            try {
+                const drafts = await indexedDBService.getAllDrafts(user).catch(() => []);
+                drafts.forEach(d => {
+                    const id = d.formData?.orgUnit || d.orgUnit || d.facilityId;
+                    const name = d.formData?.orgUnitName || d.orgUnitName || id;
+                    const stage = d.formData?.programStage || d.metadata?.programStage || d.programStageId;
+                    const group = getGroupFromStage(stage);
+                    if (id && !seen.has(id)) {
+                        seen.add(id);
+                        list.push({ id, name, facilityGroup: group });
+                    }
+                });
+            } catch (err) {
+                console.warn('Failed to load facilities from drafts database:', err);
+            }
+
+            setOfflineFacilities(list);
+        } catch (err) {
+            console.error('Error loading offline facilities:', err);
+        } finally {
+            setLoadingFacilities(false);
+        }
+    };
+
+    // Load offline facilities when takeover modal opens
+    useEffect(() => {
+        if (takeoverOpen) {
+            loadOfflineFacilities();
+        }
+    }, [takeoverOpen]);
+
     const handleVerifyAndTakeover = async () => {
-        if (!takeoverLeadUser.trim() || !takeoverFacilityId.trim() || !takeoverFacilityGroup || !takeoverOtp.trim()) {
+        const activeFacilityId = takeoverUseCustom ? takeoverFacilityId : takeoverSelectedFacilityId;
+        const activeFacilityName = takeoverUseCustom ? takeoverFacilityName : (offlineFacilities.find(f => f.id === takeoverSelectedFacilityId)?.name || takeoverSelectedFacilityId);
+
+        if (!takeoverLeadUser.trim() || !activeFacilityId.trim() || !takeoverFacilityGroup || !takeoverOtp.trim()) {
             showToast?.('Please fill in all required fields.', 'warning');
             return;
         }
@@ -514,18 +599,18 @@ export function Dashboard() {
                 otpSecret,
                 takeoverLeadUser,
                 user?.username || user?.id || '',
-                takeoverFacilityId,
+                activeFacilityId,
                 getLocalDateString()
             );
 
             if (takeoverOtp.trim() === expected) {
                 const newTakeover = {
-                    eventId: `takeover_${takeoverFacilityId}_${Date.now()}`,
-                    scheduleTeiId: takeoverFacilityId,
-                    trackedEntityInstance: takeoverFacilityId,
-                    orgUnit: takeoverFacilityId,
-                    orgUnitId: takeoverFacilityId,
-                    orgUnitName: takeoverFacilityName.trim() || takeoverFacilityId,
+                    eventId: `takeover_${activeFacilityId}_${Date.now()}`,
+                    scheduleTeiId: activeFacilityId,
+                    trackedEntityInstance: activeFacilityId,
+                    orgUnit: activeFacilityId,
+                    orgUnitId: activeFacilityId,
+                    orgUnitName: activeFacilityName.trim() || activeFacilityId,
                     isSelfAssessment: false,
                     isOfflineTakeover: true,
                     userId: user?.username || user?.id,
@@ -543,7 +628,7 @@ export function Dashboard() {
                 const nextList = Array.isArray(currentDelegations) ? [...currentDelegations] : [];
                 
                 // Avoid duplicates
-                const exists = nextList.some(d => d.orgUnitId === takeoverFacilityId && d.userId === (user?.username || user?.id));
+                const exists = nextList.some(d => d.orgUnitId === activeFacilityId && d.userId === (user?.username || user?.id));
                 if (exists) {
                     showToast?.('This facility is already registered under your offline takeovers.', 'info');
                     setTakeoverOpen(false);
@@ -560,6 +645,8 @@ export function Dashboard() {
                 setTakeoverFacilityName('');
                 setTakeoverFacilityGroup('');
                 setTakeoverOtp('');
+                setTakeoverSelectedFacilityId('');
+                setTakeoverUseCustom(false);
                 setTakeoverOpen(false);
 
                 // Refresh assessments
@@ -4394,7 +4481,13 @@ export function Dashboard() {
                         variant="outlined"
                         color="secondary"
                         size="small"
-                        onClick={() => setTakeoverOpen(true)}
+                        onClick={() => {
+                            setTakeoverSelectedFacilityId('');
+                            setTakeoverUseCustom(false);
+                            setTakeoverLeadUser('');
+                            setTakeoverOtp('');
+                            setTakeoverOpen(true);
+                        }}
                         startIcon={<FactCheckIcon />}
                         style={{ textTransform: 'none', borderRadius: 8, height: 36 }}
                     >
@@ -5804,7 +5897,7 @@ export function Dashboard() {
                 </DialogTitle>
                 <DialogContent dividers>
                     <div style={{ marginBottom: 16, padding: '10px 12px', borderRadius: 8, background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a', fontSize: '0.85rem' }}>
-                        If you are unable to do your assigned assessment offline, another assessor (or Lead) can generate a 6-digit OTP code for you. Enter their credentials and the code below to take over and unlock the assessment on your device.
+                        Select a preloaded facility to take over, or enter details manually if the facility is not listed. Enter the Lead's username and the 6-digit OTP code to unlock the assessment.
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <TextField
@@ -5815,24 +5908,72 @@ export function Dashboard() {
                             fullWidth
                             required
                         />
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 12 }}>
+
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={takeoverUseCustom}
+                                    onChange={e => {
+                                        setTakeoverUseCustom(e.target.checked);
+                                        setTakeoverFacilityId('');
+                                        setTakeoverFacilityName('');
+                                        setTakeoverSelectedFacilityId('');
+                                        setTakeoverFacilityGroup('');
+                                    }}
+                                />
+                            }
+                            label="Enter custom Facility details manually"
+                        />
+
+                        {!takeoverUseCustom ? (
                             <TextField
-                                label="Facility ID (OrgUnit ID)"
-                                value={takeoverFacilityId}
-                                onChange={e => setTakeoverFacilityId(e.target.value)}
+                                select
+                                label="Select Facility to Takeover"
+                                value={takeoverSelectedFacilityId}
+                                onChange={e => {
+                                    const val = e.target.value;
+                                    setTakeoverSelectedFacilityId(val);
+                                    const matched = offlineFacilities.find(f => f.id === val);
+                                    if (matched && matched.facilityGroup) {
+                                        setTakeoverFacilityGroup(matched.facilityGroup);
+                                    } else {
+                                        setTakeoverFacilityGroup('');
+                                    }
+                                }}
                                 size="small"
                                 fullWidth
                                 required
-                            />
-                            <TextField
-                                label="Facility Name (Friendly Name)"
-                                value={takeoverFacilityName}
-                                onChange={e => setTakeoverFacilityName(e.target.value)}
-                                size="small"
-                                fullWidth
-                                placeholder="e.g. Athlone Hospital"
-                            />
-                        </div>
+                            >
+                                <MenuItem value="">Select a facility...</MenuItem>
+                                {offlineFacilities.map((f) => (
+                                    <MenuItem key={f.id} value={f.id}>
+                                        {f.name} (ID: {f.id})
+                                    </MenuItem>
+                                ))}
+                            </TextField>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 12 }}>
+                                    <TextField
+                                        label="Facility ID (OrgUnit ID)"
+                                        value={takeoverFacilityId}
+                                        onChange={e => setTakeoverFacilityId(e.target.value)}
+                                        size="small"
+                                        fullWidth
+                                        required
+                                    />
+                                    <TextField
+                                        label="Facility Name"
+                                        value={takeoverFacilityName}
+                                        onChange={e => setTakeoverFacilityName(e.target.value)}
+                                        size="small"
+                                        fullWidth
+                                        placeholder="e.g. Athlone Hospital"
+                                    />
+                                </div>
+                            </div>
+                        )}
+
                         <TextField
                             select
                             label="Facility Type / Program Stage"
@@ -5848,6 +5989,7 @@ export function Dashboard() {
                                 </MenuItem>
                             ))}
                         </TextField>
+
                         <TextField
                             label="6-Digit OTP Takeover Code"
                             value={takeoverOtp}
@@ -5866,7 +6008,12 @@ export function Dashboard() {
                         onClick={handleVerifyAndTakeover}
                         variant="contained"
                         color="primary"
-                        disabled={!takeoverLeadUser.trim() || !takeoverFacilityId.trim() || !takeoverFacilityGroup || takeoverOtp.length !== 6}
+                        disabled={
+                            !takeoverLeadUser.trim() ||
+                            !(takeoverUseCustom ? takeoverFacilityId.trim() : takeoverSelectedFacilityId) ||
+                            !takeoverFacilityGroup ||
+                            takeoverOtp.length !== 6
+                        }
                     >
                         Verify & Takeover
                     </Button>

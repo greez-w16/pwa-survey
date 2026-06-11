@@ -251,6 +251,9 @@ export const transformMetadata = (metadata) => {
 	            // Replace remaining underscores with spaces and normalize
 	            rest = rest.replace(/_+/g, ' ');
 	            rest = rest.replace(/\s+/g, ' ').trim();
+	            if (rest.startsWith('Critical:')) {
+	                rest = '';
+	            }
 	            return rest ? `${code} ${rest}`.trim() : code;
 	        }
 

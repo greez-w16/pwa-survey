@@ -152,12 +152,35 @@ export default function Report() {
                   if (crit && crit.id) {
                     index[crit.id] = {
                       statement: standard.statement || '',
-                      description: crit.description || '',
+                      description: (crit.description && !crit.description.trim().startsWith('Critical:')) ? crit.description : '',
                     };
                   }
                 });
               });
             });
+          });
+        }
+      });
+
+      // Enrich from links files
+      const configLinksMap = {
+        'ems_full_configuration': emsLinks,
+        'mortuary_full_configuration': mortuaryLinks,
+        'clinics_full_configuration': clinicsLinks,
+        'hospital_full_configuration': hospitalLinks,
+      };
+      Object.keys(configLinksMap).forEach(key => {
+        const linkList = configLinksMap[key];
+        if (Array.isArray(linkList)) {
+          linkList.forEach(link => {
+            const code = normalizeCriterionCode(link.criteria || link.id);
+            if (code && index[code]) {
+              const existingDesc = String(index[code].description || '').trim();
+              const linkDesc = String(link.description || '').trim();
+              if (linkDesc && (!existingDesc || existingDesc.startsWith('Critical:'))) {
+                index[code].description = linkDesc;
+              }
+            }
           });
         }
       });
