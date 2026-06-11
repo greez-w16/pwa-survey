@@ -60,13 +60,13 @@
                                     };
                                 }
 
-                                (standard.criteria || []).forEach(crit => {
+                                    (standard.criteria || []).forEach(crit => {
                                     if (!crit || !crit.id) return;
                                     index[crit.id] = {
                                         statement: standard.statement || '',
                                         intent: standard.intent_tooltip || standard.intent || '',
-	                                        description: crit.description || '',
-	                                        guideline: crit.guideline || crit.guidelines || crit.guidline || '',
+                                        description: (crit.description && !crit.description.trim().startsWith('Critical:')) ? crit.description : '',
+                                        guideline: crit.guideline || crit.guidelines || crit.guidline || '',
                                         is_critical: crit.is_critical || false,
                                         severity: crit.severity || 1,
                                     };
@@ -637,7 +637,27 @@
             return links[programmeType] || [];
         }, [configuration, programmeType]);
 
-        const criterionIndex = React.useMemo(() => buildCriterionIndex(activeConfigArray), [activeConfigArray]);
+        const criterionIndex = React.useMemo(() => {
+            const index = buildCriterionIndex(activeConfigArray);
+            if (Array.isArray(activeLinks)) {
+                activeLinks.forEach(link => {
+                    const code = normalizeCriterionCode(link.criteria || link.id);
+                    if (code && index[code]) {
+                        const existingDesc = String(index[code].description || '').trim();
+                        const linkDesc = String(link.description || '').trim();
+                        // Only use links.json description when config has NO description at all.
+                        // This prevents links.json from overwriting valid config descriptions
+                        // (which are the authoritative source matching DHIS2 dataElement names).
+                        // Note: if the config description started with 'Critical:' it was already
+                        // cleared to '' by buildCriterionIndex, so the !existingDesc check catches it.
+                        if (linkDesc && !existingDesc) {
+                            index[code]._linkDescription = linkDesc; // store separately, don't overwrite config desc
+                        }
+                    }
+                });
+            }
+            return index;
+        }, [activeConfigArray, activeLinks]);
 
         const rawAssessmentScopedSections = React.useMemo(
             () => (Array.isArray(assessmentScopedGroup?.sections) ? assessmentScopedGroup.sections : []),
@@ -2397,14 +2417,40 @@
 	                            return friendlyLabel(rawLabel) || 'Unnamed Field';
                         }
 
-                        // For other sections, retrieve standard statement or criterion
-                        // description from active DataStore configuration when available,
-                        // falling back to metadata rawLabel.
+                        // For criterion questions (x.x.x.x): DHIS2 metadata is the source
+                        // of truth for the display label.
+                        // DHIS2 dataElement names look like:
+                        //   "24.1.1.2 HOSP There is evidence that patients are identified..."
+                        // We strip the leading numeric code and the facility prefix token(s)
+                        // (consecutive ALL_CAPS words e.g. "HOSP ", "EMS ", "SURV_EMS_") so
+                        // the assessor sees only the plain English statement.
+                        // For Standards (x.x.x) we prefer the config statement (richer text).
                         let targetText = rawLabel;
                         if (isStandardCriterion && configEntry.statement) {
+                            // Standards use the config's full statement text
                             targetText = configEntry.statement;
-                        } else if (isCriterionQuestion && configEntry.description) {
-                            targetText = configEntry.description;
+                        } else if (isCriterionQuestion) {
+                            // ── DHIS2 label is source of truth ───────────────────────────
+                            // Step 1: strip leading numeric code (e.g. "24.1.1.2 ")
+                            const labelAfterCode = rawLabel
+                                .replace(/^\s*\d+(?:\.\d+){2,3}\s*/, '')
+                                .trim();
+                            // Step 2: strip facility/programme prefix tokens such as
+                            // "HOSP ", "EMS ", "SURV_EMS_", "FAC_ASS_", "CLINICS_" etc.
+                            // These are sequences of ALL_CAPS/underscore words at the start.
+                            const labelAfterPrefix = labelAfterCode
+                                .replace(/^(?:[A-Z][A-Z0-9_]*\s+)+/, '')
+                                .trim();
+                            const dhisLabelClean = labelAfterPrefix || labelAfterCode;
+                            if (dhisLabelClean && dhisLabelClean.length > 5) {
+                                targetText = dhisLabelClean;
+                            } else if (configEntry.description) {
+                                // DHIS2 label too short – fall back to config description
+                                targetText = configEntry.description;
+                            } else if (configEntry._linkDescription) {
+                                // Last resort: links.json description
+                                targetText = configEntry._linkDescription;
+                            }
                         }
 
                         if (shouldShowCode && targetText && !targetText.startsWith(cleanedCode)) {
