@@ -5,6 +5,7 @@ import AssessmentSchedulingService from '../services/assessment/scheduling.servi
 import { eventBus, EVENTS } from '../events';
 import { getMetadata } from '../services/metadata.service';
 import { api } from '../services/api';
+import indexedDBService from '../services/indexedDBService';
 
 /**
  * useUserAssessments hook ported and adapted for the Survey 2 environment.
@@ -155,8 +156,21 @@ export const useUserAssessments = (options = {}) => {
                 console.warn('[useUserAssessments] Failed to fetch self-initiated assessments', selfErr);
             }
 
-            // 1c. Merge assignments
-            const allAssignments = [...assignments, ...selfAssessments];
+            // 1c. Load offline delegations from IndexedDB
+            let offlineDelegations = [];
+            try {
+                const storedDelegations = await indexedDBService.getConfig('offline_delegations');
+                if (Array.isArray(storedDelegations)) {
+                    offlineDelegations = storedDelegations.filter(d => 
+                        d && (d.userId === user?.username || d.userId === user?.id)
+                    );
+                }
+            } catch (err) {
+                console.warn('[useUserAssessments] Failed to load offline delegated assignments', err);
+            }
+
+            // Merge assignments including offline delegations
+            const allAssignments = [...assignments, ...selfAssessments, ...offlineDelegations];
 
             // 2. Get all schedules these assignments belong to
             const scheduleIds = [...new Set(allAssignments.filter(a => !a.isSelfAssessment).map(a => a.scheduleTeiId))];

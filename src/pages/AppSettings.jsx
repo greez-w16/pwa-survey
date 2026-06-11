@@ -95,6 +95,14 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     PAEDIATRIC: 'paeStageU11'
 };
 
+const ALL_CANDIDATE_NAMESPACES = [
+    'HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY', 'OBGYN', 'PHYSIOTHERAPY',
+    'RADIOLOGY', 'PRIVATE_LAB', 'GENERAL_PRACTICE', 'PRIVATE_DIETETIC',
+    'MENTAL_HEALTH', 'EYE', 'HOSPICE_PALLIATIVE', 'OCCUPATIONAL_HEALTH',
+    'UROLOGY_NEPHR', 'ORAL', 'IMCI', 'EMONC', 'ONCOLOGY', 'PAEDIATRIC',
+    'GENERAL', 'DENTAL', 'PHARMACY', 'LABORATORY'
+];
+
 const normalizeSelectedIds = (selectedIds) => (
     Array.isArray(selectedIds)
         ? [...new Set(selectedIds.filter(id => typeof id === 'string' && id.trim() !== ''))]
@@ -170,6 +178,8 @@ const LinkedCriteriaMultiSelect = React.memo(({ value, options, onChange, disabl
                 {parsedCriteria.map(item => (
                     <span
                         key={item.id}
+                        onMouseEnter={() => setHoveredId(item.id)}
+                        onMouseLeave={() => setHoveredId(null)}
                         style={{
                             background: item.color === 'G' ? '#dcfce7' : item.color === 'B' ? '#dbeafe' : '#edf2f7',
                             color: item.color === 'G' ? '#166534' : item.color === 'B' ? '#1d4ed8' : '#2d3748',
@@ -183,16 +193,31 @@ const LinkedCriteriaMultiSelect = React.memo(({ value, options, onChange, disabl
                         }}
                     >
                         {item.id}
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                handleColorChange(item.id, item.color === 'G' ? 'B' : item.color === 'B' ? '' : 'G');
-                            }}
-                            style={{ border: 'none', background: 'transparent', cursor: 'pointer', padding: '0 2px', opacity: 0.6 }}
-                            title="Toggle color tag (Green/Blue)"
-                        >
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-                        </button>
+                        {hoveredId === item.id && (
+                            <select
+                                value={item.color}
+                                onClick={(e) => e.stopPropagation()}
+                                onChange={(e) => {
+                                    e.stopPropagation();
+                                    handleColorChange(item.id, e.target.value);
+                                }}
+                                aria-label={`Select color for linked criterion ${item.id}`}
+                                title="Select linked criterion color"
+                                style={{
+                                    border: '1px solid #94a3b8',
+                                    borderRadius: 3,
+                                    background: '#fff',
+                                    color: '#334155',
+                                    cursor: 'pointer',
+                                    fontSize: '0.85em',
+                                    padding: '1px 2px',
+                                }}
+                            >
+                                <option value="">Color</option>
+                                <option value="G">Green</option>
+                                <option value="B">Blue</option>
+                            </select>
+                        )}
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
@@ -205,16 +230,89 @@ const LinkedCriteriaMultiSelect = React.memo(({ value, options, onChange, disabl
                     </span>
                 ))}
             </div>
-            
-            <SearchableMultiSelect
+            <Select
+                multiple
                 value={selectedIds}
-                options={options}
-                onChange={handleSelectionChange}
-                disabled={disabled}
-                placeholder={placeholder || "Select linked criteria..."}
-                autoOpen={open}
+                open={open}
+                onOpen={() => setOpen(true)}
                 onClose={handleClose}
-            />
+                disabled={disabled}
+                onChange={(event) => handleSelectionChange(event.target.value)}
+                renderValue={() => (
+                    <span style={{ color: '#64748b', fontSize: '0.9em' }}>
+                        {parsedCriteria.length ? 'Add or remove criteria' : (placeholder || 'None')}
+                    </span>
+                )}
+                variant="standard"
+                disableUnderline
+                fullWidth
+                MenuProps={{
+                    autoFocus: false,
+                    PaperProps: { style: { maxHeight: 350, width: 360 } },
+                }}
+            >
+                <div
+                    style={{ padding: 8, position: 'sticky', top: 0, background: '#fff', zIndex: 3, borderBottom: '1px solid #e2e8f0', display: 'flex', gap: 8 }}
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    <TextField
+                        size="small"
+                        placeholder="Search..."
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        onKeyDown={(event) => event.stopPropagation()}
+                        style={{ flex: 1 }}
+                        autoFocus
+                    />
+                    <Button
+                        size="small"
+                        variant="outlined"
+                        disabled={selectedIds.length === 0}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            onChange([]);
+                        }}
+                        style={{ whiteSpace: 'nowrap' }}
+                    >
+                        Clear all
+                    </Button>
+                </div>
+                {filteredOptions.map(option => {
+                    const selectedCriterion = parsedCriteria.find(item => item.id === option.id);
+                    return (
+                        <MenuItem
+                            key={option.id}
+                            value={option.id}
+                            onMouseEnter={() => setHoveredId(option.id)}
+                            onMouseLeave={() => setHoveredId(null)}
+                        >
+                            <Checkbox checked={selectedIds.includes(option.id)} size="small" />
+                            <ListItemText
+                                primary={option.id}
+                                secondary={option.name || ''}
+                                primaryTypographyProps={{ style: { fontFamily: 'monospace', fontSize: '0.9em' } }}
+                                secondaryTypographyProps={{ style: { fontSize: '0.75em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' } }}
+                            />
+                            {selectedCriterion && hoveredId === option.id && (
+                                <select
+                                    value={selectedCriterion.color}
+                                    onMouseDown={(event) => event.stopPropagation()}
+                                    onClick={(event) => event.stopPropagation()}
+                                    onKeyDown={(event) => event.stopPropagation()}
+                                    onChange={(event) => handleColorChange(option.id, event.target.value)}
+                                    aria-label={`Select color for linked criterion ${option.id}`}
+                                    title="Select linked criterion color"
+                                    style={{ fontSize: '0.8em', marginLeft: 8 }}
+                                >
+                                    <option value="">Color</option>
+                                    <option value="G">Green</option>
+                                    <option value="B">Blue</option>
+                                </select>
+                            )}
+                        </MenuItem>
+                    );
+                })}
+            </Select>
         </div>
     );
 });
@@ -342,6 +440,7 @@ const SETTINGS_TABLE_HEADERS = [
     { label: 'SE Description', minWidth: 220, align: 'center' },
     { label: 'Standard', minWidth: 70, align: 'center' },
     { label: 'Statement', minWidth: 300, align: 'center' },
+    { label: 'Statement Intent', minWidth: 320, align: 'center' },
     { label: 'Criterion', minWidth: 80, align: 'center' },
     { label: 'Criterion Description', minWidth: 280, align: 'center' },
     { label: 'Root', minWidth: 50, align: 'center' },
@@ -408,7 +507,11 @@ const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, 
                         seId: se.se_id,
                         seDescription: se.se_description || se.description || se.se_name || se.name || '',
                         standardId: standard.standard_id,
-                        statement: standard.statement || standard.intent || standard.intent_tooltip || '',
+                        statement: standard.statement || '',
+                        statementIntent: standard.intent_tooltip || standard.intent || '',
+                        statementIntentField: Object.prototype.hasOwnProperty.call(standard, 'intent_tooltip')
+                            ? 'intent_tooltip'
+                            : 'intent',
                         criterionId: criterion.id,
                         criterionDescription: criterion.description || '',
                         guidelines: criterion.guidelines || criterion.guideline || '',
@@ -1045,7 +1148,7 @@ export function AppSettings() {
         const candidates = [];
         const preferred = toFacilityGroupKey(preferredNs);
         if (preferred) candidates.push(preferred);
-        ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].forEach(ns => { if (!candidates.includes(ns)) candidates.push(ns); });
+        ALL_CANDIDATE_NAMESPACES.forEach(ns => { if (!candidates.includes(ns)) candidates.push(ns); });
         for (const ns of candidates) {
             try {
                 const value = await api.getDataStoreItem(ns, teiId);
@@ -4093,7 +4196,9 @@ export function AppSettings() {
                                 standards: (section.standards || []).map(standard => ({
                                     ...standard,
                                     criteria: (standard.criteria || []).filter(criterion => (
-                                        String(criterion.id || '').toLowerCase().includes(searchQuery)
+                                        String(standard.standard_id || '').toLowerCase().includes(searchQuery)
+                                        || String(standard.statement || '').toLowerCase().includes(searchQuery)
+                                        || String(criterion.id || '').toLowerCase().includes(searchQuery)
                                         || String(criterion.description || '').toLowerCase().includes(searchQuery)
                                     )),
                                 })).filter(standard => standard.criteria.length > 0),
@@ -4527,6 +4632,35 @@ export function AppSettings() {
 																								>
 																									{row.statement || '—'}
 																								</div>
+																								)}
+																							</td>
+																						)}
+																						{row.isFirstStandardRow && (
+																							<td
+																								rowSpan={row.standardRowSpan}
+																								style={{
+																									padding: '8px',
+																									border: '1px solid #e2e8f0',
+																									textAlign: 'center',
+																									verticalAlign: 'middle',
+																								}}
+																							>
+																								{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-statement-intent` ? (
+																									<EditableTextCell
+																										value={row.statementIntent}
+																										active
+																										editable
+																										maxHeight={110}
+																										onOpen={() => setActiveCellKey(null)}
+																										onSave={(value) => handleUpdateStandardText(row.configKey, row.seId, row.standardId, row.statementIntentField, value)}
+																									/>
+																								) : (
+																									<div
+																										onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-statement-intent`) : undefined}
+																										style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																									>
+																										{row.statementIntent || '—'}
+																									</div>
 																								)}
 																							</td>
 																						)}

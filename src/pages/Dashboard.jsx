@@ -30,6 +30,7 @@ import { useStorage } from '../hooks/useStorage';
 	import { useUserAssessments } from '../hooks/useUserAssessments';
 	import { SurveyPreview } from '../components/SurveyPreview.jsx';
 	import indexedDBService from '../services/indexedDBService';
+import { calculateTakeoverOtp, getLocalDateString } from '../utils/otp';
 import emsConfig from '../assets/ems/ems_config.json';
 import mortuaryConfig from '../assets/mortuary/mortuary_config.json';
 import clinicsConfig from '../assets/clinics/clinics_config.json';
@@ -94,6 +95,14 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
     ONCOLOGY: 'oncStageU11',
     PAEDIATRIC: 'paeStageU11'
 };
+
+const ALL_CANDIDATE_NAMESPACES = [
+    'HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY', 'OBGYN', 'PHYSIOTHERAPY',
+    'RADIOLOGY', 'PRIVATE_LAB', 'GENERAL_PRACTICE', 'PRIVATE_DIETETIC',
+    'MENTAL_HEALTH', 'EYE', 'HOSPICE_PALLIATIVE', 'OCCUPATIONAL_HEALTH',
+    'UROLOGY_NEPHR', 'ORAL', 'IMCI', 'EMONC', 'ONCOLOGY', 'PAEDIATRIC',
+    'GENERAL', 'DENTAL', 'PHARMACY', 'LABORATORY'
+];
 
 const normalizeSelectedIds = (selectedIds) => (
     Array.isArray(selectedIds)
@@ -477,7 +486,124 @@ export function Dashboard() {
             configSource,
             remoteConfigLoading,
             loadRemoteConfig,
+            otpSecret,
 	    } = useApp();
+    // Offline Takeover and Generator States
+    const [takeoverOpen, setTakeoverOpen] = useState(false);
+    const [takeoverLeadUser, setTakeoverLeadUser] = useState('');
+    const [takeoverFacilityId, setTakeoverFacilityId] = useState('');
+    const [takeoverFacilityName, setTakeoverFacilityName] = useState('');
+    const [takeoverFacilityGroup, setTakeoverFacilityGroup] = useState('');
+    const [takeoverOtp, setTakeoverOtp] = useState('');
+
+    const [generatorOpen, setGeneratorOpen] = useState(false);
+    const [generatorTargetAssessor, setGeneratorTargetAssessor] = useState('');
+    const [generatorSelectedFacilityId, setGeneratorSelectedFacilityId] = useState('');
+    const [generatorCustomFacilityId, setGeneratorCustomFacilityId] = useState('');
+    const [generatorUseCustomId, setGeneratorUseCustomId] = useState(false);
+    const [generatorOtp, setGeneratorOtp] = useState('');
+
+    const handleVerifyAndTakeover = async () => {
+        if (!takeoverLeadUser.trim() || !takeoverFacilityId.trim() || !takeoverFacilityGroup || !takeoverOtp.trim()) {
+            showToast?.('Please fill in all required fields.', 'warning');
+            return;
+        }
+
+        try {
+            const expected = await calculateTakeoverOtp(
+                otpSecret,
+                takeoverLeadUser,
+                user?.username || user?.id || '',
+                takeoverFacilityId,
+                getLocalDateString()
+            );
+
+            if (takeoverOtp.trim() === expected) {
+                const newTakeover = {
+                    eventId: `takeover_${takeoverFacilityId}_${Date.now()}`,
+                    scheduleTeiId: takeoverFacilityId,
+                    trackedEntityInstance: takeoverFacilityId,
+                    orgUnit: takeoverFacilityId,
+                    orgUnitId: takeoverFacilityId,
+                    orgUnitName: takeoverFacilityName.trim() || takeoverFacilityId,
+                    isSelfAssessment: false,
+                    isOfflineTakeover: true,
+                    userId: user?.username || user?.id,
+                    statusCode: 'FAC_ASS_ASSIGN_ACCEPTED',
+                    sortDate: new Date().toISOString(),
+                    facilityGroup: takeoverFacilityGroup,
+                    programStageId: SURVEY_PROGRAM_STAGE_BY_GROUP[takeoverFacilityGroup] || SURVEY_PROGRAM_STAGE_BY_GROUP.HOSPITAL,
+                    team: [
+                        { assignedUserId: user?.username || user?.id, teamRole: 'ASSESSOR' },
+                        { assignedUserId: takeoverLeadUser.trim(), teamRole: 'LEAD' }
+                    ]
+                };
+
+                const currentDelegations = await indexedDBService.getConfig('offline_delegations') || [];
+                const nextList = Array.isArray(currentDelegations) ? [...currentDelegations] : [];
+                
+                // Avoid duplicates
+                const exists = nextList.some(d => d.orgUnitId === takeoverFacilityId && d.userId === (user?.username || user?.id));
+                if (exists) {
+                    showToast?.('This facility is already registered under your offline takeovers.', 'info');
+                    setTakeoverOpen(false);
+                    return;
+                }
+
+                nextList.push(newTakeover);
+                await indexedDBService.saveConfig('offline_delegations', nextList);
+                showToast?.('Offline assessment takeover successful!', 'success');
+                
+                // Reset form
+                setTakeoverLeadUser('');
+                setTakeoverFacilityId('');
+                setTakeoverFacilityName('');
+                setTakeoverFacilityGroup('');
+                setTakeoverOtp('');
+                setTakeoverOpen(false);
+
+                // Refresh assessments
+                if (hookRefresh) {
+                    hookRefresh();
+                }
+            } else {
+                showToast?.('Invalid Takeover OTP code. Please try again.', 'error');
+            }
+        } catch (err) {
+            console.error('Takeover validation failed:', err);
+            showToast?.('Takeover validation failed. Please check inputs.', 'error');
+        }
+    };
+
+    const handleGenerateOtp = async () => {
+        const activeFacilityId = generatorUseCustomId ? generatorCustomFacilityId : generatorSelectedFacilityId;
+        if (!activeFacilityId.trim() || !generatorTargetAssessor.trim()) {
+            showToast?.('Please specify target assessor and facility.', 'warning');
+            return;
+        }
+
+        try {
+            const code = await calculateTakeoverOtp(
+                otpSecret,
+                user?.username || user?.id || '',
+                generatorTargetAssessor,
+                activeFacilityId,
+                getLocalDateString()
+            );
+            setGeneratorOtp(code);
+        } catch (err) {
+            console.error('OTP generation failed:', err);
+            showToast?.('Failed to generate OTP.', 'error');
+        }
+    };
+
+    const handleCopyOtp = () => {
+        if (!generatorOtp) return;
+        navigator.clipboard.writeText(generatorOtp)
+            .then(() => showToast?.('OTP copied to clipboard!', 'success'))
+            .catch(() => showToast?.('Failed to copy OTP.', 'error'));
+    };
+
     const activeConfig = useMemo(() => {
         if (!activeVersionId || !configBundles[activeVersionId]) {
             return {
@@ -1025,7 +1151,7 @@ export function Dashboard() {
         const candidates = [];
         const preferred = toFacilityGroupKey(preferredNs);
         if (preferred) candidates.push(preferred);
-        ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY', 'EYE', 'DENTAL', 'PHARMACY', 'LABORATORY', 'OBGYN', 'ONCOLOGY', 'PAEDIATRIC', 'GENERAL'].forEach(ns => { if (!candidates.includes(ns)) candidates.push(ns); });
+        ALL_CANDIDATE_NAMESPACES.forEach(ns => { if (!candidates.includes(ns)) candidates.push(ns); });
         for (const ns of candidates) {
             try {
                 const value = await api.getDataStoreItem(ns, teiId);
@@ -2712,7 +2838,7 @@ export function Dashboard() {
             // Try selected group first, else probe all
             const candidates = [];
             if (initFacilityGroup) candidates.push(String(initFacilityGroup).toUpperCase());
-            ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY', 'EYE', 'DENTAL', 'PHARMACY', 'LABORATORY', 'OBGYN', 'ONCOLOGY', 'PAEDIATRIC', 'GENERAL'].forEach(ns => { if (!candidates.includes(ns)) candidates.push(ns); });
+            ALL_CANDIDATE_NAMESPACES.forEach(ns => { if (!candidates.includes(ns)) candidates.push(ns); });
             let found = null; let nsHit = null;
             for (const ns of candidates) {
                 try {
@@ -2912,7 +3038,7 @@ export function Dashboard() {
             await api.upsertDataStoreItem(ns, teiId, body);
             
             // Clean up duplicates from other namespaces to prevent flip-flopping
-            const candidateNamespaces = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'];
+            const candidateNamespaces = ALL_CANDIDATE_NAMESPACES;
             for (const otherNs of candidateNamespaces) {
                 if (otherNs !== ns) {
                     try { await api.deleteDataStoreItem(otherNs, teiId); } catch (_) {}
@@ -3116,7 +3242,7 @@ export function Dashboard() {
                 await api.upsertDataStoreItem(ns, teiId, body); 
                 
                 // Clean up duplicates from other namespaces to prevent flip-flopping
-                const candidateNamespaces = ['HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'];
+                const candidateNamespaces = ALL_CANDIDATE_NAMESPACES;
                 for (const otherNs of candidateNamespaces) {
                     if (otherNs !== ns) {
                         try { await api.deleteDataStoreItem(otherNs, teiId); } catch (_) {}
@@ -4264,6 +4390,29 @@ export function Dashboard() {
                             <AssessmentIcon />
                         </IconButton>
                     </Tooltip>
+                    <Button
+                        variant="outlined"
+                        color="secondary"
+                        size="small"
+                        onClick={() => setTakeoverOpen(true)}
+                        startIcon={<FactCheckIcon />}
+                        style={{ textTransform: 'none', borderRadius: 8, height: 36 }}
+                    >
+                        Offline Takeover
+                    </Button>
+                    <Button
+                        variant="outlined"
+                        color="primary"
+                        size="small"
+                        onClick={() => {
+                            setGeneratorOtp('');
+                            setGeneratorOpen(true);
+                        }}
+                        startIcon={<SettingsIcon />}
+                        style={{ textTransform: 'none', borderRadius: 8, height: 36 }}
+                    >
+                        Generate Takeover OTP
+                    </Button>
 
 	                    <Tooltip title="Logout">
 	                        <IconButton onClick={handleLogout} color="primary" className="action-icon-btn">
@@ -5647,6 +5796,211 @@ export function Dashboard() {
 	                    </Button>
 	                </DialogActions>
 	            </Dialog>
+
+            {/* Offline Takeover Dialog */}
+            <Dialog open={takeoverOpen} onClose={() => setTakeoverOpen(false)} fullWidth maxWidth="sm">
+                <DialogTitle style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <FactCheckIcon color="primary" /> Offline Assessment Takeover
+                </DialogTitle>
+                <DialogContent dividers>
+                    <div style={{ marginBottom: 16, padding: '10px 12px', borderRadius: 8, background: '#eff6ff', border: '1px solid #bfdbfe', color: '#1e3a8a', fontSize: '0.85rem' }}>
+                        If you are unable to do your assigned assessment offline, another assessor (or Lead) can generate a 6-digit OTP code for you. Enter their credentials and the code below to take over and unlock the assessment on your device.
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <TextField
+                            label="Lead / Assessor's Username (Who generated the code)"
+                            value={takeoverLeadUser}
+                            onChange={e => setTakeoverLeadUser(e.target.value)}
+                            size="small"
+                            fullWidth
+                            required
+                        />
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.5fr', gap: 12 }}>
+                            <TextField
+                                label="Facility ID (OrgUnit ID)"
+                                value={takeoverFacilityId}
+                                onChange={e => setTakeoverFacilityId(e.target.value)}
+                                size="small"
+                                fullWidth
+                                required
+                            />
+                            <TextField
+                                label="Facility Name (Friendly Name)"
+                                value={takeoverFacilityName}
+                                onChange={e => setTakeoverFacilityName(e.target.value)}
+                                size="small"
+                                fullWidth
+                                placeholder="e.g. Athlone Hospital"
+                            />
+                        </div>
+                        <TextField
+                            select
+                            label="Facility Type / Program Stage"
+                            value={takeoverFacilityGroup}
+                            onChange={e => setTakeoverFacilityGroup(e.target.value)}
+                            size="small"
+                            fullWidth
+                            required
+                        >
+                            {Object.entries(SURVEY_PROGRAM_STAGE_BY_GROUP).map(([key, value]) => (
+                                <MenuItem key={key} value={key}>
+                                    {getFacilityGroupLabel(key)}
+                                </MenuItem>
+                            ))}
+                        </TextField>
+                        <TextField
+                            label="6-Digit OTP Takeover Code"
+                            value={takeoverOtp}
+                            onChange={e => setTakeoverOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                            placeholder="000 000"
+                            size="small"
+                            fullWidth
+                            required
+                            inputProps={{ style: { letterSpacing: '4px', textAlign: 'center', fontWeight: 'bold', fontSize: '1.2rem' } }}
+                        />
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setTakeoverOpen(false)}>Cancel</Button>
+                    <Button
+                        onClick={handleVerifyAndTakeover}
+                        variant="contained"
+                        color="primary"
+                        disabled={!takeoverLeadUser.trim() || !takeoverFacilityId.trim() || !takeoverFacilityGroup || takeoverOtp.length !== 6}
+                    >
+                        Verify & Takeover
+                    </Button>
+                </DialogActions>
+            </Dialog>
+
+            {/* Lead OTP Generator Dialog */}
+            <Dialog open={generatorOpen} onClose={() => setGeneratorOpen(false)} fullWidth maxWidth="sm">
+                <DialogTitle style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <SettingsIcon color="primary" /> Generate Takeover OTP
+                </DialogTitle>
+                <DialogContent dividers>
+                    <div style={{ marginBottom: 16, padding: '10px 12px', borderRadius: 8, background: '#f8fafc', border: '1px solid #cbd5e1', color: '#334155', fontSize: '0.85rem' }}>
+                        Generate a secure, dynamic 6-digit passcode to allow another assessor to take over an assessment from their device offline.
+                    </div>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <FormControlLabel
+                            control={
+                                <Switch
+                                    checked={generatorUseCustomId}
+                                    onChange={e => {
+                                        setGeneratorUseCustomId(e.target.checked);
+                                        setGeneratorSelectedFacilityId('');
+                                        setGeneratorCustomFacilityId('');
+                                        setGeneratorOtp('');
+                                    }}
+                                />
+                            }
+                            label="Enter custom Facility ID (for unlisted/unscheduled facilities)"
+                        />
+
+                        {!generatorUseCustomId ? (
+                            <TextField
+                                select
+                                label="Select Facility / Assessment"
+                                value={generatorSelectedFacilityId}
+                                onChange={e => {
+                                    setGeneratorSelectedFacilityId(e.target.value);
+                                    setGeneratorOtp('');
+                                }}
+                                size="small"
+                                fullWidth
+                            >
+                                <MenuItem value="">Select an assessment...</MenuItem>
+                                {[...hookUpcoming, ...hookPending].map((a, idx) => {
+                                    const label = a.orgUnitName || a.facilityId || a.orgUnitId || 'Unknown Facility';
+                                    const group = getAssessmentFacilityGroupKey(a) || '-';
+                                    const uid = resolveOrgUnitForAssessment(a);
+                                    return (
+                                        <MenuItem key={`${uid}-${idx}`} value={uid}>
+                                            {label} ({group}) - ID: {uid}
+                                        </MenuItem>
+                                    );
+                                })}
+                            </TextField>
+                        ) : (
+                            <div style={{ display: 'flex', gap: 12 }}>
+                                <TextField
+                                    label="Custom Facility ID (OrgUnit ID)"
+                                    value={generatorCustomFacilityId}
+                                    onChange={e => {
+                                        setGeneratorCustomFacilityId(e.target.value);
+                                        setGeneratorOtp('');
+                                    }}
+                                    size="small"
+                                    fullWidth
+                                    required
+                                />
+                            </div>
+                        )}
+
+                        <TextField
+                            label="Target Assessor's Username"
+                            value={generatorTargetAssessor}
+                            onChange={e => {
+                                setGeneratorTargetAssessor(e.target.value);
+                                setGeneratorOtp('');
+                            }}
+                            placeholder="Enter the assessor's exact username"
+                            size="small"
+                            fullWidth
+                            required
+                        />
+
+                        {generatorOtp && (
+                            <div style={{
+                                marginTop: 12,
+                                padding: '16px',
+                                background: '#f0fdf4',
+                                border: '1px solid #bbf7d0',
+                                borderRadius: 8,
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                gap: 8
+                            }}>
+                                <span style={{ fontSize: '0.85rem', color: '#166534', fontWeight: 500 }}>Generated OTP Code (Valid for today only)</span>
+                                <span style={{
+                                    fontSize: '2rem',
+                                    fontWeight: 'bold',
+                                    color: '#15803d',
+                                    letterSpacing: '6px',
+                                    fontFamily: 'monospace'
+                                }}>
+                                    {generatorOtp}
+                                </span>
+                                <Button
+                                    size="small"
+                                    variant="outlined"
+                                    color="success"
+                                    onClick={handleCopyOtp}
+                                    style={{ marginTop: 4 }}
+                                >
+                                    Copy Code
+                                </Button>
+                            </div>
+                        )}
+                    </div>
+                </DialogContent>
+                <DialogActions>
+                    <Button onClick={() => setGeneratorOpen(false)}>Close</Button>
+                    <Button
+                        onClick={handleGenerateOtp}
+                        variant="contained"
+                        color="primary"
+                        disabled={
+                            !(generatorUseCustomId ? generatorCustomFacilityId : generatorSelectedFacilityId) ||
+                            !generatorTargetAssessor.trim()
+                        }
+                    >
+                        Generate OTP
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Preview Modal */}
             {

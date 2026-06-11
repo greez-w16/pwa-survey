@@ -61,6 +61,22 @@ export const AppProvider = ({ children }) => {
             type: 'info',
         });
 
+    const [otpSecret, setOtpSecret] = useState('QIMS_OFFLINE_SECRET_2026_FALLBACK');
+
+    useEffect(() => {
+        const loadOtpSecret = async () => {
+            try {
+                const secret = await indexedDBService.getConfig('otp_secret');
+                if (secret) {
+                    setOtpSecret(secret);
+                }
+            } catch (err) {
+                console.warn('AppContext: Failed to load cached otp_secret', err);
+            }
+        };
+        loadOtpSecret();
+    }, []);
+
     const showToast = useCallback((message, type = 'info') => {
         console.log(`[TOAST] ${type.toUpperCase()}: ${message}`);
         setToast({
@@ -263,6 +279,20 @@ export const AppProvider = ({ children }) => {
                                 console.warn(`[AppContext] Failed to read key ${key} from local IndexedDB cache`, cacheErr);
                             }
                         }
+                    }
+
+                    // Fetch otp_secret from DataStore as well
+                    try {
+                        const secretVal = await api.getDataStoreItem(NAMESPACE, 'otp_secret');
+                        if (secretVal) {
+                            const cleanSecret = typeof secretVal === 'object' ? (secretVal.value || secretVal.secret || secretVal) : secretVal;
+                            if (cleanSecret && typeof cleanSecret === 'string') {
+                                setOtpSecret(cleanSecret);
+                                await indexedDBService.saveConfig('otp_secret', cleanSecret);
+                            }
+                        }
+                    } catch (e) {
+                        console.warn('[AppContext] Failed to fetch otp_secret from DataStore, falling back to local', e);
                     }
 
                     // Only update if we successfully fetched at least some configuration
@@ -613,6 +643,7 @@ export const AppProvider = ({ children }) => {
 	        showToast,
 	        logout,
 	        authInitializing,
+            otpSecret,
 		    }), [
 		        user,
 		        configuration,
@@ -626,7 +657,8 @@ export const AppProvider = ({ children }) => {
 		        configBundles,
                 configSource,
                 remoteConfigLoading,
-                loadRemoteConfig
+                loadRemoteConfig,
+                otpSecret
 		    ]);
 
     return (

@@ -53,7 +53,7 @@
                                 if (stdId && !index[stdId]) {
                                     index[stdId] = {
                                         statement: standard.statement || '',
-                                        intent: standard.intent_tooltip || '',
+                                        intent: standard.intent_tooltip || standard.intent || '',
 	                                        guideline: standard.guideline || standard.guidelines || standard.guidline || '',
                                         is_critical: false,
                                         severity: null,
@@ -64,7 +64,7 @@
                                     if (!crit || !crit.id) return;
                                     index[crit.id] = {
                                         statement: standard.statement || '',
-                                        intent: standard.intent_tooltip || '',
+                                        intent: standard.intent_tooltip || standard.intent || '',
 	                                        description: crit.description || '',
 	                                        guideline: crit.guideline || crit.guidelines || crit.guidline || '',
                                         is_critical: crit.is_critical || false,
@@ -2257,7 +2257,6 @@
                             }
                         }
                     }
-
                     // If this is a comment attached to a Standard (x.x.x), hide the
                     // comment row entirely in the UI.
                     if (isCommentField && parentQuestionId) {
@@ -2268,7 +2267,6 @@
                             return null;
                         }
                     }
-
                     // Check if this is a technical field that should be read-only
                     // (Enrollment ID, TEI ID, Assessor User ID, Facility Assessment
                     // Group) in the Assessment Details section. These are
@@ -2579,7 +2577,7 @@
                                 ) && (
                                     <div className={`${isRoot ? 'root-score-display' : 'linked-score-display'}`} style={{ marginBottom: '10px', padding: '10px', backgroundColor: isRoot ? '#e2e8f0' : '#f0f4f8', borderRadius: '4px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', border: isRoot ? '1px solid #cbd5e1' : '1px dashed #cbd5e1' }}>
                                         <span style={{ fontWeight: '600', color: '#2d3748', fontSize: '0.9em' }}>
-                                            {isRoot ? 'Calculated Root Score:' : 'Criterion Score:'}
+                                            {isRoot ? 'Calculated Score:' : 'Criterion Score:'}
                                         </span>
                                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                                 <span style={{ fontWeight: 'bold', fontSize: '1.05em', color: '#2b3a8e' }}>

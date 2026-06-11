@@ -48,6 +48,15 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
   PAEDIATRIC: 'paeStageU11'
 };
 
+const ALL_CANDIDATE_NAMESPACES = [
+  'HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY', 'OBGYN', 'PHYSIOTHERAPY',
+  'RADIOLOGY', 'PRIVATE_LAB', 'GENERAL_PRACTICE', 'PRIVATE_DIETETIC',
+  'MENTAL_HEALTH', 'EYE', 'HOSPICE_PALLIATIVE', 'OCCUPATIONAL_HEALTH',
+  'UROLOGY_NEPHR', 'ORAL', 'IMCI', 'EMONC', 'ONCOLOGY', 'PAEDIATRIC',
+  'GENERAL', 'DENTAL', 'PHARMACY', 'LABORATORY'
+];
+
+
 // Map a free-text Assessment Group value to an internal group id
 const resolveGroupIdFromText = (text) => {
   if (!text) return null;
@@ -942,7 +951,7 @@ const PrivateRoute = ({ children }) => {
 	    const preferred = resolveAssessmentNamespaceFromText(
 	      formData?.[FACILITY_GROUP_DE_ID] || activeGroup?.name || activeGroup?.id || ''
 	    );
-	    const next = Array.from(new Set([preferred, 'HOSPITAL', 'CLINICS', 'EMS', 'MORTUARY'].filter(Boolean)));
+	    const next = Array.from(new Set([preferred, ...ALL_CANDIDATE_NAMESPACES].filter(Boolean)));
 	    if (
 	      prevCandidatesRef.current.length === next.length &&
 	      prevCandidatesRef.current.every((val, i) => val === next[i])
