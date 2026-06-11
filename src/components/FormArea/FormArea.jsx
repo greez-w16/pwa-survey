@@ -2429,12 +2429,15 @@
                                 .replace(/^(?:[A-Z][A-Z0-9_]*\s+)+/, '')
                                 .trim();
                             // Step 3: sanitize numeric artifacts that DHIS2 sometimes
-                            // appends to or embeds in dataElement names, e.g.:
-                            //   "Some statement. - 3 21.3.1.1 22.1.1.4"  (severity + codes)
-                            //   "Some statement -2 15.1.1.1-2 16.1.1.1"  (count + codes)
-                            //   "(2)- rest of label"                       (number-dash prefix)
-                            //   "Some statement (3)-"                      (trailing number-dash)
+                            // prepends or appends to dataElement names, e.g.:
+                            //   "159-The human resource manager..."   (sequence-id prefix)
+                            //   "(2)- rest of label"                  (parenthesised number-dash)
+                            //   "Some statement. - 3 21.3.1.1"       (trailing severity + codes)
+                            //   "Some statement -2 15.1.1.1-2"       (trailing count + codes)
                             const sanitizeLabel = (text) => text
+                                // Remove leading bare number-dash e.g. "159-" or "42- "
+                                // (DHIS2 sequence IDs prepended to the element name)
+                                .replace(/^\d+-\s*/, '')
                                 // Remove leading (number)- e.g. "(2)- " or "(3)-"
                                 .replace(/^\(\d+\)-\s*/, '')
                                 // Remove trailing " - <digit> <codes...>" artifacts
