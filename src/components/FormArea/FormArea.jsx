@@ -2428,7 +2428,25 @@
                             const labelAfterPrefix = labelAfterCode
                                 .replace(/^(?:[A-Z][A-Z0-9_]*\s+)+/, '')
                                 .trim();
-                            const dhisLabelClean = labelAfterPrefix || labelAfterCode;
+                            // Step 3: sanitize numeric artifacts that DHIS2 sometimes
+                            // appends to or embeds in dataElement names, e.g.:
+                            //   "Some statement. - 3 21.3.1.1 22.1.1.4"  (severity + codes)
+                            //   "Some statement -2 15.1.1.1-2 16.1.1.1"  (count + codes)
+                            //   "(2)- rest of label"                       (number-dash prefix)
+                            //   "Some statement (3)-"                      (trailing number-dash)
+                            const sanitizeLabel = (text) => text
+                                // Remove leading (number)- e.g. "(2)- " or "(3)-"
+                                .replace(/^\(\d+\)-\s*/, '')
+                                // Remove trailing " - <digit> <codes...>" artifacts
+                                // e.g. " - 3 21.3.1.1 22.1.1.4" at end of sentence
+                                .replace(/\s+-\s*\d+(\s+\d+(?:\.\d+){2,3}(-\d+)?)*\s*$/, '')
+                                // Remove trailing " -<digit> <codes...>" (no space before dash)
+                                .replace(/\s+-\d+(\s+\d+(?:\.\d+){2,3}(-\d+)?)*\s*$/, '')
+                                // Remove trailing standalone criterion code lists
+                                // e.g. " 15.1.1.1-2 16.1.1.1-2"
+                                .replace(/(\s+\d+(?:\.\d+){2,3}(-\d+)?)+\s*$/, '')
+                                .trim();
+                            const dhisLabelClean = sanitizeLabel(labelAfterPrefix || labelAfterCode);
                             if (dhisLabelClean && dhisLabelClean.length > 5) {
                                 // DHIS2 label successfully cleaned – use it
                                 targetText = dhisLabelClean;
