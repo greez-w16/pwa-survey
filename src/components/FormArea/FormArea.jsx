@@ -638,26 +638,12 @@
         }, [configuration, programmeType]);
 
         const criterionIndex = React.useMemo(() => {
-            const index = buildCriterionIndex(activeConfigArray);
-            if (Array.isArray(activeLinks)) {
-                activeLinks.forEach(link => {
-                    const code = normalizeCriterionCode(link.criteria || link.id);
-                    if (code && index[code]) {
-                        const existingDesc = String(index[code].description || '').trim();
-                        const linkDesc = String(link.description || '').trim();
-                        // Only use links.json description when config has NO description at all.
-                        // This prevents links.json from overwriting valid config descriptions
-                        // (which are the authoritative source matching DHIS2 dataElement names).
-                        // Note: if the config description started with 'Critical:' it was already
-                        // cleared to '' by buildCriterionIndex, so the !existingDesc check catches it.
-                        if (linkDesc && !existingDesc) {
-                            index[code]._linkDescription = linkDesc; // store separately, don't overwrite config desc
-                        }
-                    }
-                });
-            }
-            return index;
-        }, [activeConfigArray, activeLinks]);
+            // Build the index purely from the configuration (local bundle or DataStore).
+            // links.json descriptions are intentionally excluded from this index – they
+            // are only used for the info-panel tooltip (getCriterionTooltip) and must
+            // never influence the field label shown to the assessor.
+            return buildCriterionIndex(activeConfigArray);
+        }, [activeConfigArray]);
 
         const rawAssessmentScopedSections = React.useMemo(
             () => (Array.isArray(assessmentScopedGroup?.sections) ? assessmentScopedGroup.sections : []),
@@ -2417,40 +2403,40 @@
 	                            return friendlyLabel(rawLabel) || 'Unnamed Field';
                         }
 
-                        // For criterion questions (x.x.x.x): DHIS2 metadata is the source
-                        // of truth for the display label.
-                        // DHIS2 dataElement names look like:
-                        //   "24.1.1.2 HOSP There is evidence that patients are identified..."
-                        // We strip the leading numeric code and the facility prefix token(s)
-                        // (consecutive ALL_CAPS words e.g. "HOSP ", "EMS ", "SURV_EMS_") so
-                        // the assessor sees only the plain English statement.
-                        // For Standards (x.x.x) we prefer the config statement (richer text).
+                        // ── Label resolution for criterion questions (x.x.x.x) ────────
+                        // DHIS2 metadata is the source of truth for the displayed label.
+                        // For Standards (x.x.x) the config statement is richer and preferred.
+                        //
+                        // Label sources (in priority order):
+                        //   1. DHIS2 rawLabel – stripped of leading code and facility prefix
+                        //   2. Local/DataStore config description – fallback when DHIS2
+                        //      label cannot be cleaned to meaningful text
+                        //
+                        // links.json descriptions are NEVER used for field labels.
                         let targetText = rawLabel;
                         if (isStandardCriterion && configEntry.statement) {
-                            // Standards use the config's full statement text
+                            // Standards: use the full config statement text
                             targetText = configEntry.statement;
                         } else if (isCriterionQuestion) {
-                            // ── DHIS2 label is source of truth ───────────────────────────
-                            // Step 1: strip leading numeric code (e.g. "24.1.1.2 ")
+                            // Step 1: strip leading numeric code e.g. "24.1.1.2 "
                             const labelAfterCode = rawLabel
                                 .replace(/^\s*\d+(?:\.\d+){2,3}\s*/, '')
                                 .trim();
-                            // Step 2: strip facility/programme prefix tokens such as
-                            // "HOSP ", "EMS ", "SURV_EMS_", "FAC_ASS_", "CLINICS_" etc.
-                            // These are sequences of ALL_CAPS/underscore words at the start.
+                            // Step 2: strip facility/programme prefix tokens
+                            // e.g. "HOSP ", "EMS ", "SURV_EMS_", "FAC_ASS_", "CLINICS_"
+                            // These are one or more consecutive ALL_CAPS words at the start.
                             const labelAfterPrefix = labelAfterCode
                                 .replace(/^(?:[A-Z][A-Z0-9_]*\s+)+/, '')
                                 .trim();
                             const dhisLabelClean = labelAfterPrefix || labelAfterCode;
                             if (dhisLabelClean && dhisLabelClean.length > 5) {
+                                // DHIS2 label successfully cleaned – use it
                                 targetText = dhisLabelClean;
                             } else if (configEntry.description) {
-                                // DHIS2 label too short – fall back to config description
+                                // DHIS2 label too short or empty – use config description
                                 targetText = configEntry.description;
-                            } else if (configEntry._linkDescription) {
-                                // Last resort: links.json description
-                                targetText = configEntry._linkDescription;
                             }
+                            // No further fallback: if both are empty, rawLabel is kept
                         }
 
                         if (shouldShowCode && targetText && !targetText.startsWith(cleanedCode)) {
