@@ -13251,18 +13251,13 @@
   },
   {
     "criteria": "24.1.1.2",
-    "description": "The individuals responsible for the patient's care are qualified and registered with the relevant regulatory or professional body",
+    "description": "There is evidence that patients are identified before medications are administered",
     "linked_criteria": [
-      "2.2.1.1-G",
-      "2.5.1.1-G",
-      "24.6.2.2",
-      "24.9.1.1",
-      "24.9.2.1"
+      "24.9.1.1-G",
+      "7.2.1.3-G"
     ],
     "root": [
-      "24.6.2.2",
-      "24.9.1.4",
-      "24.9.2.1"
+      "7.2.1.3"
     ]
   },
   {

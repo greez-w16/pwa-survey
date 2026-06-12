@@ -203,9 +203,9 @@
             // e.g. "7.1.1 Something" -> true, "7.1.1.1 Something" -> false
             const looksLikeStandard = /^\d+(?:\.\d+){2}(?!\.)/.test(trimmed);
             if (!(isStandardCriterion || looksLikeStandard)) {
-                return labelText;
+                return <span dangerouslySetInnerHTML={{ __html: labelText }} />;
             }
-            return <em>{labelText}</em>;
+            return <em dangerouslySetInnerHTML={{ __html: labelText }} />;
         };
 
     // Preserve full intent text (including paragraphing) from the source.
@@ -240,6 +240,9 @@
                     };
 
                         const parts = [];
+                    if (hospitalSubcriteriaMap?.[normalized]?.length > 0) {
+                        parts.push("**Root Criteria**");
+                    }
                     // For criterion (x.x.x.x) rows we no longer include the textual
                     // Standard / Intent / Overview blocks in the tooltip. Those remain
                     // only for higher-level rows (e.g. x.x.x display-only standards).
@@ -2075,7 +2078,7 @@
                             })();
                             return (
                                 <div key={field.id} className="form-header-separator">
-                                    <h3>{displayLabel}</h3>
+                                    <h3 dangerouslySetInnerHTML={{ __html: displayLabel }} />
                                 </div>
                             );
                         }
@@ -2605,13 +2608,14 @@
                                         onClick={(e) => {
                                             e.preventDefault();
                                             e.stopPropagation();
-	                                            setOpenCriterionTooltip({
-	                                                text: criterionTooltip,
-	                                                guideline: criterionGuideline,
-	                                            });
+                                            setOpenCriterionTooltip({
+                                                text: criterionTooltip,
+                                                guideline: criterionGuideline,
+                                                code: field.code,
+                                            });
                                         }}
                                     >
-                                        ?
+                                        i
                                     </button>
                                 )}
                                 </div>
@@ -4024,9 +4028,7 @@
                                                         <div className="standard-summary-code">
                                                             {entry.code}
                                                         </div>
-                                                        <div className="standard-summary-title">
-                                                            {entry.title}
-                                                        </div>
+                                                        <div className="standard-summary-title" dangerouslySetInnerHTML={{ __html: entry.title }} />
                                                         <div className="standard-summary-score">
                                                             <span
                                                                 className={
@@ -4074,9 +4076,7 @@
                                                                 }}
                                                             >
                                                                 <div className="standard-summary-code">{std.code}</div>
-                                                                <div className="standard-summary-title">
-                                                                    {std.title}
-                                                                </div>
+                                                                <div className="standard-summary-title" dangerouslySetInnerHTML={{ __html: std.title }} />
                                                                 <div className="standard-summary-score">
                                                                     <span
                                                                         className={
@@ -4225,7 +4225,14 @@
                             onClick={(e) => e.stopPropagation()}
                         >
                             <div className="scoring-modal-header">
-                                <div>Criterion information</div>
+                                <div>
+                                    {(() => {
+                                        const code = openCriterionTooltip?.code;
+                                        const normalized = code ? normalizeCriterionCode(code) : null;
+                                        const hasSubCriteria = normalized ? (HOSPITAL_SUBCRITERIA_MAP[normalized]?.length > 0) : false;
+                                        return hasSubCriteria ? <strong>Root Criteria</strong> : "Criterion information";
+                                    })()}
+                                </div>
                                 <button className="close-modal-btn" onClick={() => setOpenCriterionTooltip(null)} aria-label="Close">&times;</button>
                             </div>
 	                            <div className="scoring-modal-body" style={{ whiteSpace: 'pre-line' }}>
@@ -4241,10 +4248,21 @@
 	                                            {tooltipGuideline && (
 	                                                <div style={{ marginBottom: '16px', padding: '12px 14px', borderRadius: '8px', background: '#eff6ff', border: '1px solid #bfdbfe' }}>
 	                                                    <div style={{ fontWeight: 700, color: '#1e3a8a', marginBottom: '6px' }}>Guideline</div>
-	                                                    <div>{tooltipGuideline}</div>
+	                                                    <div dangerouslySetInnerHTML={{ __html: tooltipGuideline }} />
 	                                                </div>
 	                                            )}
-	                                            {tooltipText && <div>{tooltipText}</div>}
+	                                            {tooltipText && (
+                                                    <div>
+                                                        {tooltipText.startsWith("**Root Criteria**") ? (
+                                                            <>
+                                                                <strong>Root Criteria</strong>
+                                                                <div dangerouslySetInnerHTML={{ __html: tooltipText.substring("**Root Criteria**".length) }} />
+                                                            </>
+                                                        ) : (
+                                                            <div dangerouslySetInnerHTML={{ __html: tooltipText }} />
+                                                        )}
+                                                    </div>
+                                                )}
 	                                        </>
 	                                    );
 	                                })()}

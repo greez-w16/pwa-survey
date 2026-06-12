@@ -16,6 +16,24 @@ import emsLinks from '../assets/ems/ems_links.json';
 import mortuaryLinks from '../assets/mortuary/mortuary_links.json';
 import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
+
+import obstericsGynoConfig from '../assets/obsterics-gyno/obsterics_gyno_config.json';
+import obstericsGynoMatrix from '../assets/obsterics-gyno/obsterics_gyno_matrix.json';
+import physiotheraphyConfig from '../assets/physiotheraphy/physiotheraphy_config.json';
+import physiotheraphyMatrix from '../assets/physiotheraphy/physiotheraphy_matrix.json';
+import radiologyConfig from '../assets/radiology/radiology_config.json';
+import radiologyMatrix from '../assets/radiology/radiology_matrix.json';
+import generalPracticeConfig from '../assets/general-practice/general_practice_config.json';
+import generalPracticeMatrix from '../assets/general-practice/general_practice_matrix.json';
+import privateDiabeticConfig from '../assets/private-diabetic/private_diabetic_config.json';
+import privateDiabeticMatrix from '../assets/private-diabetic/private_diabetic_matrix.json';
+import oralConfig from '../assets/oral/oral_config.json';
+import oralMatrix from '../assets/oral/oral_matrix.json';
+import privateOncologyConfig from '../assets/private-oncology/private_oncology_config.json';
+import privateOncologyMatrix from '../assets/private-oncology/private_oncology_matrix.json';
+import paediatricConfig from '../assets/paediatric/paediatric_config.json';
+import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
+
 import qimsLogo from '../assets/logo.png';
 import { calculatePointsForLink, setHospitalSubcriteriaConfig } from '../utils/scoring';
 import {
@@ -69,6 +87,11 @@ const toFacilityGroupKey = (value) => {
   if (t.includes('obg')) return 'OBGYN';
   if (t.includes('oncology') || t.includes('onc')) return 'ONCOLOGY';
   if (t.includes('paediatric') || t.includes('pae') || t.includes('pediatric') || t.includes('ped')) return 'PAEDIATRIC';
+  if (t.includes('physio')) return 'PHYSIOTHERAPY';
+  if (t.includes('radio')) return 'RADIOLOGY';
+  if (t.includes('general practice') || t.includes('general_practice')) return 'GENERAL_PRACTICE';
+  if (t.includes('diabet') || t.includes('dietet') || t.includes('prd')) return 'PRIVATE_DIETETIC';
+  if (t.includes('oral')) return 'ORAL';
   return String(value || '').trim().toUpperCase();
 };
 
@@ -119,6 +142,18 @@ export default function Report() {
         clinics_full_configuration: clinicsConfig.clinics_full_configuration,
         ems_full_configuration: emsConfig.ems_full_configuration,
         mortuary_full_configuration: mortuaryConfig.mortuary_full_configuration,
+        obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+        obgyn_full_configuration: obstericsGynoConfig.service_elements,
+        physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+        physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+        radiology_full_configuration: radiologyConfig.service_elements,
+        general_practice_full_configuration: generalPracticeConfig.service_elements,
+        private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+        private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+        oral_full_configuration: oralConfig.service_elements,
+        private_oncology_full_configuration: privateOncologyConfig.service_elements,
+        oncology_full_configuration: privateOncologyConfig.service_elements,
+        paediatric_full_configuration: paediatricConfig.service_elements,
       };
     }
     return configBundles[activeConfigVersionId].config || {};
@@ -133,6 +168,18 @@ export default function Report() {
         'clinics_full_configuration',
         'hospital_full_configuration',
         'eye_full_configuration',
+        'obsterics_gyno_full_configuration',
+        'obgyn_full_configuration',
+        'physiotheraphy_full_configuration',
+        'physiotherapy_full_configuration',
+        'radiology_full_configuration',
+        'general_practice_full_configuration',
+        'private_diabetic_full_configuration',
+        'private_dietetic_full_configuration',
+        'oral_full_configuration',
+        'private_oncology_full_configuration',
+        'oncology_full_configuration',
+        'paediatric_full_configuration',
       ];
 
       possibleKeys.forEach((key) => {
@@ -168,6 +215,18 @@ export default function Report() {
         'mortuary_full_configuration': mortuaryLinks,
         'clinics_full_configuration': clinicsLinks,
         'hospital_full_configuration': hospitalLinks,
+        'obsterics_gyno_full_configuration': obstericsGynoMatrix.obsterics_gyno,
+        'obgyn_full_configuration': obstericsGynoMatrix.obsterics_gyno,
+        'physiotheraphy_full_configuration': physiotheraphyMatrix.physiotheraphy,
+        'physiotherapy_full_configuration': physiotheraphyMatrix.physiotheraphy,
+        'radiology_full_configuration': radiologyMatrix.radiology,
+        'general_practice_full_configuration': generalPracticeMatrix.general_practice,
+        'private_diabetic_full_configuration': privateDiabeticMatrix.private_diabetic,
+        'private_dietetic_full_configuration': privateDiabeticMatrix.private_diabetic,
+        'oral_full_configuration': oralMatrix.oral,
+        'private_oncology_full_configuration': privateOncologyMatrix.private_oncology,
+        'oncology_full_configuration': privateOncologyMatrix.private_oncology,
+        'paediatric_full_configuration': paediatricMatrix.paediatric,
       };
       Object.keys(configLinksMap).forEach(key => {
         const linkList = configLinksMap[key];
@@ -221,13 +280,18 @@ export default function Report() {
 
   const pType = useMemo(() => {
     const groupId = queryFacilityGroupKey;
-    return groupId === 'HOSPITAL'
-      ? 'hospital'
-      : groupId === 'CLINICS'
-      ? 'clinics'
-      : groupId === 'MORTUARY'
-      ? 'mortuary'
-      : groupId ? 'ems' : '';
+    if (groupId === 'HOSPITAL') return 'hospital';
+    if (groupId === 'CLINICS') return 'clinics';
+    if (groupId === 'MORTUARY') return 'mortuary';
+    if (groupId === 'OBGYN') return 'obgyn';
+    if (groupId === 'PHYSIOTHERAPY') return 'physiotherapy';
+    if (groupId === 'RADIOLOGY') return 'radiology';
+    if (groupId === 'GENERAL_PRACTICE') return 'general_practice';
+    if (groupId === 'PRIVATE_DIETETIC') return 'private_diabetic';
+    if (groupId === 'ORAL') return 'oral';
+    if (groupId === 'ONCOLOGY') return 'oncology';
+    if (groupId === 'PAEDIATRIC') return 'paediatric';
+    return groupId ? 'ems' : '';
   }, [queryFacilityGroupKey]);
 
   useEffect(() => {
@@ -293,8 +357,42 @@ export default function Report() {
   // Build programme-specific scoring metadata from active configuration version
   const programmeScoringMeta = useMemo(() => {
     const bundle = (configBundles && activeConfigVersionId) ? (configBundles[activeConfigVersionId] || null) : null;
-    const sourceConfig = bundle && bundle.config ? bundle.config : { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig };
-    const baseLinks = bundle && bundle.links ? bundle.links : { ems: emsLinks, mortuary: mortuaryLinks, clinics: clinicsLinks, hospital: hospitalLinks };
+    const sourceConfig = bundle && bundle.config ? bundle.config : {
+      ...emsConfig,
+      ...mortuaryConfig,
+      ...clinicsConfig,
+      ...hospitalConfig,
+      obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+      obgyn_full_configuration: obstericsGynoConfig.service_elements,
+      physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+      physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+      radiology_full_configuration: radiologyConfig.service_elements,
+      general_practice_full_configuration: generalPracticeConfig.service_elements,
+      private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+      private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+      oral_full_configuration: oralConfig.service_elements,
+      private_oncology_full_configuration: privateOncologyConfig.service_elements,
+      oncology_full_configuration: privateOncologyConfig.service_elements,
+      paediatric_full_configuration: paediatricConfig.service_elements,
+    };
+    const baseLinks = bundle && bundle.links ? bundle.links : {
+      ems: emsLinks,
+      mortuary: mortuaryLinks,
+      clinics: clinicsLinks,
+      hospital: hospitalLinks,
+      obgyn: obstericsGynoMatrix.obsterics_gyno,
+      obsterics_gyno: obstericsGynoMatrix.obsterics_gyno,
+      physiotherapy: physiotheraphyMatrix.physiotheraphy,
+      physiotheraphy: physiotheraphyMatrix.physiotheraphy,
+      radiology: radiologyMatrix.radiology,
+      general_practice: generalPracticeMatrix.general_practice,
+      private_diabetic: privateDiabeticMatrix.private_diabetic,
+      private_dietetic: privateDiabeticMatrix.private_diabetic,
+      oral: oralMatrix.oral,
+      oncology: privateOncologyMatrix.private_oncology,
+      private_oncology: privateOncologyMatrix.private_oncology,
+      paediatric: paediatricMatrix.paediatric,
+    };
     const effectiveLinks = { ...baseLinks, hospital: decorateHospitalLinksWithMatrixTags(baseLinks.hospital || hospitalLinks) };
 
     const buildMeta = (config, key, links) => {
@@ -343,6 +441,17 @@ export default function Report() {
       clinics: buildMeta(sourceConfig, 'clinics_full_configuration', effectiveLinks.clinics || clinicsLinks),
       hospital: buildMeta(sourceConfig, 'hospital_full_configuration', effectiveLinks.hospital || hospitalLinks),
       obgyn: buildMeta(sourceConfig, 'obgyn_full_configuration', effectiveLinks.obgyn || []),
+      obsterics_gyno: buildMeta(sourceConfig, 'obsterics_gyno_full_configuration', effectiveLinks.obsterics_gyno || []),
+      physiotherapy: buildMeta(sourceConfig, 'physiotherapy_full_configuration', effectiveLinks.physiotherapy || []),
+      physiotheraphy: buildMeta(sourceConfig, 'physiotheraphy_full_configuration', effectiveLinks.physiotheraphy || []),
+      radiology: buildMeta(sourceConfig, 'radiology_full_configuration', effectiveLinks.radiology || []),
+      general_practice: buildMeta(sourceConfig, 'general_practice_full_configuration', effectiveLinks.general_practice || []),
+      private_diabetic: buildMeta(sourceConfig, 'private_diabetic_full_configuration', effectiveLinks.private_diabetic || []),
+      private_dietetic: buildMeta(sourceConfig, 'private_dietetic_full_configuration', effectiveLinks.private_dietetic || []),
+      oral: buildMeta(sourceConfig, 'oral_full_configuration', effectiveLinks.oral || []),
+      oncology: buildMeta(sourceConfig, 'oncology_full_configuration', effectiveLinks.oncology || []),
+      private_oncology: buildMeta(sourceConfig, 'private_oncology_full_configuration', effectiveLinks.private_oncology || []),
+      paediatric: buildMeta(sourceConfig, 'paediatric_full_configuration', effectiveLinks.paediatric || []),
     };
   }, [configBundles, activeConfigVersionId]);
 
@@ -816,7 +925,14 @@ export default function Report() {
             else if (programmeType === 'clinics') arr = activeConfig.clinics_full_configuration || [];
             else if (programmeType === 'ems') arr = activeConfig.ems_full_configuration || [];
             else if (programmeType === 'mortuary') arr = activeConfig.mortuary_full_configuration || [];
-            else if (programmeType === 'obgyn') arr = [];
+            else if (programmeType === 'obgyn') arr = activeConfig.obgyn_full_configuration || activeConfig.obsterics_gyno_full_configuration || [];
+            else if (programmeType === 'physiotherapy') arr = activeConfig.physiotherapy_full_configuration || activeConfig.physiotheraphy_full_configuration || [];
+            else if (programmeType === 'radiology') arr = activeConfig.radiology_full_configuration || [];
+            else if (programmeType === 'general_practice') arr = activeConfig.general_practice_full_configuration || [];
+            else if (programmeType === 'private_diabetic') arr = activeConfig.private_diabetic_full_configuration || [];
+            else if (programmeType === 'oral') arr = activeConfig.oral_full_configuration || [];
+            else if (programmeType === 'oncology') arr = activeConfig.oncology_full_configuration || activeConfig.private_oncology_full_configuration || [];
+            else if (programmeType === 'paediatric') arr = activeConfig.paediatric_full_configuration || [];
             const map = {};
             (arr || []).forEach(se => {
               const n = parseInt(String(se.se_id || ''), 10);
@@ -1138,6 +1254,22 @@ export default function Report() {
         ? 'clinics'
         : reportInfo?.groupId === 'MORTUARY'
         ? 'mortuary'
+        : reportInfo?.groupId === 'OBGYN'
+        ? 'obgyn'
+        : reportInfo?.groupId === 'PHYSIOTHERAPY'
+        ? 'physiotherapy'
+        : reportInfo?.groupId === 'RADIOLOGY'
+        ? 'radiology'
+        : reportInfo?.groupId === 'GENERAL_PRACTICE'
+        ? 'general_practice'
+        : reportInfo?.groupId === 'PRIVATE_DIETETIC'
+        ? 'private_diabetic'
+        : reportInfo?.groupId === 'ORAL'
+        ? 'oral'
+        : reportInfo?.groupId === 'ONCOLOGY'
+        ? 'oncology'
+        : reportInfo?.groupId === 'PAEDIATRIC'
+        ? 'paediatric'
         : 'ems';
       const criticalLookup = (programmeScoringMeta[reportPType] || programmeScoringMeta.hospital).criticalLookup || {};
       const getCritical = (list) => list.filter(c => {
@@ -1528,13 +1660,24 @@ export default function Report() {
 
   const getPiLabel = (piCode) => {
     if (!piCode) return '';
-    const programmeType = (reportInfo?.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo?.groupId === 'CLINICS') ? 'clinics' : (reportInfo?.groupId === 'EMS') ? 'ems' : (reportInfo?.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo?.groupId === 'OBGYN') ? 'obgyn' : 'mortuary';
+    const programmeType = (reportInfo?.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo?.groupId === 'CLINICS') ? 'clinics' : (reportInfo?.groupId === 'EMS') ? 'ems' : (reportInfo?.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo?.groupId === 'OBGYN') ? 'obgyn' : (reportInfo?.groupId === 'PHYSIOTHERAPY') ? 'physiotherapy' : (reportInfo?.groupId === 'RADIOLOGY') ? 'radiology' : (reportInfo?.groupId === 'GENERAL_PRACTICE') ? 'general_practice' : (reportInfo?.groupId === 'PRIVATE_DIETETIC') ? 'private_diabetic' : (reportInfo?.groupId === 'ORAL') ? 'oral' : (reportInfo?.groupId === 'ONCOLOGY') ? 'oncology' : (reportInfo?.groupId === 'PAEDIATRIC') ? 'paediatric' : 'ems';
     const configMap = {
       hospital: activeConfig?.hospital_full_configuration,
       mortuary: activeConfig?.mortuary_full_configuration,
       clinics: activeConfig?.clinics_full_configuration,
       ems: activeConfig?.ems_full_configuration,
-      obgyn: activeConfig?.obgyn_full_configuration || []
+      obgyn: activeConfig?.obgyn_full_configuration || [],
+      obsterics_gyno: activeConfig?.obsterics_gyno_full_configuration || [],
+      physiotherapy: activeConfig?.physiotherapy_full_configuration || [],
+      physiotheraphy: activeConfig?.physiotheraphy_full_configuration || [],
+      radiology: activeConfig?.radiology_full_configuration || [],
+      general_practice: activeConfig?.general_practice_full_configuration || [],
+      private_diabetic: activeConfig?.private_diabetic_full_configuration || [],
+      private_dietetic: activeConfig?.private_dietetic_full_configuration || [],
+      oral: activeConfig?.oral_full_configuration || [],
+      oncology: activeConfig?.oncology_full_configuration || [],
+      private_oncology: activeConfig?.private_oncology_full_configuration || [],
+      paediatric: activeConfig?.paediatric_full_configuration || []
     };
     const config = configMap[programmeType] || [];
     for (const se of config) {
@@ -1549,13 +1692,24 @@ export default function Report() {
 
   const getStandardLabel = (standardCode) => {
     if (!standardCode) return '';
-    const programmeType = (reportInfo?.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo?.groupId === 'CLINICS') ? 'clinics' : (reportInfo?.groupId === 'EMS') ? 'ems' : (reportInfo?.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo?.groupId === 'OBGYN') ? 'obgyn' : 'mortuary';
+    const programmeType = (reportInfo?.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo?.groupId === 'CLINICS') ? 'clinics' : (reportInfo?.groupId === 'EMS') ? 'ems' : (reportInfo?.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo?.groupId === 'OBGYN') ? 'obgyn' : (reportInfo?.groupId === 'PHYSIOTHERAPY') ? 'physiotherapy' : (reportInfo?.groupId === 'RADIOLOGY') ? 'radiology' : (reportInfo?.groupId === 'GENERAL_PRACTICE') ? 'general_practice' : (reportInfo?.groupId === 'PRIVATE_DIETETIC') ? 'private_diabetic' : (reportInfo?.groupId === 'ORAL') ? 'oral' : (reportInfo?.groupId === 'ONCOLOGY') ? 'oncology' : (reportInfo?.groupId === 'PAEDIATRIC') ? 'paediatric' : 'ems';
     const configMap = {
       hospital: activeConfig?.hospital_full_configuration,
       mortuary: activeConfig?.mortuary_full_configuration,
       clinics: activeConfig?.clinics_full_configuration,
       ems: activeConfig?.ems_full_configuration,
-      obgyn: activeConfig?.obgyn_full_configuration || []
+      obgyn: activeConfig?.obgyn_full_configuration || [],
+      obsterics_gyno: activeConfig?.obsterics_gyno_full_configuration || [],
+      physiotherapy: activeConfig?.physiotherapy_full_configuration || [],
+      physiotheraphy: activeConfig?.physiotheraphy_full_configuration || [],
+      radiology: activeConfig?.radiology_full_configuration || [],
+      general_practice: activeConfig?.general_practice_full_configuration || [],
+      private_diabetic: activeConfig?.private_diabetic_full_configuration || [],
+      private_dietetic: activeConfig?.private_dietetic_full_configuration || [],
+      oral: activeConfig?.oral_full_configuration || [],
+      oncology: activeConfig?.oncology_full_configuration || [],
+      private_oncology: activeConfig?.private_oncology_full_configuration || [],
+      paediatric: activeConfig?.paediatric_full_configuration || []
     };
     const config = configMap[programmeType] || [];
     for (const se of config) {

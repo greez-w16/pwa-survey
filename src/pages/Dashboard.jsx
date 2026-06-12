@@ -39,6 +39,23 @@ import emsLinks from '../assets/ems/ems_links.json';
 import mortuaryLinks from '../assets/mortuary/mortuary_links.json';
 import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
+
+import obstericsGynoConfig from '../assets/obsterics-gyno/obsterics_gyno_config.json';
+import obstericsGynoMatrix from '../assets/obsterics-gyno/obsterics_gyno_matrix.json';
+import physiotheraphyConfig from '../assets/physiotheraphy/physiotheraphy_config.json';
+import physiotheraphyMatrix from '../assets/physiotheraphy/physiotheraphy_matrix.json';
+import radiologyConfig from '../assets/radiology/radiology_config.json';
+import radiologyMatrix from '../assets/radiology/radiology_matrix.json';
+import generalPracticeConfig from '../assets/general-practice/general_practice_config.json';
+import generalPracticeMatrix from '../assets/general-practice/general_practice_matrix.json';
+import privateDiabeticConfig from '../assets/private-diabetic/private_diabetic_config.json';
+import privateDiabeticMatrix from '../assets/private-diabetic/private_diabetic_matrix.json';
+import oralConfig from '../assets/oral/oral_config.json';
+import oralMatrix from '../assets/oral/oral_matrix.json';
+import privateOncologyConfig from '../assets/private-oncology/private_oncology_config.json';
+import privateOncologyMatrix from '../assets/private-oncology/private_oncology_matrix.json';
+import paediatricConfig from '../assets/paediatric/paediatric_config.json';
+import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
 import { decorateHospitalLinksWithMatrixTags } from '../utils/hospitalMatrixTags';
 import hospitalComputeCriteria from '../assets/hospital/hospital_compute_criteria.json';
 import {
@@ -990,7 +1007,6 @@ export function Dashboard() {
         if (expectedStageId && programStage?.id === expectedStageId) {
             return true;
         }
-
         if (ns === 'HOSPITAL') return isDedicatedHospitalProgramStage(programStage) || text.includes('HOSP') || text.includes('HOSPITAL');
 	        if (ns === 'CLINICS') return text.includes('CLINIC') || text.includes('CLINICS');
 	        if (ns === 'EMS') return text.includes('SURV_EMS') || text.includes('SURV-EMS') || /^\s*(EMS|SE)([_\s-]|$)/.test(text);
@@ -998,6 +1014,11 @@ export function Dashboard() {
 	        if (ns === 'OBGYN') return text.includes('OBG') || text.includes('OBGYN') || text.includes('SURV_OBG') || text.includes('SURV-OBG');
 	        if (ns === 'ONCOLOGY') return text.includes('ONCOLOGY') || text.includes('ONC') || text.includes('SURV_ONC') || text.includes('SURV-ONC');
 	        if (ns === 'PAEDIATRIC') return text.includes('PAEDIATRIC') || text.includes('PAE') || text.includes('SURV_PAE') || text.includes('SURV-PAE') || text.includes('PEDIATRIC') || text.includes('PED') || text.includes('SURV_PED') || text.includes('SURV-PED');
+	        if (ns === 'PHYSIOTHERAPY') return text.includes('PHYSIO') || text.includes('PHYSIOTHERAPY') || text.includes('SURV_PHY') || text.includes('SURV-PHY');
+	        if (ns === 'RADIOLOGY') return text.includes('RADIOLOGY') || text.includes('RAD') || text.includes('SURV_RAD') || text.includes('SURV-RAD');
+	        if (ns === 'GENERAL_PRACTICE') return text.includes('GENERAL PRACTICE') || text.includes('GENERAL_PRACTICE') || text.includes('GEP') || text.includes('SURV_GEP') || text.includes('SURV-GEP');
+	        if (ns === 'PRIVATE_DIETETIC') return text.includes('DIET') || text.includes('DIAB') || text.includes('PRD') || text.includes('SURV_PRD') || text.includes('SURV-PRD');
+	        if (ns === 'ORAL') return text.includes('ORAL') || text.includes('DENT') || text.includes('ORA') || text.includes('SURV_ORA') || text.includes('SURV-ORA');
 	        return text.includes(ns);
 	    };
  
@@ -1010,10 +1031,7 @@ export function Dashboard() {
 	            const seId = extractStageSectionSeId(section);
 	            if (!seId || optionsById.has(seId)) return;
 	            const rawName = section?.displayName || section?.name || section?.code || '';
-	            const label = String(rawName)
-	                .replace(/^\s*(SURV[-_])?([A-Z_]+)[-_\s]*/i, '')
-	                .replace(/^\s*SE\s*([0-9]+)[-_\s:]*/i, '')
-	                .trim();
+	            const label = rawName.replace(/^\s*(?:SE|SE_)\s*\d+\s*[_-]*\s*/i, '').trim();
 	            optionsById.set(seId, { id: seId, label: `SE ${seId} ${label || ''}`.trim() });
 	        });
 	        return Array.from(optionsById.values()).sort((a, b) => Number(a.id) - Number(b.id));
@@ -1030,10 +1048,18 @@ export function Dashboard() {
 	            if (metadataSeList.length > 0) return metadataSeList;
 
 	            let arr = [];
-	            if (ns === 'HOSPITAL') arr = activeConfig.hospital_full_configuration || [];
-	            else if (ns === 'CLINICS') arr = activeConfig.clinics_full_configuration || [];
-	            else if (ns === 'EMS') arr = activeConfig.ems_full_configuration || [];
-	            else if (ns === 'MORTUARY') arr = activeConfig.mortuary_full_configuration || [];
+	            if (ns === 'HOSPITAL') arr = hospitalConfig.hospital_full_configuration || [];
+	            else if (ns === 'CLINICS') arr = clinicsConfig.clinics_full_configuration || [];
+	            else if (ns === 'EMS') arr = emsConfig.ems_full_configuration || [];
+	            else if (ns === 'MORTUARY') arr = mortuaryConfig.mortuary_full_configuration || [];
+	            else if (ns === 'OBGYN') arr = obstericsGynoConfig.service_elements || [];
+	            else if (ns === 'PHYSIOTHERAPY') arr = physiotheraphyConfig.service_elements || [];
+	            else if (ns === 'RADIOLOGY') arr = radiologyConfig.service_elements || [];
+	            else if (ns === 'GENERAL_PRACTICE') arr = generalPracticeConfig.service_elements || [];
+	            else if (ns === 'PRIVATE_DIETETIC') arr = privateDiabeticConfig.service_elements || [];
+	            else if (ns === 'ORAL') arr = oralConfig.service_elements || [];
+	            else if (ns === 'ONCOLOGY') arr = privateOncologyConfig.service_elements || [];
+	            else if (ns === 'PAEDIATRIC') arr = paediatricConfig.service_elements || [];
 	            const seList = (arr || []).map(se => ({ id: String(se.se_id), label: `SE ${se.se_id} ${se.se_name || se.name || ''}`.trim() }));
 	            return seList.sort((a, b) => Number(a.id) - Number(b.id));
 	        } catch (_) { return []; }
@@ -1048,6 +1074,19 @@ export function Dashboard() {
         if (t.includes('obg')) return 'OBGYN';
         if (t.includes('oncology') || t.includes('onc')) return 'ONCOLOGY';
         if (t.includes('paediatric') || t.includes('pae') || t.includes('pediatric') || t.includes('ped')) return 'PAEDIATRIC';
+        if (t.includes('physio')) return 'PHYSIOTHERAPY';
+        if (t.includes('radio')) return 'RADIOLOGY';
+        if (t.includes('general practice') || t.includes('general_practice')) return 'GENERAL_PRACTICE';
+        if (t.includes('diabet') || t.includes('dietet') || t.includes('prd')) return 'PRIVATE_DIETETIC';
+        if (t.includes('oral')) return 'ORAL';
+        if (t.includes('private lab') || t.includes('medical lab') || t.includes('prl')) return 'PRIVATE_LAB';
+        if (t.includes('mental') || t.includes('meh')) return 'MENTAL_HEALTH';
+        if (t.includes('eye')) return 'EYE';
+        if (t.includes('hospice') || t.includes('palliative') || t.includes('hop')) return 'HOSPICE_PALLIATIVE';
+        if (t.includes('occupational') || t.includes('och')) return 'OCCUPATIONAL_HEALTH';
+        if (t.includes('urology') || t.includes('nephrology') || t.includes('urn')) return 'UROLOGY_NEPHR';
+        if (t.includes('childhood') || t.includes('imci') || t.includes('imc')) return 'IMCI';
+        if (t.includes('emergency obstetric') || t.includes('emonc') || t.includes('emo') || t.includes('emergency management')) return 'EMONC';
         return String(txt || '').toUpperCase().trim();
     }, []);
 
@@ -3748,7 +3787,24 @@ export function Dashboard() {
 		        if (activeBundle && activeBundle.config) {
 		            return activeBundle.config;
 		        }
-		        return { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig };
+		        return {
+		            ...emsConfig,
+		            ...mortuaryConfig,
+		            ...clinicsConfig,
+		            ...hospitalConfig,
+		            obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+		            obgyn_full_configuration: obstericsGynoConfig.service_elements,
+		            physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+		            physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+		            radiology_full_configuration: radiologyConfig.service_elements,
+		            general_practice_full_configuration: generalPracticeConfig.service_elements,
+		            private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+		            private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+		            oral_full_configuration: oralConfig.service_elements,
+		            private_oncology_full_configuration: privateOncologyConfig.service_elements,
+		            oncology_full_configuration: privateOncologyConfig.service_elements,
+		            paediatric_full_configuration: paediatricConfig.service_elements,
+		        };
 		    }, [activeBundle]);
 
             const currentLinks = useMemo(() => {
@@ -3760,6 +3816,18 @@ export function Dashboard() {
                         mortuary: mortuaryLinks,
                         clinics: clinicsLinks,
                         hospital: hospitalLinks,
+                        obgyn: obstericsGynoMatrix.obsterics_gyno,
+                        obsterics_gyno: obstericsGynoMatrix.obsterics_gyno,
+                        physiotherapy: physiotheraphyMatrix.physiotheraphy,
+                        physiotheraphy: physiotheraphyMatrix.physiotheraphy,
+                        radiology: radiologyMatrix.radiology,
+                        general_practice: generalPracticeMatrix.general_practice,
+                        private_diabetic: privateDiabeticMatrix.private_diabetic,
+                        private_dietetic: privateDiabeticMatrix.private_diabetic,
+                        oral: oralMatrix.oral,
+                        oncology: privateOncologyMatrix.private_oncology,
+                        private_oncology: privateOncologyMatrix.private_oncology,
+                        paediatric: paediatricMatrix.paediatric,
                     };
 
                 // Decorate Hospital links with -G / -B visual tags as per matrix.json
@@ -3797,12 +3865,41 @@ export function Dashboard() {
 		            const activeId = activeVersionId || (activeVersion && activeVersion.id);
 		            if (!activeId) return prevBundles;
 		            const existingBundle = bundles[activeId] || {
-		                config: { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig },
+		                config: {
+		                    ...emsConfig,
+		                    ...mortuaryConfig,
+		                    ...clinicsConfig,
+		                    ...hospitalConfig,
+		                    obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+		                    obgyn_full_configuration: obstericsGynoConfig.service_elements,
+		                    physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+		                    physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+		                    radiology_full_configuration: radiologyConfig.service_elements,
+		                    general_practice_full_configuration: generalPracticeConfig.service_elements,
+		                    private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+		                    private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+		                    oral_full_configuration: oralConfig.service_elements,
+		                    private_oncology_full_configuration: privateOncologyConfig.service_elements,
+		                    oncology_full_configuration: privateOncologyConfig.service_elements,
+		                    paediatric_full_configuration: paediatricConfig.service_elements,
+		                },
 		                links: {
 		                    ems: emsLinks,
 		                    mortuary: mortuaryLinks,
 		                    clinics: clinicsLinks,
 		                    hospital: hospitalLinks,
+		                    obgyn: obstericsGynoMatrix.obsterics_gyno,
+		                    obsterics_gyno: obstericsGynoMatrix.obsterics_gyno,
+		                    physiotherapy: physiotheraphyMatrix.physiotheraphy,
+		                    physiotheraphy: physiotheraphyMatrix.physiotheraphy,
+		                    radiology: radiologyMatrix.radiology,
+		                    general_practice: generalPracticeMatrix.general_practice,
+		                    private_diabetic: privateDiabeticMatrix.private_diabetic,
+		                    private_dietetic: privateDiabeticMatrix.private_diabetic,
+		                    oral: oralMatrix.oral,
+		                    oncology: privateOncologyMatrix.private_oncology,
+		                    private_oncology: privateOncologyMatrix.private_oncology,
+		                    paediatric: paediatricMatrix.paediatric,
 		                },
 		                compute: hospitalComputeCriteria,
 		            };
@@ -3921,6 +4018,66 @@ export function Dashboard() {
                 config: withCriterionRootFlags(currentConfig.mortuary_full_configuration, null),
                 extras: [{ key: 'mortuary_links', data: currentLinks.mortuary }],
             },
+            obgyn: {
+                configKey: 'obgyn_full_configuration',
+                config: withCriterionRootFlags(currentConfig.obgyn_full_configuration, null),
+                extras: [{ key: 'obgyn_links', data: currentLinks.obgyn }],
+            },
+            obsterics_gyno: {
+                configKey: 'obsterics_gyno_full_configuration',
+                config: withCriterionRootFlags(currentConfig.obsterics_gyno_full_configuration, null),
+                extras: [{ key: 'obgyn_links', data: currentLinks.obgyn }],
+            },
+            physiotherapy: {
+                configKey: 'physiotherapy_full_configuration',
+                config: withCriterionRootFlags(currentConfig.physiotherapy_full_configuration, null),
+                extras: [{ key: 'physiotherapy_links', data: currentLinks.physiotherapy }],
+            },
+            physiotheraphy: {
+                configKey: 'physiotheraphy_full_configuration',
+                config: withCriterionRootFlags(currentConfig.physiotheraphy_full_configuration, null),
+                extras: [{ key: 'physiotherapy_links', data: currentLinks.physiotherapy }],
+            },
+            radiology: {
+                configKey: 'radiology_full_configuration',
+                config: withCriterionRootFlags(currentConfig.radiology_full_configuration, null),
+                extras: [{ key: 'radiology_links', data: currentLinks.radiology }],
+            },
+            general_practice: {
+                configKey: 'general_practice_full_configuration',
+                config: withCriterionRootFlags(currentConfig.general_practice_full_configuration, null),
+                extras: [{ key: 'general_practice_links', data: currentLinks.general_practice }],
+            },
+            private_diabetic: {
+                configKey: 'private_diabetic_full_configuration',
+                config: withCriterionRootFlags(currentConfig.private_diabetic_full_configuration, null),
+                extras: [{ key: 'private_diabetic_links', data: currentLinks.private_diabetic }],
+            },
+            private_dietetic: {
+                configKey: 'private_dietetic_full_configuration',
+                config: withCriterionRootFlags(currentConfig.private_dietetic_full_configuration, null),
+                extras: [{ key: 'private_dietetic_links', data: currentLinks.private_dietetic }],
+            },
+            oral: {
+                configKey: 'oral_full_configuration',
+                config: withCriterionRootFlags(currentConfig.oral_full_configuration, null),
+                extras: [{ key: 'oral_links', data: currentLinks.oral }],
+            },
+            oncology: {
+                configKey: 'oncology_full_configuration',
+                config: withCriterionRootFlags(currentConfig.oncology_full_configuration, null),
+                extras: [{ key: 'oncology_links', data: currentLinks.oncology }],
+            },
+            private_oncology: {
+                configKey: 'private_oncology_full_configuration',
+                config: withCriterionRootFlags(currentConfig.private_oncology_full_configuration, null),
+                extras: [{ key: 'private_oncology_links', data: currentLinks.private_oncology }],
+            },
+            paediatric: {
+                configKey: 'paediatric_full_configuration',
+                config: withCriterionRootFlags(currentConfig.paediatric_full_configuration, null),
+                extras: [{ key: 'paediatric_links', data: currentLinks.paediatric }],
+            },
         };
         const target = saveTargets[normalizedFacility];
         if (!target) {
@@ -3966,6 +4123,28 @@ export function Dashboard() {
             { key: 'clinics_links', data: clinicsLinks },
             { key: 'ems_links', data: emsLinks },
             { key: 'mortuary_links', data: mortuaryLinks },
+            { key: 'obsterics_gyno_full_configuration', data: obstericsGynoConfig.service_elements },
+            { key: 'obgyn_full_configuration', data: obstericsGynoConfig.service_elements },
+            { key: 'physiotheraphy_full_configuration', data: physiotheraphyConfig.service_elements },
+            { key: 'physiotherapy_full_configuration', data: physiotheraphyConfig.service_elements },
+            { key: 'radiology_full_configuration', data: radiologyConfig.service_elements },
+            { key: 'general_practice_full_configuration', data: generalPracticeConfig.service_elements },
+            { key: 'private_diabetic_full_configuration', data: privateDiabeticConfig.service_elements },
+            { key: 'private_dietetic_full_configuration', data: privateDiabeticConfig.service_elements },
+            { key: 'oral_full_configuration', data: oralConfig.service_elements },
+            { key: 'private_oncology_full_configuration', data: privateOncologyConfig.service_elements },
+            { key: 'oncology_full_configuration', data: privateOncologyConfig.service_elements },
+            { key: 'paediatric_full_configuration', data: paediatricConfig.service_elements },
+            { key: 'obgyn_links', data: obstericsGynoMatrix.obsterics_gyno },
+            { key: 'physiotherapy_links', data: physiotheraphyMatrix.physiotheraphy },
+            { key: 'radiology_links', data: radiologyMatrix.radiology },
+            { key: 'general_practice_links', data: generalPracticeMatrix.general_practice },
+            { key: 'private_diabetic_links', data: privateDiabeticMatrix.private_diabetic },
+            { key: 'private_dietetic_links', data: privateDiabeticMatrix.private_diabetic },
+            { key: 'oral_links', data: oralMatrix.oral },
+            { key: 'private_oncology_links', data: privateOncologyMatrix.private_oncology },
+            { key: 'oncology_links', data: privateOncologyMatrix.private_oncology },
+            { key: 'paediatric_links', data: paediatricMatrix.paediatric },
         ];
         let saved = 0;
         let failed = 0;
@@ -3980,12 +4159,41 @@ export function Dashboard() {
         }
         updateActiveConfigBundle((bundle) => {
             return {
-                config: { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig },
+                config: {
+                    ...emsConfig,
+                    ...mortuaryConfig,
+                    ...clinicsConfig,
+                    ...hospitalConfig,
+                    obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+                    obgyn_full_configuration: obstericsGynoConfig.service_elements,
+                    physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+                    physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+                    radiology_full_configuration: radiologyConfig.service_elements,
+                    general_practice_full_configuration: generalPracticeConfig.service_elements,
+                    private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+                    private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+                    oral_full_configuration: oralConfig.service_elements,
+                    private_oncology_full_configuration: privateOncologyConfig.service_elements,
+                    oncology_full_configuration: privateOncologyConfig.service_elements,
+                    paediatric_full_configuration: paediatricConfig.service_elements,
+                },
                 links: {
                     ems: emsLinks,
                     mortuary: mortuaryLinks,
                     clinics: clinicsLinks,
                     hospital: hospitalLinks,
+                    obgyn: obstericsGynoMatrix.obsterics_gyno,
+                    obsterics_gyno: obstericsGynoMatrix.obsterics_gyno,
+                    physiotherapy: physiotheraphyMatrix.physiotheraphy,
+                    physiotheraphy: physiotheraphyMatrix.physiotheraphy,
+                    radiology: radiologyMatrix.radiology,
+                    general_practice: generalPracticeMatrix.general_practice,
+                    private_diabetic: privateDiabeticMatrix.private_diabetic,
+                    private_dietetic: privateDiabeticMatrix.private_diabetic,
+                    oral: oralMatrix.oral,
+                    oncology: privateOncologyMatrix.private_oncology,
+                    private_oncology: privateOncologyMatrix.private_oncology,
+                    paediatric: paediatricMatrix.paediatric,
                 },
                 compute: hospitalComputeCriteria,
             };
@@ -4219,6 +4427,18 @@ export function Dashboard() {
 		            hospital: 'hospital_full_configuration',
 		            mortuary: 'mortuary_full_configuration',
 		            clinics: 'clinics_full_configuration',
+		            obgyn: 'obgyn_full_configuration',
+		            obsterics_gyno: 'obsterics_gyno_full_configuration',
+		            physiotherapy: 'physiotherapy_full_configuration',
+		            physiotheraphy: 'physiotheraphy_full_configuration',
+		            radiology: 'radiology_full_configuration',
+		            general_practice: 'general_practice_full_configuration',
+		            private_diabetic: 'private_diabetic_full_configuration',
+		            private_dietetic: 'private_dietetic_full_configuration',
+		            oral: 'oral_full_configuration',
+		            oncology: 'oncology_full_configuration',
+		            private_oncology: 'private_oncology_full_configuration',
+		            paediatric: 'paediatric_full_configuration',
 		        };
 		        const key = typeToKeyMap[programme];
 		        if (!key) return;
@@ -4227,10 +4447,22 @@ export function Dashboard() {
 		            hospital: hospitalConfig,
 		            mortuary: mortuaryConfig,
 		            clinics: clinicsConfig,
+		            obgyn: obstericsGynoConfig,
+		            obsterics_gyno: obstericsGynoConfig,
+		            physiotherapy: physiotheraphyConfig,
+		            physiotheraphy: physiotheraphyConfig,
+		            radiology: radiologyConfig,
+		            general_practice: generalPracticeConfig,
+		            private_diabetic: privateDiabeticConfig,
+		            private_dietetic: privateDiabeticConfig,
+		            oral: oralConfig,
+		            oncology: privateOncologyConfig,
+		            private_oncology: privateOncologyConfig,
+		            paediatric: paediatricConfig,
 		        };
 		        const defaultSource = defaultSourceMap[programme];
 		        if (!defaultSource) return;
-		        const defaultList = defaultSource[key] || [];
+		        const defaultList = defaultSource[key] || defaultSource.service_elements || [];
 		        const seId = se.se_id;
 		        updateActiveConfigBundle((bundle) => {
 		            const newConfig = { ...(bundle.config || {}) };
@@ -4283,14 +4515,43 @@ export function Dashboard() {
 		        // Clone the currently active bundle (or baseline) into the new
 		        // version so that it starts as "same as current".
 		        const sourceBundle = activeBundle || {
-		            config: { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig },
-		            links: {
-		                ems: emsLinks,
-		                mortuary: mortuaryLinks,
-		                clinics: clinicsLinks,
-		                hospital: hospitalLinks,
-		            },
-		            compute: hospitalComputeCriteria,
+            config: {
+                ...emsConfig,
+                ...mortuaryConfig,
+                ...clinicsConfig,
+                ...hospitalConfig,
+                obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+                obgyn_full_configuration: obstericsGynoConfig.service_elements,
+                physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+                physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+                radiology_full_configuration: radiologyConfig.service_elements,
+                general_practice_full_configuration: generalPracticeConfig.service_elements,
+                private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+                private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+                oral_full_configuration: oralConfig.service_elements,
+                private_oncology_full_configuration: privateOncologyConfig.service_elements,
+                oncology_full_configuration: privateOncologyConfig.service_elements,
+                paediatric_full_configuration: paediatricConfig.service_elements,
+            },
+            links: {
+                ems: emsLinks,
+                mortuary: mortuaryLinks,
+                clinics: clinicsLinks,
+                hospital: hospitalLinks,
+                obgyn: obstericsGynoMatrix.obsterics_gyno,
+                obsterics_gyno: obstericsGynoMatrix.obsterics_gyno,
+                physiotherapy: physiotheraphyMatrix.physiotheraphy,
+                physiotheraphy: physiotheraphyMatrix.physiotheraphy,
+                radiology: radiologyMatrix.radiology,
+                general_practice: generalPracticeMatrix.general_practice,
+                private_diabetic: privateDiabeticMatrix.private_diabetic,
+                private_dietetic: privateDiabeticMatrix.private_diabetic,
+                oral: oralMatrix.oral,
+                oncology: privateOncologyMatrix.private_oncology,
+                private_oncology: privateOncologyMatrix.private_oncology,
+                paediatric: paediatricMatrix.paediatric,
+            },
+            compute: hospitalComputeCriteria,
 		        };
 		        const clonedBundle = JSON.parse(JSON.stringify(sourceBundle));
 		        setConfigBundles(prev => {
@@ -4321,6 +4582,18 @@ export function Dashboard() {
 		            clinics_full_configuration: clinicsConfig.clinics_full_configuration,
 		            ems_full_configuration: emsConfig.ems_full_configuration,
 		            mortuary_full_configuration: mortuaryConfig.mortuary_full_configuration,
+		            obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+		            obgyn_full_configuration: obstericsGynoConfig.service_elements,
+		            physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+		            physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+		            radiology_full_configuration: radiologyConfig.service_elements,
+		            general_practice_full_configuration: generalPracticeConfig.service_elements,
+		            private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+		            private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+		            oral_full_configuration: oralConfig.service_elements,
+		            private_oncology_full_configuration: privateOncologyConfig.service_elements,
+		            oncology_full_configuration: privateOncologyConfig.service_elements,
+		            paediatric_full_configuration: paediatricConfig.service_elements,
 		        };
 		        const rootMap = buildRootMap(currentComputeCriteria);
 		        return [
@@ -4328,6 +4601,14 @@ export function Dashboard() {
 		            { type: 'Clinics', config: activeConfig, key: 'clinics_full_configuration' },
 		            { type: 'EMS', config: activeConfig, key: 'ems_full_configuration' },
 		            { type: 'Mortuary', config: activeConfig, key: 'mortuary_full_configuration' },
+		            { type: 'OBGYN', config: activeConfig, key: 'obgyn_full_configuration' },
+		            { type: 'Physiotherapy', config: activeConfig, key: 'physiotherapy_full_configuration' },
+		            { type: 'Radiology', config: activeConfig, key: 'radiology_full_configuration' },
+		            { type: 'General Practice', config: activeConfig, key: 'general_practice_full_configuration' },
+		            { type: 'Private Dietetic', config: activeConfig, key: 'private_dietetic_full_configuration' },
+		            { type: 'Oral', config: activeConfig, key: 'oral_full_configuration' },
+		            { type: 'Oncology', config: activeConfig, key: 'oncology_full_configuration' },
+		            { type: 'Paediatric', config: activeConfig, key: 'paediatric_full_configuration' },
 		        ].map(({ type, config, key }) => {
 		            const seList = Array.isArray(config?.[key]) ? config[key] : [];
                     const searchQuery = String(settingsFacilitySearches[type] || '').trim().toLowerCase();

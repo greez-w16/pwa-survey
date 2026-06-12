@@ -11,6 +11,24 @@ import mortuaryLinks from '../assets/mortuary/mortuary_links.json';
 import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
 import hospitalComputeCriteria from '../assets/hospital/hospital_compute_criteria.json';
+
+import obstericsGynoConfig from '../assets/obsterics-gyno/obsterics_gyno_config.json';
+import obstericsGynoMatrix from '../assets/obsterics-gyno/obsterics_gyno_matrix.json';
+import physiotheraphyConfig from '../assets/physiotheraphy/physiotheraphy_config.json';
+import physiotheraphyMatrix from '../assets/physiotheraphy/physiotheraphy_matrix.json';
+import radiologyConfig from '../assets/radiology/radiology_config.json';
+import radiologyMatrix from '../assets/radiology/radiology_matrix.json';
+import generalPracticeConfig from '../assets/general-practice/general_practice_config.json';
+import generalPracticeMatrix from '../assets/general-practice/general_practice_matrix.json';
+import privateDiabeticConfig from '../assets/private-diabetic/private_diabetic_config.json';
+import privateDiabeticMatrix from '../assets/private-diabetic/private_diabetic_matrix.json';
+import oralConfig from '../assets/oral/oral_config.json';
+import oralMatrix from '../assets/oral/oral_matrix.json';
+import privateOncologyConfig from '../assets/private-oncology/private_oncology_config.json';
+import privateOncologyMatrix from '../assets/private-oncology/private_oncology_matrix.json';
+import paediatricConfig from '../assets/paediatric/paediatric_config.json';
+import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
+
 import { cleanStandardStatement } from '../utils/normalization';
 import { Alert, Snackbar } from '@mui/material';
 
@@ -21,7 +39,19 @@ const sanitizeConfig = (config) => {
         'hospital_full_configuration',
         'clinics_full_configuration',
         'ems_full_configuration',
-        'mortuary_full_configuration'
+        'mortuary_full_configuration',
+        'obsterics_gyno_full_configuration',
+        'obgyn_full_configuration',
+        'physiotheraphy_full_configuration',
+        'physiotherapy_full_configuration',
+        'radiology_full_configuration',
+        'general_practice_full_configuration',
+        'private_diabetic_full_configuration',
+        'private_dietetic_full_configuration',
+        'oral_full_configuration',
+        'private_oncology_full_configuration',
+        'oncology_full_configuration',
+        'paediatric_full_configuration'
     ];
     facilityKeys.forEach(key => {
         if (Array.isArray(sanitized[key])) {
@@ -176,13 +206,41 @@ export const AppProvider = ({ children }) => {
 		        setConfigVersions(versionsPayload.versions);
 		        setActiveConfigVersionId(versionsPayload.activeVersionId);
 
-		        // --- Build per-version bundles in memory only ---
-		        const baseConfig = sanitizeConfig({ ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig });
+		        const baseConfig = sanitizeConfig({
+		            ...emsConfig,
+		            ...mortuaryConfig,
+		            ...clinicsConfig,
+		            ...hospitalConfig,
+		            obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+		            obgyn_full_configuration: obstericsGynoConfig.service_elements,
+		            physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+		            physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+		            radiology_full_configuration: radiologyConfig.service_elements,
+		            general_practice_full_configuration: generalPracticeConfig.service_elements,
+		            private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+		            private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+		            oral_full_configuration: oralConfig.service_elements,
+		            private_oncology_full_configuration: privateOncologyConfig.service_elements,
+		            oncology_full_configuration: privateOncologyConfig.service_elements,
+		            paediatric_full_configuration: paediatricConfig.service_elements,
+		        });
 		        const baseLinks = {
 		            ems: emsLinks,
 		            mortuary: mortuaryLinks,
 		            clinics: clinicsLinks,
 		            hospital: hospitalLinks,
+		            obgyn: obstericsGynoMatrix.obsterics_gyno,
+		            obsterics_gyno: obstericsGynoMatrix.obsterics_gyno,
+		            physiotherapy: physiotheraphyMatrix.physiotheraphy,
+		            physiotheraphy: physiotheraphyMatrix.physiotheraphy,
+		            radiology: radiologyMatrix.radiology,
+		            general_practice: generalPracticeMatrix.general_practice,
+		            private_diabetic: privateDiabeticMatrix.private_diabetic,
+		            private_dietetic: privateDiabeticMatrix.private_diabetic,
+		            oral: oralMatrix.oral,
+		            oncology: privateOncologyMatrix.private_oncology,
+		            private_oncology: privateOncologyMatrix.private_oncology,
+		            paediatric: paediatricMatrix.paediatric,
 		        };
 
 		        const baselineBundle = {
@@ -242,6 +300,44 @@ export const AppProvider = ({ children }) => {
                     mortuary: [
                         { key: 'mortuary_full_configuration' },
                         { key: 'mortuary_links' },
+                    ],
+                    obgyn: [
+                        { key: 'obsterics_gyno_full_configuration' },
+                        { key: 'obgyn_full_configuration' },
+                        { key: 'obgyn_links' },
+                    ],
+                    physiotherapy: [
+                        { key: 'physiotheraphy_full_configuration' },
+                        { key: 'physiotherapy_full_configuration' },
+                        { key: 'physiotherapy_links' },
+                    ],
+                    radiology: [
+                        { key: 'radiology_full_configuration' },
+                        { key: 'radiology_links' },
+                    ],
+                    general_practice: [
+                        { key: 'general_practice_full_configuration' },
+                        { key: 'general_practice_links' },
+                    ],
+                    private_diabetic: [
+                        { key: 'private_diabetic_full_configuration' },
+                        { key: 'private_dietetic_full_configuration' },
+                        { key: 'private_diabetic_links' },
+                        { key: 'private_dietetic_links' },
+                    ],
+                    oral: [
+                        { key: 'oral_full_configuration' },
+                        { key: 'oral_links' },
+                    ],
+                    oncology: [
+                        { key: 'private_oncology_full_configuration' },
+                        { key: 'oncology_full_configuration' },
+                        { key: 'private_oncology_links' },
+                        { key: 'oncology_links' },
+                    ],
+                    paediatric: [
+                        { key: 'paediatric_full_configuration' },
+                        { key: 'paediatric_links' },
                     ],
                 };
                 const keys = facilityKeys[normalizedFacility] || Object.values(facilityKeys).flat();
@@ -308,6 +404,18 @@ export const AppProvider = ({ children }) => {
                                 ...(unwrapDataStoreArray(fetchedData.clinics_full_configuration, 'clinics_full_configuration') ? { clinics_full_configuration: unwrapDataStoreArray(fetchedData.clinics_full_configuration, 'clinics_full_configuration') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.ems_full_configuration, 'ems_full_configuration') ? { ems_full_configuration: unwrapDataStoreArray(fetchedData.ems_full_configuration, 'ems_full_configuration') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.mortuary_full_configuration, 'mortuary_full_configuration') ? { mortuary_full_configuration: unwrapDataStoreArray(fetchedData.mortuary_full_configuration, 'mortuary_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.obsterics_gyno_full_configuration, 'obsterics_gyno_full_configuration') ? { obsterics_gyno_full_configuration: unwrapDataStoreArray(fetchedData.obsterics_gyno_full_configuration, 'obsterics_gyno_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.obgyn_full_configuration, 'obgyn_full_configuration') ? { obgyn_full_configuration: unwrapDataStoreArray(fetchedData.obgyn_full_configuration, 'obgyn_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.physiotheraphy_full_configuration, 'physiotheraphy_full_configuration') ? { physiotheraphy_full_configuration: unwrapDataStoreArray(fetchedData.physiotheraphy_full_configuration, 'physiotheraphy_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.physiotherapy_full_configuration, 'physiotherapy_full_configuration') ? { physiotherapy_full_configuration: unwrapDataStoreArray(fetchedData.physiotherapy_full_configuration, 'physiotherapy_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.radiology_full_configuration, 'radiology_full_configuration') ? { radiology_full_configuration: unwrapDataStoreArray(fetchedData.radiology_full_configuration, 'radiology_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.general_practice_full_configuration, 'general_practice_full_configuration') ? { general_practice_full_configuration: unwrapDataStoreArray(fetchedData.general_practice_full_configuration, 'general_practice_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.private_diabetic_full_configuration, 'private_diabetic_full_configuration') ? { private_diabetic_full_configuration: unwrapDataStoreArray(fetchedData.private_diabetic_full_configuration, 'private_diabetic_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.private_dietetic_full_configuration, 'private_dietetic_full_configuration') ? { private_dietetic_full_configuration: unwrapDataStoreArray(fetchedData.private_dietetic_full_configuration, 'private_dietetic_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.oral_full_configuration, 'oral_full_configuration') ? { oral_full_configuration: unwrapDataStoreArray(fetchedData.oral_full_configuration, 'oral_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.private_oncology_full_configuration, 'private_oncology_full_configuration') ? { private_oncology_full_configuration: unwrapDataStoreArray(fetchedData.private_oncology_full_configuration, 'private_oncology_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.oncology_full_configuration, 'oncology_full_configuration') ? { oncology_full_configuration: unwrapDataStoreArray(fetchedData.oncology_full_configuration, 'oncology_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.paediatric_full_configuration, 'paediatric_full_configuration') ? { paediatric_full_configuration: unwrapDataStoreArray(fetchedData.paediatric_full_configuration, 'paediatric_full_configuration') } : {}),
                             });
 
                             const remoteLinks = {
@@ -316,6 +424,16 @@ export const AppProvider = ({ children }) => {
                                 ...(unwrapDataStoreArray(fetchedData.hospital_links, 'hospital_links') ? { hospital: unwrapDataStoreArray(fetchedData.hospital_links, 'hospital_links') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.clinics_links, 'clinics_links') ? { clinics: unwrapDataStoreArray(fetchedData.clinics_links, 'clinics_links') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.mortuary_links, 'mortuary_links') ? { mortuary: unwrapDataStoreArray(fetchedData.mortuary_links, 'mortuary_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.obgyn_links, 'obgyn_links') ? { obgyn: unwrapDataStoreArray(fetchedData.obgyn_links, 'obgyn_links'), obsterics_gyno: unwrapDataStoreArray(fetchedData.obgyn_links, 'obgyn_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.physiotherapy_links, 'physiotherapy_links') ? { physiotherapy: unwrapDataStoreArray(fetchedData.physiotherapy_links, 'physiotherapy_links'), physiotheraphy: unwrapDataStoreArray(fetchedData.physiotherapy_links, 'physiotherapy_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.radiology_links, 'radiology_links') ? { radiology: unwrapDataStoreArray(fetchedData.radiology_links, 'radiology_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.general_practice_links, 'general_practice_links') ? { general_practice: unwrapDataStoreArray(fetchedData.general_practice_links, 'general_practice_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.private_diabetic_links, 'private_diabetic_links') ? { private_diabetic: unwrapDataStoreArray(fetchedData.private_diabetic_links, 'private_diabetic_links'), private_dietetic: unwrapDataStoreArray(fetchedData.private_diabetic_links, 'private_diabetic_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.private_dietetic_links, 'private_dietetic_links') ? { private_dietetic: unwrapDataStoreArray(fetchedData.private_dietetic_links, 'private_dietetic_links'), private_diabetic: unwrapDataStoreArray(fetchedData.private_dietetic_links, 'private_dietetic_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.oral_links, 'oral_links') ? { oral: unwrapDataStoreArray(fetchedData.oral_links, 'oral_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.private_oncology_links, 'private_oncology_links') ? { private_oncology: unwrapDataStoreArray(fetchedData.private_oncology_links, 'private_oncology_links'), oncology: unwrapDataStoreArray(fetchedData.private_oncology_links, 'private_oncology_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.oncology_links, 'oncology_links') ? { oncology: unwrapDataStoreArray(fetchedData.oncology_links, 'oncology_links'), private_oncology: unwrapDataStoreArray(fetchedData.oncology_links, 'oncology_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.paediatric_links, 'paediatric_links') ? { paediatric: unwrapDataStoreArray(fetchedData.paediatric_links, 'paediatric_links') } : {}),
                             };
                             const remoteCompute = unwrapDataStoreObject(fetchedData.hospital_compute_criteria, 'hospital_compute_criteria');
 

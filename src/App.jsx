@@ -19,6 +19,24 @@ import emsLinks from './assets/ems/ems_links.json';
 import mortuaryLinks from './assets/mortuary/mortuary_links.json';
 import clinicsLinks from './assets/clinics/clinics_links.json';
 import hospitalLinks from './assets/hospital/hospital_links.json';
+
+import obstericsGynoConfig from './assets/obsterics-gyno/obsterics_gyno_config.json';
+import obstericsGynoMatrix from './assets/obsterics-gyno/obsterics_gyno_matrix.json';
+import physiotheraphyConfig from './assets/physiotheraphy/physiotheraphy_config.json';
+import physiotheraphyMatrix from './assets/physiotheraphy/physiotheraphy_matrix.json';
+import radiologyConfig from './assets/radiology/radiology_config.json';
+import radiologyMatrix from './assets/radiology/radiology_matrix.json';
+import generalPracticeConfig from './assets/general-practice/general_practice_config.json';
+import generalPracticeMatrix from './assets/general-practice/general_practice_matrix.json';
+import privateDiabeticConfig from './assets/private-diabetic/private_diabetic_config.json';
+import privateDiabeticMatrix from './assets/private-diabetic/private_diabetic_matrix.json';
+import oralConfig from './assets/oral/oral_config.json';
+import oralMatrix from './assets/oral/oral_matrix.json';
+import privateOncologyConfig from './assets/private-oncology/private_oncology_config.json';
+import privateOncologyMatrix from './assets/private-oncology/private_oncology_matrix.json';
+import paediatricConfig from './assets/paediatric/paediatric_config.json';
+import paediatricMatrix from './assets/paediatric/paediatric_matrix.json';
+
 import { decorateHospitalLinksWithMatrixTags } from './utils/hospitalMatrixTags';
 import './App.css';
 import Report from './pages/Report';
@@ -371,6 +389,20 @@ const PrivateRoute = ({ children }) => {
     activeGroup?.id === 'HOSPITAL' || activeGroup?.name === 'Hospital';
   const isObgyn =
     activeGroup?.id === 'OBGYN' || activeGroup?.name === 'OBGYN';
+  const isPhysiotherapy =
+    activeGroup?.id === 'PHYSIOTHERAPY' || activeGroup?.name === 'Physiotherapy';
+  const isRadiology =
+    activeGroup?.id === 'RADIOLOGY' || activeGroup?.name === 'Radiology';
+  const isGeneralPractice =
+    activeGroup?.id === 'GENERAL_PRACTICE' || activeGroup?.name === 'General Practice';
+  const isPrivateDietetic =
+    activeGroup?.id === 'PRIVATE_DIETETIC' || activeGroup?.name === 'Private Dietetic' || activeGroup?.name === 'Private Diabetic';
+  const isOral =
+    activeGroup?.id === 'ORAL' || activeGroup?.name === 'Oral';
+  const isOncology =
+    activeGroup?.id === 'ONCOLOGY' || activeGroup?.name === 'Oncology';
+  const isPaediatric =
+    activeGroup?.id === 'PAEDIATRIC' || activeGroup?.name === 'Paediatric';
 
   const programmeType = isMortuary
     ? 'mortuary'
@@ -380,6 +412,20 @@ const PrivateRoute = ({ children }) => {
     ? 'hospital'
     : isObgyn
     ? 'obgyn'
+    : isPhysiotherapy
+    ? 'physiotherapy'
+    : isRadiology
+    ? 'radiology'
+    : isGeneralPractice
+    ? 'general_practice'
+    : isPrivateDietetic
+    ? 'private_diabetic'
+    : isOral
+    ? 'oral'
+    : isOncology
+    ? 'oncology'
+    : isPaediatric
+    ? 'paediatric'
     : 'ems';
 
   // Auto-load remote configuration when on the form page and configSource is 'datastore'
@@ -403,7 +449,24 @@ const PrivateRoute = ({ children }) => {
 
 		    const sourceConfig = bundle && bundle.config
 		      ? bundle.config
-		      : { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig };
+		      : {
+		          ...emsConfig,
+		          ...mortuaryConfig,
+		          ...clinicsConfig,
+		          ...hospitalConfig,
+		          obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+		          obgyn_full_configuration: obstericsGynoConfig.service_elements,
+		          physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+		          physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+		          radiology_full_configuration: radiologyConfig.service_elements,
+		          general_practice_full_configuration: generalPracticeConfig.service_elements,
+		          private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+		          private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+		          oral_full_configuration: oralConfig.service_elements,
+		          private_oncology_full_configuration: privateOncologyConfig.service_elements,
+		          oncology_full_configuration: privateOncologyConfig.service_elements,
+		          paediatric_full_configuration: paediatricConfig.service_elements,
+		      };
 
     const baseLinks = bundle && bundle.links
       ? bundle.links
@@ -412,6 +475,18 @@ const PrivateRoute = ({ children }) => {
           mortuary: mortuaryLinks,
           clinics: clinicsLinks,
           hospital: hospitalLinks,
+          obgyn: obstericsGynoMatrix.obsterics_gyno,
+          obsterics_gyno: obstericsGynoMatrix.obsterics_gyno,
+          physiotherapy: physiotheraphyMatrix.physiotheraphy,
+          physiotheraphy: physiotheraphyMatrix.physiotheraphy,
+          radiology: radiologyMatrix.radiology,
+          general_practice: generalPracticeMatrix.general_practice,
+          private_diabetic: privateDiabeticMatrix.private_diabetic,
+          private_dietetic: privateDiabeticMatrix.private_diabetic,
+          oral: oralMatrix.oral,
+          oncology: privateOncologyMatrix.private_oncology,
+          private_oncology: privateOncologyMatrix.private_oncology,
+          paediatric: paediatricMatrix.paediatric,
         };
 
     // Decorate Hospital links with visual -G / -B tags based on matrix.json so
@@ -430,6 +505,17 @@ const PrivateRoute = ({ children }) => {
       clinics: buildScoringMeta(sourceConfig, 'clinics_full_configuration', effectiveLinks.clinics || clinicsLinks),
       hospital: buildScoringMeta(sourceConfig, 'hospital_full_configuration', effectiveLinks.hospital || hospitalLinks),
       obgyn: buildScoringMeta(sourceConfig, 'obgyn_full_configuration', effectiveLinks.obgyn || []),
+      obsterics_gyno: buildScoringMeta(sourceConfig, 'obsterics_gyno_full_configuration', effectiveLinks.obsterics_gyno || []),
+      physiotherapy: buildScoringMeta(sourceConfig, 'physiotherapy_full_configuration', effectiveLinks.physiotherapy || []),
+      physiotheraphy: buildScoringMeta(sourceConfig, 'physiotheraphy_full_configuration', effectiveLinks.physiotheraphy || []),
+      radiology: buildScoringMeta(sourceConfig, 'radiology_full_configuration', effectiveLinks.radiology || []),
+      general_practice: buildScoringMeta(sourceConfig, 'general_practice_full_configuration', effectiveLinks.general_practice || []),
+      private_diabetic: buildScoringMeta(sourceConfig, 'private_diabetic_full_configuration', effectiveLinks.private_diabetic || []),
+      private_dietetic: buildScoringMeta(sourceConfig, 'private_dietetic_full_configuration', effectiveLinks.private_dietetic || []),
+      oral: buildScoringMeta(sourceConfig, 'oral_full_configuration', effectiveLinks.oral || []),
+      oncology: buildScoringMeta(sourceConfig, 'oncology_full_configuration', effectiveLinks.oncology || []),
+      private_oncology: buildScoringMeta(sourceConfig, 'private_oncology_full_configuration', effectiveLinks.private_oncology || []),
+      paediatric: buildScoringMeta(sourceConfig, 'paediatric_full_configuration', effectiveLinks.paediatric || []),
     };
 		  }, [configBundles, activeConfigVersionId]);
 

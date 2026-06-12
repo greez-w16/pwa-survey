@@ -38,7 +38,26 @@ import emsLinks from '../assets/ems/ems_links.json';
 import mortuaryLinks from '../assets/mortuary/mortuary_links.json';
 import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
+
+import obstericsGynoConfig from '../assets/obsterics-gyno/obsterics_gyno_config.json';
+import obstericsGynoMatrix from '../assets/obsterics-gyno/obsterics_gyno_matrix.json';
+import physiotheraphyConfig from '../assets/physiotheraphy/physiotheraphy_config.json';
+import physiotheraphyMatrix from '../assets/physiotheraphy/physiotheraphy_matrix.json';
+import radiologyConfig from '../assets/radiology/radiology_config.json';
+import radiologyMatrix from '../assets/radiology/radiology_matrix.json';
+import generalPracticeConfig from '../assets/general-practice/general_practice_config.json';
+import generalPracticeMatrix from '../assets/general-practice/general_practice_matrix.json';
+import privateDiabeticConfig from '../assets/private-diabetic/private_diabetic_config.json';
+import privateDiabeticMatrix from '../assets/private-diabetic/private_diabetic_matrix.json';
+import oralConfig from '../assets/oral/oral_config.json';
+import oralMatrix from '../assets/oral/oral_matrix.json';
+import privateOncologyConfig from '../assets/private-oncology/private_oncology_config.json';
+import privateOncologyMatrix from '../assets/private-oncology/private_oncology_matrix.json';
+import paediatricConfig from '../assets/paediatric/paediatric_config.json';
+import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
+
 import { decorateHospitalLinksWithMatrixTags } from '../utils/hospitalMatrixTags';
+import { normalizeCriterionCode } from '../utils/normalization';
 import hospitalComputeCriteria from '../assets/hospital/hospital_compute_criteria.json';
 import {
     Dialog,
@@ -439,15 +458,15 @@ const SETTINGS_TABLE_HEADERS = [
     { label: 'SE Number', minWidth: 55, align: 'center' },
     { label: 'SE Description', minWidth: 220, align: 'center' },
     { label: 'Standard', minWidth: 70, align: 'center' },
-    { label: 'Statement', minWidth: 300, align: 'center' },
-    { label: 'Statement Intent', minWidth: 320, align: 'center' },
     { label: 'Criterion', minWidth: 80, align: 'center' },
-    { label: 'Criterion Description', minWidth: 280, align: 'center' },
+    { label: 'Criterion Description/name', minWidth: 280, align: 'left' },
+    { label: 'Statement', minWidth: 300, align: 'left' },
+    { label: 'Statement Intent', minWidth: 320, align: 'left' },
+    { label: 'Guidelines', minWidth: 320, align: 'left' },
     { label: 'Root', minWidth: 50, align: 'center' },
     { label: 'Critical / Non-Critical', minWidth: 110, align: 'center' },
     { label: 'Linked Criteria', minWidth: 180, maxWidth: 220 },
     { label: 'Sub-Criteria', minWidth: 180, maxWidth: 220 },
-    { label: 'Guidelines', minWidth: 320, align: 'center' },
 ];
 
 const criterionOptionsFor = (serviceElements) => serviceElements.flatMap(se =>
@@ -480,10 +499,22 @@ const CONFIG_KEY_TO_LINKS_KEY = {
     'hospital_full_configuration': 'hospital',
     'clinics_full_configuration': 'clinics',
     'ems_full_configuration': 'ems',
-    'mortuary_full_configuration': 'mortuary'
+    'mortuary_full_configuration': 'mortuary',
+    'obsterics_gyno_full_configuration': 'obgyn',
+    'obgyn_full_configuration': 'obgyn',
+    'physiotheraphy_full_configuration': 'physiotherapy',
+    'physiotherapy_full_configuration': 'physiotherapy',
+    'radiology_full_configuration': 'radiology',
+    'general_practice_full_configuration': 'general_practice',
+    'private_diabetic_full_configuration': 'private_diabetic',
+    'private_dietetic_full_configuration': 'private_diabetic',
+    'oral_full_configuration': 'oral',
+    'private_oncology_full_configuration': 'oncology',
+    'oncology_full_configuration': 'oncology',
+    'paediatric_full_configuration': 'paediatric'
 };
 
-const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, rootMap, currentLinks) => {
+const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, rootMap, currentLinks, dhis2DescriptionsMap = null) => {
     const linksKey = CONFIG_KEY_TO_LINKS_KEY[configKey];
     const linksList = currentLinks?.[linksKey] || [];
     const linksLookup = {};
@@ -513,7 +544,7 @@ const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, 
                             ? 'intent_tooltip'
                             : 'intent',
                         criterionId: criterion.id,
-                        criterionDescription: criterion.description || '',
+                        criterionDescription: dhis2DescriptionsMap ? (dhis2DescriptionsMap[criterion.id] || '') : (criterion.description || ''),
                         guidelines: criterion.guidelines || criterion.guideline || '',
                         isCritical: criterion.is_critical,
                         linkedCriteria: criterion.linked_criteria || linkedCriteriaFromLinks || standardCriteriaIds,
@@ -551,24 +582,97 @@ const EditableTextCell = ({
     onOpen,
     onSave,
 }) => {
-    const displayValue = value || '—';
+    const [textVal, setTextVal] = useState(value || '');
+    const textareaRef = useRef(null);
+
+    useEffect(() => {
+        setTextVal(value || '');
+    }, [value]);
+
+    const handleFormat = (tag) => {
+        const textarea = textareaRef.current;
+        if (!textarea) return;
+
+        const start = textarea.selectionStart;
+        const end = textarea.selectionEnd;
+        const selectedText = textVal.substring(start, end);
+        
+        let replacement = '';
+        if (tag === 'ul') {
+            replacement = `<ul>\n  <li>${selectedText || 'item'}</li>\n</ul>`;
+        } else {
+            replacement = `<${tag}>${selectedText}</${tag}>`;
+        }
+
+        const newValue = textVal.substring(0, start) + replacement + textVal.substring(end);
+        setTextVal(newValue);
+        onSave(newValue);
+
+        // Put focus back and set selection range
+        setTimeout(() => {
+            textarea.focus();
+            const newCursorPos = start + replacement.length;
+            textarea.setSelectionRange(newCursorPos, newCursorPos);
+        }, 0);
+    };
+
     if (editable && active) {
         return (
-            <TextField
-                value={value || ''}
-                onChange={(e) => onSave(e.target.value)}
-                onBlur={() => onOpen(null)}
-                onKeyDown={(e) => {
-                    if (e.key === 'Escape') onOpen(null);
-                }}
-                multiline
-                minRows={3}
-                maxRows={8}
-                size="small"
-                fullWidth
-                autoFocus
-                onClick={(e) => e.stopPropagation()}
-            />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }} onClick={(e) => e.stopPropagation()}>
+                <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '4px', borderRadius: '4px', border: '1px solid #cbd5e0', width: 'fit-content' }}>
+                    <button 
+                        style={{ padding: '2px 8px', fontSize: '0.85em', fontWeight: 'bold', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
+                        title="Bold"
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('b'); }}
+                    >
+                        B
+                    </button>
+                    <button 
+                        style={{ padding: '2px 8px', fontSize: '0.85em', fontStyle: 'italic', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
+                        title="Italic"
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('i'); }}
+                    >
+                        I
+                    </button>
+                    <button 
+                        style={{ padding: '2px 8px', fontSize: '0.85em', textDecoration: 'underline', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
+                        title="Underline"
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('u'); }}
+                    >
+                        U
+                    </button>
+                    <button 
+                        style={{ padding: '2px 8px', fontSize: '0.85em', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
+                        title="Bullet List"
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('ul'); }}
+                    >
+                        • List
+                    </button>
+                </div>
+                <textarea
+                    ref={textareaRef}
+                    value={textVal}
+                    onChange={(e) => {
+                        setTextVal(e.target.value);
+                        onSave(e.target.value);
+                    }}
+                    onBlur={() => onOpen(null)}
+                    onKeyDown={(e) => {
+                        if (e.key === 'Escape') onOpen(null);
+                    }}
+                    style={{
+                        width: '100%',
+                        minHeight: '80px',
+                        padding: '6px',
+                        fontSize: '0.9rem',
+                        fontFamily: 'inherit',
+                        border: '1px solid #cbd5e0',
+                        borderRadius: '4px',
+                        resize: 'vertical'
+                    }}
+                    autoFocus
+                />
+            </div>
         );
     }
     return (
@@ -580,9 +684,8 @@ const EditableTextCell = ({
                 cursor: editable ? 'pointer' : 'default',
                 borderBottom: editable ? '1px dashed #cbd5e0' : 'none',
             }}
-        >
-            {displayValue}
-        </div>
+            dangerouslySetInnerHTML={{ __html: value || '—' }}
+        />
     );
 };
 
@@ -908,6 +1011,11 @@ export function AppSettings() {
 	        if (ns === 'OBGYN') return text.includes('OBG') || text.includes('OBGYN') || text.includes('SURV_OBG') || text.includes('SURV-OBG');
 	        if (ns === 'ONCOLOGY') return text.includes('ONCOLOGY') || text.includes('ONC') || text.includes('SURV_ONC') || text.includes('SURV-ONC');
 	        if (ns === 'PAEDIATRIC') return text.includes('PAEDIATRIC') || text.includes('PAE') || text.includes('SURV_PAE') || text.includes('SURV-PAE') || text.includes('PEDIATRIC') || text.includes('PED') || text.includes('SURV_PED') || text.includes('SURV-PED');
+	        if (ns === 'PHYSIOTHERAPY') return text.includes('PHYSIO') || text.includes('PHYSIOTHERAPY') || text.includes('SURV_PHY') || text.includes('SURV-PHY');
+	        if (ns === 'RADIOLOGY') return text.includes('RADIOLOGY') || text.includes('RAD') || text.includes('SURV_RAD') || text.includes('SURV-RAD');
+	        if (ns === 'GENERAL_PRACTICE') return text.includes('GENERAL PRACTICE') || text.includes('GENERAL_PRACTICE') || text.includes('GEP') || text.includes('SURV_GEP') || text.includes('SURV-GEP');
+	        if (ns === 'PRIVATE_DIETETIC') return text.includes('DIET') || text.includes('DIAB') || text.includes('PRD') || text.includes('SURV_PRD') || text.includes('SURV-PRD');
+	        if (ns === 'ORAL') return text.includes('ORAL') || text.includes('DENT') || text.includes('ORA') || text.includes('SURV_ORA') || text.includes('SURV-ORA');
 	        return text.includes(ns);
 	    };
  
@@ -944,6 +1052,14 @@ export function AppSettings() {
 	            else if (ns === 'CLINICS') arr = clinicsConfig.clinics_full_configuration || [];
 	            else if (ns === 'EMS') arr = emsConfig.ems_full_configuration || [];
 	            else if (ns === 'MORTUARY') arr = mortuaryConfig.mortuary_full_configuration || [];
+	            else if (ns === 'OBGYN') arr = obstericsGynoConfig.service_elements || [];
+	            else if (ns === 'PHYSIOTHERAPY') arr = physiotheraphyConfig.service_elements || [];
+	            else if (ns === 'RADIOLOGY') arr = radiologyConfig.service_elements || [];
+	            else if (ns === 'GENERAL_PRACTICE') arr = generalPracticeConfig.service_elements || [];
+	            else if (ns === 'PRIVATE_DIETETIC') arr = privateDiabeticConfig.service_elements || [];
+	            else if (ns === 'ORAL') arr = oralConfig.service_elements || [];
+	            else if (ns === 'ONCOLOGY') arr = privateOncologyConfig.service_elements || [];
+	            else if (ns === 'PAEDIATRIC') arr = paediatricConfig.service_elements || [];
 	            const seList = (arr || []).map(se => ({ id: String(se.se_id), label: `SE ${se.se_id} ${se.se_name || se.name || ''}`.trim() }));
 	            return seList.sort((a, b) => Number(a.id) - Number(b.id));
 	        } catch (_) { return []; }
@@ -958,6 +1074,19 @@ export function AppSettings() {
         if (t.includes('obg')) return 'OBGYN';
         if (t.includes('oncology') || t.includes('onc')) return 'ONCOLOGY';
         if (t.includes('paediatric') || t.includes('pae') || t.includes('pediatric') || t.includes('ped')) return 'PAEDIATRIC';
+        if (t.includes('physio')) return 'PHYSIOTHERAPY';
+        if (t.includes('radio')) return 'RADIOLOGY';
+        if (t.includes('general practice') || t.includes('general_practice')) return 'GENERAL_PRACTICE';
+        if (t.includes('diabet') || t.includes('dietet') || t.includes('prd')) return 'PRIVATE_DIETETIC';
+        if (t.includes('oral')) return 'ORAL';
+        if (t.includes('private lab') || t.includes('medical lab') || t.includes('prl')) return 'PRIVATE_LAB';
+        if (t.includes('mental') || t.includes('meh')) return 'MENTAL_HEALTH';
+        if (t.includes('eye')) return 'EYE';
+        if (t.includes('hospice') || t.includes('palliative') || t.includes('hop')) return 'HOSPICE_PALLIATIVE';
+        if (t.includes('occupational') || t.includes('och')) return 'OCCUPATIONAL_HEALTH';
+        if (t.includes('urology') || t.includes('nephrology') || t.includes('urn')) return 'UROLOGY_NEPHR';
+        if (t.includes('childhood') || t.includes('imci') || t.includes('imc')) return 'IMCI';
+        if (t.includes('emergency obstetric') || t.includes('emonc') || t.includes('emo') || t.includes('emergency management')) return 'EMONC';
         return String(txt || '').toUpperCase().trim();
     }, []);
 
@@ -1362,6 +1491,8 @@ export function AppSettings() {
 				    const [expandedFacs, setExpandedFacs] = useState({});
 				    const [loadingFacType, setLoadingFacType] = useState(null);
                     const [settingsFacilityPages, setSettingsFacilityPages] = useState({});
+                    const [dhis2Descriptions, setDhis2Descriptions] = useState({});
+                    const [loadingDhis2Descriptions, setLoadingDhis2Descriptions] = useState({});
 				    const [configRevision, setConfigRevision] = useState(0);
 				    const [activeCellKey, setActiveCellKey] = useState(null);
 		    const [selectedSE, setSelectedSE] = useState(null);
@@ -3585,7 +3716,24 @@ export function AppSettings() {
 		        if (activeBundle && activeBundle.config) {
 		            return activeBundle.config;
 		        }
-		        return { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig };
+		        return {
+		            ...emsConfig,
+		            ...mortuaryConfig,
+		            ...clinicsConfig,
+		            ...hospitalConfig,
+		            obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+		            obgyn_full_configuration: obstericsGynoConfig.service_elements,
+		            physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+		            physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+		            radiology_full_configuration: radiologyConfig.service_elements,
+		            general_practice_full_configuration: generalPracticeConfig.service_elements,
+		            private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+		            private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+		            oral_full_configuration: oralConfig.service_elements,
+		            private_oncology_full_configuration: privateOncologyConfig.service_elements,
+		            oncology_full_configuration: privateOncologyConfig.service_elements,
+		            paediatric_full_configuration: paediatricConfig.service_elements,
+		        };
 		    }, [activeBundle]);
 
             const currentLinks = useMemo(() => {
@@ -3597,6 +3745,18 @@ export function AppSettings() {
                         mortuary: mortuaryLinks,
                         clinics: clinicsLinks,
                         hospital: hospitalLinks,
+                        obgyn: obstericsGynoMatrix.obsterics_gyno,
+                        obsterics_gyno: obstericsGynoMatrix.obsterics_gyno,
+                        physiotherapy: physiotheraphyMatrix.physiotheraphy,
+                        physiotheraphy: physiotheraphyMatrix.physiotheraphy,
+                        radiology: radiologyMatrix.radiology,
+                        general_practice: generalPracticeMatrix.general_practice,
+                        private_diabetic: privateDiabeticMatrix.private_diabetic,
+                        private_dietetic: privateDiabeticMatrix.private_diabetic,
+                        oral: oralMatrix.oral,
+                        oncology: privateOncologyMatrix.private_oncology,
+                        private_oncology: privateOncologyMatrix.private_oncology,
+                        paediatric: paediatricMatrix.paediatric,
                     };
 
                 // Decorate Hospital links with -G / -B visual tags as per matrix.json
@@ -3634,12 +3794,41 @@ export function AppSettings() {
 		            const activeId = activeVersionId || (activeVersion && activeVersion.id);
 		            if (!activeId) return prevBundles;
 		            const existingBundle = bundles[activeId] || {
-		                config: { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig },
+		                config: {
+		                    ...emsConfig,
+		                    ...mortuaryConfig,
+		                    ...clinicsConfig,
+		                    ...hospitalConfig,
+		                    obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+		                    obgyn_full_configuration: obstericsGynoConfig.service_elements,
+		                    physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+		                    physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+		                    radiology_full_configuration: radiologyConfig.service_elements,
+		                    general_practice_full_configuration: generalPracticeConfig.service_elements,
+		                    private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+		                    private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+		                    oral_full_configuration: oralConfig.service_elements,
+		                    private_oncology_full_configuration: privateOncologyConfig.service_elements,
+		                    oncology_full_configuration: privateOncologyConfig.service_elements,
+		                    paediatric_full_configuration: paediatricConfig.service_elements,
+		                },
 		                links: {
 		                    ems: emsLinks,
 		                    mortuary: mortuaryLinks,
 		                    clinics: clinicsLinks,
 		                    hospital: hospitalLinks,
+		                    obgyn: obstericsGynoMatrix.obsterics_gyno,
+		                    obsterics_gyno: obstericsGynoMatrix.obsterics_gyno,
+		                    physiotherapy: physiotheraphyMatrix.physiotheraphy,
+		                    physiotheraphy: physiotheraphyMatrix.physiotheraphy,
+		                    radiology: radiologyMatrix.radiology,
+		                    general_practice: generalPracticeMatrix.general_practice,
+		                    private_diabetic: privateDiabeticMatrix.private_diabetic,
+		                    private_dietetic: privateDiabeticMatrix.private_diabetic,
+		                    oral: oralMatrix.oral,
+		                    oncology: privateOncologyMatrix.private_oncology,
+		                    private_oncology: privateOncologyMatrix.private_oncology,
+		                    paediatric: paediatricMatrix.paediatric,
 		                },
 		                compute: hospitalComputeCriteria,
 		            };
@@ -3758,6 +3947,66 @@ export function AppSettings() {
                 config: withCriterionRootFlags(currentConfig.mortuary_full_configuration, null),
                 extras: [{ key: 'mortuary_links', data: currentLinks.mortuary }],
             },
+            obgyn: {
+                configKey: 'obgyn_full_configuration',
+                config: withCriterionRootFlags(currentConfig.obgyn_full_configuration, null),
+                extras: [{ key: 'obgyn_links', data: currentLinks.obgyn }],
+            },
+            obsterics_gyno: {
+                configKey: 'obsterics_gyno_full_configuration',
+                config: withCriterionRootFlags(currentConfig.obsterics_gyno_full_configuration, null),
+                extras: [{ key: 'obgyn_links', data: currentLinks.obgyn }],
+            },
+            physiotherapy: {
+                configKey: 'physiotherapy_full_configuration',
+                config: withCriterionRootFlags(currentConfig.physiotherapy_full_configuration, null),
+                extras: [{ key: 'physiotherapy_links', data: currentLinks.physiotherapy }],
+            },
+            physiotheraphy: {
+                configKey: 'physiotheraphy_full_configuration',
+                config: withCriterionRootFlags(currentConfig.physiotheraphy_full_configuration, null),
+                extras: [{ key: 'physiotherapy_links', data: currentLinks.physiotherapy }],
+            },
+            radiology: {
+                configKey: 'radiology_full_configuration',
+                config: withCriterionRootFlags(currentConfig.radiology_full_configuration, null),
+                extras: [{ key: 'radiology_links', data: currentLinks.radiology }],
+            },
+            general_practice: {
+                configKey: 'general_practice_full_configuration',
+                config: withCriterionRootFlags(currentConfig.general_practice_full_configuration, null),
+                extras: [{ key: 'general_practice_links', data: currentLinks.general_practice }],
+            },
+            private_diabetic: {
+                configKey: 'private_diabetic_full_configuration',
+                config: withCriterionRootFlags(currentConfig.private_diabetic_full_configuration, null),
+                extras: [{ key: 'private_diabetic_links', data: currentLinks.private_diabetic }],
+            },
+            private_dietetic: {
+                configKey: 'private_dietetic_full_configuration',
+                config: withCriterionRootFlags(currentConfig.private_dietetic_full_configuration, null),
+                extras: [{ key: 'private_dietetic_links', data: currentLinks.private_dietetic }],
+            },
+            oral: {
+                configKey: 'oral_full_configuration',
+                config: withCriterionRootFlags(currentConfig.oral_full_configuration, null),
+                extras: [{ key: 'oral_links', data: currentLinks.oral }],
+            },
+            oncology: {
+                configKey: 'oncology_full_configuration',
+                config: withCriterionRootFlags(currentConfig.oncology_full_configuration, null),
+                extras: [{ key: 'oncology_links', data: currentLinks.oncology }],
+            },
+            private_oncology: {
+                configKey: 'private_oncology_full_configuration',
+                config: withCriterionRootFlags(currentConfig.private_oncology_full_configuration, null),
+                extras: [{ key: 'private_oncology_links', data: currentLinks.private_oncology }],
+            },
+            paediatric: {
+                configKey: 'paediatric_full_configuration',
+                config: withCriterionRootFlags(currentConfig.paediatric_full_configuration, null),
+                extras: [{ key: 'paediatric_links', data: currentLinks.paediatric }],
+            },
         };
         const target = saveTargets[normalizedFacility];
         if (!target) {
@@ -3803,6 +4052,28 @@ export function AppSettings() {
             { key: 'clinics_links', data: clinicsLinks },
             { key: 'ems_links', data: emsLinks },
             { key: 'mortuary_links', data: mortuaryLinks },
+            { key: 'obsterics_gyno_full_configuration', data: obstericsGynoConfig.service_elements },
+            { key: 'obgyn_full_configuration', data: obstericsGynoConfig.service_elements },
+            { key: 'physiotheraphy_full_configuration', data: physiotheraphyConfig.service_elements },
+            { key: 'physiotherapy_full_configuration', data: physiotheraphyConfig.service_elements },
+            { key: 'radiology_full_configuration', data: radiologyConfig.service_elements },
+            { key: 'general_practice_full_configuration', data: generalPracticeConfig.service_elements },
+            { key: 'private_diabetic_full_configuration', data: privateDiabeticConfig.service_elements },
+            { key: 'private_dietetic_full_configuration', data: privateDiabeticConfig.service_elements },
+            { key: 'oral_full_configuration', data: oralConfig.service_elements },
+            { key: 'private_oncology_full_configuration', data: privateOncologyConfig.service_elements },
+            { key: 'oncology_full_configuration', data: privateOncologyConfig.service_elements },
+            { key: 'paediatric_full_configuration', data: paediatricConfig.service_elements },
+            { key: 'obgyn_links', data: obstericsGynoMatrix.obsterics_gyno },
+            { key: 'physiotherapy_links', data: physiotheraphyMatrix.physiotheraphy },
+            { key: 'radiology_links', data: radiologyMatrix.radiology },
+            { key: 'general_practice_links', data: generalPracticeMatrix.general_practice },
+            { key: 'private_diabetic_links', data: privateDiabeticMatrix.private_diabetic },
+            { key: 'private_dietetic_links', data: privateDiabeticMatrix.private_diabetic },
+            { key: 'oral_links', data: oralMatrix.oral },
+            { key: 'private_oncology_links', data: privateOncologyMatrix.private_oncology },
+            { key: 'oncology_links', data: privateOncologyMatrix.private_oncology },
+            { key: 'paediatric_links', data: paediatricMatrix.paediatric },
         ];
         let saved = 0;
         let failed = 0;
@@ -3817,12 +4088,41 @@ export function AppSettings() {
         }
         updateActiveConfigBundle((bundle) => {
             return {
-                config: { ...emsConfig, ...mortuaryConfig, ...clinicsConfig, ...hospitalConfig },
+                config: {
+                    ...emsConfig,
+                    ...mortuaryConfig,
+                    ...clinicsConfig,
+                    ...hospitalConfig,
+                    obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+                    obgyn_full_configuration: obstericsGynoConfig.service_elements,
+                    physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+                    physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+                    radiology_full_configuration: radiologyConfig.service_elements,
+                    general_practice_full_configuration: generalPracticeConfig.service_elements,
+                    private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+                    private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+                    oral_full_configuration: oralConfig.service_elements,
+                    private_oncology_full_configuration: privateOncologyConfig.service_elements,
+                    oncology_full_configuration: privateOncologyConfig.service_elements,
+                    paediatric_full_configuration: paediatricConfig.service_elements,
+                },
                 links: {
                     ems: emsLinks,
                     mortuary: mortuaryLinks,
                     clinics: clinicsLinks,
                     hospital: hospitalLinks,
+                    obgyn: obstericsGynoMatrix.obsterics_gyno,
+                    obsterics_gyno: obstericsGynoMatrix.obsterics_gyno,
+                    physiotherapy: physiotheraphyMatrix.physiotheraphy,
+                    physiotheraphy: physiotheraphyMatrix.physiotheraphy,
+                    radiology: radiologyMatrix.radiology,
+                    general_practice: generalPracticeMatrix.general_practice,
+                    private_diabetic: privateDiabeticMatrix.private_diabetic,
+                    private_dietetic: privateDiabeticMatrix.private_diabetic,
+                    oral: oralMatrix.oral,
+                    oncology: privateOncologyMatrix.private_oncology,
+                    private_oncology: privateOncologyMatrix.private_oncology,
+                    paediatric: paediatricMatrix.paediatric,
                 },
                 compute: hospitalComputeCriteria,
             };
@@ -4076,6 +4376,18 @@ export function AppSettings() {
 		            hospital: 'hospital_full_configuration',
 		            mortuary: 'mortuary_full_configuration',
 		            clinics: 'clinics_full_configuration',
+		            obgyn: 'obgyn_full_configuration',
+		            obsterics_gyno: 'obsterics_gyno_full_configuration',
+		            physiotherapy: 'physiotherapy_full_configuration',
+		            physiotheraphy: 'physiotheraphy_full_configuration',
+		            radiology: 'radiology_full_configuration',
+		            general_practice: 'general_practice_full_configuration',
+		            private_diabetic: 'private_diabetic_full_configuration',
+		            private_dietetic: 'private_dietetic_full_configuration',
+		            oral: 'oral_full_configuration',
+		            oncology: 'oncology_full_configuration',
+		            private_oncology: 'private_oncology_full_configuration',
+		            paediatric: 'paediatric_full_configuration',
 		        };
 		        const key = typeToKeyMap[programme];
 		        if (!key) return;
@@ -4084,10 +4396,22 @@ export function AppSettings() {
 		            hospital: hospitalConfig,
 		            mortuary: mortuaryConfig,
 		            clinics: clinicsConfig,
+		            obgyn: obstericsGynoConfig,
+		            obsterics_gyno: obstericsGynoConfig,
+		            physiotherapy: physiotheraphyConfig,
+		            physiotheraphy: physiotheraphyConfig,
+		            radiology: radiologyConfig,
+		            general_practice: generalPracticeConfig,
+		            private_diabetic: privateDiabeticConfig,
+		            private_dietetic: privateDiabeticConfig,
+		            oral: oralConfig,
+		            oncology: privateOncologyConfig,
+		            private_oncology: privateOncologyConfig,
+		            paediatric: paediatricConfig,
 		        };
 		        const defaultSource = defaultSourceMap[programme];
 		        if (!defaultSource) return;
-		        const defaultList = defaultSource[key] || [];
+		        const defaultList = defaultSource[key] || defaultSource.service_elements || [];
 		        const seId = se.se_id;
 		        updateActiveConfigBundle((bundle) => {
 		            const newConfig = { ...(bundle.config || {}) };
@@ -4178,6 +4502,18 @@ export function AppSettings() {
 		            clinics_full_configuration: clinicsConfig.clinics_full_configuration,
 		            ems_full_configuration: emsConfig.ems_full_configuration,
 		            mortuary_full_configuration: mortuaryConfig.mortuary_full_configuration,
+		            obsterics_gyno_full_configuration: obstericsGynoConfig.service_elements,
+		            obgyn_full_configuration: obstericsGynoConfig.service_elements,
+		            physiotheraphy_full_configuration: physiotheraphyConfig.service_elements,
+		            physiotherapy_full_configuration: physiotheraphyConfig.service_elements,
+		            radiology_full_configuration: radiologyConfig.service_elements,
+		            general_practice_full_configuration: generalPracticeConfig.service_elements,
+		            private_diabetic_full_configuration: privateDiabeticConfig.service_elements,
+		            private_dietetic_full_configuration: privateDiabeticConfig.service_elements,
+		            oral_full_configuration: oralConfig.service_elements,
+		            private_oncology_full_configuration: privateOncologyConfig.service_elements,
+		            oncology_full_configuration: privateOncologyConfig.service_elements,
+		            paediatric_full_configuration: paediatricConfig.service_elements,
 		        };
 		        const rootMap = buildRootMap(currentComputeCriteria);
 		        return [
@@ -4185,6 +4521,14 @@ export function AppSettings() {
 		            { type: 'Clinics', config: activeConfig, key: 'clinics_full_configuration' },
 		            { type: 'EMS', config: activeConfig, key: 'ems_full_configuration' },
 		            { type: 'Mortuary', config: activeConfig, key: 'mortuary_full_configuration' },
+		            { type: 'OBGYN', config: activeConfig, key: 'obgyn_full_configuration' },
+		            { type: 'Physiotherapy', config: activeConfig, key: 'physiotherapy_full_configuration' },
+		            { type: 'Radiology', config: activeConfig, key: 'radiology_full_configuration' },
+		            { type: 'General Practice', config: activeConfig, key: 'general_practice_full_configuration' },
+		            { type: 'Private Dietetic', config: activeConfig, key: 'private_dietetic_full_configuration' },
+		            { type: 'Oral', config: activeConfig, key: 'oral_full_configuration' },
+		            { type: 'Oncology', config: activeConfig, key: 'oncology_full_configuration' },
+		            { type: 'Paediatric', config: activeConfig, key: 'paediatric_full_configuration' },
 		        ].map(({ type, config, key }) => {
 		            const seList = Array.isArray(config?.[key]) ? config[key] : [];
                     const searchQuery = String(settingsFacilitySearches[type] || '').trim().toLowerCase();
@@ -4214,8 +4558,10 @@ export function AppSettings() {
                         ? filteredSeList.slice(page * pageSize, (page + 1) * pageSize)
                         : [];
 		            const allCriteriaInFacilityType = isExpanded ? criterionOptionsFor(seList) : [];
+                    const groupKey = toFacilityGroupKey(type);
+                    const dhis2Map = overviewSource === 'active' ? (dhis2Descriptions[groupKey] || {}) : null;
 		            const rows = isExpanded
-                        ? rowsForFacility(visibleSeList, key, allCriteriaInFacilityType, rootMap, currentLinks)
+                        ? rowsForFacility(visibleSeList, key, allCriteriaInFacilityType, rootMap, currentLinks, dhis2Map)
                         : [];
 		            return {
 		                type,
@@ -4231,7 +4577,7 @@ export function AppSettings() {
                         totalPages,
 		            };
 		        });
-		    }, [overviewSource, currentConfig, currentComputeCriteria, expandedFacs, settingsFacilityPages, settingsFacilitySearches]);
+		    }, [overviewSource, currentConfig, currentComputeCriteria, expandedFacs, settingsFacilityPages, settingsFacilitySearches, dhis2Descriptions]);
 
     // Filter events
     const filteredEvents = useMemo(() => {
@@ -4300,6 +4646,81 @@ export function AppSettings() {
     const handleSync = async () => {
         await syncEvents();
         await loadEvents();
+    };
+
+    const cleanDhis2Description = (raw) => {
+        if (!raw) return '';
+        let label = String(raw).trim();
+
+        // 1) Replace all underscores with spaces first to normalize separators
+        label = label.replace(/_+/g, ' ');
+
+        // 2) Strip technical prefixes from the beginning of the label recursively
+        let previous;
+        do {
+            previous = label;
+            label = label
+                .replace(/^\s*(?:SURV|HOSP|CLINICS|CLINIC|EMS|MORTUARY|SE|SEC|SECTION)\b\s*\d*\s*/i, '') // strip standalone prefix words + optional numbers
+                .replace(/^\s*-\s*/, '') // strip leading hyphens
+                .trim();
+        } while (label !== previous);
+
+        // 3) Strip standard/criterion code references at the start of the description
+        label = label.replace(/^\s*\d+(?:\.\d+)*\s*-\s*/i, '').trim();
+
+        // 4) If there is still a 4-level criterion code like "1.1.1.1", strip it
+        const critMatch = label.match(/^(\d+\.\d+\.\d+\.\d+)\s*(.*)/);
+        if (critMatch) {
+            let rest = critMatch[2] || '';
+            rest = rest.replace(/^[_\-\s:]+/, ' ').trim();
+            if (rest.toLowerCase().startsWith('critical:')) {
+                rest = '';
+            }
+            return rest ? rest : critMatch[1];
+        }
+
+        return label.replace(/\s+/g, ' ').trim();
+    };
+
+    const loadDhis2Descriptions = async (facilityType) => {
+        const groupKey = toFacilityGroupKey(facilityType);
+        const stageId = SURVEY_PROGRAM_STAGE_BY_GROUP[groupKey];
+        if (!stageId) return;
+
+        if (dhis2Descriptions[groupKey]) return;
+
+        setLoadingDhis2Descriptions(prev => ({ ...prev, [facilityType]: true }));
+        try {
+            if (!isOnline) {
+                throw new Error('Offline mode - cannot fetch remote configuration');
+            }
+            const metadata = await api.getFormMetadata(stageId);
+            const deList = getProgramStageDataElementDefinitions(metadata);
+            
+            const descMap = {};
+            deList.forEach(de => {
+                if (de.code) {
+                    const normalized = normalizeCriterionCode(de.code);
+                    if (normalized) {
+                        const desc = de.formName || de.description || de.displayFormName || de.displayName || de.name || '';
+                        descMap[normalized] = cleanDhis2Description(desc);
+                    }
+                }
+            });
+
+            setDhis2Descriptions(prev => ({
+                ...prev,
+                [groupKey]: descMap
+            }));
+        } catch (error) {
+            console.error(`Failed to load DHIS2 descriptions for ${facilityType}:`, error);
+            setDhis2Descriptions(prev => ({
+                ...prev,
+                [groupKey]: {}
+            }));
+        } finally {
+            setLoadingDhis2Descriptions(prev => ({ ...prev, [facilityType]: false }));
+        }
     };
 
     const handleDeleteEvent = async (eventId) => {
@@ -4416,6 +4837,9 @@ export function AppSettings() {
                                                 try {
                                                     if (overviewSource === 'active' && configSource === 'datastore' && isOnline) {
                                                         await loadRemoteConfig(type);
+                                                    }
+                                                    if (overviewSource === 'active') {
+                                                        await loadDhis2Descriptions(type);
                                                     }
                                                     setExpandedFacs({ [type]: true });
                                                     setSettingsFacilityPages(prev => ({ ...prev, [type]: 0 }));
@@ -4547,22 +4971,11 @@ export function AppSettings() {
 																									background: '#f8fafc',
 																								}}
 																							>
-																								{overviewSource !== 'local' && activeCellKey === `${row.seId}-se-description` ? (
-																									<EditableTextCell
-																										value={row.seDescription}
-																										active
-																										editable
-																										onOpen={() => setActiveCellKey(null)}
-																										onSave={(value) => handleUpdateSeDescription(row.configKey, row.seId, value)}
-																									/>
-																								) : (
 																								<div
-																									onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.seId}-se-description`) : undefined}
-																									style={{ maxHeight: '90px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																									style={{ maxHeight: '90px', overflowY: 'auto' }}
 																								>
 																									{row.seDescription || '—'}
 																								</div>
-																								)}
 																							</td>
 																						)}
 																						{row.isFirstStandardRow && (
@@ -4606,13 +5019,20 @@ export function AppSettings() {
 																								)}
 																							</td>
 																						)}
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', fontFamily: 'monospace' }}>{row.criterionId}</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'left', verticalAlign: 'middle' }}>
+																							<div
+																								style={{ maxHeight: '90px', overflowY: 'auto' }}
+																								dangerouslySetInnerHTML={{ __html: row.criterionDescription || '—' }}
+																							/>
+																						</td>
 																						{row.isFirstStandardRow && (
 																							<td
 																								rowSpan={row.standardRowSpan}
 																								style={{
 																									padding: '8px',
 																									border: '1px solid #e2e8f0',
-																									textAlign: 'center',
+																									textAlign: 'left',
 																									verticalAlign: 'middle',
 																								}}
 																							>
@@ -4629,9 +5049,8 @@ export function AppSettings() {
 																								<div
 																									onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-statement`) : undefined}
 																									style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
-																								>
-																									{row.statement || '—'}
-																								</div>
+																									dangerouslySetInnerHTML={{ __html: row.statement || '—' }}
+																								/>
 																								)}
 																							</td>
 																						)}
@@ -4641,7 +5060,7 @@ export function AppSettings() {
 																								style={{
 																									padding: '8px',
 																									border: '1px solid #e2e8f0',
-																									textAlign: 'center',
+																									textAlign: 'left',
 																									verticalAlign: 'middle',
 																								}}
 																							>
@@ -4658,29 +5077,27 @@ export function AppSettings() {
 																									<div
 																										onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-statement-intent`) : undefined}
 																										style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
-																									>
-																										{row.statementIntent || '—'}
-																									</div>
+																										dangerouslySetInnerHTML={{ __html: row.statementIntent || '—' }}
+																									/>
 																								)}
 																							</td>
 																						)}
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', fontFamily: 'monospace' }}>{row.criterionId}</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle' }}>
-																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-description` ? (
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'left', verticalAlign: 'middle' }}>
+																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-guidelines` ? (
 																								<EditableTextCell
-																									value={row.criterionDescription}
+																									value={row.guidelines}
 																									active
 																									editable
+																									maxHeight={110}
 																									onOpen={() => setActiveCellKey(null)}
-																									onSave={(value) => handleUpdateCriterionText(row.configKey, row.seId, row.standardId, row.criterionId, 'description', value)}
+																									onSave={(value) => handleUpdateCriterionText(row.configKey, row.seId, row.standardId, row.criterionId, 'guidelines', value)}
 																								/>
 																							) : (
 																							<div
-																								onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-description`) : undefined}
-																								style={{ maxHeight: '90px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
-																							>
-																								{row.criterionDescription || '—'}
-																							</div>
+																								onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-guidelines`) : undefined}
+																								style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
+																								dangerouslySetInnerHTML={{ __html: row.guidelines || '—' }}
+																							/>
 																							)}
 																						</td>
 																						<td 
@@ -4851,25 +5268,6 @@ export function AppSettings() {
 																								<div style={{ maxHeight: '60px', overflowY: 'auto', fontSize: '0.9em', fontFamily: 'monospace', textAlign: 'center', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}>
 																									{row.subCriteria.length > 0 ? row.subCriteria.join(', ') : 'None'}
 																								</div>
-																							)}
-																						</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle' }}>
-																							{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-guidelines` ? (
-																								<EditableTextCell
-																									value={row.guidelines}
-																									active
-																									editable
-																									maxHeight={110}
-																									onOpen={() => setActiveCellKey(null)}
-																									onSave={(value) => handleUpdateCriterionText(row.configKey, row.seId, row.standardId, row.criterionId, 'guidelines', value)}
-																								/>
-																							) : (
-																							<div
-																								onClick={overviewSource !== 'local' ? () => setActiveCellKey(`${row.criterionId}-guidelines`) : undefined}
-																								style={{ maxHeight: '110px', overflowY: 'auto', cursor: overviewSource === 'local' ? 'default' : 'pointer', borderBottom: overviewSource === 'local' ? 'none' : '1px dashed #cbd5e0' }}
-																							>
-																								{row.guidelines || '—'}
-																							</div>
 																							)}
 																						</td>
 																					</tr>
