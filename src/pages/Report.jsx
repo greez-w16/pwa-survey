@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
 import { Button, TextField, MenuItem, FormControl, InputLabel, Select, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
@@ -2129,8 +2130,8 @@ export default function Report() {
 	      ['Visit From Date:', formatCoverDate(reportPeriodStart)],
 	      ['Visit To Date:', formatCoverDate(reportPeriodEnd)],
       ['Visit Type:', reportInfo.latestType || reportInfo.groupLabel || ''],
-      ['Cohsasa Facilitators:', surveyors],
-      ['Facility Point of Contact:', ''],
+      ['Assessors/Surveyors:', surveyors],
+      ['Facility Contact:', ''],
       ['Meeting Scheduled:', ''],
       ['Meeting Started:', ''],
       ['Reason for Delay (if applicable):', ''],
@@ -2329,9 +2330,10 @@ export default function Report() {
     const buildPdfBarChartSvg = (data, xTitle, latestLabel) => {
       if (!Array.isArray(data) || data.length === 0) return '<div>No chart data available</div>';
       const width = 980;
-      const height = 520;
-      const plot = { left: 78, top: 34, width: 850, height: 330 };
+      const height = 540;
+      const plot = { left: 78, top: 34, width: 850, height: 280 };
       const bottom = plot.top + plot.height;
+      const footerTop = 452;
       const gridValues = [0, 25, 50, 75, 100];
       const groupWidth = plot.width / Math.max(1, data.length);
       const barWidth = Math.max(12, Math.min(22, groupWidth * 0.18));
@@ -2353,8 +2355,8 @@ export default function Report() {
         const baselineY = yFor(baseline);
         const latestY = yFor(latest);
         const labelX = center;
-        const labelY = bottom + 42;
-        const label = escapeHtml(item.name || item.code || '');
+        const labelY = bottom + 30;
+        const label = escapeHtml(shortCriterionLabel(item.name || item.code || '', 36));
         const baselineTextY = baseline > 12 ? baselineY + 16 : baselineY - 5;
         const latestTextY = latest > 12 ? latestY + 16 : latestY - 5;
         const baselineTextFill = baseline > 12 ? '#ffffff' : '#0505ff';
@@ -2371,18 +2373,18 @@ export default function Report() {
 
       return `
         <svg class="se-chart-svg" viewBox="0 0 ${width} ${height}" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
-          <text x="${width / 2}" y="18" text-anchor="middle" font-size="12" font-weight="700">${escapeHtml(selectedFacilityName)} Progress Report</text>
           ${grid}
           <line x1="${plot.left}" y1="${plot.top}" x2="${plot.left}" y2="${bottom}" stroke="#111827" stroke-width="1.5" />
           <line x1="${plot.left}" y1="${bottom}" x2="${plot.left + plot.width}" y2="${bottom}" stroke="#111827" stroke-width="1.5" />
           <text x="18" y="${plot.top + plot.height / 2}" transform="rotate(-90 18 ${plot.top + plot.height / 2})" text-anchor="middle" font-size="13" font-weight="700">Scores</text>
           ${bars}
-          <text x="${width / 2}" y="${height - 58}" text-anchor="middle" font-size="13" font-weight="700">${escapeHtml(xTitle)}</text>
-          <rect x="${width / 2 - 62}" y="${height - 42}" width="122" height="18" fill="none" stroke="#555" />
-          <rect x="${width / 2 - 52}" y="${height - 36}" width="10" height="10" fill="#0505ff" stroke="#000" />
-          <text x="${width / 2 - 38}" y="${height - 27}" font-size="10">Baseline</text>
-          <rect x="${width / 2 + 10}" y="${height - 36}" width="10" height="10" fill="#ef5359" stroke="#000" />
-          <text x="${width / 2 + 24}" y="${height - 27}" font-size="10">${escapeHtml(latestLabel)}</text>
+          <rect x="0" y="${footerTop}" width="${width}" height="${height - footerTop}" fill="#ffffff" />
+          <text x="${width / 2}" y="${footerTop + 18}" text-anchor="middle" font-size="13" font-weight="700">${escapeHtml(xTitle)}</text>
+          <rect x="${width / 2 - 130}" y="${footerTop + 28}" width="260" height="24" fill="#ffffff" stroke="#555" />
+          <rect x="${width / 2 - 118}" y="${footerTop + 35}" width="10" height="10" fill="#0505ff" stroke="#000" />
+          <text x="${width / 2 - 104}" y="${footerTop + 44}" font-size="10">Baseline</text>
+          <rect x="${width / 2 - 32}" y="${footerTop + 35}" width="10" height="10" fill="#ef5359" stroke="#000" />
+          <text x="${width / 2 - 18}" y="${footerTop + 44}" font-size="10">${escapeHtml(latestLabel)}</text>
         </svg>
       `;
     };
@@ -2460,6 +2462,7 @@ export default function Report() {
             <p>${escapeHtml(selectedFacilityName)} assessment findings for ${escapeHtml(seName)} are summarised in the preceding tables and chart.</p>
           </section>
           <section class="report-page se-chart-page">
+            <div class="se-chart-report-title">${escapeHtml(selectedFacilityName)} Progress Report</div>
             <h1 class="se-chart-title">${escapeHtml(seTitle)}</h1>
             <div class="se-chart-wrapper">
               ${seChartSvg}
@@ -2478,7 +2481,7 @@ export default function Report() {
                   <th colspan="3">Critical Criteria<br />Remaining</th>
                   <th rowspan="2">Most recent<br />assessment<br />date</th>
                   <th colspan="4">Policies &amp; Procedures</th>
-                  <th rowspan="2">Quality<br />improvement<br />standard<br />compliance</th>
+                  <th rowspan="2">Steering<br />improvement<br />standard<br />compliance</th>
                 </tr>
                 <tr>
                   <th>Total</th><th>NC</th><th>PC</th>
@@ -2688,8 +2691,9 @@ export default function Report() {
             .se-criteria-table .small-col { width: 6%; }
             .se-criteria-table .progress-col { width: 6%; }
             .se-chart-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; text-align: center; }
+            .se-chart-report-title { font-size: 13px; font-weight: 700; margin: 0 0 5px; }
             .se-chart-title { font-size: 24px; font-weight: bold; margin: 0 0 4px; }
-            .se-chart-wrapper { width: 260mm; height: 138mm; margin: 0 auto; }
+            .se-chart-wrapper { width: 260mm; height: 143mm; margin: 0 auto; }
             .se-chart-svg { display: block; width: 100%; height: 100%; overflow: visible; }
             .se-narrative-page { break-before: page; page-break-before: always; font-family: Arial, Helvetica, sans-serif; font-size: 11px; }
             .se-narrative-title { font-size: 16px; margin: 0 0 12px; font-weight: normal; }
@@ -2714,18 +2718,21 @@ export default function Report() {
             <img class="crest" src="${qimsLogo}" alt="Republic of Botswana" />
             <hr class="top-rule" />
             <h1 class="facility">${escapeHtml(selectedFacilityName)}</h1>
-            <div class="title">National Health Quality Standards Progress<br />Report</div>
+            <div class="title">National Health Quality Standards</div> 
+            <div class="title">Progress Report</div>
             <div class="line">OVERALL FACILITY SCORE: ${escapeHtml(score)}</div>
             <div class="line">DATE OF SURVEY: ${escapeHtml(dateRange)}</div>
-            <div class="surveyors">SURVEYORS: ${escapeHtml(surveyors)}</div>
-            <div class="confidential">CONFIDENTIAL</div>
-            <div class="contact">
-              Ministry of Health<br />
+            <div class="confidential">CONFIDENTIAL REPORT</div>
+            
+
+<div class="contact">
+              Department of Health Inspectorate<br />
               Private Bag 0038, Gaborone<br />
               Plot 54609, Government Enclave, Gaborone<br />
               Tel: 363 2500<br />
               Toll free 0800600740
             </div>
+
             <div class="bottom-logos">
               <img class="bottom-logo" src="${qimsLogo}" alt="Ministry of Health" />
               <div class="botswana-mark">BOTSWANA<span class="botswana-tagline">our pride, your destination</span></div>
@@ -2744,7 +2751,7 @@ export default function Report() {
           </section>
           <section class="report-page attendance-page">
             <div class="attendance-title">
-              Steering Committee <span class="attendance-link-word">Attendance</span><span class="attendance-note">(only project management meetings calculated)</span>
+              Steering Committee <span class="attendance-link-word">Attendance Register</span><span class="attendance-note"></span>
             </div>
           </section>
           <section class="report-page service-elements-page">
@@ -3403,7 +3410,7 @@ export default function Report() {
                           </div>
                         </div>
                         {/* Centered viewport-fixed Legend */}
-                        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 8, fontSize: 12, fontWeight: 500, color: '#475569' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: 20, marginTop: 12, fontSize: 12, fontWeight: 500, color: '#475569' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
                             <span style={{ width: 12, height: 12, backgroundColor: '#60a5fa', borderRadius: 2 }} />
                             <span>Baseline</span>
@@ -3419,7 +3426,7 @@ export default function Report() {
                 </>
               )}
             </div>
-            {drillOpen && (
+            {drillOpen && createPortal(
               <div
                 onClick={closeDrill}
                 style={{
@@ -3575,7 +3582,8 @@ export default function Report() {
                     );
                   })()}
                 </div>
-              </div>
+              </div>,
+              document.body
             )}
           </div>
         )}
