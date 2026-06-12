@@ -1,29 +1,59 @@
-    import React, { useState, useMemo } from 'react';
-    import './FormArea.css';
-    import { useApp } from '../../contexts/AppContext';
-    import { api } from '../../services/api';
-    import indexedDBService from '../../services/indexedDBService';
-    import emsConfig from '../../assets/ems/ems_config.json';
-    import mortuaryConfig from '../../assets/mortuary/mortuary_config.json';
-    import clinicsConfig from '../../assets/clinics/clinics_config.json';
-    import hospitalConfig from '../../assets/hospital/hospital_config.json';
-    import emsLinks from '../../assets/ems/ems_links.json';
-    import mortuaryLinks from '../../assets/mortuary/mortuary_links.json';
-    import clinicsLinks from '../../assets/clinics/clinics_links.json';
-    import hospitalLinks from '../../assets/hospital/hospital_links.json';
-    import hospitalComputeCriteria from '../../assets/hospital/hospital_compute_criteria.json';
-    import ScoreBadge from '../ScoreBadge';
-    import { classifyAssessment } from '../../utils/classification';
-    import { normalizeCriterionCode } from '../../utils/normalization';
-    import { createAssessmentSnapshot } from '../../utils/createAssessmentSnapshot';
-    import { calculatePointsForLink } from '../../utils/scoring';
+import React, { useState, useMemo } from 'react';
+import './FormArea.css';
+import { useApp } from '../../contexts/AppContext';
+import { api } from '../../services/api';
+import indexedDBService from '../../services/indexedDBService';
+import emsConfig from '../../assets/ems/ems_config.json';
+import mortuaryConfig from '../../assets/mortuary/mortuary_config.json';
+import clinicsConfig from '../../assets/clinics/clinics_config.json';
+import hospitalConfig from '../../assets/hospital/hospital_config.json';
+import emsLinks from '../../assets/ems/ems_links.json';
+import mortuaryLinks from '../../assets/mortuary/mortuary_links.json';
+import clinicsLinks from '../../assets/clinics/clinics_links.json';
+import hospitalLinks from '../../assets/hospital/hospital_links.json';
+import hospitalComputeCriteria from '../../assets/hospital/hospital_compute_criteria.json';
+import ScoreBadge from '../ScoreBadge';
+import { classifyAssessment } from '../../utils/classification';
+import { normalizeCriterionCode } from '../../utils/normalization';
+import { createAssessmentSnapshot } from '../../utils/createAssessmentSnapshot';
+import { calculatePointsForLink } from '../../utils/scoring';
+import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixTags';
+
+        const getProgrammeTypeFromGroup = (group) => {
+        if (!group) return 'ems';
+        const id = String(group.id || '').trim().toUpperCase();
+        const name = String(group.name || '').trim().toLowerCase();
+        
+        if (id === 'HOSPITAL' || name.includes('hospital')) return 'hospital';
+        if (id === 'CLINICS' || name.includes('clinic')) return 'clinics';
+        if (id === 'EMS' || name.includes('ems')) return 'ems';
+        if (id === 'GENERAL' || id === 'MORTUARY' || name.includes('mortu')) return 'mortuary';
+        if (id === 'OBGYN' || name.includes('obg')) return 'obgyn';
+        if (id === 'PHYSIOTHERAPY' || name.includes('physio')) return 'physiotherapy';
+        if (id === 'RADIOLOGY' || name.includes('radio')) return 'radiology';
+        if (id === 'PRIVATE_LAB' || name.includes('private lab') || name.includes('private_lab') || name.includes('medical lab') || name.includes('medical_lab')) return 'private_lab';
+        if (id === 'GENERAL_PRACTICE' || name.includes('general practice') || name.includes('general_practice')) return 'general_practice';
+        if (id === 'PRIVATE_DIETETIC' || name.includes('diabet') || name.includes('dietet') || name.includes('prd')) return 'private_diabetic';
+        if (id === 'MENTAL_HEALTH' || name.includes('mental')) return 'mental_health';
+        if (id === 'EYE' || name.includes('eye')) return 'eye';
+        if (id === 'HOSPICE_PALLIATIVE' || name.includes('hospice') || name.includes('palliative')) return 'hospice_palliative';
+        if (id === 'OCCUPATIONAL_HEALTH' || name.includes('occupational')) return 'occupational_health';
+        if (id === 'UROLOGY_NEPHR' || name.includes('urology') || name.includes('nephr')) return 'urology_nephrology';
+        if (id === 'ORAL' || name.includes('oral')) return 'oral';
+        if (id === 'IMCI' || name.includes('imci') || name.includes('childhood')) return 'imci';
+        if (id === 'EMONC' || name.includes('emonc') || name.includes('emergency')) return 'emonc';
+        if (id === 'ONCOLOGY' || name.includes('oncology') || name.includes('onc')) return 'oncology';
+        if (id === 'PAEDIATRIC' || name.includes('paediatric') || name.includes('pae') || name.includes('pediatric')) return 'paediatric';
+        
+        return 'ems';
+    };
 
     // Build a fast lookup from criterion ID (e.g. "1.2.1.3") to its
     // standard statement, intent text, critical flag, and severity.
             const buildCriterionIndex = (configData) => {
                 const index = {};
                 try {
-                    // Support EMS, Mortuary, Clinics, and Hospital configs.
+                    // Support all 20 configs.
                     // Accept either a single array of SE objects or an object with *_full_configuration keys.
                     let seArray = [];
 
@@ -35,7 +65,31 @@
                             'mortuary_full_configuration',
                             'clinics_full_configuration',
                             'hospital_full_configuration',
+                            'obsterics_gyno_full_configuration',
+                            'obgyn_full_configuration',
+                            'physiotheraphy_full_configuration',
+                            'physiotherapy_full_configuration',
+                            'radiology_full_configuration',
+                            'general_practice_full_configuration',
+                            'private_diabetic_full_configuration',
+                            'private_dietetic_full_configuration',
+                            'oral_full_configuration',
+                            'private_oncology_full_configuration',
+                            'oncology_full_configuration',
+                            'paediatric_full_configuration',
+                            'private_medical_lab_full_configuration',
+                            'private_lab_full_configuration',
+                            'mental_health_full_configuration',
                             'eye_full_configuration',
+                            'hospice_full_configuration',
+                            'hospice_palliative_full_configuration',
+                            'occupational_health_full_configuration',
+                            'urology_full_configuration',
+                            'urology_nephrology_full_configuration',
+                            'childhood_illness_full_configuration',
+                            'imci_full_configuration',
+                            'emergency_management_full_configuration',
+                            'emonc_full_configuration',
                         ];
                         possibleKeys.forEach((key) => {
                             if (Array.isArray(configData[key])) {
@@ -604,28 +658,43 @@
         }, [groups, activeGroup, assessmentGroupText, resolveAssessmentGroupId]);
 
         const programmeType = React.useMemo(() => {
-            if (activeGroup?.id === 'SURV-MORTUARY' || activeGroup?.id === 'GENERAL' || activeGroup?.name === 'Mortuary') {
-                return 'mortuary';
-            }
-            if (activeGroup?.id === 'CLINICS' || activeGroup?.name === 'Clinics') {
-                return 'clinics';
-            }
-            if (activeGroup?.id === 'HOSPITAL' || activeGroup?.name === 'Hospital') {
-                return 'hospital';
-            }
-            return 'ems';
+            return getProgrammeTypeFromGroup(activeGroup);
         }, [activeGroup]);
 
         const { configuration, showToast, isOnline } = useApp();
 
-        // Resolve configuration for the current programme (EMS, Mortuary, Clinics, Hospital)
+        // Resolve configuration for the current programme
         const activeConfigArray = React.useMemo(() => {
             const configKeyMap = {
                 ems: 'ems_full_configuration',
                 mortuary: 'mortuary_full_configuration',
                 clinics: 'clinics_full_configuration',
                 hospital: 'hospital_full_configuration',
+                obgyn: 'obgyn_full_configuration',
+                obsterics_gyno: 'obsterics_gyno_full_configuration',
+                physiotherapy: 'physiotherapy_full_configuration',
+                physiotheraphy: 'physiotheraphy_full_configuration',
+                radiology: 'radiology_full_configuration',
+                general_practice: 'general_practice_full_configuration',
+                private_diabetic: 'private_diabetic_full_configuration',
+                private_dietetic: 'private_dietetic_full_configuration',
+                oral: 'oral_full_configuration',
+                oncology: 'oncology_full_configuration',
+                private_oncology: 'private_oncology_full_configuration',
+                paediatric: 'paediatric_full_configuration',
+                private_lab: 'private_lab_full_configuration',
+                private_medical_lab: 'private_medical_lab_full_configuration',
+                mental_health: 'mental_health_full_configuration',
                 eye: 'eye_full_configuration',
+                hospice_palliative: 'hospice_palliative_full_configuration',
+                hospice: 'hospice_full_configuration',
+                occupational_health: 'occupational_health_full_configuration',
+                urology_nephrology: 'urology_nephrology_full_configuration',
+                urology: 'urology_full_configuration',
+                imci: 'imci_full_configuration',
+                childhood_illness: 'childhood_illness_full_configuration',
+                emonc: 'emonc_full_configuration',
+                emergency_management: 'emergency_management_full_configuration',
             };
             const key = configKeyMap[programmeType];
             if (configuration && key && Array.isArray(configuration[key])) {
@@ -637,7 +706,11 @@
         // Resolve links for the current programme
         const activeLinks = React.useMemo(() => {
             const links = configuration?.links || {};
-            return links[programmeType] || [];
+            const rawLinks = links[programmeType] || [];
+            if (programmeType === 'hospital') {
+                return decorateHospitalLinksWithMatrixTags(rawLinks);
+            }
+            return rawLinks;
         }, [configuration, programmeType]);
 
         const criterionIndex = React.useMemo(() => {

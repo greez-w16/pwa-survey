@@ -56,6 +56,27 @@ import privateOncologyMatrix from '../assets/private-oncology/private_oncology_m
 import paediatricConfig from '../assets/paediatric/paediatric_config.json';
 import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
 
+// Import remaining 8 facility matrices and matrixConfig parser
+import { buildConfigFromMatrix } from '../utils/matrixConfig';
+import privateMedicalLabMatrix from '../assets/private-medical-lab/private_medical_lab_matrix.json';
+import mentalHealthMatrix from '../assets/mental-health/mental_health_matrix.json';
+import eyeMatrix from '../assets/eye/eye_matrix.json';
+import hospiceMatrix from '../assets/hospice/hospice_matrix.json';
+import occupationalHealthMatrix from '../assets/occupational-health/occupational_health_matrix.json';
+import urologyMatrix from '../assets/urology/urology_matrix.json';
+import childhoodIllnessMatrix from '../assets/childhood-illness/childhood_illness_matrix.json';
+import emergencyManagementMatrix from '../assets/emergency-management/emergency_management_matrix.json';
+
+// Parse baseline configs from matrices
+const privateMedicalLabConfig = buildConfigFromMatrix('private_medical_lab', privateMedicalLabMatrix.private_medical_lab);
+const mentalHealthConfig = buildConfigFromMatrix('mental_health', mentalHealthMatrix.mental_health);
+const eyeConfig = buildConfigFromMatrix('eye', eyeMatrix.eye);
+const hospiceConfig = buildConfigFromMatrix('hospice', hospiceMatrix.hospice);
+const occupationalHealthConfig = buildConfigFromMatrix('occupational_health', occupationalHealthMatrix.occupational_health);
+const urologyConfig = buildConfigFromMatrix('urology', urologyMatrix.urology);
+const childhoodIllnessConfig = buildConfigFromMatrix('childhood_illness', childhoodIllnessMatrix.childhood_illness);
+const emergencyManagementConfig = buildConfigFromMatrix('emergency_management', emergencyManagementMatrix.emergency_management);
+
 import { decorateHospitalLinksWithMatrixTags } from '../utils/hospitalMatrixTags';
 import { normalizeCriterionCode } from '../utils/normalization';
 import hospitalComputeCriteria from '../assets/hospital/hospital_compute_criteria.json';
@@ -511,7 +532,20 @@ const CONFIG_KEY_TO_LINKS_KEY = {
     'oral_full_configuration': 'oral',
     'private_oncology_full_configuration': 'oncology',
     'oncology_full_configuration': 'oncology',
-    'paediatric_full_configuration': 'paediatric'
+    'paediatric_full_configuration': 'paediatric',
+    'private_medical_lab_full_configuration': 'private_medical_lab',
+    'private_lab_full_configuration': 'private_medical_lab',
+    'mental_health_full_configuration': 'mental_health',
+    'eye_full_configuration': 'eye',
+    'hospice_full_configuration': 'hospice',
+    'hospice_palliative_full_configuration': 'hospice',
+    'occupational_health_full_configuration': 'occupational_health',
+    'urology_full_configuration': 'urology',
+    'urology_nephrology_full_configuration': 'urology',
+    'childhood_illness_full_configuration': 'childhood_illness',
+    'imci_full_configuration': 'childhood_illness',
+    'emergency_management_full_configuration': 'emergency_management',
+    'emonc_full_configuration': 'emergency_management'
 };
 
 const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, rootMap, currentLinks, dhis2DescriptionsMap = null) => {
@@ -4007,6 +4041,71 @@ export function AppSettings() {
                 config: withCriterionRootFlags(currentConfig.paediatric_full_configuration, null),
                 extras: [{ key: 'paediatric_links', data: currentLinks.paediatric }],
             },
+            private_medical_lab: {
+                configKey: 'private_medical_lab_full_configuration',
+                config: withCriterionRootFlags(currentConfig.private_medical_lab_full_configuration, null),
+                extras: [{ key: 'private_medical_lab_links', data: currentLinks.private_medical_lab }],
+            },
+            private_lab: {
+                configKey: 'private_medical_lab_full_configuration',
+                config: withCriterionRootFlags(currentConfig.private_medical_lab_full_configuration, null),
+                extras: [{ key: 'private_medical_lab_links', data: currentLinks.private_medical_lab }],
+            },
+            mental_health: {
+                configKey: 'mental_health_full_configuration',
+                config: withCriterionRootFlags(currentConfig.mental_health_full_configuration, null),
+                extras: [{ key: 'mental_health_links', data: currentLinks.mental_health }],
+            },
+            eye: {
+                configKey: 'eye_full_configuration',
+                config: withCriterionRootFlags(currentConfig.eye_full_configuration, null),
+                extras: [{ key: 'eye_links', data: currentLinks.eye }],
+            },
+            hospice: {
+                configKey: 'hospice_full_configuration',
+                config: withCriterionRootFlags(currentConfig.hospice_full_configuration, null),
+                extras: [{ key: 'hospice_links', data: currentLinks.hospice }],
+            },
+            hospice_palliative: {
+                configKey: 'hospice_full_configuration',
+                config: withCriterionRootFlags(currentConfig.hospice_full_configuration, null),
+                extras: [{ key: 'hospice_links', data: currentLinks.hospice }],
+            },
+            occupational_health: {
+                configKey: 'occupational_health_full_configuration',
+                config: withCriterionRootFlags(currentConfig.occupational_health_full_configuration, null),
+                extras: [{ key: 'occupational_health_links', data: currentLinks.occupational_health }],
+            },
+            urology: {
+                configKey: 'urology_full_configuration',
+                config: withCriterionRootFlags(currentConfig.urology_full_configuration, null),
+                extras: [{ key: 'urology_links', data: currentLinks.urology }],
+            },
+            urology_nephrology: {
+                configKey: 'urology_full_configuration',
+                config: withCriterionRootFlags(currentConfig.urology_full_configuration, null),
+                extras: [{ key: 'urology_links', data: currentLinks.urology }],
+            },
+            childhood_illness: {
+                configKey: 'childhood_illness_full_configuration',
+                config: withCriterionRootFlags(currentConfig.childhood_illness_full_configuration, null),
+                extras: [{ key: 'childhood_illness_links', data: currentLinks.childhood_illness }],
+            },
+            imci: {
+                configKey: 'childhood_illness_full_configuration',
+                config: withCriterionRootFlags(currentConfig.childhood_illness_full_configuration, null),
+                extras: [{ key: 'childhood_illness_links', data: currentLinks.childhood_illness }],
+            },
+            emergency_management: {
+                configKey: 'emergency_management_full_configuration',
+                config: withCriterionRootFlags(currentConfig.emergency_management_full_configuration, null),
+                extras: [{ key: 'emergency_management_links', data: currentLinks.emergency_management }],
+            },
+            emonc: {
+                configKey: 'emergency_management_full_configuration',
+                config: withCriterionRootFlags(currentConfig.emergency_management_full_configuration, null),
+                extras: [{ key: 'emergency_management_links', data: currentLinks.emergency_management }],
+            },
         };
         const target = saveTargets[normalizedFacility];
         if (!target) {
@@ -4038,6 +4137,37 @@ export function AppSettings() {
         } else {
             showToast?.(`Configuration was not saved to DHIS2 DataStore. ${failed} item(s) failed.`, 'error');
         }
+    };
+
+    const handleDownloadConfigsBackup = () => {
+        const activeId = activeVersionId || 'v1';
+        const bundle = configBundles[activeId];
+        if (!bundle) {
+            showToast?.('No active configuration bundle to backup.', 'warning');
+            return;
+        }
+
+        const backupData = {
+            timestamp: new Date().toISOString(),
+            versionId: activeId,
+            config: bundle.config || {},
+            links: bundle.links || {},
+            compute: bundle.compute || {},
+        };
+
+        const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        const filename = `qims_configurations_backup_${activeId}_${new Date().toISOString().replace(/[:.]/g, '-')}.json`;
+        a.href = url;
+        a.download = filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        
+        console.log(`[Backup] Configurations backup downloaded successfully as ${filename}`);
+        showToast?.('Configurations backup downloaded successfully.', 'success');
     };
 
     const handleResetConfigsToBaseline = async () => {
@@ -4074,6 +4204,22 @@ export function AppSettings() {
             { key: 'private_oncology_links', data: privateOncologyMatrix.private_oncology },
             { key: 'oncology_links', data: privateOncologyMatrix.private_oncology },
             { key: 'paediatric_links', data: paediatricMatrix.paediatric },
+            { key: 'private_medical_lab_full_configuration', data: privateMedicalLabConfig.service_elements },
+            { key: 'private_medical_lab_links', data: privateMedicalLabMatrix.private_medical_lab },
+            { key: 'mental_health_full_configuration', data: mentalHealthConfig.service_elements },
+            { key: 'mental_health_links', data: mentalHealthMatrix.mental_health },
+            { key: 'eye_full_configuration', data: eyeConfig.service_elements },
+            { key: 'eye_links', data: eyeMatrix.eye },
+            { key: 'hospice_full_configuration', data: hospiceConfig.service_elements },
+            { key: 'hospice_links', data: hospiceMatrix.hospice },
+            { key: 'occupational_health_full_configuration', data: occupationalHealthConfig.service_elements },
+            { key: 'occupational_health_links', data: occupationalHealthMatrix.occupational_health },
+            { key: 'urology_full_configuration', data: urologyConfig.service_elements },
+            { key: 'urology_links', data: urologyMatrix.urology },
+            { key: 'childhood_illness_full_configuration', data: childhoodIllnessConfig.service_elements },
+            { key: 'childhood_illness_links', data: childhoodIllnessMatrix.childhood_illness },
+            { key: 'emergency_management_full_configuration', data: emergencyManagementConfig.service_elements },
+            { key: 'emergency_management_links', data: emergencyManagementMatrix.emergency_management },
         ];
         let saved = 0;
         let failed = 0;
@@ -4105,6 +4251,14 @@ export function AppSettings() {
                     private_oncology_full_configuration: privateOncologyConfig.service_elements,
                     oncology_full_configuration: privateOncologyConfig.service_elements,
                     paediatric_full_configuration: paediatricConfig.service_elements,
+                    private_medical_lab_full_configuration: privateMedicalLabConfig.service_elements,
+                    mental_health_full_configuration: mentalHealthConfig.service_elements,
+                    eye_full_configuration: eyeConfig.service_elements,
+                    hospice_full_configuration: hospiceConfig.service_elements,
+                    occupational_health_full_configuration: occupationalHealthConfig.service_elements,
+                    urology_full_configuration: urologyConfig.service_elements,
+                    childhood_illness_full_configuration: childhoodIllnessConfig.service_elements,
+                    emergency_management_full_configuration: emergencyManagementConfig.service_elements,
                 },
                 links: {
                     ems: emsLinks,
@@ -4123,6 +4277,14 @@ export function AppSettings() {
                     oncology: privateOncologyMatrix.private_oncology,
                     private_oncology: privateOncologyMatrix.private_oncology,
                     paediatric: paediatricMatrix.paediatric,
+                    private_medical_lab: privateMedicalLabMatrix.private_medical_lab,
+                    mental_health: mentalHealthMatrix.mental_health,
+                    eye: eyeMatrix.eye,
+                    hospice: hospiceMatrix.hospice,
+                    occupational_health: occupationalHealthMatrix.occupational_health,
+                    urology: urologyMatrix.urology,
+                    childhood_illness: childhoodIllnessMatrix.childhood_illness,
+                    emergency_management: emergencyManagementMatrix.emergency_management,
                 },
                 compute: hospitalComputeCriteria,
             };
@@ -4514,6 +4676,14 @@ export function AppSettings() {
 		            private_oncology_full_configuration: privateOncologyConfig.service_elements,
 		            oncology_full_configuration: privateOncologyConfig.service_elements,
 		            paediatric_full_configuration: paediatricConfig.service_elements,
+		            private_medical_lab_full_configuration: privateMedicalLabConfig.service_elements,
+		            mental_health_full_configuration: mentalHealthConfig.service_elements,
+		            eye_full_configuration: eyeConfig.service_elements,
+		            hospice_full_configuration: hospiceConfig.service_elements,
+		            occupational_health_full_configuration: occupationalHealthConfig.service_elements,
+		            urology_full_configuration: urologyConfig.service_elements,
+		            childhood_illness_full_configuration: childhoodIllnessConfig.service_elements,
+		            emergency_management_full_configuration: emergencyManagementConfig.service_elements,
 		        };
 		        const rootMap = buildRootMap(currentComputeCriteria);
 		        return [
@@ -4529,6 +4699,14 @@ export function AppSettings() {
 		            { type: 'Oral', config: activeConfig, key: 'oral_full_configuration' },
 		            { type: 'Oncology', config: activeConfig, key: 'oncology_full_configuration' },
 		            { type: 'Paediatric', config: activeConfig, key: 'paediatric_full_configuration' },
+		            { type: 'Private Lab', config: activeConfig, key: 'private_medical_lab_full_configuration' },
+		            { type: 'Mental Health', config: activeConfig, key: 'mental_health_full_configuration' },
+		            { type: 'Eye', config: activeConfig, key: 'eye_full_configuration' },
+		            { type: 'Hospice & Palliative', config: activeConfig, key: 'hospice_full_configuration' },
+		            { type: 'Occupational Health', config: activeConfig, key: 'occupational_health_full_configuration' },
+		            { type: 'Urology & Nephrology', config: activeConfig, key: 'urology_full_configuration' },
+		            { type: 'IMCI', config: activeConfig, key: 'childhood_illness_full_configuration' },
+		            { type: 'EMONC', config: activeConfig, key: 'emergency_management_full_configuration' },
 		        ].map(({ type, config, key }) => {
 		            const seList = Array.isArray(config?.[key]) ? config[key] : [];
                     const searchQuery = String(settingsFacilitySearches[type] || '').trim().toLowerCase();
@@ -5534,7 +5712,28 @@ export function AppSettings() {
                         ) : null}
                     </div>
                 </DialogContent>
-                
+
+                <Dialog open={showResetConfirmDialog} onClose={() => setShowResetConfirmDialog(false)}>
+                    <DialogTitle>Confirm Reset to Code Baseline</DialogTitle>
+                    <DialogContent dividers>
+                        <strong>WARNING:</strong> Resetting to baseline will completely overwrite all configurations in the remote DataStore.
+                        To prevent any loss of custom work, the system will <strong>automatically download a backup</strong> of your current configurations first.
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={() => setShowResetConfirmDialog(false)}>Cancel</Button>
+                        <Button
+                            onClick={async () => {
+                                setShowResetConfirmDialog(false);
+                                handleDownloadConfigsBackup();
+                                await handleResetConfigsToBaseline();
+                            }}
+                            color="error"
+                            variant="contained"
+                        >
+                            Download Backup & Reset
+                        </Button>
+                    </DialogActions>
+                </Dialog>
             </div>
   );
 
