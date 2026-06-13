@@ -17,6 +17,7 @@ import emsLinks from '../assets/ems/ems_links.json';
 import mortuaryLinks from '../assets/mortuary/mortuary_links.json';
 import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
+import indexedDBService from '../services/indexedDBService';
 
 import obstericsGynoConfig from '../assets/obsterics-gyno/obsterics_gyno_config.json';
 import obstericsGynoMatrix from '../assets/obsterics-gyno/obsterics_gyno_matrix.json';
@@ -34,6 +35,27 @@ import privateOncologyConfig from '../assets/private-oncology/private_oncology_c
 import privateOncologyMatrix from '../assets/private-oncology/private_oncology_matrix.json';
 import paediatricConfig from '../assets/paediatric/paediatric_config.json';
 import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
+
+// Import remaining 8 facility matrices and matrixConfig parser
+import { buildConfigFromMatrix } from '../utils/matrixConfig';
+import privateMedicalLabMatrix from '../assets/private-medical-lab/private_medical_lab_matrix.json';
+import mentalHealthMatrix from '../assets/mental-health/mental_health_matrix.json';
+import eyeMatrix from '../assets/eye/eye_matrix.json';
+import hospiceMatrix from '../assets/hospice/hospice_matrix.json';
+import occupationalHealthMatrix from '../assets/occupational-health/occupational_health_matrix.json';
+import urologyMatrix from '../assets/urology/urology_matrix.json';
+import childhoodIllnessMatrix from '../assets/childhood-illness/childhood_illness_matrix.json';
+import emergencyManagementMatrix from '../assets/emergency-management/emergency_management_matrix.json';
+
+// Parse baseline configs from matrices
+const privateMedicalLabConfig = buildConfigFromMatrix('private_medical_lab', privateMedicalLabMatrix.private_medical_lab);
+const mentalHealthConfig = buildConfigFromMatrix('mental_health', mentalHealthMatrix.mental_health);
+const eyeConfig = buildConfigFromMatrix('eye', eyeMatrix.eye);
+const hospiceConfig = buildConfigFromMatrix('hospice', hospiceMatrix.hospice);
+const occupationalHealthConfig = buildConfigFromMatrix('occupational_health', occupationalHealthMatrix.occupational_health);
+const urologyConfig = buildConfigFromMatrix('urology', urologyMatrix.urology);
+const childhoodIllnessConfig = buildConfigFromMatrix('childhood_illness', childhoodIllnessMatrix.childhood_illness);
+const emergencyManagementConfig = buildConfigFromMatrix('emergency_management', emergencyManagementMatrix.emergency_management);
 
 import qimsLogo from '../assets/logo.png';
 import { calculatePointsForLink, setHospitalSubcriteriaConfig } from '../utils/scoring';
@@ -81,18 +103,26 @@ const SURVEY_PROGRAM_STAGE_BY_GROUP = {
 const toFacilityGroupKey = (value) => {
   const t = String(value || '').trim().toLowerCase();
   if (!t || t === '-') return '';
+  if (t.includes('general practice') || t.includes('general_practice') || t === 'gep') return 'GENERAL_PRACTICE';
+  if (t.includes('hospice') || t.includes('palliative') || t === 'hop') return 'HOSPICE_PALLIATIVE';
   if (t.includes('hosp')) return 'HOSPITAL';
   if (t.includes('clinic')) return 'CLINICS';
   if (t.includes('ems') || t === 'se' || t.includes(' se')) return 'EMS';
-  if (t.includes('mortu') || t.includes('general')) return 'MORTUARY';
+  if (t.includes('mortu')) return 'MORTUARY';
   if (t.includes('obg')) return 'OBGYN';
   if (t.includes('oncology') || t.includes('onc')) return 'ONCOLOGY';
   if (t.includes('paediatric') || t.includes('pae') || t.includes('pediatric') || t.includes('ped')) return 'PAEDIATRIC';
   if (t.includes('physio')) return 'PHYSIOTHERAPY';
   if (t.includes('radio')) return 'RADIOLOGY';
-  if (t.includes('general practice') || t.includes('general_practice')) return 'GENERAL_PRACTICE';
-  if (t.includes('diabet') || t.includes('dietet') || t.includes('prd')) return 'PRIVATE_DIETETIC';
+  if (t.includes('diabet') || t.includes('dietet') || t.includes('prd') || t.includes('diabetic')) return 'PRIVATE_DIETETIC';
   if (t.includes('oral')) return 'ORAL';
+  if (t.includes('private lab') || t.includes('private_lab') || t.includes('medical lab') || t.includes('medical_lab') || t === 'prl') return 'PRIVATE_LAB';
+  if (t.includes('mental') || t === 'meh') return 'MENTAL_HEALTH';
+  if (t.includes('eye') || t === 'eye') return 'EYE';
+  if (t.includes('occupational') || t === 'och') return 'OCCUPATIONAL_HEALTH';
+  if (t.includes('urology') || t.includes('nephr') || t === 'urn') return 'UROLOGY_NEPHR';
+  if (t.includes('imci') || t.includes('childhood') || t === 'imc') return 'IMCI';
+  if (t.includes('emonc') || t === 'emo') return 'EMONC';
   return String(value || '').trim().toUpperCase();
 };
 
@@ -107,6 +137,31 @@ const getFacilityGroupKeyFromProgramStageId = (stageId) => {
   if (!id) return '';
   const entry = Object.entries(SURVEY_PROGRAM_STAGE_BY_GROUP).find(([, value]) => value === id);
   return entry?.[0] || '';
+};
+
+const getProgrammeTypeFromGroupId = (groupId) => {
+  const g = String(groupId || '').trim().toUpperCase();
+  if (g === 'HOSPITAL') return 'hospital';
+  if (g === 'CLINICS') return 'clinics';
+  if (g === 'EMS') return 'ems';
+  if (g === 'MORTUARY') return 'mortuary';
+  if (g === 'OBGYN') return 'obgyn';
+  if (g === 'PHYSIOTHERAPY') return 'physiotherapy';
+  if (g === 'RADIOLOGY') return 'radiology';
+  if (g === 'PRIVATE_LAB') return 'private_lab';
+  if (g === 'GENERAL_PRACTICE') return 'general_practice';
+  if (g === 'PRIVATE_DIETETIC') return 'private_diabetic';
+  if (g === 'MENTAL_HEALTH') return 'mental_health';
+  if (g === 'EYE') return 'eye';
+  if (g === 'HOSPICE_PALLIATIVE') return 'hospice_palliative';
+  if (g === 'OCCUPATIONAL_HEALTH') return 'occupational_health';
+  if (g === 'UROLOGY_NEPHR') return 'urology_nephrology';
+  if (g === 'ORAL') return 'oral';
+  if (g === 'IMCI') return 'imci';
+  if (g === 'EMONC') return 'emonc';
+  if (g === 'ONCOLOGY') return 'oncology';
+  if (g === 'PAEDIATRIC') return 'paediatric';
+  return 'ems'; // fallback
 };
 
 export default function Report() {
@@ -155,6 +210,19 @@ export default function Report() {
         private_oncology_full_configuration: privateOncologyConfig.service_elements,
         oncology_full_configuration: privateOncologyConfig.service_elements,
         paediatric_full_configuration: paediatricConfig.service_elements,
+        private_medical_lab_full_configuration: privateMedicalLabConfig.service_elements,
+        private_lab_full_configuration: privateMedicalLabConfig.service_elements,
+        mental_health_full_configuration: mentalHealthConfig.service_elements,
+        eye_full_configuration: eyeConfig.service_elements,
+        hospice_full_configuration: hospiceConfig.service_elements,
+        hospice_palliative_full_configuration: hospiceConfig.service_elements,
+        occupational_health_full_configuration: occupationalHealthConfig.service_elements,
+        urology_full_configuration: urologyConfig.service_elements,
+        urology_nephrology_full_configuration: urologyConfig.service_elements,
+        childhood_illness_full_configuration: childhoodIllnessConfig.service_elements,
+        imci_full_configuration: childhoodIllnessConfig.service_elements,
+        emergency_management_full_configuration: emergencyManagementConfig.service_elements,
+        emonc_full_configuration: emergencyManagementConfig.service_elements,
       };
     }
     return configBundles[activeConfigVersionId].config || {};
@@ -181,6 +249,18 @@ export default function Report() {
         'private_oncology_full_configuration',
         'oncology_full_configuration',
         'paediatric_full_configuration',
+        'private_medical_lab_full_configuration',
+        'private_lab_full_configuration',
+        'mental_health_full_configuration',
+        'hospice_full_configuration',
+        'hospice_palliative_full_configuration',
+        'occupational_health_full_configuration',
+        'urology_full_configuration',
+        'urology_nephrology_full_configuration',
+        'childhood_illness_full_configuration',
+        'imci_full_configuration',
+        'emergency_management_full_configuration',
+        'emonc_full_configuration',
       ];
 
       possibleKeys.forEach((key) => {
@@ -228,6 +308,19 @@ export default function Report() {
         'private_oncology_full_configuration': privateOncologyMatrix.private_oncology,
         'oncology_full_configuration': privateOncologyMatrix.private_oncology,
         'paediatric_full_configuration': paediatricMatrix.paediatric,
+        'private_medical_lab_full_configuration': privateMedicalLabMatrix.private_medical_lab,
+        'private_lab_full_configuration': privateMedicalLabMatrix.private_medical_lab,
+        'mental_health_full_configuration': mentalHealthMatrix.mental_health,
+        'eye_full_configuration': eyeMatrix.eye,
+        'hospice_full_configuration': hospiceMatrix.hospice,
+        'hospice_palliative_full_configuration': hospiceMatrix.hospice,
+        'occupational_health_full_configuration': occupationalHealthMatrix.occupational_health,
+        'urology_full_configuration': urologyMatrix.urology,
+        'urology_nephrology_full_configuration': urologyMatrix.urology,
+        'childhood_illness_full_configuration': childhoodIllnessMatrix.childhood_illness,
+        'imci_full_configuration': childhoodIllnessMatrix.childhood_illness,
+        'emergency_management_full_configuration': emergencyManagementMatrix.emergency_management,
+        'emonc_full_configuration': emergencyManagementMatrix.emergency_management,
       };
       Object.keys(configLinksMap).forEach(key => {
         const linkList = configLinksMap[key];
@@ -280,19 +373,7 @@ export default function Report() {
   const queryFacilityGroupKey = useMemo(() => toFacilityGroupKey(reportQueryParams.facilityGroup), [reportQueryParams.facilityGroup]);
 
   const pType = useMemo(() => {
-    const groupId = queryFacilityGroupKey;
-    if (groupId === 'HOSPITAL') return 'hospital';
-    if (groupId === 'CLINICS') return 'clinics';
-    if (groupId === 'MORTUARY') return 'mortuary';
-    if (groupId === 'OBGYN') return 'obgyn';
-    if (groupId === 'PHYSIOTHERAPY') return 'physiotherapy';
-    if (groupId === 'RADIOLOGY') return 'radiology';
-    if (groupId === 'GENERAL_PRACTICE') return 'general_practice';
-    if (groupId === 'PRIVATE_DIETETIC') return 'private_diabetic';
-    if (groupId === 'ORAL') return 'oral';
-    if (groupId === 'ONCOLOGY') return 'oncology';
-    if (groupId === 'PAEDIATRIC') return 'paediatric';
-    return groupId ? 'ems' : '';
+    return getProgrammeTypeFromGroupId(queryFacilityGroupKey);
   }, [queryFacilityGroupKey]);
 
   useEffect(() => {
@@ -656,6 +737,43 @@ export default function Report() {
 		        }).catch(() => []);
 		        all = mergeEvents(all, facilityEvents);
 	
+		        // Merge local drafts to support offline or un-synced data visibility on reports
+		        try {
+		          const localDrafts = await indexedDBService.getAllDrafts(user).catch(() => []);
+		          const convertedDrafts = localDrafts.map((draft) => {
+		            const dataValues = [];
+		            Object.entries(draft.formData || {}).forEach(([key, val]) => {
+		              if (['orgUnit', 'eventDate', 'programStage', 'typeOfAssessment', 'facilityGroup', 'completedSections'].includes(key)) return;
+		              dataValues.push({
+		                dataElement: key,
+		                value: String(val)
+		              });
+		            });
+
+		            const draftTei = draft.metadata?.teiId || draft.metadata?.trackedEntityInstance || reportQueryParams.teiId || '';
+		            const draftOrgUnit = draft.formData?.orgUnit || draft.metadata?.orgUnitId || selectedFacilityId || '';
+		            const draftStage = draft.metadata?.programStageId || draft.formData?.programStage || effectiveStageId || stageId || '';
+		            const draftDate = draft.formData?.eventDate || draft.lastUpdated || draft.createdAt || new Date().toISOString();
+
+		            return {
+		              event: draft.eventId,
+		              enrollment: draft.metadata?.enrollmentId || draft.eventId,
+		              eventDate: draftDate,
+		              program: programId,
+		              programStage: draftStage,
+		              orgUnit: draftOrgUnit,
+		              trackedEntityInstance: draftTei,
+		              status: 'ACTIVE',
+		              dataValues,
+		              notes: [],
+		              isDraft: true
+		            };
+		          });
+		          all = mergeEvents(all, convertedDrafts);
+		        } catch (e) {
+		          console.warn('Failed to load or merge local drafts for report:', e);
+		        }
+	
 
         if (all.length === 0) {
           showToast?.('No assessments found for this facility.', 'info');
@@ -702,23 +820,31 @@ export default function Report() {
           return String(idx + 1);
         };
 
-        // New model: one TEI = one assessment; events under that TEI are the SE rows + one meta/final event
-        const bundlesByTei = {};
+        // New model: one enrollment = one assessment; events under that enrollment are the SE rows + one meta/final event
+        const bundlesByEnrollment = {};
         all.forEach(ev => {
-          const teiId = ev?.trackedEntityInstance;
-          if (!teiId) return;
-          if (!bundlesByTei[teiId]) bundlesByTei[teiId] = { teiId, events: [], byTag: {}, metaEvents: [] };
-          bundlesByTei[teiId].events.push(ev);
+          const enrollmentId = ev?.enrollment || ev?.trackedEntityInstance;
+          if (!enrollmentId) return;
+          if (!bundlesByEnrollment[enrollmentId]) {
+            bundlesByEnrollment[enrollmentId] = {
+              enrollmentId,
+              teiId: ev?.trackedEntityInstance || null,
+              events: [],
+              byTag: {},
+              metaEvents: []
+            };
+          }
+          bundlesByEnrollment[enrollmentId].events.push(ev);
           const tag = getNumericSysTag(ev);
           if (tag) {
-            if (!bundlesByTei[teiId].byTag[tag]) bundlesByTei[teiId].byTag[tag] = [];
-            bundlesByTei[teiId].byTag[tag].push(ev);
+            if (!bundlesByEnrollment[enrollmentId].byTag[tag]) bundlesByEnrollment[enrollmentId].byTag[tag] = [];
+            bundlesByEnrollment[enrollmentId].byTag[tag].push(ev);
           } else {
-            bundlesByTei[teiId].metaEvents.push(ev);
+            bundlesByEnrollment[enrollmentId].metaEvents.push(ev);
           }
         });
 
-        const bundles = Object.values(bundlesByTei).map(bundle => {
+        const bundles = Object.values(bundlesByEnrollment).map(bundle => {
           const typeEvents = bundle.events.filter(ev => getTypeValue(ev));
           const groupEvents = bundle.events.filter(ev => getGroupValue(ev));
           const latestTypeEvent = pickLatest(typeEvents) || pickLatest(bundle.metaEvents) || pickLatest(bundle.events);
@@ -736,8 +862,9 @@ export default function Report() {
 
 	        const targetBundle = (() => {
 	          if (reportQueryParams.teiId) {
-	            const byTei = bundles.find(b => b.teiId === reportQueryParams.teiId);
-	            if (byTei) return byTei;
+	            const matching = bundles.filter(b => b.teiId === reportQueryParams.teiId)
+	              .sort((a, b) => new Date(b.assessmentDate) - new Date(a.assessmentDate));
+	            if (matching.length > 0) return matching[0];
 	          }
 	          if (reportQueryParams.eventId) {
 	            return bundles.find(b => (b.events || []).some(ev =>
@@ -930,10 +1057,18 @@ export default function Report() {
             else if (programmeType === 'physiotherapy') arr = activeConfig.physiotherapy_full_configuration || activeConfig.physiotheraphy_full_configuration || [];
             else if (programmeType === 'radiology') arr = activeConfig.radiology_full_configuration || [];
             else if (programmeType === 'general_practice') arr = activeConfig.general_practice_full_configuration || [];
-            else if (programmeType === 'private_diabetic') arr = activeConfig.private_diabetic_full_configuration || [];
+            else if (programmeType === 'private_diabetic' || programmeType === 'private_dietetic') arr = activeConfig.private_diabetic_full_configuration || [];
             else if (programmeType === 'oral') arr = activeConfig.oral_full_configuration || [];
             else if (programmeType === 'oncology') arr = activeConfig.oncology_full_configuration || activeConfig.private_oncology_full_configuration || [];
             else if (programmeType === 'paediatric') arr = activeConfig.paediatric_full_configuration || [];
+            else if (programmeType === 'private_lab' || programmeType === 'private_medical_lab') arr = activeConfig.private_medical_lab_full_configuration || [];
+            else if (programmeType === 'mental_health') arr = activeConfig.mental_health_full_configuration || [];
+            else if (programmeType === 'eye') arr = activeConfig.eye_full_configuration || [];
+            else if (programmeType === 'hospice_palliative' || programmeType === 'hospice') arr = activeConfig.hospice_full_configuration || [];
+            else if (programmeType === 'occupational_health') arr = activeConfig.occupational_health_full_configuration || [];
+            else if (programmeType === 'urology_nephrology' || programmeType === 'urology') arr = activeConfig.urology_full_configuration || [];
+            else if (programmeType === 'imci' || programmeType === 'childhood_illness') arr = activeConfig.childhood_illness_full_configuration || [];
+            else if (programmeType === 'emonc' || programmeType === 'emergency_management') arr = activeConfig.emergency_management_full_configuration || [];
             const map = {};
             (arr || []).forEach(se => {
               const n = parseInt(String(se.se_id || ''), 10);
@@ -1122,7 +1257,7 @@ export default function Report() {
   const baselineScoring = useAssessmentScoring(baselineAssessment || { sections: [] });
 
   // Collapsible state for Facility Overview
-  const [isFacilityOverviewCollapsed, setIsFacilityOverviewCollapsed] = useState(true);
+  const [isFacilityOverviewCollapsed, setIsFacilityOverviewCollapsed] = useState(false);
   // Large radar chart dialog state
   const [isRadarChartOpen, setIsRadarChartOpen] = useState(false);
 	  // Collapsible state for C / PC / NC stacked distribution
@@ -1249,29 +1384,7 @@ export default function Report() {
       }, 0);
 
       // Critical criteria counts
-      const reportPType = reportInfo?.groupId === 'HOSPITAL'
-        ? 'hospital'
-        : reportInfo?.groupId === 'CLINICS'
-        ? 'clinics'
-        : reportInfo?.groupId === 'MORTUARY'
-        ? 'mortuary'
-        : reportInfo?.groupId === 'OBGYN'
-        ? 'obgyn'
-        : reportInfo?.groupId === 'PHYSIOTHERAPY'
-        ? 'physiotherapy'
-        : reportInfo?.groupId === 'RADIOLOGY'
-        ? 'radiology'
-        : reportInfo?.groupId === 'GENERAL_PRACTICE'
-        ? 'general_practice'
-        : reportInfo?.groupId === 'PRIVATE_DIETETIC'
-        ? 'private_diabetic'
-        : reportInfo?.groupId === 'ORAL'
-        ? 'oral'
-        : reportInfo?.groupId === 'ONCOLOGY'
-        ? 'oncology'
-        : reportInfo?.groupId === 'PAEDIATRIC'
-        ? 'paediatric'
-        : 'ems';
+      const reportPType = getProgrammeTypeFromGroupId(reportInfo?.groupId);
       const criticalLookup = (programmeScoringMeta[reportPType] || programmeScoringMeta.hospital).criticalLookup || {};
       const getCritical = (list) => list.filter(c => {
         const code = String(c.code || '').trim();
@@ -1661,7 +1774,7 @@ export default function Report() {
 
   const getPiLabel = (piCode) => {
     if (!piCode) return '';
-    const programmeType = (reportInfo?.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo?.groupId === 'CLINICS') ? 'clinics' : (reportInfo?.groupId === 'EMS') ? 'ems' : (reportInfo?.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo?.groupId === 'OBGYN') ? 'obgyn' : (reportInfo?.groupId === 'PHYSIOTHERAPY') ? 'physiotherapy' : (reportInfo?.groupId === 'RADIOLOGY') ? 'radiology' : (reportInfo?.groupId === 'GENERAL_PRACTICE') ? 'general_practice' : (reportInfo?.groupId === 'PRIVATE_DIETETIC') ? 'private_diabetic' : (reportInfo?.groupId === 'ORAL') ? 'oral' : (reportInfo?.groupId === 'ONCOLOGY') ? 'oncology' : (reportInfo?.groupId === 'PAEDIATRIC') ? 'paediatric' : 'ems';
+    const programmeType = getProgrammeTypeFromGroupId(reportInfo?.groupId);
     const configMap = {
       hospital: activeConfig?.hospital_full_configuration,
       mortuary: activeConfig?.mortuary_full_configuration,
@@ -1678,7 +1791,20 @@ export default function Report() {
       oral: activeConfig?.oral_full_configuration || [],
       oncology: activeConfig?.oncology_full_configuration || [],
       private_oncology: activeConfig?.private_oncology_full_configuration || [],
-      paediatric: activeConfig?.paediatric_full_configuration || []
+      paediatric: activeConfig?.paediatric_full_configuration || [],
+      private_lab: activeConfig?.private_medical_lab_full_configuration || [],
+      private_medical_lab: activeConfig?.private_medical_lab_full_configuration || [],
+      mental_health: activeConfig?.mental_health_full_configuration || [],
+      eye: activeConfig?.eye_full_configuration || [],
+      hospice_palliative: activeConfig?.hospice_full_configuration || [],
+      hospice: activeConfig?.hospice_full_configuration || [],
+      occupational_health: activeConfig?.occupational_health_full_configuration || [],
+      urology_nephrology: activeConfig?.urology_full_configuration || [],
+      urology: activeConfig?.urology_full_configuration || [],
+      imci: activeConfig?.childhood_illness_full_configuration || [],
+      childhood_illness: activeConfig?.childhood_illness_full_configuration || [],
+      emonc: activeConfig?.emergency_management_full_configuration || [],
+      emergency_management: activeConfig?.emergency_management_full_configuration || [],
     };
     const config = configMap[programmeType] || [];
     for (const se of config) {
@@ -1693,7 +1819,7 @@ export default function Report() {
 
   const getStandardLabel = (standardCode) => {
     if (!standardCode) return '';
-    const programmeType = (reportInfo?.groupId === 'HOSPITAL') ? 'hospital' : (reportInfo?.groupId === 'CLINICS') ? 'clinics' : (reportInfo?.groupId === 'EMS') ? 'ems' : (reportInfo?.groupId === 'MORTUARY') ? 'mortuary' : (reportInfo?.groupId === 'OBGYN') ? 'obgyn' : (reportInfo?.groupId === 'PHYSIOTHERAPY') ? 'physiotherapy' : (reportInfo?.groupId === 'RADIOLOGY') ? 'radiology' : (reportInfo?.groupId === 'GENERAL_PRACTICE') ? 'general_practice' : (reportInfo?.groupId === 'PRIVATE_DIETETIC') ? 'private_diabetic' : (reportInfo?.groupId === 'ORAL') ? 'oral' : (reportInfo?.groupId === 'ONCOLOGY') ? 'oncology' : (reportInfo?.groupId === 'PAEDIATRIC') ? 'paediatric' : 'ems';
+    const programmeType = getProgrammeTypeFromGroupId(reportInfo?.groupId);
     const configMap = {
       hospital: activeConfig?.hospital_full_configuration,
       mortuary: activeConfig?.mortuary_full_configuration,
@@ -1710,7 +1836,20 @@ export default function Report() {
       oral: activeConfig?.oral_full_configuration || [],
       oncology: activeConfig?.oncology_full_configuration || [],
       private_oncology: activeConfig?.private_oncology_full_configuration || [],
-      paediatric: activeConfig?.paediatric_full_configuration || []
+      paediatric: activeConfig?.paediatric_full_configuration || [],
+      private_lab: activeConfig?.private_medical_lab_full_configuration || [],
+      private_medical_lab: activeConfig?.private_medical_lab_full_configuration || [],
+      mental_health: activeConfig?.mental_health_full_configuration || [],
+      eye: activeConfig?.eye_full_configuration || [],
+      hospice_palliative: activeConfig?.hospice_full_configuration || [],
+      hospice: activeConfig?.hospice_full_configuration || [],
+      occupational_health: activeConfig?.occupational_health_full_configuration || [],
+      urology_nephrology: activeConfig?.urology_full_configuration || [],
+      urology: activeConfig?.urology_full_configuration || [],
+      imci: activeConfig?.childhood_illness_full_configuration || [],
+      childhood_illness: activeConfig?.childhood_illness_full_configuration || [],
+      emonc: activeConfig?.emergency_management_full_configuration || [],
+      emergency_management: activeConfig?.emergency_management_full_configuration || [],
     };
     const config = configMap[programmeType] || [];
     for (const se of config) {

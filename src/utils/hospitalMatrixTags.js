@@ -70,7 +70,44 @@ export const getMatrixTagForLink = (rootCode, linkedCode) => {
  * @returns {Array<Object>} new array with decorated linked_criteria
  */
 export const decorateHospitalLinksWithMatrixTags = (hospitalLinksRaw) => {
-    const links = Array.isArray(hospitalLinksRaw) ? hospitalLinksRaw : [];
+    const links = Array.isArray(hospitalLinksRaw) ? [...hospitalLinksRaw] : [];
+    
+    // Create a Set of normalized criterion codes that are already present in hospitalLinksRaw
+    const existingKeys = new Set(
+        links
+            .map(l => l && l.criteria ? normalizeCriterionCode(l.criteria) : null)
+            .filter(Boolean)
+    );
+
+    // Read all rows from the master matrixData and append missing ones
+    const matrixRows = Array.isArray(matrixData) ? matrixData : [];
+    matrixRows.forEach((row) => {
+        if (!row || !row.criteria) return;
+        const normCode = normalizeCriterionCode(row.criteria);
+        if (!normCode || existingKeys.has(normCode)) return;
+
+        // Construct standard link object format for the missing criteria
+        const constructedLinked = (row.linked_criteria || [])
+            .map(lc => {
+                if (!lc || !lc.id) return null;
+                const tag = String(lc.bg_label || '').toLowerCase() === 'green'
+                    ? 'G'
+                    : String(lc.bg_label || '').toLowerCase() === 'blue'
+                        ? 'B'
+                        : null;
+                return tag ? `${lc.id}-${tag}` : lc.id;
+            })
+            .filter(Boolean);
+
+        links.push({
+            criteria: row.criteria,
+            description: "",
+            linked_criteria: constructedLinked,
+            root: []
+        });
+        existingKeys.add(normCode);
+    });
+
     return links.map((linkObj) => {
         if (!linkObj || !linkObj.criteria) return linkObj;
         const rootCode = linkObj.criteria;

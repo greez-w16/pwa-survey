@@ -29,6 +29,27 @@ import privateOncologyMatrix from '../assets/private-oncology/private_oncology_m
 import paediatricConfig from '../assets/paediatric/paediatric_config.json';
 import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
 
+// Import 8 remaining facility matrices and matrixConfig parser
+import { buildConfigFromMatrix } from '../utils/matrixConfig';
+import privateMedicalLabMatrix from '../assets/private-medical-lab/private_medical_lab_matrix.json';
+import mentalHealthMatrix from '../assets/mental-health/mental_health_matrix.json';
+import eyeMatrix from '../assets/eye/eye_matrix.json';
+import hospiceMatrix from '../assets/hospice/hospice_matrix.json';
+import occupationalHealthMatrix from '../assets/occupational-health/occupational_health_matrix.json';
+import urologyMatrix from '../assets/urology/urology_matrix.json';
+import childhoodIllnessMatrix from '../assets/childhood-illness/childhood_illness_matrix.json';
+import emergencyManagementMatrix from '../assets/emergency-management/emergency_management_matrix.json';
+
+// Parse baseline configs from matrices
+const privateMedicalLabConfig = buildConfigFromMatrix('private_medical_lab', privateMedicalLabMatrix.private_medical_lab);
+const mentalHealthConfig = buildConfigFromMatrix('mental_health', mentalHealthMatrix.mental_health);
+const eyeConfig = buildConfigFromMatrix('eye', eyeMatrix.eye);
+const hospiceConfig = buildConfigFromMatrix('hospice', hospiceMatrix.hospice);
+const occupationalHealthConfig = buildConfigFromMatrix('occupational_health', occupationalHealthMatrix.occupational_health);
+const urologyConfig = buildConfigFromMatrix('urology', urologyMatrix.urology);
+const childhoodIllnessConfig = buildConfigFromMatrix('childhood_illness', childhoodIllnessMatrix.childhood_illness);
+const emergencyManagementConfig = buildConfigFromMatrix('emergency_management', emergencyManagementMatrix.emergency_management);
+
 import { cleanStandardStatement } from '../utils/normalization';
 import { Alert, Snackbar } from '@mui/material';
 
@@ -51,7 +72,15 @@ const sanitizeConfig = (config) => {
         'oral_full_configuration',
         'private_oncology_full_configuration',
         'oncology_full_configuration',
-        'paediatric_full_configuration'
+        'paediatric_full_configuration',
+        'private_medical_lab_full_configuration',
+        'mental_health_full_configuration',
+        'eye_full_configuration',
+        'hospice_full_configuration',
+        'occupational_health_full_configuration',
+        'urology_full_configuration',
+        'childhood_illness_full_configuration',
+        'emergency_management_full_configuration'
     ];
     facilityKeys.forEach(key => {
         if (Array.isArray(sanitized[key])) {
@@ -223,6 +252,14 @@ export const AppProvider = ({ children }) => {
 		            private_oncology_full_configuration: privateOncologyConfig.service_elements,
 		            oncology_full_configuration: privateOncologyConfig.service_elements,
 		            paediatric_full_configuration: paediatricConfig.service_elements,
+		            private_medical_lab_full_configuration: privateMedicalLabConfig.service_elements,
+		            mental_health_full_configuration: mentalHealthConfig.service_elements,
+		            eye_full_configuration: eyeConfig.service_elements,
+		            hospice_full_configuration: hospiceConfig.service_elements,
+		            occupational_health_full_configuration: occupationalHealthConfig.service_elements,
+		            urology_full_configuration: urologyConfig.service_elements,
+		            childhood_illness_full_configuration: childhoodIllnessConfig.service_elements,
+		            emergency_management_full_configuration: emergencyManagementConfig.service_elements,
 		        });
 		        const baseLinks = {
 		            ems: emsLinks,
@@ -241,6 +278,14 @@ export const AppProvider = ({ children }) => {
 		            oncology: privateOncologyMatrix.private_oncology,
 		            private_oncology: privateOncologyMatrix.private_oncology,
 		            paediatric: paediatricMatrix.paediatric,
+		            private_medical_lab: privateMedicalLabMatrix.private_medical_lab,
+		            mental_health: mentalHealthMatrix.mental_health,
+		            eye: eyeMatrix.eye,
+		            hospice: hospiceMatrix.hospice,
+		            occupational_health: occupationalHealthMatrix.occupational_health,
+		            urology: urologyMatrix.urology,
+		            childhood_illness: childhoodIllnessMatrix.childhood_illness,
+		            emergency_management: emergencyManagementMatrix.emergency_management,
 		        };
 
 		        const baselineBundle = {
@@ -339,6 +384,58 @@ export const AppProvider = ({ children }) => {
                         { key: 'paediatric_full_configuration' },
                         { key: 'paediatric_links' },
                     ],
+                    private_medical_lab: [
+                        { key: 'private_medical_lab_full_configuration' },
+                        { key: 'private_medical_lab_links' },
+                    ],
+                    private_lab: [
+                        { key: 'private_medical_lab_full_configuration' },
+                        { key: 'private_medical_lab_links' },
+                    ],
+                    mental_health: [
+                        { key: 'mental_health_full_configuration' },
+                        { key: 'mental_health_links' },
+                    ],
+                    eye: [
+                        { key: 'eye_full_configuration' },
+                        { key: 'eye_links' },
+                    ],
+                    hospice: [
+                        { key: 'hospice_full_configuration' },
+                        { key: 'hospice_links' },
+                    ],
+                    hospice_palliative: [
+                        { key: 'hospice_full_configuration' },
+                        { key: 'hospice_links' },
+                    ],
+                    occupational_health: [
+                        { key: 'occupational_health_full_configuration' },
+                        { key: 'occupational_health_links' },
+                    ],
+                    urology: [
+                        { key: 'urology_full_configuration' },
+                        { key: 'urology_links' },
+                    ],
+                    urology_nephrology: [
+                        { key: 'urology_full_configuration' },
+                        { key: 'urology_links' },
+                    ],
+                    childhood_illness: [
+                        { key: 'childhood_illness_full_configuration' },
+                        { key: 'childhood_illness_links' },
+                    ],
+                    imci: [
+                        { key: 'childhood_illness_full_configuration' },
+                        { key: 'childhood_illness_links' },
+                    ],
+                    emergency_management: [
+                        { key: 'emergency_management_full_configuration' },
+                        { key: 'emergency_management_links' },
+                    ],
+                    emonc: [
+                        { key: 'emergency_management_full_configuration' },
+                        { key: 'emergency_management_links' },
+                    ],
                 };
                 const keys = facilityKeys[normalizedFacility] || Object.values(facilityKeys).flat();
                 const loadScope = normalizedFacility || 'all';
@@ -398,7 +495,7 @@ export const AppProvider = ({ children }) => {
                             const activeId = activeConfigVersionId || 'v1';
                             const currentBundle = next[activeId] || {};
 
-                            const remoteConfig = sanitizeConfig({
+                             const remoteConfig = sanitizeConfig({
                                 ...currentBundle.config,
                                 ...(unwrapDataStoreArray(fetchedData.hospital_full_configuration, 'hospital_full_configuration') ? { hospital_full_configuration: unwrapDataStoreArray(fetchedData.hospital_full_configuration, 'hospital_full_configuration') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.clinics_full_configuration, 'clinics_full_configuration') ? { clinics_full_configuration: unwrapDataStoreArray(fetchedData.clinics_full_configuration, 'clinics_full_configuration') } : {}),
@@ -416,6 +513,14 @@ export const AppProvider = ({ children }) => {
                                 ...(unwrapDataStoreArray(fetchedData.private_oncology_full_configuration, 'private_oncology_full_configuration') ? { private_oncology_full_configuration: unwrapDataStoreArray(fetchedData.private_oncology_full_configuration, 'private_oncology_full_configuration') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.oncology_full_configuration, 'oncology_full_configuration') ? { oncology_full_configuration: unwrapDataStoreArray(fetchedData.oncology_full_configuration, 'oncology_full_configuration') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.paediatric_full_configuration, 'paediatric_full_configuration') ? { paediatric_full_configuration: unwrapDataStoreArray(fetchedData.paediatric_full_configuration, 'paediatric_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.private_medical_lab_full_configuration, 'private_medical_lab_full_configuration') ? { private_medical_lab_full_configuration: unwrapDataStoreArray(fetchedData.private_medical_lab_full_configuration, 'private_medical_lab_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.mental_health_full_configuration, 'mental_health_full_configuration') ? { mental_health_full_configuration: unwrapDataStoreArray(fetchedData.mental_health_full_configuration, 'mental_health_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.eye_full_configuration, 'eye_full_configuration') ? { eye_full_configuration: unwrapDataStoreArray(fetchedData.eye_full_configuration, 'eye_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.hospice_full_configuration, 'hospice_full_configuration') ? { hospice_full_configuration: unwrapDataStoreArray(fetchedData.hospice_full_configuration, 'hospice_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.occupational_health_full_configuration, 'occupational_health_full_configuration') ? { occupational_health_full_configuration: unwrapDataStoreArray(fetchedData.occupational_health_full_configuration, 'occupational_health_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.urology_full_configuration, 'urology_full_configuration') ? { urology_full_configuration: unwrapDataStoreArray(fetchedData.urology_full_configuration, 'urology_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.childhood_illness_full_configuration, 'childhood_illness_full_configuration') ? { childhood_illness_full_configuration: unwrapDataStoreArray(fetchedData.childhood_illness_full_configuration, 'childhood_illness_full_configuration') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.emergency_management_full_configuration, 'emergency_management_full_configuration') ? { emergency_management_full_configuration: unwrapDataStoreArray(fetchedData.emergency_management_full_configuration, 'emergency_management_full_configuration') } : {}),
                             });
 
                             const remoteLinks = {
@@ -434,6 +539,14 @@ export const AppProvider = ({ children }) => {
                                 ...(unwrapDataStoreArray(fetchedData.private_oncology_links, 'private_oncology_links') ? { private_oncology: unwrapDataStoreArray(fetchedData.private_oncology_links, 'private_oncology_links'), oncology: unwrapDataStoreArray(fetchedData.private_oncology_links, 'private_oncology_links') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.oncology_links, 'oncology_links') ? { oncology: unwrapDataStoreArray(fetchedData.oncology_links, 'oncology_links'), private_oncology: unwrapDataStoreArray(fetchedData.oncology_links, 'oncology_links') } : {}),
                                 ...(unwrapDataStoreArray(fetchedData.paediatric_links, 'paediatric_links') ? { paediatric: unwrapDataStoreArray(fetchedData.paediatric_links, 'paediatric_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.private_medical_lab_links, 'private_medical_lab_links') ? { private_medical_lab: unwrapDataStoreArray(fetchedData.private_medical_lab_links, 'private_medical_lab_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.mental_health_links, 'mental_health_links') ? { mental_health: unwrapDataStoreArray(fetchedData.mental_health_links, 'mental_health_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.eye_links, 'eye_links') ? { eye: unwrapDataStoreArray(fetchedData.eye_links, 'eye_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.hospice_links, 'hospice_links') ? { hospice: unwrapDataStoreArray(fetchedData.hospice_links, 'hospice_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.occupational_health_links, 'occupational_health_links') ? { occupational_health: unwrapDataStoreArray(fetchedData.occupational_health_links, 'occupational_health_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.urology_links, 'urology_links') ? { urology: unwrapDataStoreArray(fetchedData.urology_links, 'urology_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.childhood_illness_links, 'childhood_illness_links') ? { childhood_illness: unwrapDataStoreArray(fetchedData.childhood_illness_links, 'childhood_illness_links') } : {}),
+                                ...(unwrapDataStoreArray(fetchedData.emergency_management_links, 'emergency_management_links') ? { emergency_management: unwrapDataStoreArray(fetchedData.emergency_management_links, 'emergency_management_links') } : {}),
                             };
                             const remoteCompute = unwrapDataStoreObject(fetchedData.hospital_compute_criteria, 'hospital_compute_criteria');
 

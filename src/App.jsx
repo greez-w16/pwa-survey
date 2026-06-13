@@ -37,6 +37,27 @@ import privateOncologyMatrix from './assets/private-oncology/private_oncology_ma
 import paediatricConfig from './assets/paediatric/paediatric_config.json';
 import paediatricMatrix from './assets/paediatric/paediatric_matrix.json';
 
+// Import remaining 8 facility matrices and matrixConfig parser
+import { buildConfigFromMatrix } from './utils/matrixConfig';
+import privateMedicalLabMatrix from './assets/private-medical-lab/private_medical_lab_matrix.json';
+import mentalHealthMatrix from './assets/mental-health/mental_health_matrix.json';
+import eyeMatrix from './assets/eye/eye_matrix.json';
+import hospiceMatrix from './assets/hospice/hospice_matrix.json';
+import occupationalHealthMatrix from './assets/occupational-health/occupational_health_matrix.json';
+import urologyMatrix from './assets/urology/urology_matrix.json';
+import childhoodIllnessMatrix from './assets/childhood-illness/childhood_illness_matrix.json';
+import emergencyManagementMatrix from './assets/emergency-management/emergency_management_matrix.json';
+
+// Parse baseline configs from matrices
+const privateMedicalLabConfig = buildConfigFromMatrix('private_medical_lab', privateMedicalLabMatrix.private_medical_lab);
+const mentalHealthConfig = buildConfigFromMatrix('mental_health', mentalHealthMatrix.mental_health);
+const eyeConfig = buildConfigFromMatrix('eye', eyeMatrix.eye);
+const hospiceConfig = buildConfigFromMatrix('hospice', hospiceMatrix.hospice);
+const occupationalHealthConfig = buildConfigFromMatrix('occupational_health', occupationalHealthMatrix.occupational_health);
+const urologyConfig = buildConfigFromMatrix('urology', urologyMatrix.urology);
+const childhoodIllnessConfig = buildConfigFromMatrix('childhood_illness', childhoodIllnessMatrix.childhood_illness);
+const emergencyManagementConfig = buildConfigFromMatrix('emergency_management', emergencyManagementMatrix.emergency_management);
+
 import { decorateHospitalLinksWithMatrixTags } from './utils/hospitalMatrixTags';
 import './App.css';
 import Report from './pages/Report';
@@ -79,6 +100,8 @@ const ALL_CANDIDATE_NAMESPACES = [
 const resolveGroupIdFromText = (text) => {
   if (!text) return null;
   const t = String(text).toLowerCase();
+  if (t.includes('general practice') || t.includes('general_practice') || t.includes('gep')) return 'GENERAL_PRACTICE';
+  if (t.includes('hospice') || t.includes('palliative') || t.includes('hop')) return 'HOSPICE_PALLIATIVE';
   if (t.includes('hosp')) return 'HOSPITAL';
   if (t.includes('clinic')) return 'CLINICS';
   if (t.includes('ems') || t.startsWith('se') || t.includes(' se')) return 'SE';
@@ -87,20 +110,47 @@ const resolveGroupIdFromText = (text) => {
   // New facility types
   if (t.includes('physio')) return 'PHYSIOTHERAPY';
   if (t.includes('radiology') || t.includes('rad')) return 'RADIOLOGY';
-  if (t.includes('private lab') || t.includes('prl')) return 'PRIVATE_LAB';
-  if (t.includes('general practice') || t.includes('gep')) return 'GENERAL_PRACTICE';
-  if (t.includes('private dietetic') || t.includes('prd')) return 'PRIVATE_DIETETIC';
-  if (t.includes('mental health') || t.includes('meh')) return 'MENTAL_HEALTH';
+  if (t.includes('private lab') || t.includes('private_lab') || t.includes('medical lab') || t.includes('medical_lab') || t.includes('prl')) return 'PRIVATE_LAB';
+  if (t.includes('private dietetic') || t.includes('private_dietetic') || t.includes('prd') || t.includes('diabet')) return 'PRIVATE_DIETETIC';
+  if (t.includes('mental health') || t.includes('mental_health') || t.includes('meh')) return 'MENTAL_HEALTH';
   if (t.includes('eye')) return 'EYE';
-  if (t.includes('hospice') || t.includes('palliative') || t.includes('hop')) return 'HOSPICE_PALLIATIVE';
-  if (t.includes('occupational health') || t.includes('och')) return 'OCCUPATIONAL_HEALTH';
-  if (t.includes('urology') || t.includes('nephrology') || t.includes('urn')) return 'UROLOGY_NEPHR';
+  if (t.includes('occupational health') || t.includes('occupational_health') || t.includes('och')) return 'OCCUPATIONAL_HEALTH';
+  if (t.includes('urology') || t.includes('nephrology') || t.includes('urology_nephrology') || t.includes('urn')) return 'UROLOGY_NEPHR';
   if (t.includes('oral')) return 'ORAL';
   if (t.includes('imci')) return 'IMCI';
   if (t.includes('emonc') || t.includes('emo')) return 'EMONC';
   if (t.includes('oncology') || t.includes('onc')) return 'ONCOLOGY';
   if (t.includes('paediatric') || t.includes('pae') || t.includes('pediatric') || t.includes('ped')) return 'PAEDIATRIC';
   return null;
+};
+
+const getProgrammeTypeFromGroup = (group) => {
+  if (!group) return 'ems';
+  const id = String(group.id || '').trim().toUpperCase();
+  const name = String(group.name || '').trim().toLowerCase();
+  
+  if (id === 'HOSPITAL' || name.includes('hospital')) return 'hospital';
+  if (id === 'CLINICS' || name.includes('clinic')) return 'clinics';
+  if (id === 'EMS' || name.includes('ems')) return 'ems';
+  if (id === 'GENERAL' || id === 'MORTUARY' || name.includes('mortu')) return 'mortuary';
+  if (id === 'OBGYN' || name.includes('obg')) return 'obgyn';
+  if (id === 'PHYSIOTHERAPY' || name.includes('physio')) return 'physiotherapy';
+  if (id === 'RADIOLOGY' || name.includes('radio')) return 'radiology';
+  if (id === 'PRIVATE_LAB' || name.includes('private lab') || name.includes('private_lab') || name.includes('medical lab') || name.includes('medical_lab')) return 'private_lab';
+  if (id === 'GENERAL_PRACTICE' || name.includes('general practice') || name.includes('general_practice')) return 'general_practice';
+  if (id === 'PRIVATE_DIETETIC' || name.includes('diabet') || name.includes('dietet') || name.includes('prd')) return 'private_diabetic';
+  if (id === 'MENTAL_HEALTH' || name.includes('mental')) return 'mental_health';
+  if (id === 'EYE' || name.includes('eye')) return 'eye';
+  if (id === 'HOSPICE_PALLIATIVE' || name.includes('hospice') || name.includes('palliative')) return 'hospice_palliative';
+  if (id === 'OCCUPATIONAL_HEALTH' || name.includes('occupational')) return 'occupational_health';
+  if (id === 'UROLOGY_NEPHR' || name.includes('urology') || name.includes('nephr')) return 'urology_nephrology';
+  if (id === 'ORAL' || name.includes('oral')) return 'oral';
+  if (id === 'IMCI' || name.includes('imci') || name.includes('childhood')) return 'imci';
+  if (id === 'EMONC' || name.includes('emonc') || name.includes('emergency')) return 'emonc';
+  if (id === 'ONCOLOGY' || name.includes('oncology') || name.includes('onc')) return 'oncology';
+  if (id === 'PAEDIATRIC' || name.includes('paediatric') || name.includes('pae') || name.includes('pediatric')) return 'paediatric';
+  
+  return 'ems';
 };
 
 const getSurveyProgramStageIdForGroupText = (text) => {
@@ -379,54 +429,7 @@ const PrivateRoute = ({ children }) => {
 		  const location = useLocation();
 	  const assessmentIdParam = searchParams.get('assessmentId');
 
-  const isMortuary =
-    activeGroup?.id === 'GENERAL' ||
-    activeGroup?.id === 'MORTUARY' ||
-    activeGroup?.name === 'Mortuary';
-  const isClinics =
-    activeGroup?.id === 'CLINICS' || activeGroup?.name === 'Clinics';
-  const isHospital =
-    activeGroup?.id === 'HOSPITAL' || activeGroup?.name === 'Hospital';
-  const isObgyn =
-    activeGroup?.id === 'OBGYN' || activeGroup?.name === 'OBGYN';
-  const isPhysiotherapy =
-    activeGroup?.id === 'PHYSIOTHERAPY' || activeGroup?.name === 'Physiotherapy';
-  const isRadiology =
-    activeGroup?.id === 'RADIOLOGY' || activeGroup?.name === 'Radiology';
-  const isGeneralPractice =
-    activeGroup?.id === 'GENERAL_PRACTICE' || activeGroup?.name === 'General Practice';
-  const isPrivateDietetic =
-    activeGroup?.id === 'PRIVATE_DIETETIC' || activeGroup?.name === 'Private Dietetic' || activeGroup?.name === 'Private Diabetic';
-  const isOral =
-    activeGroup?.id === 'ORAL' || activeGroup?.name === 'Oral';
-  const isOncology =
-    activeGroup?.id === 'ONCOLOGY' || activeGroup?.name === 'Oncology';
-  const isPaediatric =
-    activeGroup?.id === 'PAEDIATRIC' || activeGroup?.name === 'Paediatric';
-
-  const programmeType = isMortuary
-    ? 'mortuary'
-    : isClinics
-    ? 'clinics'
-    : isHospital
-    ? 'hospital'
-    : isObgyn
-    ? 'obgyn'
-    : isPhysiotherapy
-    ? 'physiotherapy'
-    : isRadiology
-    ? 'radiology'
-    : isGeneralPractice
-    ? 'general_practice'
-    : isPrivateDietetic
-    ? 'private_diabetic'
-    : isOral
-    ? 'oral'
-    : isOncology
-    ? 'oncology'
-    : isPaediatric
-    ? 'paediatric'
-    : 'ems';
+  const programmeType = getProgrammeTypeFromGroup(activeGroup);
 
   // Auto-load remote configuration when on the form page and configSource is 'datastore'
   useEffect(() => {
@@ -466,6 +469,19 @@ const PrivateRoute = ({ children }) => {
 		          private_oncology_full_configuration: privateOncologyConfig.service_elements,
 		          oncology_full_configuration: privateOncologyConfig.service_elements,
 		          paediatric_full_configuration: paediatricConfig.service_elements,
+		          private_medical_lab_full_configuration: privateMedicalLabConfig.service_elements,
+		          private_lab_full_configuration: privateMedicalLabConfig.service_elements,
+		          mental_health_full_configuration: mentalHealthConfig.service_elements,
+		          eye_full_configuration: eyeConfig.service_elements,
+		          hospice_full_configuration: hospiceConfig.service_elements,
+		          hospice_palliative_full_configuration: hospiceConfig.service_elements,
+		          occupational_health_full_configuration: occupationalHealthConfig.service_elements,
+		          urology_full_configuration: urologyConfig.service_elements,
+		          urology_nephrology_full_configuration: urologyConfig.service_elements,
+		          childhood_illness_full_configuration: childhoodIllnessConfig.service_elements,
+		          imci_full_configuration: childhoodIllnessConfig.service_elements,
+		          emergency_management_full_configuration: emergencyManagementConfig.service_elements,
+		          emonc_full_configuration: emergencyManagementConfig.service_elements,
 		      };
 
     const baseLinks = bundle && bundle.links
@@ -487,6 +503,19 @@ const PrivateRoute = ({ children }) => {
           oncology: privateOncologyMatrix.private_oncology,
           private_oncology: privateOncologyMatrix.private_oncology,
           paediatric: paediatricMatrix.paediatric,
+          private_lab: privateMedicalLabMatrix.private_medical_lab,
+          private_medical_lab: privateMedicalLabMatrix.private_medical_lab,
+          mental_health: mentalHealthMatrix.mental_health,
+          eye: eyeMatrix.eye,
+          hospice_palliative: hospiceMatrix.hospice,
+          hospice: hospiceMatrix.hospice,
+          occupational_health: occupationalHealthMatrix.occupational_health,
+          urology_nephrology: urologyMatrix.urology,
+          urology: urologyMatrix.urology,
+          imci: childhoodIllnessMatrix.childhood_illness,
+          childhood_illness: childhoodIllnessMatrix.childhood_illness,
+          emonc: emergencyManagementMatrix.emergency_management,
+          emergency_management: emergencyManagementMatrix.emergency_management,
         };
 
     // Decorate Hospital links with visual -G / -B tags based on matrix.json so
@@ -516,6 +545,19 @@ const PrivateRoute = ({ children }) => {
       oncology: buildScoringMeta(sourceConfig, 'oncology_full_configuration', effectiveLinks.oncology || []),
       private_oncology: buildScoringMeta(sourceConfig, 'private_oncology_full_configuration', effectiveLinks.private_oncology || []),
       paediatric: buildScoringMeta(sourceConfig, 'paediatric_full_configuration', effectiveLinks.paediatric || []),
+      private_lab: buildScoringMeta(sourceConfig, 'private_lab_full_configuration', effectiveLinks.private_lab || []),
+      private_medical_lab: buildScoringMeta(sourceConfig, 'private_medical_lab_full_configuration', effectiveLinks.private_medical_lab || []),
+      mental_health: buildScoringMeta(sourceConfig, 'mental_health_full_configuration', effectiveLinks.mental_health || []),
+      eye: buildScoringMeta(sourceConfig, 'eye_full_configuration', effectiveLinks.eye || []),
+      hospice_palliative: buildScoringMeta(sourceConfig, 'hospice_palliative_full_configuration', effectiveLinks.hospice_palliative || []),
+      hospice: buildScoringMeta(sourceConfig, 'hospice_full_configuration', effectiveLinks.hospice || []),
+      occupational_health: buildScoringMeta(sourceConfig, 'occupational_health_full_configuration', effectiveLinks.occupational_health || []),
+      urology_nephrology: buildScoringMeta(sourceConfig, 'urology_nephrology_full_configuration', effectiveLinks.urology_nephrology || []),
+      urology: buildScoringMeta(sourceConfig, 'urology_full_configuration', effectiveLinks.urology || []),
+      imci: buildScoringMeta(sourceConfig, 'imci_full_configuration', effectiveLinks.imci || []),
+      childhood_illness: buildScoringMeta(sourceConfig, 'childhood_illness_full_configuration', effectiveLinks.childhood_illness || []),
+      emonc: buildScoringMeta(sourceConfig, 'emonc_full_configuration', effectiveLinks.emonc || []),
+      emergency_management: buildScoringMeta(sourceConfig, 'emergency_management_full_configuration', effectiveLinks.emergency_management || []),
     };
 		  }, [configBundles, activeConfigVersionId]);
 
@@ -1229,26 +1271,7 @@ const PrivateRoute = ({ children }) => {
 	    if (!groups || groups.length === 0 || !scoringFormData) return { sections: [] };
 
     // Determine which configuration to use based on the active group
-    const isMortuary =
-      activeGroup?.id === 'GENERAL' ||
-      activeGroup?.id === 'MORTUARY' ||
-      activeGroup?.name === 'Mortuary';
-    const isClinics =
-      activeGroup?.id === 'CLINICS' || activeGroup?.name === 'Clinics';
-    const isHospital =
-      activeGroup?.id === 'HOSPITAL' || activeGroup?.name === 'Hospital';
-    const isObgyn =
-      activeGroup?.id === 'OBGYN' || activeGroup?.name === 'OBGYN';
-
-    const programmeType = isMortuary
-      ? 'mortuary'
-      : isClinics
-      ? 'clinics'
-      : isHospital
-      ? 'hospital'
-      : isObgyn
-      ? 'obgyn'
-      : 'ems';
+    const programmeType = getProgrammeTypeFromGroup(activeGroup);
 
     // Use precomputed lookups for the active programme type from the programmeScoringMeta map.
     const activeScoringMeta = programmeScoringMeta[programmeType] || programmeScoringMeta.hospital;
