@@ -479,9 +479,9 @@ const SETTINGS_TABLE_HEADERS = [
     { label: 'SE Number', minWidth: 55, align: 'center' },
     { label: 'SE Description', minWidth: 220, align: 'center' },
     { label: 'Standard', minWidth: 70, align: 'center' },
+    { label: 'Statement', minWidth: 300, align: 'left' },
     { label: 'Criterion', minWidth: 80, align: 'center' },
     { label: 'Criterion Description/name', minWidth: 280, align: 'left' },
-    { label: 'Statement', minWidth: 300, align: 'left' },
     { label: 'Statement Intent', minWidth: 320, align: 'left' },
     { label: 'Guidelines', minWidth: 320, align: 'left' },
     { label: 'Root', minWidth: 50, align: 'center' },
@@ -489,6 +489,12 @@ const SETTINGS_TABLE_HEADERS = [
     { label: 'Linked Criteria', minWidth: 180, maxWidth: 220 },
     { label: 'Sub-Criteria', minWidth: 180, maxWidth: 220 },
 ];
+
+const getLeftOffset = (label) => {
+    if (label === 'SE Number') return 0;
+    if (label === 'SE Description') return 55;
+    return undefined;
+};
 
 const criterionOptionsFor = (serviceElements) => serviceElements.flatMap(se =>
     (se.sections || []).flatMap(section =>
@@ -578,7 +584,7 @@ const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, 
                             ? 'intent_tooltip'
                             : 'intent',
                         criterionId: criterion.id,
-                        criterionDescription: dhis2DescriptionsMap ? (dhis2DescriptionsMap[criterion.id] || '') : (criterion.description || ''),
+                        criterionDescription: (dhis2DescriptionsMap && dhis2DescriptionsMap[criterion.id]) ? dhis2DescriptionsMap[criterion.id] : (criterion.description || ''),
                         guidelines: criterion.guidelines || criterion.guideline || '',
                         isCritical: criterion.is_critical,
                         linkedCriteria: criterion.linked_criteria || linkedCriteriaFromLinks || standardCriteriaIds,
@@ -765,6 +771,7 @@ export function AppSettings() {
     const [isBaselineCreating, setIsBaselineCreating] = useState(false);
     const [createProgress, setCreateProgress] = useState(null);
     const [createDetails, setCreateDetails] = useState([]);
+    const [collapsedSettingsCols, setCollapsedSettingsCols] = useState(new Set()); // Set of collapsed column labels
 	    const [createElapsedSeconds, setCreateElapsedSeconds] = useState(0);
 	    const createDetailsEndRef = useRef(null);
     const [createErrorInfo, setCreateErrorInfo] = useState(null);
@@ -1524,6 +1531,7 @@ export function AppSettings() {
 	    const [showSettings, setShowSettings] = useState(false);
 				    const [expandedFacs, setExpandedFacs] = useState({});
 				    const [loadingFacType, setLoadingFacType] = useState(null);
+				    const [fullScreenFacType, setFullScreenFacType] = useState(null);
                     const [settingsFacilityPages, setSettingsFacilityPages] = useState({});
                     const [dhis2Descriptions, setDhis2Descriptions] = useState({});
                     const [loadingDhis2Descriptions, setLoadingDhis2Descriptions] = useState({});
@@ -4737,7 +4745,7 @@ export function AppSettings() {
                         : [];
 		            const allCriteriaInFacilityType = isExpanded ? criterionOptionsFor(seList) : [];
                     const groupKey = toFacilityGroupKey(type);
-                    const dhis2Map = overviewSource === 'active' ? (dhis2Descriptions[groupKey] || {}) : null;
+                    const dhis2Map = dhis2Descriptions[groupKey] || {};
 		            const rows = isExpanded
                         ? rowsForFacility(visibleSeList, key, allCriteriaInFacilityType, rootMap, currentLinks, dhis2Map)
                         : [];
@@ -5008,6 +5016,7 @@ export function AppSettings() {
                                                 if (isClosing) {
                                                     setExpandedFacs({});
                                                     setActiveCellKey(null);
+                                                    setFullScreenFacType(null);
                                                     return;
                                                 }
 											    setLoadingFacType(type);
@@ -5016,9 +5025,8 @@ export function AppSettings() {
                                                     if (overviewSource === 'active' && configSource === 'datastore' && isOnline) {
                                                         await loadRemoteConfig(type);
                                                     }
-                                                    if (overviewSource === 'active') {
-                                                        await loadDhis2Descriptions(type);
-                                                    }
+                                                    // Always load DHIS2 descriptions so the Criterion Description column is always live
+                                                    await loadDhis2Descriptions(type);
                                                     setExpandedFacs({ [type]: true });
                                                     setSettingsFacilityPages(prev => ({ ...prev, [type]: 0 }));
                                                 } finally {
@@ -5047,8 +5055,39 @@ export function AppSettings() {
 																<span style={{ fontSize: '0.8em', color: '#718096', display: 'flex', alignItems: 'center', gap: 6 }}>{loadingFacType === type ? <CircularProgress size={14} /> : (isExpanded ? '  Collapse' : '  Expand')}</span>
 															</div>
 															{isExpanded && (
-																<div style={{ padding: '8px', maxHeight: '55vh', overflowY: 'auto', overflowX: 'auto' }}>
-                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+																<div style={fullScreenFacType === type ? {
+																	position: 'fixed',
+																	top: 0,
+																	left: 0,
+																	width: '100vw',
+																	height: '100vh',
+																	zIndex: 9999,
+																	background: '#fff',
+																	padding: '24px',
+																	boxSizing: 'border-box',
+																	display: 'flex',
+																	flexDirection: 'column',
+																	overflow: 'hidden'
+																} : {
+																	padding: '8px',
+																	maxHeight: '55vh',
+																	overflowY: 'auto',
+																	overflowX: 'auto'
+																}}>
+																	{fullScreenFacType === type && (
+																		<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, borderBottom: '2px solid #cbd5e0', paddingBottom: 8, flexShrink: 0 }}>
+																			<h3 style={{ margin: 0, color: '#2d3748', fontFamily: 'sans-serif' }}>{type} Configuration Settings</h3>
+																			<Button
+																				size="small"
+																				variant="contained"
+																				color="error"
+																				onClick={() => setFullScreenFacType(null)}
+																			>
+																				Exit Full Screen
+																			</Button>
+																		</div>
+																	)}
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8, flexShrink: 0 }}>
                                                                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
 																			<TextField
 																				size="small"
@@ -5096,28 +5135,67 @@ export function AppSettings() {
                                                                             >
                                                                                 Next
                                                                             </Button>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant={fullScreenFacType === type ? "contained" : "outlined"}
+                                                                                color={fullScreenFacType === type ? "error" : "primary"}
+                                                                                onClick={() => setFullScreenFacType(fullScreenFacType === type ? null : type)}
+                                                                            >
+                                                                                {fullScreenFacType === type ? "Exit Full Screen" : "Full Screen"}
+                                                                            </Button>
                                                                         </div>
                                                                     </div>
+																	<div style={fullScreenFacType === type ? { flex: 1, overflow: 'auto', width: '100%', marginTop: 8 } : { display: 'contents' }}>
 																	<table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em' }}>
 																		<thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
 																			<tr style={{ background: '#edf2f7', textAlign: 'left' }}>
-																				{SETTINGS_TABLE_HEADERS.map(header => (
-																					<th
-																						key={header.label}
-																						style={{
-																							padding: '8px',
-																							border: '1px solid #cbd5e0',
-																							minWidth: `${header.minWidth}px`,
-																							maxWidth: header.maxWidth ? `${header.maxWidth}px` : undefined,
-																							position: 'sticky',
-																							top: 0,
-																							background: '#edf2f7',
-																							textAlign: header.align || 'center',
-																						}}
-																					>
-																						{header.label}
-																					</th>
-																				))}
+																				{SETTINGS_TABLE_HEADERS.map(header => {
+																					const leftOffset = getLeftOffset(header.label);
+																					const isCollapsible = header.label === 'SE Number' || header.label === 'SE Description';
+																					const isCollapsed = collapsedSettingsCols.has(header.label);
+																					return (
+																						<th
+																							key={header.label}
+																							style={{
+																								padding: isCollapsed ? '4px 2px' : '8px',
+																								border: '1px solid #cbd5e0',
+																								minWidth: isCollapsed ? '22px' : `${header.minWidth}px`,
+																								maxWidth: isCollapsed ? '22px' : (header.maxWidth ? `${header.maxWidth}px` : undefined),
+																								width: isCollapsed ? '22px' : undefined,
+																								overflow: 'hidden',
+																								whiteSpace: 'nowrap',
+																								position: 'sticky',
+																								top: 0,
+																								left: leftOffset !== undefined ? leftOffset : undefined,
+																								zIndex: leftOffset !== undefined ? 3 : 2,
+																								background: '#edf2f7',
+																								textAlign: 'center',
+																								transition: 'min-width 0.2s, max-width 0.2s, width 0.2s',
+																							}}
+																						>
+																							{isCollapsible ? (
+																								<div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flexWrap: 'nowrap' }}>
+																									{!isCollapsed && <span style={{ fontSize: '0.75em', fontWeight: 600 }}>{header.label}</span>}
+																									<button
+																										title={isCollapsed ? `Expand ${header.label}` : `Collapse ${header.label}`}
+																										onClick={() => setCollapsedSettingsCols(prev => {
+																											const next = new Set(prev);
+																											if (next.has(header.label)) next.delete(header.label); else next.add(header.label);
+																											return next;
+																										})}
+																										style={{
+																											border: 'none', background: 'transparent', cursor: 'pointer',
+																											padding: '0 2px', fontSize: '10px', lineHeight: 1,
+																											color: '#4a5568', flexShrink: 0,
+																										}}
+																									>
+																										{isCollapsed ? '▶' : '◀'}
+																									</button>
+																								</div>
+																							) : header.label}
+																						</th>
+																					);
+																				})}
 																			</tr>
 																		</thead>
 																		<tbody>
@@ -5127,33 +5205,47 @@ export function AppSettings() {
 																							<td
 																								rowSpan={row.seRowSpan}
 																								style={{
-																									padding: '8px',
+																									padding: collapsedSettingsCols.has('SE Number') ? '4px 2px' : '8px',
 																									border: '1px solid #e2e8f0',
 																									textAlign: 'center',
 																									verticalAlign: 'middle',
 																									fontWeight: 700,
 																									background: '#f8fafc',
+																									position: 'sticky',
+																									left: 0,
+																									zIndex: 1,
+																									width: collapsedSettingsCols.has('SE Number') ? '22px' : undefined,
+																									maxWidth: collapsedSettingsCols.has('SE Number') ? '22px' : undefined,
+																									overflow: 'hidden',
+																									transition: 'width 0.2s, max-width 0.2s, padding 0.2s',
 																								}}
 																							>
-																								{row.seId}
+																								{!collapsedSettingsCols.has('SE Number') && row.seId}
 																							</td>
 																						)}
 																						{row.isFirstSeRow && (
 																							<td
 																								rowSpan={row.seRowSpan}
 																								style={{
-																									padding: '8px',
+																									padding: collapsedSettingsCols.has('SE Description') ? '4px 2px' : '8px',
 																									border: '1px solid #e2e8f0',
 																									textAlign: 'center',
 																									verticalAlign: 'middle',
 																									background: '#f8fafc',
+																									position: 'sticky',
+																									left: collapsedSettingsCols.has('SE Number') ? 22 : 55,
+																									zIndex: 1,
+																									width: collapsedSettingsCols.has('SE Description') ? '22px' : undefined,
+																									maxWidth: collapsedSettingsCols.has('SE Description') ? '22px' : undefined,
+																									overflow: 'hidden',
+																									transition: 'left 0.2s, width 0.2s, max-width 0.2s, padding 0.2s',
 																								}}
 																							>
-																								<div
-																									style={{ maxHeight: '90px', overflowY: 'auto' }}
-																								>
-																									{row.seDescription || '—'}
-																								</div>
+																								{!collapsedSettingsCols.has('SE Description') && (
+																									<div style={{ maxHeight: '90px', overflowY: 'auto' }}>
+																										{row.seDescription || '—'}
+																									</div>
+																								)}
 																							</td>
 																						)}
 																						{row.isFirstStandardRow && (
@@ -5197,13 +5289,6 @@ export function AppSettings() {
 																								)}
 																							</td>
 																						)}
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', fontFamily: 'monospace' }}>{row.criterionId}</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'left', verticalAlign: 'middle' }}>
-																							<div
-																								style={{ maxHeight: '90px', overflowY: 'auto' }}
-																								dangerouslySetInnerHTML={{ __html: row.criterionDescription || '—' }}
-																							/>
-																						</td>
 																						{row.isFirstStandardRow && (
 																							<td
 																								rowSpan={row.standardRowSpan}
@@ -5212,6 +5297,7 @@ export function AppSettings() {
 																									border: '1px solid #e2e8f0',
 																									textAlign: 'left',
 																									verticalAlign: 'middle',
+																									background: '#ffffff',
 																								}}
 																							>
 																								{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-statement` ? (
@@ -5232,6 +5318,13 @@ export function AppSettings() {
 																								)}
 																							</td>
 																						)}
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', fontFamily: 'monospace' }}>{row.criterionId}</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'left', verticalAlign: 'middle' }}>
+																							<div
+																								style={{ maxHeight: '90px', overflowY: 'auto' }}
+																								dangerouslySetInnerHTML={{ __html: row.criterionDescription || '—' }}
+																							/>
+																						</td>
 																						{row.isFirstStandardRow && (
 																							<td
 																								rowSpan={row.standardRowSpan}
@@ -5452,6 +5545,7 @@ export function AppSettings() {
 																				))}
 																		</tbody>
 																	</table>
+																	</div>
 																</div>
 															)}
 														</div>

@@ -1159,9 +1159,53 @@ const PrivateRoute = ({ children }) => {
 	  const scoringEventIdsKey = React.useMemo(() => JSON.stringify(scoringEventIds), [scoringEventIds]);
 
 		  useEffect(() => {
-		    // DISABLED: Server scoring data fetch temporarily disabled to reduce latency.
-		    setServerAssessmentData({});
-		    setIsScoringPending(false);
+		    if (!user || !scoringEventIds.length) {
+		      setServerAssessmentData({});
+		      setIsScoringPending(false);
+		      return;
+		    }
+		    let cancelled = false;
+		    (async () => {
+		      try {
+		        setIsScoringPending(true);
+		        let loadedEvents = [];
+		        try {
+		          loadedEvents = await api.getEventsList({
+		            eventIds: scoringEventIds,
+		            fields: 'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]'
+		          });
+		        } catch (bulkErr) {
+		          console.warn('App: Bulk scoring fetch failed, falling back to individual fetches', bulkErr);
+		          const batchSize = 5;
+		          for (let i = 0; i < scoringEventIds.length; i += batchSize) {
+		            const batch = scoringEventIds.slice(i, i + batchSize);
+		            const loaded = await Promise.all(batch.map(eventId => api.getEventById(
+		              eventId,
+		              'event,eventDate,status,trackedEntityInstance,dataValues[dataElement,value]'
+		            ).catch(() => null)));
+		            loaded.forEach(ev => { if (ev?.event) loadedEvents.push(ev); });
+		          }
+		        }
+
+		        if (cancelled) return;
+		        const nextServerData = {};
+		        loadedEvents.forEach(ev => {
+		          (ev?.dataValues || []).forEach(dv => {
+		            if (!dv?.dataElement || dv.value === undefined || dv.value === null) return;
+		            const text = String(dv.value).trim();
+		            if (text === '') return;
+		            nextServerData[dv.dataElement] = dv.value;
+		          });
+		        });
+		        setServerAssessmentData(nextServerData);
+		      } catch (e) {
+		        console.warn('App: Could not refresh server scoring data', e);
+		        if (!cancelled) setServerAssessmentData({});
+		      } finally {
+		        if (!cancelled) setIsScoringPending(false);
+		      }
+		    })();
+		    return () => { cancelled = true; };
 		  }, [user, scoringEventIds, scoringEventIdsKey, serverScoringRefreshTick]);
 
 	  useEffect(() => {

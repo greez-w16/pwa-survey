@@ -1480,37 +1480,40 @@ export const api = {
         }).catch(() => []);
         
         // 2. Supplement with modern tracker events API (handles new 'detached' self-assessments)
-        try {
-            const trackerParams = [
-                'paging=false',
-                `program=${programId}`,
-                `programStage=${stageId}`,
-                `orgUnit=${orgUnitId}`,
-                'ouMode=DESCENDANTS',
-                'order=occurredAt:desc',
-                `fields=${fields.replace('eventDate', 'occurredAt').replace('trackedEntityInstance', 'trackedEntity')}`
-            ].join('&');
-            const trackerResp = await fetch(`${BASE_URL}/api/tracker/events?${trackerParams}`, { headers: getHeaders() });
-            if (trackerResp.ok) {
-                const trackerData = await trackerResp.json();
-                const trackerInstances = (trackerData.instances || trackerData.events || []).map(ev => ({
-                    ...ev,
-                    event: ev.event || ev.instance,
-                    eventDate: ev.occurredAt || ev.eventDate,
-                    trackedEntityInstance: ev.trackedEntity || ev.trackedEntityInstance
-                }));
-                
-                // Merge and deduplicate by event ID
-                const seenIds = new Set(events.map(e => e.event));
-                trackerInstances.forEach(ev => {
-                    if (!seenIds.has(ev.event)) {
-                        events.push(ev);
-                        seenIds.add(ev.event);
-                    }
-                });
+        // Only run if stageId is specified to prevent massive unpaged queries across all stages
+        if (stageId) {
+            try {
+                const trackerParams = [
+                    'paging=false',
+                    `program=${programId}`,
+                    `programStage=${stageId}`,
+                    `orgUnit=${orgUnitId}`,
+                    'ouMode=DESCENDANTS',
+                    'order=occurredAt:desc',
+                    `fields=${fields.replace('eventDate', 'occurredAt').replace('trackedEntityInstance', 'trackedEntity')}`
+                ].join('&');
+                const trackerResp = await fetch(`${BASE_URL}/api/tracker/events?${trackerParams}`, { headers: getHeaders() });
+                if (trackerResp.ok) {
+                    const trackerData = await trackerResp.json();
+                    const trackerInstances = (trackerData.instances || trackerData.events || []).map(ev => ({
+                        ...ev,
+                        event: ev.event || ev.instance,
+                        eventDate: ev.occurredAt || ev.eventDate,
+                        trackedEntityInstance: ev.trackedEntity || ev.trackedEntityInstance
+                    }));
+                    
+                    // Merge and deduplicate by event ID
+                    const seenIds = new Set(events.map(e => e.event));
+                    trackerInstances.forEach(ev => {
+                        if (!seenIds.has(ev.event)) {
+                            events.push(ev);
+                            seenIds.add(ev.event);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.warn('[getSurveyEventsForOrgUnit] Tracker supplement failed', err);
             }
-        } catch (err) {
-            console.warn('[getSurveyEventsForOrgUnit] Tracker supplement failed', err);
         }
 
         return events;
