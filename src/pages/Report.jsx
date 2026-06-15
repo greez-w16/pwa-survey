@@ -19,21 +19,13 @@ import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
 import indexedDBService from '../services/indexedDBService';
 
-import obstericsGynoConfig from '../assets/obsterics-gyno/obsterics_gyno_config.json';
 import obstericsGynoMatrix from '../assets/obsterics-gyno/obsterics_gyno_matrix.json';
-import physiotheraphyConfig from '../assets/physiotheraphy/physiotheraphy_config.json';
 import physiotheraphyMatrix from '../assets/physiotheraphy/physiotheraphy_matrix.json';
-import radiologyConfig from '../assets/radiology/radiology_config.json';
 import radiologyMatrix from '../assets/radiology/radiology_matrix.json';
-import generalPracticeConfig from '../assets/general-practice/general_practice_config.json';
 import generalPracticeMatrix from '../assets/general-practice/general_practice_matrix.json';
-import privateDiabeticConfig from '../assets/private-diabetic/private_diabetic_config.json';
 import privateDiabeticMatrix from '../assets/private-diabetic/private_diabetic_matrix.json';
-import oralConfig from '../assets/oral/oral_config.json';
 import oralMatrix from '../assets/oral/oral_matrix.json';
-import privateOncologyConfig from '../assets/private-oncology/private_oncology_config.json';
 import privateOncologyMatrix from '../assets/private-oncology/private_oncology_matrix.json';
-import paediatricConfig from '../assets/paediatric/paediatric_config.json';
 import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
 
 // Import remaining 8 facility matrices and matrixConfig parser
@@ -56,6 +48,14 @@ const occupationalHealthConfig = buildConfigFromMatrix('occupational_health', oc
 const urologyConfig = buildConfigFromMatrix('urology', urologyMatrix.urology);
 const childhoodIllnessConfig = buildConfigFromMatrix('childhood_illness', childhoodIllnessMatrix.childhood_illness);
 const emergencyManagementConfig = buildConfigFromMatrix('emergency_management', emergencyManagementMatrix.emergency_management);
+const radiologyConfig = buildConfigFromMatrix('radiology', radiologyMatrix.radiology);
+const obstericsGynoConfig = buildConfigFromMatrix('obsterics_gyno', obstericsGynoMatrix.obsterics_gyno);
+const physiotheraphyConfig = buildConfigFromMatrix('physiotheraphy', physiotheraphyMatrix.physiotheraphy);
+const generalPracticeConfig = buildConfigFromMatrix('general_practice', generalPracticeMatrix.general_practice);
+const privateDiabeticConfig = buildConfigFromMatrix('private_diabetic', privateDiabeticMatrix.private_diabetic);
+const oralConfig = buildConfigFromMatrix('oral', oralMatrix.oral);
+const privateOncologyConfig = buildConfigFromMatrix('private_oncology', privateOncologyMatrix.private_oncology);
+const paediatricConfig = buildConfigFromMatrix('paediatric', paediatricMatrix.paediatric);
 
 import qimsLogo from '../assets/logo.png';
 import { calculatePointsForLink, setHospitalSubcriteriaConfig } from '../utils/scoring';
@@ -163,6 +163,14 @@ const getProgrammeTypeFromGroupId = (groupId) => {
   if (g === 'PAEDIATRIC') return 'paediatric';
   return 'ems'; // fallback
 };
+
+const withTimeout = (promise, ms, label = 'Request') => new Promise((resolve, reject) => {
+  const timer = setTimeout(() => reject(new Error(`${label} timed out`)), ms);
+  Promise.resolve(promise)
+    .then(value => resolve(value))
+    .catch(err => reject(err))
+    .finally(() => clearTimeout(timer));
+});
 
 export default function Report() {
   const { user, configuration, setConfiguration, showToast, configBundles, activeConfigVersionId, userAssignments, configSource, loadRemoteConfig } = useApp();
@@ -407,7 +415,7 @@ export default function Report() {
     let cancelled = false;
     setMetadataLoading(true);
     setMetadataFetchAttempted(false);
-    api.getFormMetadata(stageId)
+    withTimeout(api.getFormMetadata(stageId), 3000, 'Metadata')
       .then((metadata) => {
         if (cancelled) return;
         setConfiguration?.({
@@ -599,13 +607,7 @@ export default function Report() {
     return null;
   };
 
-  const withTimeout = (promise, ms, label = 'Request') => new Promise((resolve, reject) => {
-    const timer = setTimeout(() => reject(new Error(`${label} timed out`)), ms);
-    Promise.resolve(promise)
-      .then(value => resolve(value))
-      .catch(err => reject(err))
-      .finally(() => clearTimeout(timer));
-  });
+
 
   useEffect(() => {
     let cancelled = false;
@@ -618,10 +620,20 @@ export default function Report() {
         // Prefer authorised facilities from scheduling assignments
         if (directFacilityId) {
           try {
-            const ou = await api.getFacilityDetails(directFacilityId);
+            const ou = await withTimeout(api.getFacilityDetails(directFacilityId), 2500, 'Facility Details');
             options = [{ id: directFacilityId, name: ou.displayName || ou.name || directFacilityId }];
           } catch (_) {
-            options = [{ id: directFacilityId, name: directFacilityId }];
+            let fallbackName = directFacilityId;
+            if (Array.isArray(userAssignments)) {
+              const matched = userAssignments.find(a => {
+                const aId = a.orgUnitId || (typeof a.orgUnit === 'string' ? a.orgUnit : a.orgUnit?.id);
+                return aId === directFacilityId;
+              });
+              if (matched) {
+                fallbackName = matched.orgUnitName || (matched.orgUnit && (matched.orgUnit.displayName || matched.orgUnit.name)) || directFacilityId;
+              }
+            }
+            options = [{ id: directFacilityId, name: fallbackName }];
           }
         } else if (Array.isArray(userAssignments) && userAssignments.length > 0) {
           const byOu = new Map();
@@ -693,55 +705,66 @@ export default function Report() {
 	          return Array.from(byEvent.values());
 	        };
 
-	        if (reportQueryParams.eventId) {
-	          const enrollmentEvents = await api.getEventsList({
-	            enrollmentId: reportQueryParams.eventId,
-	            order: 'eventDate:desc',
-	            fields: eventFields,
-	          }).catch(() => []);
-	          const directEvent = await api.getEventById(reportQueryParams.eventId, eventFields).then(ev => ev ? [ev] : []).catch(() => []);
-	          all = mergeEvents(enrollmentEvents || [], directEvent || []);
-	        }
 
-	        if (reportQueryParams.teiId) {
-	          const candidateStages = Array.from(new Set([
-	            effectiveStageId,
-	            stageIdFromGroup,
-	            configuration?.programStage?.id,
-	            SURVEY_PROGRAM_STAGE_BY_GROUP.HOSPITAL,
-	            SURVEY_PROGRAM_STAGE_BY_GROUP.CLINICS,
-	            SURVEY_PROGRAM_STAGE_BY_GROUP.EMS,
-	            SURVEY_PROGRAM_STAGE_BY_GROUP.MORTUARY,
-	          ].filter(Boolean)));
 
-	          for (const candidateStageId of candidateStages) {
-	            const teiEvents = await api.getSurveyEventsForTei({
-	              teiId: reportQueryParams.teiId,
-	              orgUnitId: selectedFacilityId,
-	              programId,
-	              stageId: candidateStageId,
-	              fields: eventFields,
-	            }).catch(() => []);
-	            if (Array.isArray(teiEvents) && teiEvents.length > 0) {
-	              all = mergeEvents(all, teiEvents);
-	            }
-	          }
-	        }
+          // 1. Queue eventId requests in parallel
+          let eventIdPromise = Promise.resolve([]);
+          if (reportQueryParams.eventId) {
+            eventIdPromise = Promise.all([
+              withTimeout(api.getEventsList({
+                enrollmentId: reportQueryParams.eventId,
+                order: 'eventDate:desc',
+                fields: eventFields,
+              }), 4000).catch(() => []),
+              withTimeout(api.getEventById(reportQueryParams.eventId, eventFields), 4000)
+                .then(ev => ev ? [ev] : [])
+                .catch(() => [])
+            ]).then(([l1, l2]) => mergeEvents(l1, l2));
+          }
 
-		        if (all.length > 0) {
-		          const firstEventStage = all.find(ev => ev?.programStage)?.programStage;
-		          if (firstEventStage) effectiveStageId = firstEventStage;
-		        }
-	
-		        // Always load all facility events so the true baseline can be found,
-		        // even when a specific TEI/event was targeted from the dashboard.
-		        const facilityEvents = await api.getSurveyEventsForOrgUnit({
-		          orgUnitId: selectedFacilityId,
-		          programId,
-		          stageId: effectiveStageId,
-		          fields: eventFields
-		        }).catch(() => []);
-		        all = mergeEvents(all, facilityEvents);
+          // 2. Queue teiId candidate stage requests in parallel
+          let teiEventsPromise = Promise.resolve([]);
+          if (reportQueryParams.teiId) {
+            const candidateStages = Array.from(new Set([
+              effectiveStageId,
+              stageIdFromGroup,
+              configuration?.programStage?.id,
+              SURVEY_PROGRAM_STAGE_BY_GROUP.HOSPITAL,
+              SURVEY_PROGRAM_STAGE_BY_GROUP.CLINICS,
+              SURVEY_PROGRAM_STAGE_BY_GROUP.EMS,
+              SURVEY_PROGRAM_STAGE_BY_GROUP.MORTUARY,
+            ].filter(Boolean)));
+
+            teiEventsPromise = Promise.all(
+              candidateStages.map(candidateStageId =>
+                withTimeout(api.getSurveyEventsForTei({
+                  teiId: reportQueryParams.teiId,
+                  orgUnitId: selectedFacilityId,
+                  programId,
+                  stageId: candidateStageId,
+                  fields: eventFields,
+                }), 4000).catch(() => [])
+              )
+            ).then(results => mergeEvents(...results));
+          }
+
+          // Wait for eventId and teiId fetches in parallel
+          const [eventsFromId, eventsFromTei] = await Promise.all([eventIdPromise, teiEventsPromise]);
+          all = mergeEvents(eventsFromId, eventsFromTei);
+
+          if (all.length > 0) {
+            const firstEventStage = all.find(ev => ev?.programStage)?.programStage;
+            if (firstEventStage) effectiveStageId = firstEventStage;
+          }
+
+          // 3. Load facility events with timeout
+          const facilityEvents = await withTimeout(api.getSurveyEventsForOrgUnit({
+            orgUnitId: selectedFacilityId,
+            programId,
+            stageId: effectiveStageId,
+            fields: eventFields
+          }), 4000).catch(() => []);
+          all = mergeEvents(all, facilityEvents);
 	
 		        // Merge local drafts to support offline or un-synced data visibility on reports
 		        try {
@@ -866,7 +889,7 @@ export default function Report() {
           }
         });
 
-        const bundles = Object.values(bundlesByEnrollment).map(bundle => {
+        let bundles = Object.values(bundlesByEnrollment).map(bundle => {
           const typeEvents = bundle.events.filter(ev => getTypeValue(ev));
           const groupEvents = bundle.events.filter(ev => getGroupValue(ev));
           const latestTypeEvent = pickLatest(typeEvents) || pickLatest(bundle.metaEvents) || pickLatest(bundle.events);
@@ -881,6 +904,31 @@ export default function Report() {
             metaEvent: latestTypeEvent || pickLatest(bundle.metaEvents) || pickLatest(bundle.events)
           };
         }).filter(b => b.assessmentDate);
+
+        // Keep only the latest created TEI/enrollment and the baseline TEI/enrollment
+        if (bundles.length > 0) {
+          // Find the latest overall bundle (preferring targeted teiId if provided)
+          let latestBundleResolved = null;
+          if (reportQueryParams.teiId) {
+            latestBundleResolved = bundles.find(b => b.teiId === reportQueryParams.teiId);
+          }
+          if (!latestBundleResolved) {
+            const sortedBundles = [...bundles].sort((a, b) => new Date(b.assessmentDate) - new Date(a.assessmentDate));
+            latestBundleResolved = sortedBundles[0];
+          }
+
+          // Find the baseline bundle (earliest bundle marked as isBaseline, or earliest overall as fallback)
+          let baselineBundleResolved = bundles.filter(b => b.isBaseline).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
+          if (!baselineBundleResolved) {
+            baselineBundleResolved = [...bundles].sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0];
+          }
+
+          const allowedTeis = new Set();
+          if (latestBundleResolved?.teiId) allowedTeis.add(latestBundleResolved.teiId);
+          if (baselineBundleResolved?.teiId) allowedTeis.add(baselineBundleResolved.teiId);
+
+          bundles = bundles.filter(b => allowedTeis.has(b.teiId));
+        }
 
         const targetBundle = (() => {
           if (reportQueryParams.teiId) {
@@ -944,13 +992,18 @@ export default function Report() {
 
         const latestTeiId = latestBundle.teiId;
         let baselineBundle = null;
-        if (latestTeiId) {
-          baselineBundle = bundles.filter(b => b.isBaseline && b.teiId === latestTeiId).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
-          if (!baselineBundle) baselineBundle = bundles.filter(b => b.teiId === latestTeiId).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
+        
+        // 1. Try to find a baseline bundle globally (across any TEI in the filtered bundles)
+        baselineBundle = bundles.filter(b => b.isBaseline).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
+        
+        // 2. If no baseline bundle exists, try to find the earliest event on the latest TEI
+        if (!baselineBundle && latestTeiId) {
+          baselineBundle = bundles.filter(b => b.teiId === latestTeiId).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
         }
+        
+        // 3. Absolute fallback to the earliest bundle in the filtered list
         if (!baselineBundle) {
-          baselineBundle = bundles.filter(b => b.isBaseline).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
-          if (!baselineBundle) baselineBundle = bundles.sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
+          baselineBundle = bundles.sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
         }
 
         if (!baselineBundle) {
@@ -1046,13 +1099,40 @@ export default function Report() {
         });
 
         const buildAssessmentFromBundle = (bundle, filterByPeriod = false) => ({
-          sections: targetSections.map((section, idx) => ({
-            id: section.id,
-            standards: [{
-              id: section.code || section.id,
-              criteria: (section.fields || [])
-                .filter(f => f.type === 'select')
-                .map(f => {
+          sections: targetSections.map((section, idx) => {
+            const fieldsByStandard = {};
+
+            (section.fields || [])
+              .filter(f => f.type === 'select')
+              .forEach(f => {
+                const code = f.code || f.id;
+                let normalizedCode = normalizeCriterionCode(code);
+                if (!normalizedCode || !/\d/.test(normalizedCode)) {
+                  const labelMatch = String(f.label || '').match(/\b\d+(?:\.\d+){2,3}\b/);
+                  if (labelMatch) normalizedCode = labelMatch[0];
+                }
+
+                let standardCode = null;
+                if (normalizedCode) {
+                  const parts = normalizedCode.split('.');
+                  if (parts.length >= 3) {
+                    standardCode = `${parts[0]}.${parts[1]}.${parts[2]}`;
+                  }
+                }
+                if (!standardCode) {
+                  standardCode = section.code || section.id || 'unassigned';
+                }
+
+                if (!fieldsByStandard[standardCode]) {
+                  fieldsByStandard[standardCode] = [];
+                }
+                fieldsByStandard[standardCode].push(f);
+              });
+
+            const standardsList = Object.entries(fieldsByStandard).map(([stdCode, fields]) => {
+              return {
+                id: stdCode,
+                criteria: fields.map(f => {
                   const tag = sectionTagMap[section.id] || resolveSectionTag(section, idx);
                   const rawEvents = bundle.byTag?.[tag] || [];
                   const filteredEvents = filterByPeriod
@@ -1087,10 +1167,10 @@ export default function Report() {
                   const formDataForSection = Object.fromEntries((((sectionEvent || {}).dataValues) || []).map(dv => [dv.dataElement, dv.value]));
                   const code = f.code || f.id;
                   const normalizedCode = normalizeCriterionCode(code);
-	                  const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
-	                  const rawLinks = Array.isArray(linksData.linked_criteria) ? linksData.linked_criteria : [];
-	                  const effectiveLinks = rawLinks.filter(l => !String(l || '').trim().match(/-(G|B)$/i));
-	                  const isRoot = effectiveLinks.length > 0;
+                  const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
+                  const rawLinks = Array.isArray(linksData.linked_criteria) ? linksData.linked_criteria : [];
+                  const effectiveLinks = rawLinks.filter(l => !String(l || '').trim().match(/-(G|B)$/i));
+                  const isRoot = effectiveLinks.length > 0;
                   const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
                   const isCritical = (function() {
                     const uiToggle = f.commentFieldId ? formDataForSection[`is_critical_${f.commentFieldId}`] : undefined;
@@ -1104,17 +1184,32 @@ export default function Report() {
                   return {
                     id: f.id,
                     code,
-	                    label: f.label || f.displayName || f.name || code,
+                    label: f.label || f.displayName || f.name || code,
                     response: formDataForSection[f.id] || 'NA',
                     isCritical,
                     isRoot,
-	                    links: effectiveLinks,
+                    links: effectiveLinks,
                     roots: linksData.roots,
-                    severity
+                    severity,
+                    ...(function() {
+                      const raw = formDataForSection[`override_${f.id}`];
+                      const enabled = (raw === true) || (raw === 1) || (String(raw).toLowerCase() === 'true') || (String(raw) === '1');
+                      return enabled ? { overrideEnabled: true, overrideResponse: formDataForSection[f.id] || 'NA' } : {};
+                    })()
                   };
                 })
-            }]
-          }))
+              };
+            });
+
+            const finalStandards = standardsList.length > 0
+              ? standardsList
+              : [{ id: section.code || section.id, criteria: [] }];
+
+            return {
+              id: section.id,
+              standards: finalStandards
+            };
+          })
         });
 
         const assessment = buildAssessmentFromBundle(latestBundle, false);
@@ -1434,10 +1529,13 @@ export default function Report() {
     const baseById = Object.fromEntries(baseSections.map(s => [s.id, s]));
 
     const norm = (v) => {
-      const s = String(v || '').trim().toLowerCase();
+      const s = String(v || '').trim().toLowerCase().replace(/_/g, ' ').replace(/-/g, ' ');
       if (s === '2' || s === 'yes' || s === 'y' || s === 'compliant' || s === 'c') return 'C';
       if (s === '1' || s === 'partial' || s === 'partially compliant' || s === 'pc') return 'PC';
-      if (s === '0' || s === 'no' || s === 'n' || s === 'non compliant' || s === 'non-compliant' || s === 'nc') return 'NC';
+      if (s === '0' || s === 'no' || s === 'n' || s === 'non compliant' || s === 'nc') return 'NC';
+      if (s.includes('non compliant') || s.includes('noncompliant') || s === 'nc') return 'NC';
+      if (s.includes('partially') || s.includes('partial') || s === 'pc') return 'PC';
+      if (s.includes('compliant') || s === 'c') return 'C';
       return 'NA';
     };
 
@@ -1455,8 +1553,8 @@ export default function Report() {
     const ids = Object.keys(sectionLabels || {});
     return ids.map((id, idx) => {
       const name = sectionLabels[id] || id;
-      const baseCrit = (((baseById[id]||{}).standards||[{}])[0].criteria)||[];
-      const lateCrit = (((latestById[id]||{}).standards||[{}])[0].criteria)||[];
+      const baseCrit = (baseById[id]?.standards || []).flatMap(std => std.criteria || []);
+      const lateCrit = (latestById[id]?.standards || []).flatMap(std => std.criteria || []);
       const baseCounts = getCounts(baseCrit);
       const lateCounts = getCounts(lateCrit);
       const baselinePercentValue = Number.isFinite(blPct[id]) ? Number(blPct[id]) : null;
@@ -1550,10 +1648,13 @@ export default function Report() {
 	  const responseDistributionData = useMemo(() => {
 	    if (!reportAssessment) return [];
 	    const norm = (value) => {
-	      const s = String(value || '').trim().toLowerCase();
+	      const s = String(value || '').trim().toLowerCase().replace(/_/g, ' ').replace(/-/g, ' ');
 	      if (['2', 'yes', 'y', 'compliant', 'c'].includes(s)) return 'C';
 	      if (['1', 'partial', 'partially compliant', 'pc'].includes(s)) return 'PC';
-	      if (['0', 'no', 'n', 'non compliant', 'non-compliant', 'nc'].includes(s)) return 'NC';
+	      if (['0', 'no', 'n', 'non compliant', 'nc'].includes(s)) return 'NC';
+	      if (s.includes('non compliant') || s.includes('noncompliant') || s === 'nc') return 'NC';
+	      if (s.includes('partially') || s.includes('partial') || s === 'pc') return 'PC';
+	      if (s.includes('compliant') || s === 'c') return 'C';
 	      return 'NA';
 	    };
 	    const sectionsById = Object.fromEntries((reportAssessment.sections || []).map(section => [section.id, section]));
@@ -1565,7 +1666,7 @@ export default function Report() {
 	      })
 	      .map((sectionId) => {
 	        const section = sectionsById[sectionId] || {};
-	        const criteria = (((section.standards || [{}])[0] || {}).criteria) || [];
+	        const criteria = (section.standards || []).flatMap(std => std.criteria || []);
 	        const counts = criteria.reduce((acc, criterion) => {
 	          acc[norm(criterion.response)] += 1;
 	          return acc;

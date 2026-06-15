@@ -1,4 +1,4 @@
-{
+﻿{
   "service": "physiotheraphy",
   "service_elements": [
     {
@@ -21,7 +21,8 @@
                   "severity": null,
                   "description": "The leaders of the practice are formally or informally identified.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Where a practice consists of more than two practitioners the leaders of the practice must be formally identified.",
+                  "guidelines": "Where a practice consists of more than two practitioners the leaders of the practice must be formally identified."
                 },
                 {
                   "id": "1.1.1.2",
@@ -29,7 +30,8 @@
                   "severity": null,
                   "description": "The practice has a mission statement that reflects its strategic objectives and matches the needs of the community served.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "The mission statement is critical to the strategic planning process since it provides clear, guiding principles that define who the healthcare provider is as an organisation and why the practice exists. Mission statements create the foundation for action planning and a basis for accountability with the community.",
+                  "guidelines": "The mission statement is critical to the strategic planning process since it provides clear, guiding principles that define who the healthcare provider is as an organisation and why the practice exists. Mission statements create the foundation for action planning and a basis for accountability with the community."
                 },
                 {
                   "id": "1.1.1.3",
@@ -37,7 +39,8 @@
                   "severity": null,
                   "description": "The leaders are collectively responsible for ensuring that the mission statement is known to all personnel, patients, carers and the community served.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This can be achieved in many ways, such as public display of the mission statement on notice boards, in the waiting area or included in printed information leaflets given to each patient when they first visit the practice. If the practice has a website, the mission statement can also be published on the website. Documented evidence that personnel have read the mission statement must be provided for full compliance with this criterion.",
+                  "guidelines": "This can be achieved in many ways, such as public display of the mission statement on notice boards, in the waiting area or included in printed information leaflets given to each patient when they first visit the practice. If the practice has a website, the mission statement can also be published on the website. Documented evidence that personnel have read the mission statement must be provided for full compliance with this criterion."
                 },
                 {
                   "id": "1.1.1.4",
@@ -45,7 +48,8 @@
                   "severity": null,
                   "description": "The practice participates in community health activities.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "The mission of a practice should meet the needs of the community. To be compliant with this criterion evidence must be provided of interaction with members of health committee and participation in community health activities.",
+                  "guidelines": "The mission of a practice should meet the needs of the community. To be compliant with this criterion evidence must be provided of interaction with members of health committee and participation in community health activities."
                 },
                 {
                   "id": "1.1.1.5",
@@ -53,7 +57,8 @@
                   "severity": null,
                   "description": "The leaders, in liaison with the whole practice team, coordinates the compilation of an annual strategic plan and budget.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This criterion requires all departments within the practice to be involved in the compilation of the annual strategic plan and budget to ensure that the needs of each department are discussed, considered and met if possible within the scope of the practice budget. Compliance will be demonstrated by documented evidence, for example, minutes of meetings.",
+                  "guidelines": "This criterion requires all departments within the practice to be involved in the compilation of the annual strategic plan and budget to ensure that the needs of each department are discussed, considered and met if possible within the scope of the practice budget. Compliance will be demonstrated by documented evidence, for example, minutes of meetings."
                 },
                 {
                   "id": "1.1.1.6",
@@ -61,7 +66,8 @@
                   "severity": null,
                   "description": "The leaders are collectively responsible for implementing the practice's mission and strategic plan.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Evidence of an action plan for achieving the practice’s mission and strategic plan will be required.",
+                  "guidelines": "Evidence of an action plan for achieving the practice’s mission and strategic plan will be required."
                 },
                 {
                   "id": "1.1.1.7",
@@ -69,7 +75,8 @@
                   "severity": null,
                   "description": "The strategic plan is evaluated on an annual basis.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be measured by providing documented evidence that the practice’s strategic plan has been reviewed.",
+                  "guidelines": "Compliance will be measured by providing documented evidence that the practice’s strategic plan has been reviewed."
                 },
                 {
                   "id": "1.1.1.8",
@@ -77,7 +84,8 @@
                   "severity": null,
                   "description": "Regular monitoring of the implementation of the strategic plan against envisaged timeframes and progress in achieving its objectives is documented at intervals determined by the practice.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This criterion requires that practice leaders adhere to the timeframes that were set at the beginning of each year for achieving the strategic plan. For any plan to be implemented effectively, it is essential to monitor the progress that is being made towards achieving the outcomes that have been planned. This criterion further requires the practice to document the progress that is being made during the year towards achieving the strategic plan.",
+                  "guidelines": "This criterion requires that practice leaders adhere to the timeframes that were set at the beginning of each year for achieving the strategic plan. For any plan to be implemented effectively, it is essential to monitor the progress that is being made towards achieving the outcomes that have been planned. This criterion further requires the practice to document the progress that is being made during the year towards achieving the strategic plan."
                 },
                 {
                   "id": "1.1.1.9",
@@ -85,7 +93,8 @@
                   "severity": null,
                   "description": "Where appropriate, the leadership roles in various positions are documented, agreed to and known by the personnel.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This may, for example include personnel responsible for monitoring infection control practices, resuscitation, stock control, patient files etc.",
+                  "guidelines": "This may, for example include personnel responsible for monitoring infection control practices, resuscitation, stock control, patient files etc."
                 }
               ]
             }
@@ -106,7 +115,8 @@
                   "severity": null,
                   "description": "There are documented risk management processes for identifying all risks relating to practice processes and systems, personnel, patients, visitors to the practice and physical facilities.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This criterion is assessed on evidence of effective management found throughout the practice during the survey. If this criterion is scored PC or NC, the transgressions need to be recorded in detail to motivate for the PC/NC rating and it should be based on accurate facts.",
+                  "guidelines": "This criterion is assessed on evidence of effective management found throughout the practice during the survey. If this criterion is scored PC or NC, the transgressions need to be recorded in detail to motivate for the PC/NC rating and it should be based on accurate facts."
                 },
                 {
                   "id": "1.2.1.2",
@@ -114,7 +124,8 @@
                   "severity": null,
                   "description": "The manager has the education and/or experience necessary to carry out his or her responsibilities.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "If the practice manager is a solo practitioner or partner in the practice this criterion will be scored based on the evidence of effective management found throughout the practice during the survey. If the practice manager is an employee of the practice, compliance will be assessed against the requirements set out in the position description.",
+                  "guidelines": "If the practice manager is a solo practitioner or partner in the practice this criterion will be scored based on the evidence of effective management found throughout the practice during the survey. If the practice manager is an employee of the practice, compliance will be assessed against the requirements set out in the position description."
                 },
                 {
                   "id": "1.2.1.3",
@@ -122,7 +133,8 @@
                   "severity": null,
                   "description": "The practice is licensed in terms of relevant legislation for the level and type of services provided.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "CRITICAL  Documented evidence is required.",
+                  "guidelines": "CRITICAL  Documented evidence is required."
                 },
                 {
                   "id": "1.2.1.4",
@@ -130,7 +142,8 @@
                   "severity": null,
                   "description": "The manager ensures that there is a system in place to monitor the implementation of applicable laws and regulations.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This criterion will be scored compliant by default, although a PC rating is given whenever there is definite evidence of non-adherence to any legal requirement. In these cases, the transgression needs to be recorded in detail to motivate for the PC rating and it should be based on accurate facts. Common examples of non-conformance with legal requirements include the following deficiencies: The required certificates are not available, for example, fire clearance certificates, electrical installation certificates, commissioning certificates (for example, ethylene oxide sterilisers), pressure test certificates for vessels under pressure Internal/external financial audits are not conducted Nurses transcribe doctors’ prescriptions and/or dispense medication Pharmaceutical items are incorrectly labelled Proof of current registration of professional personnel with the relevant councils is not available In order to demonstrate compliance, practices may wish to compile a template listing the criteria requiring demonstration of compliance with country-specific legislation and regulations against the relevant national acts, regulations, etc. applicable to the criterion.",
+                  "guidelines": "This criterion will be scored compliant by default, although a PC rating is given whenever there is definite evidence of non-adherence to any legal requirement. In these cases, the transgression needs to be recorded in detail to motivate for the PC rating and it should be based on accurate facts. Common examples of non-conformance with legal requirements include the following deficiencies: The required certificates are not available, for example, fire clearance certificates, electrical installation certificates, commissioning certificates (for example, ethylene oxide sterilisers), pressure test certificates for vessels under pressure Internal/external financial audits are not conducted Nurses transcribe doctors’ prescriptions and/or dispense medication Pharmaceutical items are incorrectly labelled Proof of current registration of professional personnel with the relevant councils is not available In order to demonstrate compliance, practices may wish to compile a template listing the criteria requiring demonstration of compliance with country-specific legislation and regulations against the relevant national acts, regulations, etc. applicable to the criterion."
                 },
                 {
                   "id": "1.2.1.5",
@@ -161,7 +174,8 @@
                   "severity": null,
                   "description": "The practice leaders facilitate communication between teams where relevant and between individual personnel members.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "ROOT “Teams” refer to all the groups of employees and practitioners involved in the practice, for example administration, cleaning and clinical personnel. Minutes of personnel meetings, memos and communication tools can be provided as evidence. There must be evidence of at least quarterly personnel meetings.",
+                  "guidelines": "ROOT “Teams” refer to all the groups of employees and practitioners involved in the practice, for example administration, cleaning and clinical personnel. Minutes of personnel meetings, memos and communication tools can be provided as evidence. There must be evidence of at least quarterly personnel meetings."
                 },
                 {
                   "id": "1.2.2.2",
@@ -169,7 +183,8 @@
                   "severity": null,
                   "description": "Agendas are prepared for meetings in order to allow those attending to prepare for participation.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "An assessment of a sample of agendas of meetings should be undertaken to determine the trend and “general” compliance as the criterion should not be penalised on one or two exceptions.",
+                  "guidelines": "An assessment of a sample of agendas of meetings should be undertaken to determine the trend and “general” compliance as the criterion should not be penalised on one or two exceptions."
                 },
                 {
                   "id": "1.2.2.3",
@@ -185,7 +200,8 @@
                   "severity": null,
                   "description": "There is a procedure to make sure that important matters resulting from management meetings are communicated to and acted upon by personnel.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "The existing “mechanism” should be assessed for effectiveness in conveying this information to personnel but surveyors must further note the importance of searching for evidence of “and acted upon”. This generally requires that minutes should reflect the allocation of responsibilities for carrying out tasks and that these are reported on at subsequent meetings.",
+                  "guidelines": "The existing “mechanism” should be assessed for effectiveness in conveying this information to personnel but surveyors must further note the importance of searching for evidence of “and acted upon”. This generally requires that minutes should reflect the allocation of responsibilities for carrying out tasks and that these are reported on at subsequent meetings."
                 }
               ]
             },
@@ -200,7 +216,8 @@
                   "severity": null,
                   "description": "Information on services, hours of operation and processes for obtaining care is provided to services in the community who work in collaboration with the practice.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This information needs to be provided for example, to community nursing teams, step down care, allied health professionals etc. Compliance can be demonstrated by for example, e-mail correspondence with the various services or by providing information pamphlets about the practice to these services.",
+                  "guidelines": "This information needs to be provided for example, to community nursing teams, step down care, allied health professionals etc. Compliance can be demonstrated by for example, e-mail correspondence with the various services or by providing information pamphlets about the practice to these services."
                 },
                 {
                   "id": "1.2.3.3",
@@ -208,7 +225,8 @@
                   "severity": null,
                   "description": "The practice determines that the receiving individual/organisation can meet the patient’s continuing care needs, and establishes arrangements to ensure continuity.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Documented evidence is required.",
+                  "guidelines": "Documented evidence is required."
                 }
               ]
             }
@@ -236,7 +254,8 @@
                   "severity": null,
                   "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be assessed during the patient record audit and/or patient interviews.",
+                  "guidelines": "Compliance will be assessed during the patient record audit and/or patient interviews."
                 },
                 {
                   "id": "3.1.2.2",
@@ -244,7 +263,8 @@
                   "severity": null,
                   "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be assessed during the patient record audit and/or patient interviews.",
+                  "guidelines": "Compliance will be assessed during the patient record audit and/or patient interviews."
                 }
               ]
             },
@@ -259,7 +279,8 @@
                   "severity": null,
                   "description": "The patient’s need for privacy is protected during all examinations, procedures and treatments.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This must be evident in all patient care areas.",
+                  "guidelines": "This must be evident in all patient care areas."
                 },
                 {
                   "id": "3.1.3.2",
@@ -275,7 +296,8 @@
                   "severity": null,
                   "description": "The patient’s right to privacy is protected for all forms of counselling.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This must be evident in all patient care areas.",
+                  "guidelines": "This must be evident in all patient care areas."
                 },
                 {
                   "id": "3.1.3.5",
@@ -283,7 +305,8 @@
                   "severity": null,
                   "description": "When appropriate, patients are permitted to be accompanied by a family member/care-giver during consultations.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during patient interviews and observation.",
+                  "guidelines": "Compliance will be verified during patient interviews and observation."
                 }
               ]
             },
@@ -298,7 +321,8 @@
                   "severity": null,
                   "description": "Patients are aware of their right to voice complaints and the processes by which to do so, internally as well as externally where applicable.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "The complaints process must be prominently displayed in the practice. Results obtained from patient interviews and observation will determine the level of compliance.",
+                  "guidelines": "The complaints process must be prominently displayed in the practice. Results obtained from patient interviews and observation will determine the level of compliance."
                 }
               ]
             }
@@ -319,7 +343,8 @@
                   "severity": null,
                   "description": "Patients who are waiting are advised of any delays that may be experienced in receiving attention.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be measured during patient and personnel interviews.",
+                  "guidelines": "Compliance will be measured during patient and personnel interviews."
                 }
               ]
             },
@@ -334,7 +359,8 @@
                   "severity": null,
                   "description": "The practice implements a policy on telephonic and electronic communication with patients that details at least a) – e) in the standard intent above.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during personnel and patient interviews, patient record audits and by observation.",
+                  "guidelines": "Compliance will be verified during personnel and patient interviews, patient record audits and by observation."
                 }
               ]
             },
@@ -349,7 +375,8 @@
                   "severity": null,
                   "description": "The practice offers relevant health education to its patients in a planned and consistent manner which enables patients to meet their on-going health needs and achieve their health goals.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This will be assessed based on the evaluation of the patient education activities in relation to the services offered as well as the individual patient education during consultation for example, lifestyle advice, when to seek medical attention - how urgently and at what level of care, etc. Compliance will be verified during patient interviews and patient record audits.",
+                  "guidelines": "This will be assessed based on the evaluation of the patient education activities in relation to the services offered as well as the individual patient education during consultation for example, lifestyle advice, when to seek medical attention - how urgently and at what level of care, etc. Compliance will be verified during patient interviews and patient record audits."
                 },
                 {
                   "id": "3.2.5.2",
@@ -357,7 +384,8 @@
                   "severity": null,
                   "description": "Posters and pamphlets regarding high risk and commonly treated conditions relevant to the practice population (e.g. HIV, TB, Diabetes, Hypertension) are visibly displayed and accessible in the waiting room and routinely provided to patients during the consultation when appropriate.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during patient interviews, patient record audits and by observation.",
+                  "guidelines": "Compliance will be verified during patient interviews, patient record audits and by observation."
                 },
                 {
                   "id": "3.2.5.6",
@@ -365,7 +393,8 @@
                   "severity": null,
                   "description": "Information is provided in a manner and language that is understood by those making the care decisions.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during patient interviews.",
+                  "guidelines": "Compliance will be verified during patient interviews."
                 }
               ]
             }
@@ -393,7 +422,8 @@
                   "severity": null,
                   "description": "Patient and family rights are identified in a policy and documented in accordance with relevant and current laws, charters and regulations.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Patient and family rights are internationally accepted and implemented. Country specific patient rights charters must be referenced in the policy. The practice policy must include at least the right to: A healthy and safe environment Participation in decision-making Access to health care Ethical health care Choice of health services Confidentiality and privacy Culturally sensitive care Informed consent  Refusal of treatment A second opinion Complaints about health services",
+                  "guidelines": "Patient and family rights are internationally accepted and implemented. Country specific patient rights charters must be referenced in the policy. The practice policy must include at least the right to: A healthy and safe environment Participation in decision-making Access to health care Ethical health care Choice of health services Confidentiality and privacy Culturally sensitive care Informed consent  Refusal of treatment A second opinion Complaints about health services"
                 },
                 {
                   "id": "3.1.1.3",
@@ -401,7 +431,8 @@
                   "severity": null,
                   "description": "There is a patient rights charter which is prominently displayed and patients are made aware of their rights.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be measured on observation and by documented evidence that patients are made aware of their rights. This can be achieved by drawing their attention to the poster, strategically positioning of poster or by having copies of the charter available.",
+                  "guidelines": "Compliance will be measured on observation and by documented evidence that patients are made aware of their rights. This can be achieved by drawing their attention to the poster, strategically positioning of poster or by having copies of the charter available."
                 }
               ]
             },
@@ -416,7 +447,8 @@
                   "severity": null,
                   "description": "Patients are informed about their condition and the proposed treatment.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be assessed during the patient record audit and/or patient interviews.",
+                  "guidelines": "Compliance will be assessed during the patient record audit and/or patient interviews."
                 },
                 {
                   "id": "3.1.2.2",
@@ -424,7 +456,8 @@
                   "severity": null,
                   "description": "The practice informs patients and their families about their rights to refuse or discontinue treatment, and the consequences of such decisions.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be assessed during the patient record audit and/or patient interviews.",
+                  "guidelines": "Compliance will be assessed during the patient record audit and/or patient interviews."
                 },
                 {
                   "id": "3.1.2.3",
@@ -447,7 +480,8 @@
                   "severity": null,
                   "description": "The patient’s need for privacy is protected during all examinations, procedures and treatments.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This must be evident in all patient care areas.",
+                  "guidelines": "This must be evident in all patient care areas."
                 },
                 {
                   "id": "3.1.3.2",
@@ -463,7 +497,8 @@
                   "severity": null,
                   "description": "The patient’s right to privacy is protected for all forms of counselling.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This must be evident in all patient care areas.",
+                  "guidelines": "This must be evident in all patient care areas."
                 },
                 {
                   "id": "3.1.3.4",
@@ -471,7 +506,8 @@
                   "severity": null,
                   "description": "Policies and procedures to prevent the loss or misuse of patient information are implemented.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This criterion measures more than just the information contained in the patient record. The confidentiality agreement that is signed by personnel must include the protection of all patient related information including for example, discussing patient details with anyone not involved in the patient’s care, comments on social media etc. Compliance will be measured by evidence of a signed confidentiality agreement and by examining the incident management system in the practice to establish if any complaints or incidents have been reported involving a breach of patient confidentiality.",
+                  "guidelines": "This criterion measures more than just the information contained in the patient record. The confidentiality agreement that is signed by personnel must include the protection of all patient related information including for example, discussing patient details with anyone not involved in the patient’s care, comments on social media etc. Compliance will be measured by evidence of a signed confidentiality agreement and by examining the incident management system in the practice to establish if any complaints or incidents have been reported involving a breach of patient confidentiality."
                 }
               ]
             },
@@ -494,7 +530,8 @@
                   "severity": null,
                   "description": "The practice has a documented policy outlining the procedure for obtaining consent in the case of patients who are unable to grant consent for themselves by way of age or mental/physical incapacity, which is in accordance with the relevant laws and regulations.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be assessed during the patient record audit.",
+                  "guidelines": "Compliance will be assessed during the patient record audit."
                 },
                 {
                   "id": "3.1.4.3",
@@ -502,7 +539,8 @@
                   "severity": null,
                   "description": "Documented consent is obtained from patients for health information to be provided to a third party.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Evidence of compliance with this criterion may be found in different documents, e.g., patients may give consent for information to be shared with health funders as part of their membership registration. Consent is required whenever health information is shared for example with employers, family members or carers, lawyers and insurance companies.",
+                  "guidelines": "Evidence of compliance with this criterion may be found in different documents, e.g., patients may give consent for information to be shared with health funders as part of their membership registration. Consent is required whenever health information is shared for example with employers, family members or carers, lawyers and insurance companies."
                 },
                 {
                   "id": "3.1.4.4",
@@ -525,7 +563,8 @@
                   "severity": null,
                   "description": "There is a documented policy outlining the mechanism to allow for the hearing of complaints and how to act upon them which is implemented.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Documented evidence of implementation of the complaints procedure, e.g. complaints log and the documentation relating to the investigation and resolution of complaints, must be made available.",
+                  "guidelines": "Documented evidence of implementation of the complaints procedure, e.g. complaints log and the documentation relating to the investigation and resolution of complaints, must be made available."
                 },
                 {
                   "id": "3.1.5.5",
@@ -533,7 +572,8 @@
                   "severity": null,
                   "description": "Complaints are monitored and repetitions or patterns are identified.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Documented evidence of such monitoring must be available.",
+                  "guidelines": "Documented evidence of such monitoring must be available."
                 }
               ]
             }
@@ -554,7 +594,8 @@
                   "severity": null,
                   "description": "When patients register with the practice they are informed of the range of services offered by the practice, opening hours, contact details and after hours’ care arrangements, where applicable.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "It is advisable to provide this information in printed form as patients may not remember what has been told. Patients must acknowledge receipt of the information by signing (on the registration form) that they have been informed.",
+                  "guidelines": "It is advisable to provide this information in printed form as patients may not remember what has been told. Patients must acknowledge receipt of the information by signing (on the registration form) that they have been informed."
                 }
               ]
             },
@@ -569,7 +610,8 @@
                   "severity": null,
                   "description": "There is a system to ensure that patients are seen within the shortest possible time.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "To be compliant with this criterion personnel must be able to describe the patient journey from arriving at the practice until they leave. Administrative processes must be simple, standardised and streamlined as far as possible.",
+                  "guidelines": "To be compliant with this criterion personnel must be able to describe the patient journey from arriving at the practice until they leave. Administrative processes must be simple, standardised and streamlined as far as possible."
                 },
                 {
                   "id": "3.2.2.6",
@@ -577,7 +619,8 @@
                   "severity": null,
                   "description": "The patient’s consent is obtained if third parties are expected to be present during the consultation.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This can apply to students, researchers, other practice personnel and even to the patient’s family and caregivers. Documented evidence must be provided.",
+                  "guidelines": "This can apply to students, researchers, other practice personnel and even to the patient’s family and caregivers. Documented evidence must be provided."
                 }
               ]
             },
@@ -592,7 +635,8 @@
                   "severity": null,
                   "description": "New patients to the practice are asked to complete a form detailing at least a) – k) in the standard intent above.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.2.3.2",
@@ -600,7 +644,8 @@
                   "severity": null,
                   "description": "Patients are asked to update the practice if their contact details change.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.2.3.3",
@@ -608,7 +653,8 @@
                   "severity": null,
                   "description": "Health funder details are accurately recorded for each new patient when required.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 }
               ]
             },
@@ -623,7 +669,8 @@
                   "severity": null,
                   "description": "The practice implements a policy on telephonic and electronic communication with patients that details at least a) – e) in the standard intent above.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during personnel and patient interviews, patient record audits and by observation.",
+                  "guidelines": "Compliance will be verified during personnel and patient interviews, patient record audits and by observation."
                 },
                 {
                   "id": "3.2.4.2",
@@ -631,7 +678,8 @@
                   "severity": null,
                   "description": "There is evidence of practice/patient telephone or electronic advice and information in the patient health records.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 }
               ]
             },
@@ -646,7 +694,8 @@
                   "severity": null,
                   "description": "The practice offers relevant health education to its patients in a planned and consistent manner which enables patients to meet their on-going health needs and achieve their health goals.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This will be assessed based on the evaluation of the patient education activities in relation to the services offered as well as the individual patient education during consultation for example, lifestyle advice, when to seek medical attention - how urgently and at what level of care, etc. Compliance will be verified during patient interviews and patient record audits.",
+                  "guidelines": "This will be assessed based on the evaluation of the patient education activities in relation to the services offered as well as the individual patient education during consultation for example, lifestyle advice, when to seek medical attention - how urgently and at what level of care, etc. Compliance will be verified during patient interviews and patient record audits."
                 },
                 {
                   "id": "3.2.5.2",
@@ -654,7 +703,8 @@
                   "severity": null,
                   "description": "Posters and pamphlets regarding high risk and commonly treated conditions relevant to the practice population (e.g. HIV, TB, Diabetes, Hypertension) are visibly displayed and accessible in the waiting room and routinely provided to patients during the consultation when appropriate.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during patient interviews, patient record audits and by observation.",
+                  "guidelines": "Compliance will be verified during patient interviews, patient record audits and by observation."
                 },
                 {
                   "id": "3.2.5.3",
@@ -662,7 +712,8 @@
                   "severity": null,
                   "description": "Patient and family education provided is noted in the patient record.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audits.",
+                  "guidelines": "Compliance will be verified during the patient record audits."
                 },
                 {
                   "id": "3.2.5.5",
@@ -670,7 +721,8 @@
                   "severity": null,
                   "description": "There is documented evidence that patients are referred to these resources, where appropriate.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audits.",
+                  "guidelines": "Compliance will be verified during the patient record audits."
                 },
                 {
                   "id": "3.2.5.7",
@@ -678,7 +730,8 @@
                   "severity": null,
                   "description": "Prior to a treatment or assessment being rendered, except in cases of emergency, the practice must ensure that risks regarding the relevant procedure have been advised to the patient or substitute decision maker where necessary.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audits.",
+                  "guidelines": "Compliance will be verified during the patient record audits."
                 }
               ]
             }
@@ -699,7 +752,8 @@
                   "severity": null,
                   "description": "Notes for each consultation contain as a minimum points a) – n) above.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.3.2.2",
@@ -707,7 +761,8 @@
                   "severity": null,
                   "description": "Handwritten notes are legible.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.3.2.3",
@@ -715,7 +770,8 @@
                   "severity": null,
                   "description": "Notes are recorded contemporaneously.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.3.2.4",
@@ -723,7 +779,8 @@
                   "severity": null,
                   "description": "All abbreviations are standardised according to recognised local and national standards.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.3.2.5",
@@ -731,7 +788,8 @@
                   "severity": null,
                   "description": "The patients’ records, including contact details, are up to date to ensure the transfer of the latest information between care providers.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.3.2.6",
@@ -739,7 +797,8 @@
                   "severity": null,
                   "description": "The patient is fully informed regarding the estimated costs of any treatment or referral prior to these costs being incurred and the discussion is documented.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 }
               ]
             }
@@ -760,7 +819,8 @@
                   "severity": null,
                   "description": "The clinical team can describe how they ensure consistency of assessment, evaluation and management of patients.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be measured during personnel interviews and the patient record audit.",
+                  "guidelines": "Compliance will be measured during personnel interviews and the patient record audit."
                 },
                 {
                   "id": "3.4.1.3",
@@ -768,7 +828,8 @@
                   "severity": null,
                   "description": "The clinical team can demonstrate how they communicate about clinical issues and support systems in the practice.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be measured during personnel interviews and the patient record audit.",
+                  "guidelines": "Compliance will be measured during personnel interviews and the patient record audit."
                 }
               ]
             },
@@ -783,7 +844,8 @@
                   "severity": null,
                   "description": "The physical therapy examination is documented, dated, and appropriately authenticated by the physical therapist who performed it.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by a review of patient records.",
+                  "guidelines": "Compliance will be verified by a review of patient records."
                 },
                 {
                   "id": "3.4.2.2",
@@ -791,7 +853,8 @@
                   "severity": null,
                   "description": "The physical therapy examination identifies the physical therapy needs of the patient/client.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by a review of patient records.",
+                  "guidelines": "Compliance will be verified by a review of patient records."
                 },
                 {
                   "id": "3.4.2.3",
@@ -799,7 +862,8 @@
                   "severity": null,
                   "description": "The physical therapy examination incorporates appropriate history taking, systems review and tests and measures to facilitate outcome measurement.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 },
                 {
                   "id": "3.4.2.4",
@@ -807,7 +871,8 @@
                   "severity": null,
                   "description": "The physical therapy examination produces data which is sufficient to allow evaluation, diagnosis, prognosis/plan of care, and determination of interventions/treatment.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 },
                 {
                   "id": "3.4.2.5",
@@ -815,7 +880,8 @@
                   "severity": null,
                   "description": "The physical therapy examination may result in recommendations for additional services to meet the needs of the patient/client.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 },
                 {
                   "id": "3.4.2.6",
@@ -823,7 +889,8 @@
                   "severity": null,
                   "description": "The physical therapy examination provides written evidence of the reasons why no further management has been given to the patient/client and, when appropriate, to the carer.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 }
               ]
             },
@@ -838,7 +905,8 @@
                   "severity": null,
                   "description": "The physical therapist collaboratively involves the patient/client and others as appropriate in the planning, implementation, and assessment of the intervention/treatment.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 },
                 {
                   "id": "3.4.3.2",
@@ -846,7 +914,8 @@
                   "severity": null,
                   "description": "The intervention/treatment is based on the examination, evaluation, diagnosis, and prognosis/plan and informed by current evidence.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records in conjunction with the available and implemented clinical guidelines.",
+                  "guidelines": "Compliance will be verified by reviewing patient records in conjunction with the available and implemented clinical guidelines."
                 },
                 {
                   "id": "3.4.3.3",
@@ -854,7 +923,8 @@
                   "severity": null,
                   "description": "The intervention/treatment identifies anticipated goals and expected outcomes describes the proposed intervention/treatment, including frequency and duration.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 },
                 {
                   "id": "3.4.3.4",
@@ -862,7 +932,8 @@
                   "severity": null,
                   "description": "The intervention/treatment is at a level that is consistent with current physical therapy practice.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "The practice regularly reviews its standard treatment protocols and aligns it to current national and international best practice and clinical guidelines.",
+                  "guidelines": "The practice regularly reviews its standard treatment protocols and aligns it to current national and international best practice and clinical guidelines."
                 },
                 {
                   "id": "3.4.3.5",
@@ -870,7 +941,8 @@
                   "severity": null,
                   "description": "The intervention/treatment is inter-professional when necessary to meet the needs of the patient/client.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "The practice regularly communicates with the multi-disciplinary team regarding details of the patient’s clinical management and progression.",
+                  "guidelines": "The practice regularly communicates with the multi-disciplinary team regarding details of the patient’s clinical management and progression."
                 },
                 {
                   "id": "3.4.3.6",
@@ -878,7 +950,8 @@
                   "severity": null,
                   "description": "The intervention/treatment includes documentation that is dated and appropriately authenticated by the physical therapist who established the plan.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 },
                 {
                   "id": "3.4.3.7",
@@ -886,7 +959,8 @@
                   "severity": null,
                   "description": "Interventions/treatments provided by physical therapist support personnel is directed and supervised by the physical therapist.",
                   "is_critical": true,
-                  "guideline": ""
+                  "guideline": "CRITICAL  Compliance will be verified by reviewing patient records and practical observation.",
+                  "guidelines": "CRITICAL  Compliance will be verified by reviewing patient records and practical observation."
                 },
                 {
                   "id": "3.4.3.8",
@@ -894,7 +968,8 @@
                   "severity": null,
                   "description": "Interventions/treatments provided by physical therapist support personnel are commensurate with the qualifications and the legal limitations of such personnel.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records, personnel files and clinical practice protocols.",
+                  "guidelines": "Compliance will be verified by reviewing patient records, personnel files and clinical practice protocols."
                 },
                 {
                   "id": "3.4.3.9",
@@ -902,7 +977,8 @@
                   "severity": null,
                   "description": "Interventions/treatments provided by physical therapist support personnel may only be altered by the physical therapist in accordance with changes in response or status.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records, personnel files and clinical practice protocols.",
+                  "guidelines": "Compliance will be verified by reviewing patient records, personnel files and clinical practice protocols."
                 }
               ]
             },
@@ -925,7 +1001,8 @@
                   "severity": null,
                   "description": "The physical therapist re-examination includes modifications to the intervention/treatment or referral to other practitioner/professionals.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 },
                 {
                   "id": "3.4.4.3",
@@ -933,7 +1010,8 @@
                   "severity": null,
                   "description": "The physical therapist obtains the patients consent for any modifications to the treatment where necessary.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 }
               ]
             }
@@ -954,7 +1032,8 @@
                   "severity": null,
                   "description": "The physical therapist discontinues intervention/treatment when the patient/client is unable to continue to progress toward goals or when the physical therapist determines that the patient/client will no longer benefit from physical therapy.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 },
                 {
                   "id": "3.5.1.2",
@@ -962,7 +1041,8 @@
                   "severity": null,
                   "description": "The physical therapist informs the patient that the patient/client has a right to discontinue treatment/intervention at any time.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 },
                 {
                   "id": "3.5.1.3",
@@ -970,7 +1050,8 @@
                   "severity": null,
                   "description": "Where the examination, diagnostic process, or any change in status reveals findings outside the scope of knowledge, experience, and/or expertise of the physical therapist, the patient/client shall so be informed and referred to the appropriate practitioner/professional.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified by reviewing patient records.",
+                  "guidelines": "Compliance will be verified by reviewing patient records."
                 }
               ]
             },
@@ -985,7 +1066,8 @@
                   "severity": null,
                   "description": "There is a documented process to refer patients.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.5.2.2",
@@ -993,7 +1075,8 @@
                   "severity": null,
                   "description": "The lines of communication between the practice, referral centres and community services are clearly defined.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Practice personnel must clearly describe the referral process, especially where patients are sent to another healthcare organisation for specialist consultation or special investigations and then return to the referring practice for further investigation. Compliance will be verified during the patient record audit.",
+                  "guidelines": "Practice personnel must clearly describe the referral process, especially where patients are sent to another healthcare organisation for specialist consultation or special investigations and then return to the referring practice for further investigation. Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.5.2.4",
@@ -1001,7 +1084,8 @@
                   "severity": null,
                   "description": "Referrals are to specific individuals and/or agencies in the patient's home community wherever possible.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.5.2.5",
@@ -1009,7 +1093,8 @@
                   "severity": null,
                   "description": "Patients and as appropriate their families are given follow-up instructions which are provided in an understandable form and manner.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.5.2.7",
@@ -1017,7 +1102,8 @@
                   "severity": null,
                   "description": "The referral is made on appropriate stationery or electronically.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.5.2.8",
@@ -1025,7 +1111,8 @@
                   "severity": null,
                   "description": "The referral contains as a minimum a) – f) in the standard intent above.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.5.2.11",
@@ -1033,7 +1120,8 @@
                   "severity": null,
                   "description": "Follow-up care based on the findings of investigations/consultations performed outside the practice is noted in the patient record.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 }
               ]
             }
@@ -1054,7 +1142,8 @@
                   "severity": null,
                   "description": "There is implementation of a documented policy on clinical handover to ensure that standard processes are followed.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "The complexity and comprehensiveness of the content of handover information required to achieve continuity of care will differ for different types of handover situations. The details to be included in each situation should be agreed upon by all stakeholders and formalised in a practice to ensure a standardised approach at all times.  The transfer of information must be documented, preferably using standardised forms (electronic or paper-based) for the various handovers. Compliance will be verified during patient record audit.",
+                  "guidelines": "The complexity and comprehensiveness of the content of handover information required to achieve continuity of care will differ for different types of handover situations. The details to be included in each situation should be agreed upon by all stakeholders and formalised in a practice to ensure a standardised approach at all times.  The transfer of information must be documented, preferably using standardised forms (electronic or paper-based) for the various handovers. Compliance will be verified during patient record audit."
                 },
                 {
                   "id": "3.6.1.3",
@@ -1062,7 +1151,8 @@
                   "severity": null,
                   "description": "Handover of clinical information is recorded in the patients' health records.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 },
                 {
                   "id": "3.6.1.4",
@@ -1070,7 +1160,8 @@
                   "severity": null,
                   "description": "Information relating to those patients requiring special attention, such as the chronically ill or those with infections which require specific infection control measures, is provided in a patient held letter, a copy of which is kept in the patient record.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "Compliance will be verified during the patient record audit.",
+                  "guidelines": "Compliance will be verified during the patient record audit."
                 }
               ]
             },
@@ -1085,7 +1176,8 @@
                   "severity": null,
                   "description": "Patient health records contain reports or notes of investigations occurring outside normal opening hours by or on behalf of the practice.",
                   "is_critical": false,
-                  "guideline": ""
+                  "guideline": "This criterion will not be applicable to consultations that occur at public health facilities. Evidence must be provided on how and when the practice receives notes of investigations occurring through all other after-hours arrangements. Compliance will be verified during the patient record audit.",
+                  "guidelines": "This criterion will not be applicable to consultations that occur at public health facilities. Evidence must be provided on how and when the practice receives notes of investigations occurring through all other after-hours arrangements. Compliance will be verified during the patient record audit."
                 }
               ]
             }

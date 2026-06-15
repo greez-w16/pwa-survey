@@ -20,21 +20,13 @@ import mortuaryLinks from './assets/mortuary/mortuary_links.json';
 import clinicsLinks from './assets/clinics/clinics_links.json';
 import hospitalLinks from './assets/hospital/hospital_links.json';
 
-import obstericsGynoConfig from './assets/obsterics-gyno/obsterics_gyno_config.json';
 import obstericsGynoMatrix from './assets/obsterics-gyno/obsterics_gyno_matrix.json';
-import physiotheraphyConfig from './assets/physiotheraphy/physiotheraphy_config.json';
 import physiotheraphyMatrix from './assets/physiotheraphy/physiotheraphy_matrix.json';
-import radiologyConfig from './assets/radiology/radiology_config.json';
 import radiologyMatrix from './assets/radiology/radiology_matrix.json';
-import generalPracticeConfig from './assets/general-practice/general_practice_config.json';
 import generalPracticeMatrix from './assets/general-practice/general_practice_matrix.json';
-import privateDiabeticConfig from './assets/private-diabetic/private_diabetic_config.json';
 import privateDiabeticMatrix from './assets/private-diabetic/private_diabetic_matrix.json';
-import oralConfig from './assets/oral/oral_config.json';
 import oralMatrix from './assets/oral/oral_matrix.json';
-import privateOncologyConfig from './assets/private-oncology/private_oncology_config.json';
 import privateOncologyMatrix from './assets/private-oncology/private_oncology_matrix.json';
-import paediatricConfig from './assets/paediatric/paediatric_config.json';
 import paediatricMatrix from './assets/paediatric/paediatric_matrix.json';
 
 // Import remaining 8 facility matrices and matrixConfig parser
@@ -57,6 +49,14 @@ const occupationalHealthConfig = buildConfigFromMatrix('occupational_health', oc
 const urologyConfig = buildConfigFromMatrix('urology', urologyMatrix.urology);
 const childhoodIllnessConfig = buildConfigFromMatrix('childhood_illness', childhoodIllnessMatrix.childhood_illness);
 const emergencyManagementConfig = buildConfigFromMatrix('emergency_management', emergencyManagementMatrix.emergency_management);
+const radiologyConfig = buildConfigFromMatrix('radiology', radiologyMatrix.radiology);
+const obstericsGynoConfig = buildConfigFromMatrix('obsterics_gyno', obstericsGynoMatrix.obsterics_gyno);
+const physiotheraphyConfig = buildConfigFromMatrix('physiotheraphy', physiotheraphyMatrix.physiotheraphy);
+const generalPracticeConfig = buildConfigFromMatrix('general_practice', generalPracticeMatrix.general_practice);
+const privateDiabeticConfig = buildConfigFromMatrix('private_diabetic', privateDiabeticMatrix.private_diabetic);
+const oralConfig = buildConfigFromMatrix('oral', oralMatrix.oral);
+const privateOncologyConfig = buildConfigFromMatrix('private_oncology', privateOncologyMatrix.private_oncology);
+const paediatricConfig = buildConfigFromMatrix('paediatric', paediatricMatrix.paediatric);
 
 import { decorateHospitalLinksWithMatrixTags } from './utils/hospitalMatrixTags';
 import './App.css';
@@ -1328,21 +1328,43 @@ const PrivateRoute = ({ children }) => {
 	    const allSections = targetGroups.flatMap(g => g.sections || []);
 
 	    return {
-	      sections: allSections.map(section => ({
-	        id: section.id,
-	        standards: [{
-	          id: section.code || section.id,
-	          // Only score select fields (dropdowns) as they correspond to criteria responses
-	          criteria: (section.fields || [])
-	            .filter(f => f.type === 'select')
-	            .map(f => {
+	      sections: allSections.map(section => {
+	        const fieldsByStandard = {};
+
+	        (section.fields || [])
+	          .filter(f => f.type === 'select')
+	          .forEach(f => {
+	            const code = f.code || f.id;
+	            let normalizedCode = normalizeCriterionCode(code);
+	            if (!normalizedCode || !/\d/.test(normalizedCode)) {
+	              const labelMatch = String(f.label || '').match(/\b\d+(?:\.\d+){2,3}\b/);
+	              if (labelMatch) normalizedCode = labelMatch[0];
+	            }
+
+	            let standardCode = null;
+	            if (normalizedCode) {
+	              const parts = normalizedCode.split('.');
+	              if (parts.length >= 3) {
+	                standardCode = `${parts[0]}.${parts[1]}.${parts[2]}`;
+	              }
+	            }
+	            if (!standardCode) {
+	              standardCode = section.code || section.id || 'unassigned';
+	            }
+
+	            if (!fieldsByStandard[standardCode]) {
+	              fieldsByStandard[standardCode] = [];
+	            }
+	            fieldsByStandard[standardCode].push(f);
+	          });
+
+	        const standardsList = Object.entries(fieldsByStandard).map(([stdCode, fields]) => {
+	          return {
+	            id: stdCode,
+	            criteria: fields.map(f => {
 	              const code = f.code || f.id;
 	              const normalizedCode = normalizeCriterionCode(code);
                   const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
-                  // Treat links suffixed with -G / -B as visual-only. A criterion
-                  // is considered a real root ONLY if there is at least one
-                  // effective (non -G/-B) linked criterion. Otherwise, allow
-                  // manual scoring like a normal leaf.
                   const rawLinks = Array.isArray(linksData.linked_criteria) ? linksData.linked_criteria : [];
                   const effectiveLinks = rawLinks.filter(l => !String(l || '').trim().match(/-(G|B)$/i));
                   const hasEffectiveLinks = effectiveLinks.length > 0;
@@ -1352,30 +1374,35 @@ const PrivateRoute = ({ children }) => {
                   return {
 	                id: f.id,
 	                code: code,
-	                    response: scoringFormData[f.id] || 'NA',
-                    // Critical flag: prefer explicit UI toggle if present; otherwise fallback to config
+	                response: scoringFormData[f.id] || 'NA',
                     isCritical: (function() {
-	                      const uiToggle = (scoringFormData[`is_critical_${f.commentFieldId}`]);
+	                  const uiToggle = (scoringFormData[`is_critical_${f.commentFieldId}`]);
                       if (uiToggle !== undefined && uiToggle !== null) return Boolean(uiToggle);
                       return Boolean(criticalLookup[normalizedCode] || criticalLookup[code]);
                     })(),
                     isRoot,
-                    // Provide only effective (non -G/-B) links to the scorer so
-                    // that criteria with purely visual links behave as leaves and
-                    // can be scored manually.
                     links: effectiveLinks,
 	                roots: linksData.roots,
                     severity,
-                    // Manual override support for root criteria: enable and value
                     ...(function() {
-	                      const raw = scoringFormData[`override_${f.id}`];
+	                  const raw = scoringFormData[`override_${f.id}`];
                       const enabled = (raw === true) || (raw === 1) || (String(raw).toLowerCase() === 'true') || (String(raw) === '1');
-	                      return enabled ? { overrideEnabled: true, overrideResponse: scoringFormData[f.id] || 'NA' } : {};
+	                  return enabled ? { overrideEnabled: true, overrideResponse: scoringFormData[f.id] || 'NA' } : {};
                     })()
 	              };
 	            })
-	        }]
-	      }))
+	          };
+	        });
+
+	        const finalStandards = standardsList.length > 0 
+	          ? standardsList 
+	          : [{ id: section.code || section.id, criteria: [] }];
+
+	        return {
+	          id: section.id,
+	          standards: finalStandards
+	        };
+	      })
 	    };
 		  }, [activeGroup, groups, scoringDeps, location.pathname, programmeScoringMeta]);
 

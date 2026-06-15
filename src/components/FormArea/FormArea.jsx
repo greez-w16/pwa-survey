@@ -608,6 +608,22 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
             rawSaveField(key, val);
         }, [rawSaveField]);
 
+        const formAreaRef = React.useRef(null);
+
+        const scrollToTop = React.useCallback(() => {
+            if (formAreaRef.current) {
+                formAreaRef.current.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            } else {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        }, []);
+
         const [isScoringModalOpen, setIsScoringModalOpen] = useState(false);
         const [viewingRootCalc, setViewingRootCalc] = useState(null); // { code, result }
         const [currentSubsectionIndex, setCurrentSubsectionIndex] = useState(0);
@@ -738,7 +754,8 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
         // Reset pagination when activeSection changes
         React.useEffect(() => {
             setCurrentSubsectionIndex(0);
-        }, [propsActiveSection?.id]);
+            scrollToTop();
+        }, [propsActiveSection?.id, scrollToTop]);
 
             // Resolve Hospital compute criteria from configuration
             const HOSPITAL_SUBCRITERIA_MAP = React.useMemo(() => {
@@ -1713,10 +1730,14 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                     }
 
                     const sectionScore = scoringResults.sections.find((s) => s.id === activeSection.id);
-                    const standardResults = sectionScore?.standards?.[0];
-                    if (!standardResults) return {};
+                    if (!sectionScore?.standards || sectionScore.standards.length === 0) return {};
 
-                    const criteriaScores = standardResults.criteriaScores || {};
+                    const criteriaScores = {};
+                    sectionScore.standards.forEach(std => {
+                        if (std.criteriaScores) {
+                            Object.assign(criteriaScores, std.criteriaScores);
+                        }
+                    });
                     const result = {};
 
                     subsections.forEach((subFields, subsectionIndex) => {
@@ -3686,7 +3707,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
         };
 
             return (
-                <div className="form-area">
+                <div ref={formAreaRef} className="form-area">
                         <div className="form-header">
                             <div className="header-content">
                                     <h2>
@@ -3944,7 +3965,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                     className="nav-btn"
                                     onClick={() => {
                                         setCurrentSubsectionIndex((curr) => Math.max(0, curr - 1));
-                                        window.scrollTo(0, 0);
+                                        scrollToTop();
                                     }}
                                     disabled={currentSubsectionIndex === 0}
                                     style={{ opacity: currentSubsectionIndex === 0 ? 0.5 : 1 }}
@@ -3970,7 +3991,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                         setCurrentSubsectionIndex((curr) =>
                                             Math.min(subsections.length - 1, curr + 1),
                                         );
-                                        window.scrollTo(0, 0);
+                                        scrollToTop();
                                     }}
                                     disabled={isLastSubsection}
                                     style={{ opacity: isLastSubsection ? 0.5 : 1 }}
@@ -4129,7 +4150,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                                         const isCurrent = std.subsectionIndex === currentSubsectionIndex;
                                                         const handleJumpToSubsection = () => {
                                                             setCurrentSubsectionIndex(std.subsectionIndex);
-                                                            window.scrollTo(0, 0);
+                                                            scrollToTop();
                                                         };
                                                         return (
                                                             <div
@@ -4222,7 +4243,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                 className="nav-btn"
                                 onClick={() => {
                                     setCurrentSubsectionIndex(curr => Math.max(0, curr - 1));
-                                    window.scrollTo(0, 0);
+                                    scrollToTop();
                                 }}
                                 disabled={currentSubsectionIndex === 0}
                                 style={{ opacity: currentSubsectionIndex === 0 ? 0.5 : 1 }}
@@ -4236,7 +4257,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                 className="nav-btn"
                                 onClick={() => {
                                     setCurrentSubsectionIndex(curr => Math.min(subsections.length - 1, curr + 1));
-                                    window.scrollTo(0, 0);
+                                    scrollToTop();
                                 }}
                                 disabled={isLastSubsection}
                                 style={{ opacity: isLastSubsection ? 0.5 : 1 }}

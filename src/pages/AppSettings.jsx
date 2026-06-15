@@ -39,21 +39,13 @@ import mortuaryLinks from '../assets/mortuary/mortuary_links.json';
 import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
 
-import obstericsGynoConfig from '../assets/obsterics-gyno/obsterics_gyno_config.json';
 import obstericsGynoMatrix from '../assets/obsterics-gyno/obsterics_gyno_matrix.json';
-import physiotheraphyConfig from '../assets/physiotheraphy/physiotheraphy_config.json';
 import physiotheraphyMatrix from '../assets/physiotheraphy/physiotheraphy_matrix.json';
-import radiologyConfig from '../assets/radiology/radiology_config.json';
 import radiologyMatrix from '../assets/radiology/radiology_matrix.json';
-import generalPracticeConfig from '../assets/general-practice/general_practice_config.json';
 import generalPracticeMatrix from '../assets/general-practice/general_practice_matrix.json';
-import privateDiabeticConfig from '../assets/private-diabetic/private_diabetic_config.json';
 import privateDiabeticMatrix from '../assets/private-diabetic/private_diabetic_matrix.json';
-import oralConfig from '../assets/oral/oral_config.json';
 import oralMatrix from '../assets/oral/oral_matrix.json';
-import privateOncologyConfig from '../assets/private-oncology/private_oncology_config.json';
 import privateOncologyMatrix from '../assets/private-oncology/private_oncology_matrix.json';
-import paediatricConfig from '../assets/paediatric/paediatric_config.json';
 import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
 
 // Import remaining 8 facility matrices and matrixConfig parser
@@ -76,6 +68,14 @@ const occupationalHealthConfig = buildConfigFromMatrix('occupational_health', oc
 const urologyConfig = buildConfigFromMatrix('urology', urologyMatrix.urology);
 const childhoodIllnessConfig = buildConfigFromMatrix('childhood_illness', childhoodIllnessMatrix.childhood_illness);
 const emergencyManagementConfig = buildConfigFromMatrix('emergency_management', emergencyManagementMatrix.emergency_management);
+const radiologyConfig = buildConfigFromMatrix('radiology', radiologyMatrix.radiology);
+const obstericsGynoConfig = buildConfigFromMatrix('obsterics_gyno', obstericsGynoMatrix.obsterics_gyno);
+const physiotheraphyConfig = buildConfigFromMatrix('physiotheraphy', physiotheraphyMatrix.physiotheraphy);
+const generalPracticeConfig = buildConfigFromMatrix('general_practice', generalPracticeMatrix.general_practice);
+const privateDiabeticConfig = buildConfigFromMatrix('private_diabetic', privateDiabeticMatrix.private_diabetic);
+const oralConfig = buildConfigFromMatrix('oral', oralMatrix.oral);
+const privateOncologyConfig = buildConfigFromMatrix('private_oncology', privateOncologyMatrix.private_oncology);
+const paediatricConfig = buildConfigFromMatrix('paediatric', paediatricMatrix.paediatric);
 
 import { decorateHospitalLinksWithMatrixTags } from '../utils/hospitalMatrixTags';
 import { normalizeCriterionCode } from '../utils/normalization';
@@ -490,9 +490,11 @@ const SETTINGS_TABLE_HEADERS = [
     { label: 'Sub-Criteria', minWidth: 180, maxWidth: 220 },
 ];
 
-const getLeftOffset = (label) => {
+const getLeftOffset = (label, collapsedCols) => {
     if (label === 'SE Number') return 0;
-    if (label === 'SE Description') return 55;
+    if (label === 'SE Description') {
+        return collapsedCols?.has?.('SE Number') ? 22 : 55;
+    }
     return undefined;
 };
 
@@ -584,7 +586,20 @@ const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, 
                             ? 'intent_tooltip'
                             : 'intent',
                         criterionId: criterion.id,
-                        criterionDescription: (dhis2DescriptionsMap && dhis2DescriptionsMap[criterion.id]) ? dhis2DescriptionsMap[criterion.id] : (criterion.description || ''),
+                        criterionDescription: (() => {
+                            const dhis2Info = dhis2DescriptionsMap && dhis2DescriptionsMap[criterion.id];
+                            if (dhis2Info && typeof dhis2Info === 'object') {
+                                const dhis2Code = dhis2Info.code || '';
+                                const dhis2Desc = dhis2Info.dhis2Desc || '';
+                                const localDesc = criterion.description || '';
+                                const displayDesc = dhis2Desc || localDesc || '';
+                                return dhis2Code ? `${dhis2Code} - ${displayDesc}` : displayDesc;
+                            }
+                            if (dhis2Info && typeof dhis2Info === 'string') {
+                                return dhis2Info;
+                            }
+                            return criterion.description || '';
+                        })(),
                         guidelines: criterion.guidelines || criterion.guideline || '',
                         isCritical: criterion.is_critical,
                         linkedCriteria: criterion.linked_criteria || linkedCriteriaFromLinks || standardCriteriaIds,
@@ -4889,7 +4904,11 @@ export function AppSettings() {
                     const normalized = normalizeCriterionCode(de.code);
                     if (normalized) {
                         const desc = de.formName || de.description || de.displayFormName || de.displayName || de.name || '';
-                        descMap[normalized] = cleanDhis2Description(desc);
+                        const cleanDesc = cleanDhis2Description(desc);
+                        descMap[normalized] = {
+                            code: de.code,
+                            dhis2Desc: cleanDesc
+                        };
                     }
                 }
             });
@@ -5150,7 +5169,7 @@ export function AppSettings() {
 																		<thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
 																			<tr style={{ background: '#edf2f7', textAlign: 'left' }}>
 																				{SETTINGS_TABLE_HEADERS.map(header => {
-																					const leftOffset = getLeftOffset(header.label);
+																					const leftOffset = getLeftOffset(header.label, collapsedSettingsCols);
 																					const isCollapsible = header.label === 'SE Number' || header.label === 'SE Description';
 																					const isCollapsed = collapsedSettingsCols.has(header.label);
 																					return (
