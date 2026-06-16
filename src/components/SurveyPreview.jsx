@@ -163,7 +163,13 @@ export function SurveyPreview({ event, onClose }) {
 	    }
 
 	    return (
-	        <div className="inspection-preview-overlay">
+	        <div
+	            className="inspection-preview-overlay secure-no-select"
+	            onCopy={(e) => { e.preventDefault(); e.stopPropagation(); }}
+	            onCut={(e) => { e.preventDefault(); e.stopPropagation(); }}
+	            onPaste={(e) => { e.preventDefault(); e.stopPropagation(); }}
+	            onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
+	        >
 	            <div className="inspection-preview-modal">
 	                <div className="preview-header">
 	                    <div className="preview-header-main">

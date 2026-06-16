@@ -302,7 +302,11 @@ const PrivateRoute = ({ children }) => {
 	    saveField: baseSaveField,
 	    loadFormData,
 	    isSaving,
-	    lastSaved
+	    lastSaved,
+	    syncStatus,
+	    setSyncStatus,
+	    pendingFields,
+	    syncedFields
 	  } = useIncrementalSave(activeEventId, {
 	    user,
 	    onSaveSuccess: (details) => console.log('✅ App: Saved field:', details),
@@ -1563,6 +1567,10 @@ const PrivateRoute = ({ children }) => {
 		                  scoringResults={scoringResults}
 		                  isScoringPending={isScoringPending}
 		                  onCriterionChange={handleCriterionChange}
+                  syncStatus={syncStatus}
+                  setSyncStatus={setSyncStatus}
+                  pendingFields={pendingFields}
+                  syncedFields={syncedFields}
                 />
               </Layout>
             </>

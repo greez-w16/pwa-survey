@@ -1034,3 +1034,69 @@
         width: 100%;
     }
 }
+
+/* Security Focus Blur Overlay */
+.security-blur-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100000; /* Extremely high to cover everything */
+    color: white;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+}
+
+.security-blur-card {
+    background: linear-gradient(135deg, #102a4c, #1e293b);
+    padding: 2.5rem;
+    border-radius: 14px;
+    box-shadow: 0 24px 70px rgba(15, 23, 42, 0.16);
+    text-align: center;
+    max-width: 480px;
+    width: 90%;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.security-blur-icon {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.security-blur-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+    color: #38bdf8;
+}
+
+.security-blur-text {
+    font-size: 0.95rem;
+    color: #cbd5e1;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+}
+
+.security-blur-btn {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 0.75rem 1.5rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+.security-blur-btn:hover {
+    background-color: #1d4ed8;
+    transform: scale(1.02);
+}

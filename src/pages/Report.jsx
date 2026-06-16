@@ -784,12 +784,24 @@ export default function Report() {
 		          const localDrafts = await indexedDBService.getAllDrafts(user).catch(() => []);
 		          const convertedDrafts = localDrafts.map((draft) => {
 		            const dataValues = [];
+		            let hasRealAnswers = false;
+		            // Count completed sections as evidence the user has progressed through the survey
+		            const completedSectionsVal = draft.formData?.completedSections;
+		            if (Array.isArray(completedSectionsVal) && completedSectionsVal.length > 0) {
+		              hasRealAnswers = true;
+		            }
 		            Object.entries(draft.formData || {}).forEach(([key, val]) => {
 		              if (['orgUnit', 'eventDate', 'programStage', 'typeOfAssessment', 'facilityGroup', 'completedSections'].includes(key)) return;
+		              if (key.endsWith('_internal')) return;
+		              
 		              dataValues.push({
 		                dataElement: key,
 		                value: String(val)
 		              });
+		              
+		              if (val !== undefined && val !== null && String(val).trim() !== '') {
+		                hasRealAnswers = true;
+		              }
 		            });
 
 		            const draftTei = draft.metadata?.teiId || draft.metadata?.trackedEntityInstance || reportQueryParams.teiId || '';
@@ -808,7 +820,8 @@ export default function Report() {
 		              status: 'ACTIVE',
 		              dataValues,
 		              notes: [],
-		              isDraft: true
+		              isDraft: true,
+		              hasRealAnswers
 		            };
 		          });
 		          all = mergeEvents(all, convertedDrafts);
@@ -889,7 +902,7 @@ export default function Report() {
         const bundlesByEnrollment = {};
         // Exclude local draft events — they only contain local metadata (e.g. facilityName_internal)
         // and should never be used as the source for baseline/latest assessment selection.
-        all.filter(ev => !ev.isDraft).forEach(ev => {
+        all.filter(ev => !ev.isDraft || ev.hasRealAnswers).forEach(ev => {
           const teiId = getEventTeiId(ev);
           const enrollmentId = ev?.enrollment || teiId;
           if (!enrollmentId) return;
@@ -988,7 +1001,24 @@ export default function Report() {
           if (latestBundleResolved?.teiId) allowedTeis.add(latestBundleResolved.teiId);
           if (baselineBundleResolved?.teiId) allowedTeis.add(baselineBundleResolved.teiId);
 
-          bundles = bundles.filter(b => allowedTeis.has(b.teiId));
+          // Also track allowed enrollment IDs so offline drafts (no teiId yet) are
+          // not silently dropped when allowedTeis is empty.
+          const allowedEnrollments = new Set();
+          if (latestBundleResolved?.enrollmentId) allowedEnrollments.add(latestBundleResolved.enrollmentId);
+          if (baselineBundleResolved?.enrollmentId) allowedEnrollments.add(baselineBundleResolved.enrollmentId);
+
+          if (allowedTeis.size > 0) {
+            // Normal path: filter by teiId (server-synced events)
+            bundles = bundles.filter(b =>
+              allowedTeis.has(b.teiId) ||
+              (!b.teiId && allowedEnrollments.has(b.enrollmentId))
+            );
+          } else if (allowedEnrollments.size > 0) {
+            // Offline-only path: no teiIds available – match by enrollmentId instead
+            bundles = bundles.filter(b => allowedEnrollments.has(b.enrollmentId));
+          }
+          // If both sets are empty something is wrong; keep bundles as-is so the
+          // subsequent inPeriodBundles step can still produce results.
         }
 
         const targetBundle = (() => {

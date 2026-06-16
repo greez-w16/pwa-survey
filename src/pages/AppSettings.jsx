@@ -637,80 +637,78 @@ const EditableTextCell = ({
     onOpen,
     onSave,
 }) => {
-    const [textVal, setTextVal] = useState(value || '');
-    const textareaRef = useRef(null);
+    const editorRef = useRef(null);
 
+    // Populate the contentEditable div when entering edit mode
     useEffect(() => {
-        setTextVal(value || '');
-    }, [value]);
-
-    const handleFormat = (tag) => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selectedText = textVal.substring(start, end);
-        
-        let replacement = '';
-        if (tag === 'ul') {
-            replacement = `<ul>\n  <li>${selectedText || 'item'}</li>\n</ul>`;
-        } else {
-            replacement = `<${tag}>${selectedText}</${tag}>`;
+        if (active && editorRef.current) {
+            editorRef.current.innerHTML = value || '';
+            // Move cursor to end
+            try {
+                const range = document.createRange();
+                const sel = window.getSelection();
+                range.selectNodeContents(editorRef.current);
+                range.collapse(false);
+                sel.removeAllRanges();
+                sel.addRange(range);
+                editorRef.current.focus();
+            } catch (_) { /* ignore */ }
         }
+    }, [active]); // eslint-disable-line react-hooks/exhaustive-deps
 
-        const newValue = textVal.substring(0, start) + replacement + textVal.substring(end);
-        setTextVal(newValue);
-        onSave(newValue);
+    const handleFormat = (command) => {
+        editorRef.current?.focus();
+        // execCommand applies formatting to the current selection
+        document.execCommand(command, false, null);
+        const newHtml = editorRef.current?.innerHTML || '';
+        onSave(newHtml);
+    };
 
-        // Put focus back and set selection range
-        setTimeout(() => {
-            textarea.focus();
-            const newCursorPos = start + replacement.length;
-            textarea.setSelectionRange(newCursorPos, newCursorPos);
-        }, 0);
+    const handleInput = () => {
+        const newHtml = editorRef.current?.innerHTML || '';
+        onSave(newHtml);
     };
 
     if (editable && active) {
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }} onClick={(e) => e.stopPropagation()}>
+                {/* Formatting toolbar */}
                 <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '4px', borderRadius: '4px', border: '1px solid #cbd5e0', width: 'fit-content' }}>
-                    <button 
+                    <button
                         style={{ padding: '2px 8px', fontSize: '0.85em', fontWeight: 'bold', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
                         title="Bold"
-                        onMouseDown={(e) => { e.preventDefault(); handleFormat('b'); }}
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('bold'); }}
                     >
                         B
                     </button>
-                    <button 
+                    <button
                         style={{ padding: '2px 8px', fontSize: '0.85em', fontStyle: 'italic', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
                         title="Italic"
-                        onMouseDown={(e) => { e.preventDefault(); handleFormat('i'); }}
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('italic'); }}
                     >
                         I
                     </button>
-                    <button 
+                    <button
                         style={{ padding: '2px 8px', fontSize: '0.85em', textDecoration: 'underline', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
                         title="Underline"
-                        onMouseDown={(e) => { e.preventDefault(); handleFormat('u'); }}
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('underline'); }}
                     >
                         U
                     </button>
-                    <button 
+                    <button
                         style={{ padding: '2px 8px', fontSize: '0.85em', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
                         title="Bullet List"
-                        onMouseDown={(e) => { e.preventDefault(); handleFormat('ul'); }}
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('insertUnorderedList'); }}
                     >
                         • List
                     </button>
                 </div>
-                <textarea
-                    ref={textareaRef}
-                    value={textVal}
-                    onChange={(e) => {
-                        setTextVal(e.target.value);
-                        onSave(e.target.value);
-                    }}
+                {/* WYSIWYG contentEditable editor — bold/underline render in real time */}
+                <div
+                    ref={editorRef}
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={handleInput}
                     onBlur={() => onOpen(null)}
                     onKeyDown={(e) => {
                         if (e.key === 'Escape') onOpen(null);
@@ -721,11 +719,15 @@ const EditableTextCell = ({
                         padding: '6px',
                         fontSize: '0.9rem',
                         fontFamily: 'inherit',
-                        border: '1px solid #cbd5e0',
+                        border: '1px solid #4a90e2',
                         borderRadius: '4px',
-                        resize: 'vertical'
+                        overflowY: 'auto',
+                        outline: 'none',
+                        cursor: 'text',
+                        lineHeight: '1.5',
+                        background: '#fff',
+                        boxShadow: '0 0 0 2px rgba(74,144,226,0.15)',
                     }}
-                    autoFocus
                 />
             </div>
         );
