@@ -4,7 +4,7 @@ import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
 import { Button, TextField, MenuItem, FormControl, InputLabel, Select, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { transformMetadata } from '../utils/transformers';
 import { normalizeCriterionCode } from '../utils/normalization';
 import { useAssessmentScoring } from '../hooks/useAssessmentScoring';
@@ -164,17 +164,10 @@ const getProgrammeTypeFromGroupId = (groupId) => {
   return 'ems'; // fallback
 };
 
-const withTimeout = (promise, ms, label = 'Request') => new Promise((resolve, reject) => {
-  const timer = setTimeout(() => reject(new Error(`${label} timed out`)), ms);
-  Promise.resolve(promise)
-    .then(value => resolve(value))
-    .catch(err => reject(err))
-    .finally(() => clearTimeout(timer));
-});
-
 export default function Report() {
   const { user, configuration, setConfiguration, showToast, configBundles, activeConfigVersionId, userAssignments, configSource, loadRemoteConfig } = useApp();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [metadataLoading, setMetadataLoading] = useState(false);
   const [metadataFetchAttempted, setMetadataFetchAttempted] = useState(false);
@@ -362,13 +355,20 @@ export default function Report() {
     const id = String(section.id || '').toLowerCase();
     const code = String(section.code || '').toLowerCase();
     const name = String(section.name || section.se_name || section.title || '').toLowerCase();
+    const origName = String(section._originalName || '').toLowerCase();
     if (id === 'ad' || id === 'assessment_details' || id === 'assessment-details') return true;
     if (code === 'ad' || code === 'assessment_details' || code === 'assessment-details') return true;
-    return name.includes('assessment details');
+    const textToCheck = [name, origName];
+    return textToCheck.some(t =>
+      t.includes('assessment details') ||
+      t.includes('assessment_details') ||
+      t.includes('facility details') ||
+      t.includes('facility_details')
+    );
   };
 	  const reportQueryParams = useMemo(() => {
 	    try {
-	      const sp = new URLSearchParams(window.location.search);
+	      const sp = new URLSearchParams(location.search);
 	      return {
 	        facilityId: sp.get('facilityId') || '',
 	        teiId: sp.get('teiId') || '',
@@ -382,7 +382,7 @@ export default function Report() {
 	    } catch {
 	      return { facilityId: '', teiId: '', eventId: '', programId: '', programStageId: '', facilityGroup: '', start: '', end: '' };
 	    }
-	  }, []);
+	  }, [location.search]);
 
   const queryFacilityGroupKey = useMemo(() => toFacilityGroupKey(reportQueryParams.facilityGroup), [reportQueryParams.facilityGroup]);
 
@@ -415,7 +415,7 @@ export default function Report() {
     let cancelled = false;
     setMetadataLoading(true);
     setMetadataFetchAttempted(false);
-    withTimeout(api.getFormMetadata(stageId), 3000, 'Metadata')
+    api.getFormMetadata(stageId)
       .then((metadata) => {
         if (cancelled) return;
         setConfiguration?.({
@@ -607,7 +607,13 @@ export default function Report() {
     return null;
   };
 
-
+  const withTimeout = (promise, ms, label = 'Request') => new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(`${label} timed out`)), ms);
+    Promise.resolve(promise)
+      .then(value => resolve(value))
+      .catch(err => reject(err))
+      .finally(() => clearTimeout(timer));
+  });
 
   useEffect(() => {
     let cancelled = false;
@@ -620,20 +626,10 @@ export default function Report() {
         // Prefer authorised facilities from scheduling assignments
         if (directFacilityId) {
           try {
-            const ou = await withTimeout(api.getFacilityDetails(directFacilityId), 2500, 'Facility Details');
+            const ou = await api.getFacilityDetails(directFacilityId);
             options = [{ id: directFacilityId, name: ou.displayName || ou.name || directFacilityId }];
           } catch (_) {
-            let fallbackName = directFacilityId;
-            if (Array.isArray(userAssignments)) {
-              const matched = userAssignments.find(a => {
-                const aId = a.orgUnitId || (typeof a.orgUnit === 'string' ? a.orgUnit : a.orgUnit?.id);
-                return aId === directFacilityId;
-              });
-              if (matched) {
-                fallbackName = matched.orgUnitName || (matched.orgUnit && (matched.orgUnit.displayName || matched.orgUnit.name)) || directFacilityId;
-              }
-            }
-            options = [{ id: directFacilityId, name: fallbackName }];
+            options = [{ id: directFacilityId, name: directFacilityId }];
           }
         } else if (Array.isArray(userAssignments) && userAssignments.length > 0) {
           const byOu = new Map();
@@ -690,6 +686,10 @@ export default function Report() {
       const periodStart = parseDateStart(startDate);
       const periodEnd = parseDateEnd(endDate);
       if (periodStart && periodEnd && periodStart > periodEnd) { showToast?.('Start date must be before end date.', 'warning'); return; }
+      
+      let activeStartDate = startDate;
+      let activeEndDate = endDate;
+      
       setReportLoading(true);
       setReportInfo(null);
       setReportAssessment(null);
@@ -705,7 +705,20 @@ export default function Report() {
 	          return Array.from(byEvent.values());
 	        };
 
-
+          const withTimeout = (promise, ms = 4000) => {
+            return new Promise((resolve, reject) => {
+              const timer = setTimeout(() => reject(new Error('Timeout')), ms);
+              promise
+                .then(res => {
+                  clearTimeout(timer);
+                  resolve(res);
+                })
+                .catch(err => {
+                  clearTimeout(timer);
+                  reject(err);
+                });
+            });
+          };
 
           // 1. Queue eventId requests in parallel
           let eventIdPromise = Promise.resolve([]);
@@ -821,7 +834,12 @@ export default function Report() {
         };
         const getNumericSysTag = (ev) => {
           const tag = getSysTag(ev);
-          return tag && /^\d+$/.test(tag) ? tag : null;
+          if (!tag) return null;
+          // Accept pure numbers: "1", "2", ...
+          if (/^\d+$/.test(tag)) return tag;
+          // Also accept "HOSP_SE1", "SE_2", "EMS3", etc. — extract the trailing number
+          const m = tag.match(/(\d+)$/);
+          return m ? m[1] : null;
         };
         const getTypeValue = (ev) => {
           if (!TYPE_OF_ASSESSMENT_DE_ID) return '';
@@ -864,20 +882,27 @@ export default function Report() {
           return `${year}-${month}-${day}`;
         };
 
+        const getEventTeiId = (ev) => {
+          return ev?.trackedEntityInstance || ev?.trackedEntity || ev?.teiId || ev?.tei || null;
+        };
+
         const bundlesByEnrollment = {};
-        all.forEach(ev => {
-          const enrollmentId = ev?.enrollment || ev?.trackedEntityInstance;
+        // Exclude local draft events — they only contain local metadata (e.g. facilityName_internal)
+        // and should never be used as the source for baseline/latest assessment selection.
+        all.filter(ev => !ev.isDraft).forEach(ev => {
+          const teiId = getEventTeiId(ev);
+          const enrollmentId = ev?.enrollment || teiId;
           if (!enrollmentId) return;
           if (!bundlesByEnrollment[enrollmentId]) {
             bundlesByEnrollment[enrollmentId] = {
               enrollmentId,
-              teiId: ev?.trackedEntityInstance || null,
+              teiId: teiId,
               events: [],
               byTag: {},
               metaEvents: []
             };
-          } else if (ev?.trackedEntityInstance && !bundlesByEnrollment[enrollmentId].teiId) {
-            bundlesByEnrollment[enrollmentId].teiId = ev.trackedEntityInstance;
+          } else if (teiId && !bundlesByEnrollment[enrollmentId].teiId) {
+            bundlesByEnrollment[enrollmentId].teiId = teiId;
           }
           bundlesByEnrollment[enrollmentId].events.push(ev);
           const tag = getNumericSysTag(ev);
@@ -905,6 +930,19 @@ export default function Report() {
           };
         }).filter(b => b.assessmentDate);
 
+        console.log('[Report] Bundles constructed:', bundles.map(b => ({
+          enrollmentId: b.enrollmentId,
+          teiId: b.teiId,
+          assessmentDate: b.assessmentDate,
+          latestType: b.latestType,
+          isBaseline: b.isBaseline,
+          byTagKeys: Object.keys(b.byTag),
+          metaEventsCount: b.metaEvents.length,
+          metaEventDEcount: (b.metaEvent?.dataValues || []).length,
+          byTag1EventCount: (b.byTag['1'] || []).length,
+          byTag1SampleDEs: ((b.byTag['1'] || [])[0]?.dataValues || []).map(dv => dv.dataElement),
+        })));
+
         // Keep only the latest created TEI/enrollment and the baseline TEI/enrollment
         if (bundles.length > 0) {
           // Find the latest overall bundle (preferring targeted teiId if provided)
@@ -921,6 +959,29 @@ export default function Report() {
           let baselineBundleResolved = bundles.filter(b => b.isBaseline).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
           if (!baselineBundleResolved) {
             baselineBundleResolved = [...bundles].sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0];
+          }
+
+          // Adjust state dates if needed to make sure they encompass the available surveys.
+          // This ensures that the latest and baseline surveys are always shown, rather than being filtered out.
+          if (latestBundleResolved && baselineBundleResolved) {
+            const bDate = getLocalDateString(baselineBundleResolved.assessmentDate);
+            const lDate = getLocalDateString(latestBundleResolved.assessmentDate);
+            if (bDate && lDate) {
+              const dates = [bDate, lDate].sort();
+              const proposedStart = dates[0];
+              const proposedEnd = dates[1];
+
+              // Check if we need to adjust the date inputs.
+              // If the current filters would exclude these surveys, we automatically adjust them.
+              if (!activeStartDate || activeStartDate > proposedStart) {
+                activeStartDate = proposedStart;
+                setStartDate(proposedStart);
+              }
+              if (!activeEndDate || activeEndDate < proposedEnd) {
+                activeEndDate = proposedEnd;
+                setEndDate(proposedEnd);
+              }
+            }
           }
 
           const allowedTeis = new Set();
@@ -949,8 +1010,8 @@ export default function Report() {
           const eventsInPeriod = b.events.filter(ev => {
             const evDateStr = getLocalDateString(ev.eventDate);
             if (!evDateStr) return false;
-            if (startDate && evDateStr < startDate) return false;
-            if (endDate && evDateStr > endDate) return false;
+            if (activeStartDate && evDateStr < activeStartDate) return false;
+            if (activeEndDate && evDateStr > activeEndDate) return false;
             return true;
           });
 
@@ -966,12 +1027,12 @@ export default function Report() {
           };
         }).filter(Boolean);
 
-        const dateRangeChanged = (startDate !== (reportQueryParams.start?.split('T')[0] || '')) || (endDate !== (reportQueryParams.end?.split('T')[0] || ''));
+        const dateRangeChanged = (activeStartDate !== (reportQueryParams.start?.split('T')[0] || '')) || (activeEndDate !== (reportQueryParams.end?.split('T')[0] || ''));
         const targetInPeriod = targetBundle && (() => {
           const targetDateStr = getLocalDateString(targetBundle.assessmentDate);
           if (!targetDateStr) return false;
-          if (startDate && targetDateStr < startDate) return false;
-          if (endDate && targetDateStr > endDate) return false;
+          if (activeStartDate && targetDateStr < activeStartDate) return false;
+          if (activeEndDate && targetDateStr > activeEndDate) return false;
           return true;
         })();
 
@@ -1088,6 +1149,21 @@ export default function Report() {
         );
         const latestType = latestBundle.latestType || 'Latest assessment';
 
+        // Build the set of DE IDs that are stamped onto every SE event at creation time
+        // (SYS_TAG, type-of-assessment, facility-group, and the Assessment Details section
+        // fields if identifiable from section metadata). An SE event is "populated" ONLY
+        // when it contains a dataValue whose DE ID is NOT in this exclusion set.
+        const knownMetadataDeIds = new Set([
+          SYS_TAG_DE_ID,
+          FACILITY_GROUP_DE_ID,
+          ...(TYPE_OF_ASSESSMENT_DE_ID ? [TYPE_OF_ASSESSMENT_DE_ID] : []),
+          // Also exclude any field IDs from the Assessment Details section if found
+          ...(targetSections)
+            .filter(s => isAssessmentDetailsSection(s))
+            .flatMap(s => (s.fields || []).map(f => f.id))
+            .filter(Boolean),
+        ]);
+
         const baselineEventBySection = {};
         const latestEventBySection = {};
         targetSections.filter(s => !isAssessmentDetailsSection(s)).forEach((section, idx) => {
@@ -1139,31 +1215,41 @@ export default function Report() {
                     ? rawEvents.filter(ev => {
                         const evDateStr = getLocalDateString(ev.eventDate);
                         if (!evDateStr) return false;
-                        if (startDate && evDateStr < startDate) return false;
-                        if (endDate && evDateStr > endDate) return false;
+                        if (activeStartDate && evDateStr < activeStartDate) return false;
+                        if (activeEndDate && evDateStr > activeEndDate) return false;
                         return true;
                       })
                     : rawEvents;
-                  const tagEvent = pickLatest(filteredEvents);
-                  const sectionEvent = isAssessmentDetailsSection(section)
-                    ? bundle.metaEvent
-                    : tagEvent || (() => {
-                        if (!section.fields?.length || !Array.isArray(bundle.metaEvents)) return bundle.metaEvent || null;
-                        const fieldIds = new Set(section.fields.map(field => field.id));
-                        const metaEventsList = filterByPeriod
-                          ? bundle.metaEvents.filter(ev => {
-                              const evDateStr = getLocalDateString(ev.eventDate);
-                              if (!evDateStr) return false;
-                              if (startDate && evDateStr < startDate) return false;
-                              if (endDate && evDateStr > endDate) return false;
-                              return true;
-                            })
-                          : bundle.metaEvents;
-                        const candidates = metaEventsList.filter(ev =>
-                          (ev.dataValues || []).some(dv => fieldIds.has(dv.dataElement))
-                        );
-                        return candidates.sort((a, b) => new Date(b.eventDate || 0) - new Date(a.eventDate || 0))[0] || bundle.metaEvent || null;
-                      })();
+                  // Determine which event has the survey answers for this section.
+                  // Strategy: check if ANY metaEvent (FINAL event) has answers for
+                  // section.fields — if so, it's old format (all answers in FINAL event).
+                  // If not, it's new format (answers in the per-SE byTag event).
+                  const sectionFieldIds = new Set((section.fields || []).map(field => field.id));
+
+                  const metaEventsWithSectionData = (Array.isArray(bundle.metaEvents) ? bundle.metaEvents : [])
+                    .filter(ev => (ev.dataValues || []).some(dv => sectionFieldIds.has(dv.dataElement)));
+
+                  let sectionEvent;
+                  if (isAssessmentDetailsSection(section)) {
+                    sectionEvent = bundle.metaEvent;
+                  } else if (metaEventsWithSectionData.length > 0) {
+                    // Old format: FINAL event has answers for this section
+                    sectionEvent = metaEventsWithSectionData
+                      .sort((a, b) => new Date(b.eventDate || 0) - new Date(a.eventDate || 0))[0];
+                    console.log('[Report] OLD-FORMAT section', section.name,
+                      '| metaCandidates:', metaEventsWithSectionData.length,
+                      '| sectionEvent.event:', sectionEvent?.event,
+                      '| dvCount:', (sectionEvent?.dataValues || []).length);
+                  } else {
+                    // New format: answers are in the per-SE byTag event
+                    sectionEvent = pickLatest(filteredEvents) || bundle.metaEvent || null;
+                    console.log('[Report] NEW-FORMAT section', section.name,
+                      '| filteredEvents:', filteredEvents.length,
+                      '| sectionEvent.event:', sectionEvent?.event,
+                      '| sectionEvent dvCount:', (sectionEvent?.dataValues || []).length,
+                      '| sectionFieldIds size:', sectionFieldIds.size,
+                      '| sectionEvent DEs:', (sectionEvent?.dataValues || []).map(dv => dv.dataElement));
+                  }
                   const formDataForSection = Object.fromEntries((((sectionEvent || {}).dataValues) || []).map(dv => [dv.dataElement, dv.value]));
                   const code = f.code || f.id;
                   const normalizedCode = normalizeCriterionCode(code);
@@ -1292,8 +1378,8 @@ export default function Report() {
           count: inPeriodBundles.length,
           baselineDate: baselineBundle.assessmentDate || null,
           latestDate: latestBundle.effectiveAssessmentDate || latestBundle.assessmentDate || null,
-	          periodStart: startDate || null,
-	          periodEnd: endDate || null,
+	          periodStart: activeStartDate || null,
+	          periodEnd: activeEndDate || null,
           latestType,
           sectionLatestDates: Object.fromEntries(
             targetSections.filter(s => !isAssessmentDetailsSection(s)).map(s => [s.id, latestEventBySection[s.id]?.eventDate || null])
@@ -1409,19 +1495,14 @@ export default function Report() {
   useEffect(() => {
     try {
 	      const facilityId = reportQueryParams.facilityId;
-	      const end = reportQueryParams.end;
       if (facilityId) setSelectedFacilityId(facilityId);
       if (facilityId) setFacilityLocked(true);
       setStartDate('2026-01-01');
-      if (end) {
-        setEndDate(end.split('T')[0] || end);
-      } else {
-        const d = new Date();
-        const year = d.getFullYear();
-        const month = String(d.getMonth() + 1).padStart(2, '0');
-        const day = String(d.getDate()).padStart(2, '0');
-        setEndDate(`${year}-${month}-${day}`);
-      }
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      setEndDate(`${year}-${month}-${day}`);
 	      if (facilityId) setAutoGenerateRequested(true);
     } catch {}
 	  }, [reportQueryParams]);
@@ -1835,8 +1916,14 @@ export default function Report() {
     background,
     color,
     fontWeight: 700,
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
     ...extra,
   });
+
+  const headerRow2CellStyle = (background, color, extra = {}) =>
+    overviewHeaderCellStyle(background, color, { top: '37px', ...extra });
 
   const overviewBodyCellStyle = (rowIndex, extra = {}) => ({
     border: '1px solid #e2e8f0',
@@ -3370,14 +3457,14 @@ export default function Report() {
                 <h3 style={{ margin: 0 }}>Facility Overview</h3>
               </div>
               {!isFacilityOverviewCollapsed && (
-              <div style={{ overflowX: 'auto', marginTop: 8, maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
+              <div style={{ overflow: 'auto', maxHeight: '72vh', marginTop: 8, maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84em', minWidth: 1500 }}>
                   <thead>
                     <tr>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')} title="Service Element index code">SE</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a', { left: 0, zIndex: 15 })} title="Service Element index code">SE</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a', { minWidth: 220 })} title="Service Element name">Service</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')} title="First recorded compliance score inside the selected date range.">Overall baseline score</th>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')} title="Most recent recorded compliance score inside the selected date range.">Overall progress score</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')} title="Most recent recorded compliance score inside the selected date range.">{reportInfo?.latestType ? String(reportInfo.latestType).trim() : 'Overall progress score'}</th>
                       <th colSpan={4} style={overviewHeaderCellStyle('#e0f2fe', '#075985')} title="Action-oriented metrics tracking change, closure rate, timeline, and status.">Action insights</th>
                       <th colSpan={3} style={overviewHeaderCellStyle('#fef3c7', '#92400e')} title="Deficiencies (Non-Compliant or Partially Compliant criteria) identified in the baseline assessment.">Deficiencies identified at baseline</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#dcfce7', '#166534')} title="Baseline deficiencies successfully resolved to Compliant in the latest assessment.">Deficiencies completed to date</th>
@@ -3387,28 +3474,28 @@ export default function Report() {
                       <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')} title="Date of the most recent assessment within the selected range.">Most recent assessment date</th>
                     </tr>
                     <tr>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })} title="Percentage point change between progress and baseline scores: (rounded progress % - rounded baseline %).">Δ Change</th>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')} title="Percentage of baseline deficiencies successfully resolved: (Completed / Baseline Total) * 100.">Closure Rate</th>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })} title="Number of months elapsed since the latest assessment was completed.">Months Since</th>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')} title="Current status of the service: Critical (remaining critical deficiencies or score drop <= -15%), Warning (some deficiencies or score drop <= -5%), or On Track.">Status</th>
-                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')} title="Total baseline deficiencies: (NC + PC).">Total</th>
-                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')} title="Baseline criteria scored as Non-Compliant.">NC</th>
-                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')} title="Baseline criteria scored as Partially Compliant.">PC</th>
-                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')} title="Total remaining deficiencies: (NC + PC).">Total</th>
-                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')} title="Remaining criteria scored as Non-Compliant in the latest assessment.">NC</th>
-                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')} title="Remaining criteria scored as Partially Compliant in the latest assessment.">PC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Total critical criteria evaluated at baseline.">Total</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria scored as Non-Compliant at baseline.">NC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria scored as Partially Compliant at baseline.">PC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Total critical criteria remaining deficient in the latest assessment.">Total</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria remaining Non-Compliant in the latest assessment.">NC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria remaining Partially Compliant in the latest assessment.">PC</th>
+                      <th style={headerRow2CellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })} title="Percentage point change between progress and baseline scores: (rounded progress % - rounded baseline %).">Δ Change</th>
+                      <th style={headerRow2CellStyle('#f0f9ff', '#075985')} title="Percentage of baseline deficiencies successfully resolved: (Completed / Baseline Total) * 100.">Closure Rate</th>
+                      <th style={headerRow2CellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })} title="Number of months elapsed since the latest assessment was completed.">Months Since</th>
+                      <th style={headerRow2CellStyle('#f0f9ff', '#075985')} title="Current status of the service: Critical (remaining critical deficiencies or score drop <= -15%), Warning (some deficiencies or score drop <= -5%), or On Track.">Status</th>
+                      <th style={headerRow2CellStyle('#fff7ed', '#92400e')} title="Total baseline deficiencies: (NC + PC).">Total</th>
+                      <th style={headerRow2CellStyle('#fff7ed', '#92400e')} title="Baseline criteria scored as Non-Compliant.">NC</th>
+                      <th style={headerRow2CellStyle('#fff7ed', '#92400e')} title="Baseline criteria scored as Partially Compliant.">PC</th>
+                      <th style={headerRow2CellStyle('#fef2f2', '#991b1b')} title="Total remaining deficiencies: (NC + PC).">Total</th>
+                      <th style={headerRow2CellStyle('#fef2f2', '#991b1b')} title="Remaining criteria scored as Non-Compliant in the latest assessment.">NC</th>
+                      <th style={headerRow2CellStyle('#fef2f2', '#991b1b')} title="Remaining criteria scored as Partially Compliant in the latest assessment.">PC</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Total critical criteria evaluated at baseline.">Total</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria scored as Non-Compliant at baseline.">NC</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria scored as Partially Compliant at baseline.">PC</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Total critical criteria remaining deficient in the latest assessment.">Total</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria remaining Non-Compliant in the latest assessment.">NC</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria remaining Partially Compliant in the latest assessment.">PC</th>
                     </tr>
                   </thead>
                   <tbody>
                     {facilityOverview.map((row, rowIndex) => (
                       <tr key={`ov-${row.seIndex}`}>
-                        <td style={overviewBodyCellStyle(rowIndex)}>{`SE ${row.seIndex}`}</td>
+                        <td style={overviewBodyCellStyle(rowIndex, { position: 'sticky', left: 0, zIndex: 5 })}>{`SE ${row.seIndex}`}</td>
                         <td style={overviewBodyCellStyle(rowIndex, { minWidth: 220 })}>{renderOverviewService(row)}</td>
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewScore(row.baselinePercent)}</td>
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewScore(row.latestPercent)}</td>
@@ -3435,7 +3522,7 @@ export default function Report() {
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td style={overviewTotalsCellStyle()}>Totals</td>
+                      <td style={overviewTotalsCellStyle({ position: 'sticky', left: 0, zIndex: 5 })}>Totals</td>
                       <td style={overviewTotalsCellStyle({ textAlign: 'left' })}>{`SE Count: ${facilityOverview.length}`}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewScore(baselineOverall)}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewScore(latestOverall)}</td>
