@@ -2223,7 +2223,6 @@ export function Dashboard() {
 	                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 	                                        <button
 	                                            className="btn btn-secondary btn-xs"
-                                                disabled={!isUserInTeam}
 	                                            onClick={(e) => {
 	                                                e.stopPropagation();
 	                                                const baselineDate = ev._baselineDate || null;
@@ -5613,7 +5612,6 @@ export function Dashboard() {
                                                                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                                                                         <button
                                                                                             className="btn btn-secondary btn-xs"
-                                                                                            disabled={!isUserInTeam}
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
                                                                                                 const baselineDate = ev._baselineDate || null;

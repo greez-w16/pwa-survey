@@ -697,6 +697,18 @@ export default function Report() {
 	        const eventFields = 'event,enrollment,eventDate,program,programStage,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value],notes[note,value]';
 	        let all = [];
 	        let effectiveStageId = stageId;
+
+          // Synchronously resolve Type of Assessment data element from initial config
+          let activePs = configuration?.programStage;
+          let resolvedTypeOfAssessmentDeId = (() => {
+            if (!activePs) return null;
+            const candidates = (activePs.programStageDataElements || []).map(psde => psde.dataElement || psde);
+            const match = candidates.find(de => {
+              const n = (de?.displayName || de?.formName || de?.name || '').toLowerCase();
+              return n.includes('type of assessment');
+            });
+            return match?.id || null;
+          })();
 	        const mergeEvents = (...lists) => {
 	          const byEvent = new Map();
 	          lists.flat().forEach(ev => {
@@ -767,7 +779,20 @@ export default function Report() {
 
           if (all.length > 0) {
             const firstEventStage = all.find(ev => ev?.programStage)?.programStage;
-            if (firstEventStage) effectiveStageId = firstEventStage;
+            if (firstEventStage) {
+              if (firstEventStage !== effectiveStageId) {
+                effectiveStageId = firstEventStage;
+                try {
+                  const newPs = await api.getFormMetadata(effectiveStageId);
+                  const candidates = (newPs.programStageDataElements || []).map(psde => psde.dataElement || psde);
+                  const match = candidates.find(de => {
+                    const n = (de?.displayName || de?.formName || de?.name || '').toLowerCase();
+                    return n.includes('type of assessment');
+                  });
+                  if (match) resolvedTypeOfAssessmentDeId = match.id;
+                } catch (_) {}
+              }
+            }
           }
 
           // 3. Load facility events with timeout
@@ -803,6 +828,22 @@ export default function Report() {
 		                hasRealAnswers = true;
 		              }
 		            });
+
+		            // Ensure Type of Assessment and Facility Group are in dataValues so getTypeValue/getGroupValue resolve them correctly
+		            const typeVal = draft.formData?.[TYPE_OF_ASSESSMENT_DE_ID] || draft.metadata?.typeOfAssessment || draft.typeOfAssessment || '';
+		            if (typeVal && TYPE_OF_ASSESSMENT_DE_ID && !dataValues.some(dv => dv.dataElement === TYPE_OF_ASSESSMENT_DE_ID)) {
+		              dataValues.push({
+		                dataElement: TYPE_OF_ASSESSMENT_DE_ID,
+		                value: String(typeVal)
+		              });
+		            }
+		            const groupVal = draft.formData?.[FACILITY_GROUP_DE_ID] || draft.metadata?.facilityGroup || draft.facilityGroup || '';
+		            if (groupVal && FACILITY_GROUP_DE_ID && !dataValues.some(dv => dv.dataElement === FACILITY_GROUP_DE_ID)) {
+		              dataValues.push({
+		                dataElement: FACILITY_GROUP_DE_ID,
+		                value: String(groupVal)
+		              });
+		            }
 
 		            const draftTei = draft.metadata?.teiId || draft.metadata?.trackedEntityInstance || reportQueryParams.teiId || '';
 		            const draftOrgUnit = draft.formData?.orgUnit || draft.metadata?.orgUnitId || selectedFacilityId || '';
@@ -855,8 +896,8 @@ export default function Report() {
           return m ? m[1] : null;
         };
         const getTypeValue = (ev) => {
-          if (!TYPE_OF_ASSESSMENT_DE_ID) return '';
-          return ((ev?.dataValues || []).find(d => d.dataElement === TYPE_OF_ASSESSMENT_DE_ID)?.value) || '';
+          if (!resolvedTypeOfAssessmentDeId) return '';
+          return ((ev?.dataValues || []).find(d => d.dataElement === resolvedTypeOfAssessmentDeId)?.value) || '';
         };
         const getGroupValue = (ev) => {
           return ((ev?.dataValues || []).find(d => d.dataElement === FACILITY_GROUP_DE_ID)?.value) || '';
@@ -961,10 +1002,20 @@ export default function Report() {
           // Find the latest overall bundle (preferring targeted teiId if provided)
           let latestBundleResolved = null;
           if (reportQueryParams.teiId) {
-            latestBundleResolved = bundles.find(b => b.teiId === reportQueryParams.teiId);
+            const matching = bundles.filter(b => b.teiId === reportQueryParams.teiId)
+              .sort((a, b) => {
+                const dateDiff = new Date(b.assessmentDate) - new Date(a.assessmentDate);
+                if (dateDiff !== 0) return dateDiff;
+                return (a.isBaseline ? 1 : 0) - (b.isBaseline ? 1 : 0);
+              });
+            latestBundleResolved = matching[0] || null;
           }
           if (!latestBundleResolved) {
-            const sortedBundles = [...bundles].sort((a, b) => new Date(b.assessmentDate) - new Date(a.assessmentDate));
+            const sortedBundles = [...bundles].sort((a, b) => {
+              const dateDiff = new Date(b.assessmentDate) - new Date(a.assessmentDate);
+              if (dateDiff !== 0) return dateDiff;
+              return (a.isBaseline ? 1 : 0) - (b.isBaseline ? 1 : 0);
+            });
             latestBundleResolved = sortedBundles[0];
           }
 
@@ -1024,7 +1075,11 @@ export default function Report() {
         const targetBundle = (() => {
           if (reportQueryParams.teiId) {
             const matching = bundles.filter(b => b.teiId === reportQueryParams.teiId)
-              .sort((a, b) => new Date(b.assessmentDate) - new Date(a.assessmentDate));
+              .sort((a, b) => {
+                const dateDiff = new Date(b.assessmentDate) - new Date(a.assessmentDate);
+                if (dateDiff !== 0) return dateDiff;
+                return (a.isBaseline ? 1 : 0) - (b.isBaseline ? 1 : 0);
+              });
             if (matching.length > 0) return matching[0];
           }
           if (reportQueryParams.eventId) {
@@ -1073,7 +1128,11 @@ export default function Report() {
         }
 
         const forceTarget = targetBundle && targetInPeriod && !dateRangeChanged;
-        const latestBundle = (forceTarget ? targetBundle : null) || inPeriodBundles.sort((a, b) => new Date(b.effectiveAssessmentDate) - new Date(a.effectiveAssessmentDate))[0] || null;
+        const latestBundle = (forceTarget ? targetBundle : null) || inPeriodBundles.sort((a, b) => {
+          const dateDiff = new Date(b.effectiveAssessmentDate) - new Date(a.effectiveAssessmentDate);
+          if (dateDiff !== 0) return dateDiff;
+          return (a.isBaseline ? 1 : 0) - (b.isBaseline ? 1 : 0);
+        })[0] || null;
         
         if (!latestBundle) {
           showToast?.('Could not resolve latest assessment for this facility.', 'warning');
@@ -1085,16 +1144,31 @@ export default function Report() {
         let baselineBundle = null;
         
         // 1. Try to find a baseline bundle globally (across any TEI in the filtered bundles)
-        baselineBundle = bundles.filter(b => b.isBaseline).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
+        baselineBundle = bundles.filter(b => b.isBaseline).sort((a, b) => {
+          const dateDiff = new Date(a.assessmentDate) - new Date(b.assessmentDate);
+          if (dateDiff !== 0) return dateDiff;
+          // Prefer the one that IS baseline
+          return (b.isBaseline ? 1 : 0) - (a.isBaseline ? 1 : 0);
+        })[0] || null;
         
         // 2. If no baseline bundle exists, try to find the earliest event on the latest TEI
         if (!baselineBundle && latestTeiId) {
-          baselineBundle = bundles.filter(b => b.teiId === latestTeiId).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
+          baselineBundle = bundles.filter(b => b.teiId === latestTeiId).sort((a, b) => {
+            const dateDiff = new Date(a.assessmentDate) - new Date(b.assessmentDate);
+            if (dateDiff !== 0) return dateDiff;
+            // Prefer the one that IS baseline
+            return (b.isBaseline ? 1 : 0) - (a.isBaseline ? 1 : 0);
+          })[0] || null;
         }
         
         // 3. Absolute fallback to the earliest bundle in the filtered list
         if (!baselineBundle) {
-          baselineBundle = bundles.sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
+          baselineBundle = bundles.sort((a, b) => {
+            const dateDiff = new Date(a.assessmentDate) - new Date(b.assessmentDate);
+            if (dateDiff !== 0) return dateDiff;
+            // Prefer the one that IS baseline
+            return (b.isBaseline ? 1 : 0) - (a.isBaseline ? 1 : 0);
+          })[0] || null;
         }
 
         if (!baselineBundle) {
@@ -1186,7 +1260,7 @@ export default function Report() {
         const knownMetadataDeIds = new Set([
           SYS_TAG_DE_ID,
           FACILITY_GROUP_DE_ID,
-          ...(TYPE_OF_ASSESSMENT_DE_ID ? [TYPE_OF_ASSESSMENT_DE_ID] : []),
+          ...(resolvedTypeOfAssessmentDeId ? [resolvedTypeOfAssessmentDeId] : []),
           // Also exclude any field IDs from the Assessment Details section if found
           ...(targetSections)
             .filter(s => isAssessmentDetailsSection(s))
@@ -1204,129 +1278,101 @@ export default function Report() {
           latestEventBySection[section.id] = pickLatest(tagEvents);
         });
 
-        const buildAssessmentFromBundle = (bundle, filterByPeriod = false) => ({
-          sections: targetSections.map((section, idx) => {
-            const fieldsByStandard = {};
+        const buildAssessmentFromBundle = (bundle, filterByPeriod = false) => {
+          // Preload all data values from all events in this bundle, sorting events by date ascending
+          // so that later values overwrite earlier ones (matching the form's aggregation behavior).
+          const flatFormData = {};
+          const sortedEvents = [...(bundle.events || [])].sort((a, b) => new Date(a.eventDate || 0) - new Date(b.eventDate || 0));
+          sortedEvents.forEach(ev => {
+            (ev.dataValues || []).forEach(dv => {
+              if (dv && dv.dataElement) {
+                flatFormData[dv.dataElement] = dv.value ?? '';
+              }
+            });
+          });
 
-            (section.fields || [])
-              .filter(f => f.type === 'select')
-              .forEach(f => {
-                const code = f.code || f.id;
-                let normalizedCode = normalizeCriterionCode(code);
-                if (!normalizedCode || !/\d/.test(normalizedCode)) {
-                  const labelMatch = String(f.label || '').match(/\b\d+(?:\.\d+){2,3}\b/);
-                  if (labelMatch) normalizedCode = labelMatch[0];
-                }
+          return {
+            sections: targetSections.map((section, idx) => {
+              const fieldsByStandard = {};
 
-                let standardCode = null;
-                if (normalizedCode) {
-                  const parts = normalizedCode.split('.');
-                  if (parts.length >= 3) {
-                    standardCode = `${parts[0]}.${parts[1]}.${parts[2]}`;
+              (section.fields || [])
+                .filter(f => f.type === 'select')
+                .forEach(f => {
+                  const code = f.code || f.id;
+                  let normalizedCode = normalizeCriterionCode(code);
+                  if (!normalizedCode || !/\d/.test(normalizedCode)) {
+                    const labelMatch = String(f.label || '').match(/\b\d+(?:\.\d+){2,3}\b/);
+                    if (labelMatch) normalizedCode = labelMatch[0];
                   }
-                }
-                if (!standardCode) {
-                  standardCode = section.code || section.id || 'unassigned';
-                }
 
-                if (!fieldsByStandard[standardCode]) {
-                  fieldsByStandard[standardCode] = [];
-                }
-                fieldsByStandard[standardCode].push(f);
+                  let standardCode = null;
+                  if (normalizedCode) {
+                    const parts = normalizedCode.split('.');
+                    if (parts.length >= 3) {
+                      standardCode = `${parts[0]}.${parts[1]}.${parts[2]}`;
+                    }
+                  }
+                  if (!standardCode) {
+                    standardCode = section.code || section.id || 'unassigned';
+                  }
+
+                  if (!fieldsByStandard[standardCode]) {
+                    fieldsByStandard[standardCode] = [];
+                  }
+                  fieldsByStandard[standardCode].push(f);
+                });
+
+              const standardsList = Object.entries(fieldsByStandard).map(([stdCode, fields]) => {
+                return {
+                  id: stdCode,
+                  criteria: fields.map(f => {
+                    const code = f.code || f.id;
+                    const normalizedCode = normalizeCriterionCode(code);
+                    const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
+                    const rawLinks = Array.isArray(linksData.linked_criteria) ? linksData.linked_criteria : [];
+                    const effectiveLinks = rawLinks.filter(l => !String(l || '').trim().match(/-(G|B)$/i));
+                    const isRoot = effectiveLinks.length > 0;
+                    const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
+                    const isCritical = (function() {
+                      const uiToggle = f.commentFieldId ? flatFormData[`is_critical_${f.commentFieldId}`] : undefined;
+                      if (uiToggle !== undefined && uiToggle !== null && String(uiToggle).trim() !== '') {
+                        return (uiToggle === true || String(uiToggle).toLowerCase() === 'true' || uiToggle === 1 || String(uiToggle) === '1');
+                      }
+                      const commentVal = f.commentFieldId ? String(flatFormData[f.commentFieldId] || '') : '';
+                      if (commentVal.includes('[CRITICAL]')) return true;
+                      return Boolean(criticalLookup[normalizedCode] || criticalLookup[code]);
+                    })();
+                    return {
+                      id: f.id,
+                      code,
+                      label: f.label || f.displayName || f.name || code,
+                      response: flatFormData[f.id] || 'NA',
+                      isCritical,
+                      isRoot,
+                      links: effectiveLinks,
+                      roots: linksData.roots,
+                      severity,
+                      ...(function() {
+                        const raw = flatFormData[`override_${f.id}`];
+                        const enabled = (raw === true) || (raw === 1) || (String(raw).toLowerCase() === 'true') || (String(raw) === '1');
+                        return enabled ? { overrideEnabled: true, overrideResponse: flatFormData[f.id] || 'NA' } : {};
+                      })()
+                    };
+                  })
+                };
               });
 
-            const standardsList = Object.entries(fieldsByStandard).map(([stdCode, fields]) => {
+              const finalStandards = standardsList.length > 0
+                ? standardsList
+                : [{ id: section.code || section.id, criteria: [] }];
+
               return {
-                id: stdCode,
-                criteria: fields.map(f => {
-                  const tag = sectionTagMap[section.id] || resolveSectionTag(section, idx);
-                  const rawEvents = bundle.byTag?.[tag] || [];
-                  const filteredEvents = filterByPeriod
-                    ? rawEvents.filter(ev => {
-                        const evDateStr = getLocalDateString(ev.eventDate);
-                        if (!evDateStr) return false;
-                        if (activeStartDate && evDateStr < activeStartDate) return false;
-                        if (activeEndDate && evDateStr > activeEndDate) return false;
-                        return true;
-                      })
-                    : rawEvents;
-                  // Determine which event has the survey answers for this section.
-                  // Strategy: check if ANY metaEvent (FINAL event) has answers for
-                  // section.fields — if so, it's old format (all answers in FINAL event).
-                  // If not, it's new format (answers in the per-SE byTag event).
-                  const sectionFieldIds = new Set((section.fields || []).map(field => field.id));
-
-                  const metaEventsWithSectionData = (Array.isArray(bundle.metaEvents) ? bundle.metaEvents : [])
-                    .filter(ev => (ev.dataValues || []).some(dv => sectionFieldIds.has(dv.dataElement)));
-
-                  let sectionEvent;
-                  if (isAssessmentDetailsSection(section)) {
-                    sectionEvent = bundle.metaEvent;
-                  } else if (metaEventsWithSectionData.length > 0) {
-                    // Old format: FINAL event has answers for this section
-                    sectionEvent = metaEventsWithSectionData
-                      .sort((a, b) => new Date(b.eventDate || 0) - new Date(a.eventDate || 0))[0];
-                    console.log('[Report] OLD-FORMAT section', section.name,
-                      '| metaCandidates:', metaEventsWithSectionData.length,
-                      '| sectionEvent.event:', sectionEvent?.event,
-                      '| dvCount:', (sectionEvent?.dataValues || []).length);
-                  } else {
-                    // New format: answers are in the per-SE byTag event
-                    sectionEvent = pickLatest(filteredEvents) || bundle.metaEvent || null;
-                    console.log('[Report] NEW-FORMAT section', section.name,
-                      '| filteredEvents:', filteredEvents.length,
-                      '| sectionEvent.event:', sectionEvent?.event,
-                      '| sectionEvent dvCount:', (sectionEvent?.dataValues || []).length,
-                      '| sectionFieldIds size:', sectionFieldIds.size,
-                      '| sectionEvent DEs:', (sectionEvent?.dataValues || []).map(dv => dv.dataElement));
-                  }
-                  const formDataForSection = Object.fromEntries((((sectionEvent || {}).dataValues) || []).map(dv => [dv.dataElement, dv.value]));
-                  const code = f.code || f.id;
-                  const normalizedCode = normalizeCriterionCode(code);
-                  const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
-                  const rawLinks = Array.isArray(linksData.linked_criteria) ? linksData.linked_criteria : [];
-                  const effectiveLinks = rawLinks.filter(l => !String(l || '').trim().match(/-(G|B)$/i));
-                  const isRoot = effectiveLinks.length > 0;
-                  const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
-                  const isCritical = (function() {
-                    const uiToggle = f.commentFieldId ? formDataForSection[`is_critical_${f.commentFieldId}`] : undefined;
-                    if (uiToggle !== undefined && uiToggle !== null && String(uiToggle).trim() !== '') {
-                      return (uiToggle === true || String(uiToggle).toLowerCase() === 'true' || uiToggle === 1 || String(uiToggle) === '1');
-                    }
-                    const commentVal = f.commentFieldId ? String(formDataForSection[f.commentFieldId] || '') : '';
-                    if (commentVal.includes('[CRITICAL]')) return true;
-                    return Boolean(criticalLookup[normalizedCode] || criticalLookup[code]);
-                  })();
-                  return {
-                    id: f.id,
-                    code,
-                    label: f.label || f.displayName || f.name || code,
-                    response: formDataForSection[f.id] || 'NA',
-                    isCritical,
-                    isRoot,
-                    links: effectiveLinks,
-                    roots: linksData.roots,
-                    severity,
-                    ...(function() {
-                      const raw = formDataForSection[`override_${f.id}`];
-                      const enabled = (raw === true) || (raw === 1) || (String(raw).toLowerCase() === 'true') || (String(raw) === '1');
-                      return enabled ? { overrideEnabled: true, overrideResponse: formDataForSection[f.id] || 'NA' } : {};
-                    })()
-                  };
-                })
+                id: section.id,
+                standards: finalStandards
               };
-            });
-
-            const finalStandards = standardsList.length > 0
-              ? standardsList
-              : [{ id: section.code || section.id, criteria: [] }];
-
-            return {
-              id: section.id,
-              standards: finalStandards
-            };
-          })
-        });
+            })
+          };
+        };
 
         const assessment = buildAssessmentFromBundle(latestBundle, false);
         const baselineAssess = buildAssessmentFromBundle(baselineBundle, false);

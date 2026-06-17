@@ -314,19 +314,15 @@ const PrivateRoute = ({ children }) => {
 	      console.error('❌ App: Save failed:', error);
 	      if (!error) return;
 
-	      // Friendly messaging for local storage limits / draft limits.
-	      if (error.code === 'DRAFT_LIMIT_EXCEEDED') {
-	        showToast(
-	          'You already have 5 offline drafts stored for this user. Please sync your existing assessments from the Dashboard, then use Settings → Reset Local Data to clear space.',
-	          'warning'
-	        );
-	      } else if (
+	      // Draft limit is now handled automatically by auto-eviction in indexedDBService.
+	      // Only surface an error when the physical device storage is full.
+	      if (
 	        error.code === 'LOCAL_QUOTA_EXCEEDED' ||
 	        error.name === 'QuotaExceededError' ||
 	        /quota/i.test(error.message || '')
 	      ) {
 	        showToast(
-	          'Local storage is full in this browser. Please sync your drafts from the Dashboard, then use Settings → Reset Local Data to free up space.',
+	          'Local storage is full on this device. Please sync your drafts from the Dashboard, then use Settings → Reset Local Data to free up space.',
 	          'error'
 	        );
 	      }
