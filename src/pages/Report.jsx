@@ -4,7 +4,7 @@ import { useApp } from '../contexts/AppContext';
 import { api } from '../services/api';
 import { Button, TextField, MenuItem, FormControl, InputLabel, Select, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { transformMetadata } from '../utils/transformers';
 import { normalizeCriterionCode } from '../utils/normalization';
 import { useAssessmentScoring } from '../hooks/useAssessmentScoring';
@@ -19,21 +19,13 @@ import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
 import indexedDBService from '../services/indexedDBService';
 
-import obstericsGynoConfig from '../assets/obsterics-gyno/obsterics_gyno_config.json';
 import obstericsGynoMatrix from '../assets/obsterics-gyno/obsterics_gyno_matrix.json';
-import physiotheraphyConfig from '../assets/physiotheraphy/physiotheraphy_config.json';
 import physiotheraphyMatrix from '../assets/physiotheraphy/physiotheraphy_matrix.json';
-import radiologyConfig from '../assets/radiology/radiology_config.json';
 import radiologyMatrix from '../assets/radiology/radiology_matrix.json';
-import generalPracticeConfig from '../assets/general-practice/general_practice_config.json';
 import generalPracticeMatrix from '../assets/general-practice/general_practice_matrix.json';
-import privateDiabeticConfig from '../assets/private-diabetic/private_diabetic_config.json';
 import privateDiabeticMatrix from '../assets/private-diabetic/private_diabetic_matrix.json';
-import oralConfig from '../assets/oral/oral_config.json';
 import oralMatrix from '../assets/oral/oral_matrix.json';
-import privateOncologyConfig from '../assets/private-oncology/private_oncology_config.json';
 import privateOncologyMatrix from '../assets/private-oncology/private_oncology_matrix.json';
-import paediatricConfig from '../assets/paediatric/paediatric_config.json';
 import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
 
 // Import remaining 8 facility matrices and matrixConfig parser
@@ -56,6 +48,14 @@ const occupationalHealthConfig = buildConfigFromMatrix('occupational_health', oc
 const urologyConfig = buildConfigFromMatrix('urology', urologyMatrix.urology);
 const childhoodIllnessConfig = buildConfigFromMatrix('childhood_illness', childhoodIllnessMatrix.childhood_illness);
 const emergencyManagementConfig = buildConfigFromMatrix('emergency_management', emergencyManagementMatrix.emergency_management);
+const radiologyConfig = buildConfigFromMatrix('radiology', radiologyMatrix.radiology);
+const obstericsGynoConfig = buildConfigFromMatrix('obsterics_gyno', obstericsGynoMatrix.obsterics_gyno);
+const physiotheraphyConfig = buildConfigFromMatrix('physiotheraphy', physiotheraphyMatrix.physiotheraphy);
+const generalPracticeConfig = buildConfigFromMatrix('general_practice', generalPracticeMatrix.general_practice);
+const privateDiabeticConfig = buildConfigFromMatrix('private_diabetic', privateDiabeticMatrix.private_diabetic);
+const oralConfig = buildConfigFromMatrix('oral', oralMatrix.oral);
+const privateOncologyConfig = buildConfigFromMatrix('private_oncology', privateOncologyMatrix.private_oncology);
+const paediatricConfig = buildConfigFromMatrix('paediatric', paediatricMatrix.paediatric);
 
 import qimsLogo from '../assets/logo.png';
 import { calculatePointsForLink, setHospitalSubcriteriaConfig } from '../utils/scoring';
@@ -167,6 +167,7 @@ const getProgrammeTypeFromGroupId = (groupId) => {
 export default function Report() {
   const { user, configuration, setConfiguration, showToast, configBundles, activeConfigVersionId, userAssignments, configSource, loadRemoteConfig } = useApp();
   const navigate = useNavigate();
+  const location = useLocation();
   const [loading, setLoading] = useState(true);
   const [metadataLoading, setMetadataLoading] = useState(false);
   const [metadataFetchAttempted, setMetadataFetchAttempted] = useState(false);
@@ -174,8 +175,14 @@ export default function Report() {
   const [facilityOptions, setFacilityOptions] = useState([]); // [{id, name}]
   const [selectedFacilityId, setSelectedFacilityId] = useState('');
   const [facilityLocked, setFacilityLocked] = useState(false);
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [startDate, setStartDate] = useState('2026-01-01');
+  const [endDate, setEndDate] = useState(() => {
+    const d = new Date();
+    const year = d.getFullYear();
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  });
   const [autoGenerateRequested, setAutoGenerateRequested] = useState(false);
   const [reportLoading, setReportLoading] = useState(false);
   const [reportInfo, setReportInfo] = useState(null); // { groupId, groupLabel, count, baselineDate, latestDate }
@@ -348,13 +355,20 @@ export default function Report() {
     const id = String(section.id || '').toLowerCase();
     const code = String(section.code || '').toLowerCase();
     const name = String(section.name || section.se_name || section.title || '').toLowerCase();
+    const origName = String(section._originalName || '').toLowerCase();
     if (id === 'ad' || id === 'assessment_details' || id === 'assessment-details') return true;
     if (code === 'ad' || code === 'assessment_details' || code === 'assessment-details') return true;
-    return name.includes('assessment details');
+    const textToCheck = [name, origName];
+    return textToCheck.some(t =>
+      t.includes('assessment details') ||
+      t.includes('assessment_details') ||
+      t.includes('facility details') ||
+      t.includes('facility_details')
+    );
   };
 	  const reportQueryParams = useMemo(() => {
 	    try {
-	      const sp = new URLSearchParams(window.location.search);
+	      const sp = new URLSearchParams(location.search);
 	      return {
 	        facilityId: sp.get('facilityId') || '',
 	        teiId: sp.get('teiId') || '',
@@ -368,7 +382,7 @@ export default function Report() {
 	    } catch {
 	      return { facilityId: '', teiId: '', eventId: '', programId: '', programStageId: '', facilityGroup: '', start: '', end: '' };
 	    }
-	  }, []);
+	  }, [location.search]);
 
   const queryFacilityGroupKey = useMemo(() => toFacilityGroupKey(reportQueryParams.facilityGroup), [reportQueryParams.facilityGroup]);
 
@@ -672,6 +686,10 @@ export default function Report() {
       const periodStart = parseDateStart(startDate);
       const periodEnd = parseDateEnd(endDate);
       if (periodStart && periodEnd && periodStart > periodEnd) { showToast?.('Start date must be before end date.', 'warning'); return; }
+      
+      let activeStartDate = startDate;
+      let activeEndDate = endDate;
+      
       setReportLoading(true);
       setReportInfo(null);
       setReportAssessment(null);
@@ -679,6 +697,18 @@ export default function Report() {
 	        const eventFields = 'event,enrollment,eventDate,program,programStage,orgUnit,trackedEntityInstance,status,dataValues[dataElement,value],notes[note,value]';
 	        let all = [];
 	        let effectiveStageId = stageId;
+
+          // Synchronously resolve Type of Assessment data element from initial config
+          let activePs = configuration?.programStage;
+          let resolvedTypeOfAssessmentDeId = (() => {
+            if (!activePs) return null;
+            const candidates = (activePs.programStageDataElements || []).map(psde => psde.dataElement || psde);
+            const match = candidates.find(de => {
+              const n = (de?.displayName || de?.formName || de?.name || '').toLowerCase();
+              return n.includes('type of assessment');
+            });
+            return match?.id || null;
+          })();
 	        const mergeEvents = (...lists) => {
 	          const byEvent = new Map();
 	          lists.flat().forEach(ev => {
@@ -687,68 +717,133 @@ export default function Report() {
 	          return Array.from(byEvent.values());
 	        };
 
-	        if (reportQueryParams.eventId) {
-	          const enrollmentEvents = await api.getEventsList({
-	            enrollmentId: reportQueryParams.eventId,
-	            order: 'eventDate:desc',
-	            fields: eventFields,
-	          }).catch(() => []);
-	          const directEvent = await api.getEventById(reportQueryParams.eventId, eventFields).then(ev => ev ? [ev] : []).catch(() => []);
-	          all = mergeEvents(enrollmentEvents || [], directEvent || []);
-	        }
+          const withTimeout = (promise, ms = 4000) => {
+            return new Promise((resolve, reject) => {
+              const timer = setTimeout(() => reject(new Error('Timeout')), ms);
+              promise
+                .then(res => {
+                  clearTimeout(timer);
+                  resolve(res);
+                })
+                .catch(err => {
+                  clearTimeout(timer);
+                  reject(err);
+                });
+            });
+          };
 
-	        if (reportQueryParams.teiId) {
-	          const candidateStages = Array.from(new Set([
-	            effectiveStageId,
-	            stageIdFromGroup,
-	            configuration?.programStage?.id,
-	            SURVEY_PROGRAM_STAGE_BY_GROUP.HOSPITAL,
-	            SURVEY_PROGRAM_STAGE_BY_GROUP.CLINICS,
-	            SURVEY_PROGRAM_STAGE_BY_GROUP.EMS,
-	            SURVEY_PROGRAM_STAGE_BY_GROUP.MORTUARY,
-	          ].filter(Boolean)));
+          // 1. Queue eventId requests in parallel
+          let eventIdPromise = Promise.resolve([]);
+          if (reportQueryParams.eventId) {
+            eventIdPromise = Promise.all([
+              withTimeout(api.getEventsList({
+                enrollmentId: reportQueryParams.eventId,
+                order: 'eventDate:desc',
+                fields: eventFields,
+              }), 4000).catch(() => []),
+              withTimeout(api.getEventById(reportQueryParams.eventId, eventFields), 4000)
+                .then(ev => ev ? [ev] : [])
+                .catch(() => [])
+            ]).then(([l1, l2]) => mergeEvents(l1, l2));
+          }
 
-	          for (const candidateStageId of candidateStages) {
-	            const teiEvents = await api.getSurveyEventsForTei({
-	              teiId: reportQueryParams.teiId,
-	              orgUnitId: selectedFacilityId,
-	              programId,
-	              stageId: candidateStageId,
-	              fields: eventFields,
-	            }).catch(() => []);
-	            if (Array.isArray(teiEvents) && teiEvents.length > 0) {
-	              all = mergeEvents(all, teiEvents);
-	            }
-	          }
-	        }
+          // 2. Queue teiId candidate stage requests in parallel
+          let teiEventsPromise = Promise.resolve([]);
+          if (reportQueryParams.teiId) {
+            const candidateStages = Array.from(new Set([
+              effectiveStageId,
+              stageIdFromGroup,
+              configuration?.programStage?.id,
+              SURVEY_PROGRAM_STAGE_BY_GROUP.HOSPITAL,
+              SURVEY_PROGRAM_STAGE_BY_GROUP.CLINICS,
+              SURVEY_PROGRAM_STAGE_BY_GROUP.EMS,
+              SURVEY_PROGRAM_STAGE_BY_GROUP.MORTUARY,
+            ].filter(Boolean)));
 
-		        if (all.length > 0) {
-		          const firstEventStage = all.find(ev => ev?.programStage)?.programStage;
-		          if (firstEventStage) effectiveStageId = firstEventStage;
-		        }
-	
-		        // Always load all facility events so the true baseline can be found,
-		        // even when a specific TEI/event was targeted from the dashboard.
-		        const facilityEvents = await api.getSurveyEventsForOrgUnit({
-		          orgUnitId: selectedFacilityId,
-		          programId,
-		          stageId: effectiveStageId,
-		          fields: eventFields
-		        }).catch(() => []);
-		        all = mergeEvents(all, facilityEvents);
+            teiEventsPromise = Promise.all(
+              candidateStages.map(candidateStageId =>
+                withTimeout(api.getSurveyEventsForTei({
+                  teiId: reportQueryParams.teiId,
+                  orgUnitId: selectedFacilityId,
+                  programId,
+                  stageId: candidateStageId,
+                  fields: eventFields,
+                }), 4000).catch(() => [])
+              )
+            ).then(results => mergeEvents(...results));
+          }
+
+          // Wait for eventId and teiId fetches in parallel
+          const [eventsFromId, eventsFromTei] = await Promise.all([eventIdPromise, teiEventsPromise]);
+          all = mergeEvents(eventsFromId, eventsFromTei);
+
+          if (all.length > 0) {
+            const firstEventStage = all.find(ev => ev?.programStage)?.programStage;
+            if (firstEventStage) {
+              if (firstEventStage !== effectiveStageId) {
+                effectiveStageId = firstEventStage;
+                try {
+                  const newPs = await api.getFormMetadata(effectiveStageId);
+                  const candidates = (newPs.programStageDataElements || []).map(psde => psde.dataElement || psde);
+                  const match = candidates.find(de => {
+                    const n = (de?.displayName || de?.formName || de?.name || '').toLowerCase();
+                    return n.includes('type of assessment');
+                  });
+                  if (match) resolvedTypeOfAssessmentDeId = match.id;
+                } catch (_) {}
+              }
+            }
+          }
+
+          // 3. Load facility events with timeout
+          const facilityEvents = await withTimeout(api.getSurveyEventsForOrgUnit({
+            orgUnitId: selectedFacilityId,
+            programId,
+            stageId: effectiveStageId,
+            fields: eventFields
+          }), 4000).catch(() => []);
+          all = mergeEvents(all, facilityEvents);
 	
 		        // Merge local drafts to support offline or un-synced data visibility on reports
 		        try {
 		          const localDrafts = await indexedDBService.getAllDrafts(user).catch(() => []);
 		          const convertedDrafts = localDrafts.map((draft) => {
 		            const dataValues = [];
+		            let hasRealAnswers = false;
+		            // Count completed sections as evidence the user has progressed through the survey
+		            const completedSectionsVal = draft.formData?.completedSections;
+		            if (Array.isArray(completedSectionsVal) && completedSectionsVal.length > 0) {
+		              hasRealAnswers = true;
+		            }
 		            Object.entries(draft.formData || {}).forEach(([key, val]) => {
 		              if (['orgUnit', 'eventDate', 'programStage', 'typeOfAssessment', 'facilityGroup', 'completedSections'].includes(key)) return;
+		              if (key.endsWith('_internal')) return;
+		              
 		              dataValues.push({
 		                dataElement: key,
 		                value: String(val)
 		              });
+		              
+		              if (val !== undefined && val !== null && String(val).trim() !== '') {
+		                hasRealAnswers = true;
+		              }
 		            });
+
+		            // Ensure Type of Assessment and Facility Group are in dataValues so getTypeValue/getGroupValue resolve them correctly
+		            const typeVal = draft.formData?.[TYPE_OF_ASSESSMENT_DE_ID] || draft.metadata?.typeOfAssessment || draft.typeOfAssessment || '';
+		            if (typeVal && TYPE_OF_ASSESSMENT_DE_ID && !dataValues.some(dv => dv.dataElement === TYPE_OF_ASSESSMENT_DE_ID)) {
+		              dataValues.push({
+		                dataElement: TYPE_OF_ASSESSMENT_DE_ID,
+		                value: String(typeVal)
+		              });
+		            }
+		            const groupVal = draft.formData?.[FACILITY_GROUP_DE_ID] || draft.metadata?.facilityGroup || draft.facilityGroup || '';
+		            if (groupVal && FACILITY_GROUP_DE_ID && !dataValues.some(dv => dv.dataElement === FACILITY_GROUP_DE_ID)) {
+		              dataValues.push({
+		                dataElement: FACILITY_GROUP_DE_ID,
+		                value: String(groupVal)
+		              });
+		            }
 
 		            const draftTei = draft.metadata?.teiId || draft.metadata?.trackedEntityInstance || reportQueryParams.teiId || '';
 		            const draftOrgUnit = draft.formData?.orgUnit || draft.metadata?.orgUnitId || selectedFacilityId || '';
@@ -766,7 +861,8 @@ export default function Report() {
 		              status: 'ACTIVE',
 		              dataValues,
 		              notes: [],
-		              isDraft: true
+		              isDraft: true,
+		              hasRealAnswers
 		            };
 		          });
 		          all = mergeEvents(all, convertedDrafts);
@@ -774,6 +870,7 @@ export default function Report() {
 		          console.warn('Failed to load or merge local drafts for report:', e);
 		        }
 	
+        all = all.filter(ev => ev?.orgUnit === selectedFacilityId);
 
         if (all.length === 0) {
           showToast?.('No assessments found for this facility.', 'info');
@@ -791,11 +888,16 @@ export default function Report() {
         };
         const getNumericSysTag = (ev) => {
           const tag = getSysTag(ev);
-          return tag && /^\d+$/.test(tag) ? tag : null;
+          if (!tag) return null;
+          // Accept pure numbers: "1", "2", ...
+          if (/^\d+$/.test(tag)) return tag;
+          // Also accept "HOSP_SE1", "SE_2", "EMS3", etc. — extract the trailing number
+          const m = tag.match(/(\d+)$/);
+          return m ? m[1] : null;
         };
         const getTypeValue = (ev) => {
-          if (!TYPE_OF_ASSESSMENT_DE_ID) return '';
-          return ((ev?.dataValues || []).find(d => d.dataElement === TYPE_OF_ASSESSMENT_DE_ID)?.value) || '';
+          if (!resolvedTypeOfAssessmentDeId) return '';
+          return ((ev?.dataValues || []).find(d => d.dataElement === resolvedTypeOfAssessmentDeId)?.value) || '';
         };
         const getGroupValue = (ev) => {
           return ((ev?.dataValues || []).find(d => d.dataElement === FACILITY_GROUP_DE_ID)?.value) || '';
@@ -821,18 +923,40 @@ export default function Report() {
         };
 
         // New model: one enrollment = one assessment; events under that enrollment are the SE rows + one meta/final event
+        const getLocalDateString = (dateInput) => {
+          if (!dateInput) return '';
+          const str = String(dateInput).trim();
+          const match = str.match(/^(\d{4}-\d{2}-\d{2})/);
+          if (match) return match[1];
+          const d = new Date(dateInput);
+          if (Number.isNaN(d.getTime())) return '';
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        };
+
+        const getEventTeiId = (ev) => {
+          return ev?.trackedEntityInstance || ev?.trackedEntity || ev?.teiId || ev?.tei || null;
+        };
+
         const bundlesByEnrollment = {};
-        all.forEach(ev => {
-          const enrollmentId = ev?.enrollment || ev?.trackedEntityInstance;
+        // Exclude local draft events — they only contain local metadata (e.g. facilityName_internal)
+        // and should never be used as the source for baseline/latest assessment selection.
+        all.filter(ev => !ev.isDraft || ev.hasRealAnswers).forEach(ev => {
+          const teiId = getEventTeiId(ev);
+          const enrollmentId = ev?.enrollment || teiId;
           if (!enrollmentId) return;
           if (!bundlesByEnrollment[enrollmentId]) {
             bundlesByEnrollment[enrollmentId] = {
               enrollmentId,
-              teiId: ev?.trackedEntityInstance || null,
+              teiId: teiId,
               events: [],
               byTag: {},
               metaEvents: []
             };
+          } else if (teiId && !bundlesByEnrollment[enrollmentId].teiId) {
+            bundlesByEnrollment[enrollmentId].teiId = teiId;
           }
           bundlesByEnrollment[enrollmentId].events.push(ev);
           const tag = getNumericSysTag(ev);
@@ -844,7 +968,7 @@ export default function Report() {
           }
         });
 
-        const bundles = Object.values(bundlesByEnrollment).map(bundle => {
+        let bundles = Object.values(bundlesByEnrollment).map(bundle => {
           const typeEvents = bundle.events.filter(ev => getTypeValue(ev));
           const groupEvents = bundle.events.filter(ev => getGroupValue(ev));
           const latestTypeEvent = pickLatest(typeEvents) || pickLatest(bundle.metaEvents) || pickLatest(bundle.events);
@@ -860,38 +984,199 @@ export default function Report() {
           };
         }).filter(b => b.assessmentDate);
 
-	        const targetBundle = (() => {
-	          if (reportQueryParams.teiId) {
-	            const matching = bundles.filter(b => b.teiId === reportQueryParams.teiId)
-	              .sort((a, b) => new Date(b.assessmentDate) - new Date(a.assessmentDate));
-	            if (matching.length > 0) return matching[0];
-	          }
-	          if (reportQueryParams.eventId) {
-	            return bundles.find(b => (b.events || []).some(ev =>
-	              ev?.event === reportQueryParams.eventId || ev?.enrollment === reportQueryParams.eventId
-	            )) || null;
-	          }
-	          return null;
-	        })();
+        console.log('[Report] Bundles constructed:', bundles.map(b => ({
+          enrollmentId: b.enrollmentId,
+          teiId: b.teiId,
+          assessmentDate: b.assessmentDate,
+          latestType: b.latestType,
+          isBaseline: b.isBaseline,
+          byTagKeys: Object.keys(b.byTag),
+          metaEventsCount: b.metaEvents.length,
+          metaEventDEcount: (b.metaEvent?.dataValues || []).length,
+          byTag1EventCount: (b.byTag['1'] || []).length,
+          byTag1SampleDEs: ((b.byTag['1'] || [])[0]?.dataValues || []).map(dv => dv.dataElement),
+        })));
 
-	        const inPeriodBundles = bundles.filter(b => {
-          const d = b.assessmentDate ? new Date(b.assessmentDate) : null;
-          if (!d) return false;
-	          if (periodStart && d < periodStart) return false;
-	          if (periodEnd && d > periodEnd) return false;
+        // Keep only the latest created TEI/enrollment and the baseline TEI/enrollment
+        if (bundles.length > 0) {
+          // Find the latest overall bundle (preferring targeted teiId if provided)
+          let latestBundleResolved = null;
+          if (reportQueryParams.teiId) {
+            const matching = bundles.filter(b => b.teiId === reportQueryParams.teiId)
+              .sort((a, b) => {
+                const dateDiff = new Date(b.assessmentDate) - new Date(a.assessmentDate);
+                if (dateDiff !== 0) return dateDiff;
+                return (a.isBaseline ? 1 : 0) - (b.isBaseline ? 1 : 0);
+              });
+            latestBundleResolved = matching[0] || null;
+          }
+          if (!latestBundleResolved) {
+            const sortedBundles = [...bundles].sort((a, b) => {
+              const dateDiff = new Date(b.assessmentDate) - new Date(a.assessmentDate);
+              if (dateDiff !== 0) return dateDiff;
+              return (a.isBaseline ? 1 : 0) - (b.isBaseline ? 1 : 0);
+            });
+            latestBundleResolved = sortedBundles[0];
+          }
+
+          // Find the baseline bundle (earliest bundle marked as isBaseline, or earliest overall as fallback)
+          let baselineBundleResolved = bundles.filter(b => b.isBaseline).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
+          if (!baselineBundleResolved) {
+            baselineBundleResolved = [...bundles].sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0];
+          }
+
+          // Adjust state dates if needed to make sure they encompass the available surveys.
+          // This ensures that the latest and baseline surveys are always shown, rather than being filtered out.
+          if (latestBundleResolved && baselineBundleResolved) {
+            const bDate = getLocalDateString(baselineBundleResolved.assessmentDate);
+            const lDate = getLocalDateString(latestBundleResolved.assessmentDate);
+            if (bDate && lDate) {
+              const dates = [bDate, lDate].sort();
+              const proposedStart = dates[0];
+              const proposedEnd = dates[1];
+
+              // Check if we need to adjust the date inputs.
+              // If the current filters would exclude these surveys, we automatically adjust them.
+              if (!activeStartDate || activeStartDate > proposedStart) {
+                activeStartDate = proposedStart;
+                setStartDate(proposedStart);
+              }
+              if (!activeEndDate || activeEndDate < proposedEnd) {
+                activeEndDate = proposedEnd;
+                setEndDate(proposedEnd);
+              }
+            }
+          }
+
+          const allowedTeis = new Set();
+          if (latestBundleResolved?.teiId) allowedTeis.add(latestBundleResolved.teiId);
+          if (baselineBundleResolved?.teiId) allowedTeis.add(baselineBundleResolved.teiId);
+
+          // Also track allowed enrollment IDs so offline drafts (no teiId yet) are
+          // not silently dropped when allowedTeis is empty.
+          const allowedEnrollments = new Set();
+          if (latestBundleResolved?.enrollmentId) allowedEnrollments.add(latestBundleResolved.enrollmentId);
+          if (baselineBundleResolved?.enrollmentId) allowedEnrollments.add(baselineBundleResolved.enrollmentId);
+
+          if (allowedTeis.size > 0) {
+            // Normal path: filter by teiId (server-synced events)
+            bundles = bundles.filter(b =>
+              allowedTeis.has(b.teiId) ||
+              (!b.teiId && allowedEnrollments.has(b.enrollmentId))
+            );
+          } else if (allowedEnrollments.size > 0) {
+            // Offline-only path: no teiIds available – match by enrollmentId instead
+            bundles = bundles.filter(b => allowedEnrollments.has(b.enrollmentId));
+          }
+          // If both sets are empty something is wrong; keep bundles as-is so the
+          // subsequent inPeriodBundles step can still produce results.
+        }
+
+        const targetBundle = (() => {
+          if (reportQueryParams.teiId) {
+            const matching = bundles.filter(b => b.teiId === reportQueryParams.teiId)
+              .sort((a, b) => {
+                const dateDiff = new Date(b.assessmentDate) - new Date(a.assessmentDate);
+                if (dateDiff !== 0) return dateDiff;
+                return (a.isBaseline ? 1 : 0) - (b.isBaseline ? 1 : 0);
+              });
+            if (matching.length > 0) return matching[0];
+          }
+          if (reportQueryParams.eventId) {
+            return bundles.find(b => (b.events || []).some(ev =>
+              ev?.event === reportQueryParams.eventId || ev?.enrollment === reportQueryParams.eventId
+            )) || null;
+          }
+          return null;
+        })();
+
+        // Filter events within the period and compute effective assessment dates for bundles
+        const inPeriodBundles = bundles.map(b => {
+          const eventsInPeriod = b.events.filter(ev => {
+            const evDateStr = getLocalDateString(ev.eventDate);
+            if (!evDateStr) return false;
+            if (activeStartDate && evDateStr < activeStartDate) return false;
+            if (activeEndDate && evDateStr > activeEndDate) return false;
+            return true;
+          });
+
+          if (eventsInPeriod.length === 0) return null;
+
+          const latestInPeriodEvent = pickLatest(eventsInPeriod);
+          const effectiveDate = latestInPeriodEvent?.eventDate || null;
+
+          return {
+            ...b,
+            effectiveAssessmentDate: effectiveDate,
+            eventsInPeriod
+          };
+        }).filter(Boolean);
+
+        const dateRangeChanged = (activeStartDate !== (reportQueryParams.start?.split('T')[0] || '')) || (activeEndDate !== (reportQueryParams.end?.split('T')[0] || ''));
+        const targetInPeriod = targetBundle && (() => {
+          const targetDateStr = getLocalDateString(targetBundle.assessmentDate);
+          if (!targetDateStr) return false;
+          if (activeStartDate && targetDateStr < activeStartDate) return false;
+          if (activeEndDate && targetDateStr > activeEndDate) return false;
           return true;
-        });
-	        const targetInPeriod = targetBundle && (!periodStart || new Date(targetBundle.assessmentDate) >= periodStart) && (!periodEnd || new Date(targetBundle.assessmentDate) <= periodEnd);
-	        if (inPeriodBundles.length === 0 && !targetInPeriod) { showToast?.('No assessments found for the selected filters.', 'info'); setReportLoading(false); return; }
+        })();
 
-        let baselineBundle = bundles.filter(b => b.isBaseline).sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
-        if (!baselineBundle) baselineBundle = bundles.sort((a, b) => new Date(a.assessmentDate) - new Date(b.assessmentDate))[0] || null;
-	        const latestBundle = (targetInPeriod ? targetBundle : null) || inPeriodBundles.sort((a, b) => new Date(b.assessmentDate) - new Date(a.assessmentDate))[0] || null;
-        if (!baselineBundle || !latestBundle) {
-          showToast?.('Could not resolve baseline/latest assessments for this facility.', 'warning');
+        if (inPeriodBundles.length === 0 && !targetInPeriod) {
+          showToast?.('No assessments found for the selected filters.', 'info');
           setReportLoading(false);
           return;
         }
+
+        const forceTarget = targetBundle && targetInPeriod && !dateRangeChanged;
+        const latestBundle = (forceTarget ? targetBundle : null) || inPeriodBundles.sort((a, b) => {
+          const dateDiff = new Date(b.effectiveAssessmentDate) - new Date(a.effectiveAssessmentDate);
+          if (dateDiff !== 0) return dateDiff;
+          return (a.isBaseline ? 1 : 0) - (b.isBaseline ? 1 : 0);
+        })[0] || null;
+        
+        if (!latestBundle) {
+          showToast?.('Could not resolve latest assessment for this facility.', 'warning');
+          setReportLoading(false);
+          return;
+        }
+
+        const latestTeiId = latestBundle.teiId;
+        let baselineBundle = null;
+        
+        // 1. Try to find a baseline bundle globally (across any TEI in the filtered bundles)
+        baselineBundle = bundles.filter(b => b.isBaseline).sort((a, b) => {
+          const dateDiff = new Date(a.assessmentDate) - new Date(b.assessmentDate);
+          if (dateDiff !== 0) return dateDiff;
+          // Prefer the one that IS baseline
+          return (b.isBaseline ? 1 : 0) - (a.isBaseline ? 1 : 0);
+        })[0] || null;
+        
+        // 2. If no baseline bundle exists, try to find the earliest event on the latest TEI
+        if (!baselineBundle && latestTeiId) {
+          baselineBundle = bundles.filter(b => b.teiId === latestTeiId).sort((a, b) => {
+            const dateDiff = new Date(a.assessmentDate) - new Date(b.assessmentDate);
+            if (dateDiff !== 0) return dateDiff;
+            // Prefer the one that IS baseline
+            return (b.isBaseline ? 1 : 0) - (a.isBaseline ? 1 : 0);
+          })[0] || null;
+        }
+        
+        // 3. Absolute fallback to the earliest bundle in the filtered list
+        if (!baselineBundle) {
+          baselineBundle = bundles.sort((a, b) => {
+            const dateDiff = new Date(a.assessmentDate) - new Date(b.assessmentDate);
+            if (dateDiff !== 0) return dateDiff;
+            // Prefer the one that IS baseline
+            return (b.isBaseline ? 1 : 0) - (a.isBaseline ? 1 : 0);
+          })[0] || null;
+        }
+
+        if (!baselineBundle) {
+          showToast?.('Could not resolve baseline assessment for this facility.', 'warning');
+          setReportLoading(false);
+          return;
+        }
+
 
 	        const groupText = baselineBundle.groupText || latestBundle.groupText || '';
 	        const groupId = resolveGroupIdFromText(groupText) || getFacilityGroupKeyFromProgramStageId(effectiveStageId) || 'GENERAL';
@@ -957,14 +1242,8 @@ export default function Report() {
 	        } : null);
 
         // Build assessment structure for scoring based on facility group
-        const pType = groupId === 'HOSPITAL'
-          ? 'hospital'
-          : groupId === 'CLINICS'
-          ? 'clinics'
-          : groupId === 'MORTUARY'
-          ? 'mortuary'
-          : 'ems';
-        const { linksDataLookup, severityLookup, criticalLookup } = programmeScoringMeta[pType] || programmeScoringMeta.hospital;
+        const programmeType = getProgrammeTypeFromGroupId(groupId);
+        const { linksDataLookup, severityLookup, criticalLookup } = programmeScoringMeta[programmeType] || programmeScoringMeta.hospital;
 
         // Under the new model, each SE lives in its own event tagged as SYS_TAG:<seNum>
         const sectionTagMap = Object.fromEntries(
@@ -974,71 +1253,129 @@ export default function Report() {
         );
         const latestType = latestBundle.latestType || 'Latest assessment';
 
+        // Build the set of DE IDs that are stamped onto every SE event at creation time
+        // (SYS_TAG, type-of-assessment, facility-group, and the Assessment Details section
+        // fields if identifiable from section metadata). An SE event is "populated" ONLY
+        // when it contains a dataValue whose DE ID is NOT in this exclusion set.
+        const knownMetadataDeIds = new Set([
+          SYS_TAG_DE_ID,
+          FACILITY_GROUP_DE_ID,
+          ...(resolvedTypeOfAssessmentDeId ? [resolvedTypeOfAssessmentDeId] : []),
+          // Also exclude any field IDs from the Assessment Details section if found
+          ...(targetSections)
+            .filter(s => isAssessmentDetailsSection(s))
+            .flatMap(s => (s.fields || []).map(f => f.id))
+            .filter(Boolean),
+        ]);
+
         const baselineEventBySection = {};
         const latestEventBySection = {};
         targetSections.filter(s => !isAssessmentDetailsSection(s)).forEach((section, idx) => {
           const tag = sectionTagMap[section.id] || resolveSectionTag(section, idx);
           baselineEventBySection[section.id] = pickLatest(baselineBundle.byTag?.[tag] || []);
-          latestEventBySection[section.id] = pickLatest(latestBundle.byTag?.[tag] || []);
+          
+          const tagEvents = latestBundle.byTag?.[tag] || [];
+          latestEventBySection[section.id] = pickLatest(tagEvents);
         });
 
-        const buildAssessmentFromBundle = (bundle) => ({
-          sections: targetSections.map((section, idx) => ({
-            id: section.id,
-            standards: [{
-              id: section.code || section.id,
-              criteria: (section.fields || [])
+        const buildAssessmentFromBundle = (bundle, filterByPeriod = false) => {
+          // Preload all data values from all events in this bundle, sorting events by date ascending
+          // so that later values overwrite earlier ones (matching the form's aggregation behavior).
+          const flatFormData = {};
+          const sortedEvents = [...(bundle.events || [])].sort((a, b) => new Date(a.eventDate || 0) - new Date(b.eventDate || 0));
+          sortedEvents.forEach(ev => {
+            (ev.dataValues || []).forEach(dv => {
+              if (dv && dv.dataElement) {
+                flatFormData[dv.dataElement] = dv.value ?? '';
+              }
+            });
+          });
+
+          return {
+            sections: targetSections.map((section, idx) => {
+              const fieldsByStandard = {};
+
+              (section.fields || [])
                 .filter(f => f.type === 'select')
-                .map(f => {
-                  const tagEvent = pickLatest(bundle.byTag?.[sectionTagMap[section.id] || resolveSectionTag(section, idx)] || []);
-                  const sectionEvent = isAssessmentDetailsSection(section)
-                    ? bundle.metaEvent
-                    : tagEvent || (() => {
-                        // Mixed-model fallback: old-model assessments stored all criteria
-                        // in a single meta event without SYS_TAG. Find the latest meta event
-                        // that actually contains data values for this section's fields.
-                        if (!section.fields?.length || !Array.isArray(bundle.metaEvents)) return bundle.metaEvent || null;
-                        const fieldIds = new Set(section.fields.map(field => field.id));
-                        const candidates = bundle.metaEvents.filter(ev =>
-                          (ev.dataValues || []).some(dv => fieldIds.has(dv.dataElement))
-                        );
-                        return candidates.sort((a, b) => new Date(b.eventDate || 0) - new Date(a.eventDate || 0))[0] || bundle.metaEvent || null;
-                      })();
-                  const formDataForSection = Object.fromEntries((((sectionEvent || {}).dataValues) || []).map(dv => [dv.dataElement, dv.value]));
+                .forEach(f => {
                   const code = f.code || f.id;
-                  const normalizedCode = normalizeCriterionCode(code);
-	                  const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
-	                  const rawLinks = Array.isArray(linksData.linked_criteria) ? linksData.linked_criteria : [];
-	                  const effectiveLinks = rawLinks.filter(l => !String(l || '').trim().match(/-(G|B)$/i));
-	                  const isRoot = effectiveLinks.length > 0;
-                  const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
-                  const isCritical = (function() {
-                    const uiToggle = f.commentFieldId ? formDataForSection[`is_critical_${f.commentFieldId}`] : undefined;
-                    if (uiToggle !== undefined && uiToggle !== null && String(uiToggle).trim() !== '') {
-                      return (uiToggle === true || String(uiToggle).toLowerCase() === 'true' || uiToggle === 1 || String(uiToggle) === '1');
-                    }
-                    const commentVal = f.commentFieldId ? String(formDataForSection[f.commentFieldId] || '') : '';
-                    if (commentVal.includes('[CRITICAL]')) return true;
-                    return Boolean(criticalLookup[normalizedCode] || criticalLookup[code]);
-                  })();
-                  return {
-                    id: f.id,
-                    code,
-	                    label: f.label || f.displayName || f.name || code,
-                    response: formDataForSection[f.id] || 'NA',
-                    isCritical,
-                    isRoot,
-	                    links: effectiveLinks,
-                    roots: linksData.roots,
-                    severity
-                  };
-                })
-            }]
-          }))
-        });
+                  let normalizedCode = normalizeCriterionCode(code);
+                  if (!normalizedCode || !/\d/.test(normalizedCode)) {
+                    const labelMatch = String(f.label || '').match(/\b\d+(?:\.\d+){2,3}\b/);
+                    if (labelMatch) normalizedCode = labelMatch[0];
+                  }
 
-        const assessment = buildAssessmentFromBundle(latestBundle);
-        const baselineAssess = buildAssessmentFromBundle(baselineBundle);
+                  let standardCode = null;
+                  if (normalizedCode) {
+                    const parts = normalizedCode.split('.');
+                    if (parts.length >= 3) {
+                      standardCode = `${parts[0]}.${parts[1]}.${parts[2]}`;
+                    }
+                  }
+                  if (!standardCode) {
+                    standardCode = section.code || section.id || 'unassigned';
+                  }
+
+                  if (!fieldsByStandard[standardCode]) {
+                    fieldsByStandard[standardCode] = [];
+                  }
+                  fieldsByStandard[standardCode].push(f);
+                });
+
+              const standardsList = Object.entries(fieldsByStandard).map(([stdCode, fields]) => {
+                return {
+                  id: stdCode,
+                  criteria: fields.map(f => {
+                    const code = f.code || f.id;
+                    const normalizedCode = normalizeCriterionCode(code);
+                    const linksData = linksDataLookup[normalizedCode] || linksDataLookup[code] || { roots: [], linked_criteria: [] };
+                    const rawLinks = Array.isArray(linksData.linked_criteria) ? linksData.linked_criteria : [];
+                    const effectiveLinks = rawLinks.filter(l => !String(l || '').trim().match(/-(G|B)$/i));
+                    const isRoot = effectiveLinks.length > 0;
+                    const severity = severityLookup[normalizedCode] || severityLookup[code] || 1;
+                    const isCritical = (function() {
+                      const uiToggle = f.commentFieldId ? flatFormData[`is_critical_${f.commentFieldId}`] : undefined;
+                      if (uiToggle !== undefined && uiToggle !== null && String(uiToggle).trim() !== '') {
+                        return (uiToggle === true || String(uiToggle).toLowerCase() === 'true' || uiToggle === 1 || String(uiToggle) === '1');
+                      }
+                      const commentVal = f.commentFieldId ? String(flatFormData[f.commentFieldId] || '') : '';
+                      if (commentVal.includes('[CRITICAL]')) return true;
+                      return Boolean(criticalLookup[normalizedCode] || criticalLookup[code]);
+                    })();
+                    return {
+                      id: f.id,
+                      code,
+                      label: f.label || f.displayName || f.name || code,
+                      response: flatFormData[f.id] || 'NA',
+                      isCritical,
+                      isRoot,
+                      links: effectiveLinks,
+                      roots: linksData.roots,
+                      severity,
+                      ...(function() {
+                        const raw = flatFormData[`override_${f.id}`];
+                        const enabled = (raw === true) || (raw === 1) || (String(raw).toLowerCase() === 'true') || (String(raw) === '1');
+                        return enabled ? { overrideEnabled: true, overrideResponse: flatFormData[f.id] || 'NA' } : {};
+                      })()
+                    };
+                  })
+                };
+              });
+
+              const finalStandards = standardsList.length > 0
+                ? standardsList
+                : [{ id: section.code || section.id, criteria: [] }];
+
+              return {
+                id: section.id,
+                standards: finalStandards
+              };
+            })
+          };
+        };
+
+        const assessment = buildAssessmentFromBundle(latestBundle, false);
+        const baselineAssess = buildAssessmentFromBundle(baselineBundle, false);
 
         setReportAssessment(assessment);
         setBaselineAssessment(baselineAssess);
@@ -1113,11 +1450,12 @@ export default function Report() {
           groupId,
           groupLabel: groupObj?.name || groupId,
 		          programStageId: effectiveStageId,
+          teiId: latestTeiId || '',
           count: inPeriodBundles.length,
           baselineDate: baselineBundle.assessmentDate || null,
-          latestDate: latestBundle.assessmentDate || null,
-	          periodStart: startDate || null,
-	          periodEnd: endDate || null,
+          latestDate: latestBundle.effectiveAssessmentDate || latestBundle.assessmentDate || null,
+	          periodStart: activeStartDate || null,
+	          periodEnd: activeEndDate || null,
           latestType,
           sectionLatestDates: Object.fromEntries(
             targetSections.filter(s => !isAssessmentDetailsSection(s)).map(s => [s.id, latestEventBySection[s.id]?.eventDate || null])
@@ -1233,12 +1571,14 @@ export default function Report() {
   useEffect(() => {
     try {
 	      const facilityId = reportQueryParams.facilityId;
-	      const start = reportQueryParams.start;
-	      const end = reportQueryParams.end;
       if (facilityId) setSelectedFacilityId(facilityId);
       if (facilityId) setFacilityLocked(true);
-      if (start) setStartDate(start.split('T')[0] || start);
-      if (end) setEndDate(end.split('T')[0] || end);
+      setStartDate('2026-01-01');
+      const d = new Date();
+      const year = d.getFullYear();
+      const month = String(d.getMonth() + 1).padStart(2, '0');
+      const day = String(d.getDate()).padStart(2, '0');
+      setEndDate(`${year}-${month}-${day}`);
 	      if (facilityId) setAutoGenerateRequested(true);
     } catch {}
 	  }, [reportQueryParams]);
@@ -1346,10 +1686,13 @@ export default function Report() {
     const baseById = Object.fromEntries(baseSections.map(s => [s.id, s]));
 
     const norm = (v) => {
-      const s = String(v || '').trim().toLowerCase();
+      const s = String(v || '').trim().toLowerCase().replace(/_/g, ' ').replace(/-/g, ' ');
       if (s === '2' || s === 'yes' || s === 'y' || s === 'compliant' || s === 'c') return 'C';
       if (s === '1' || s === 'partial' || s === 'partially compliant' || s === 'pc') return 'PC';
-      if (s === '0' || s === 'no' || s === 'n' || s === 'non compliant' || s === 'non-compliant' || s === 'nc') return 'NC';
+      if (s === '0' || s === 'no' || s === 'n' || s === 'non compliant' || s === 'nc') return 'NC';
+      if (s.includes('non compliant') || s.includes('noncompliant') || s === 'nc') return 'NC';
+      if (s.includes('partially') || s.includes('partial') || s === 'pc') return 'PC';
+      if (s.includes('compliant') || s === 'c') return 'C';
       return 'NA';
     };
 
@@ -1367,8 +1710,8 @@ export default function Report() {
     const ids = Object.keys(sectionLabels || {});
     return ids.map((id, idx) => {
       const name = sectionLabels[id] || id;
-      const baseCrit = (((baseById[id]||{}).standards||[{}])[0].criteria)||[];
-      const lateCrit = (((latestById[id]||{}).standards||[{}])[0].criteria)||[];
+      const baseCrit = (baseById[id]?.standards || []).flatMap(std => std.criteria || []);
+      const lateCrit = (latestById[id]?.standards || []).flatMap(std => std.criteria || []);
       const baseCounts = getCounts(baseCrit);
       const lateCounts = getCounts(lateCrit);
       const baselinePercentValue = Number.isFinite(blPct[id]) ? Number(blPct[id]) : null;
@@ -1462,10 +1805,13 @@ export default function Report() {
 	  const responseDistributionData = useMemo(() => {
 	    if (!reportAssessment) return [];
 	    const norm = (value) => {
-	      const s = String(value || '').trim().toLowerCase();
+	      const s = String(value || '').trim().toLowerCase().replace(/_/g, ' ').replace(/-/g, ' ');
 	      if (['2', 'yes', 'y', 'compliant', 'c'].includes(s)) return 'C';
 	      if (['1', 'partial', 'partially compliant', 'pc'].includes(s)) return 'PC';
-	      if (['0', 'no', 'n', 'non compliant', 'non-compliant', 'nc'].includes(s)) return 'NC';
+	      if (['0', 'no', 'n', 'non compliant', 'nc'].includes(s)) return 'NC';
+	      if (s.includes('non compliant') || s.includes('noncompliant') || s === 'nc') return 'NC';
+	      if (s.includes('partially') || s.includes('partial') || s === 'pc') return 'PC';
+	      if (s.includes('compliant') || s === 'c') return 'C';
 	      return 'NA';
 	    };
 	    const sectionsById = Object.fromEntries((reportAssessment.sections || []).map(section => [section.id, section]));
@@ -1477,7 +1823,7 @@ export default function Report() {
 	      })
 	      .map((sectionId) => {
 	        const section = sectionsById[sectionId] || {};
-	        const criteria = (((section.standards || [{}])[0] || {}).criteria) || [];
+	        const criteria = (section.standards || []).flatMap(std => std.criteria || []);
 	        const counts = criteria.reduce((acc, criterion) => {
 	          acc[norm(criterion.response)] += 1;
 	          return acc;
@@ -1646,8 +1992,14 @@ export default function Report() {
     background,
     color,
     fontWeight: 700,
+    position: 'sticky',
+    top: 0,
+    zIndex: 10,
     ...extra,
   });
+
+  const headerRow2CellStyle = (background, color, extra = {}) =>
+    overviewHeaderCellStyle(background, color, { top: '37px', ...extra });
 
   const overviewBodyCellStyle = (rowIndex, extra = {}) => ({
     border: '1px solid #e2e8f0',
@@ -2266,6 +2618,7 @@ export default function Report() {
     const servicesSeen = facilityOverview.length || (reportAssessment?.sections || []).filter(s => !isAssessmentDetailsSection(s)).length || '';
     const overviewRows = [
       ['Facility:', selectedFacilityName],
+      ['TEI ID:', reportInfo.teiId || '—'],
 	      ['Visit From Date:', formatCoverDate(reportPeriodStart)],
 	      ['Visit To Date:', formatCoverDate(reportPeriodEnd)],
       ['Visit Type:', reportInfo.latestType || reportInfo.groupLabel || ''],
@@ -3139,6 +3492,10 @@ export default function Report() {
 	                <div style={{ fontSize: 12, opacity: 0.8 }}>Program Stage ID</div>
 	                <div style={{ fontWeight: 700, fontFamily: 'monospace' }}>{reportInfo.programStageId || '—'}</div>
 	              </div>
+	              <div style={{ background: '#0b1220', color: '#e5e7eb', padding: '10px 12px', borderRadius: 8, minWidth: 180 }}>
+	                <div style={{ fontSize: 12, opacity: 0.8 }}>TEI ID</div>
+	                <div style={{ fontWeight: 700, fontFamily: 'monospace' }}>{reportInfo.teiId || '—'}</div>
+	              </div>
               <div style={{ background: '#0b1220', color: '#e5e7eb', padding: '10px 12px', borderRadius: 8, minWidth: 180 }}>
                 <div style={{ fontSize: 12, opacity: 0.8 }}>Assessments in period</div>
                 <div style={{ fontWeight: 700 }}>{reportInfo.count}</div>
@@ -3176,14 +3533,14 @@ export default function Report() {
                 <h3 style={{ margin: 0 }}>Facility Overview</h3>
               </div>
               {!isFacilityOverviewCollapsed && (
-              <div style={{ overflowX: 'auto', marginTop: 8, maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
+              <div style={{ overflow: 'auto', maxHeight: '72vh', marginTop: 8, maxWidth: '100%', WebkitOverflowScrolling: 'touch' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.84em', minWidth: 1500 }}>
                   <thead>
                     <tr>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')} title="Service Element index code">SE</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a', { left: 0, zIndex: 15 })} title="Service Element index code">SE</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a', { minWidth: 220 })} title="Service Element name">Service</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')} title="First recorded compliance score inside the selected date range.">Overall baseline score</th>
-                      <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')} title="Most recent recorded compliance score inside the selected date range.">Overall progress score</th>
+                      <th rowSpan={2} style={overviewHeaderCellStyle('#dbeafe', '#1e3a8a')} title="Most recent recorded compliance score inside the selected date range.">{reportInfo?.latestType ? String(reportInfo.latestType).trim() : 'Overall progress score'}</th>
                       <th colSpan={4} style={overviewHeaderCellStyle('#e0f2fe', '#075985')} title="Action-oriented metrics tracking change, closure rate, timeline, and status.">Action insights</th>
                       <th colSpan={3} style={overviewHeaderCellStyle('#fef3c7', '#92400e')} title="Deficiencies (Non-Compliant or Partially Compliant criteria) identified in the baseline assessment.">Deficiencies identified at baseline</th>
                       <th rowSpan={2} style={overviewHeaderCellStyle('#dcfce7', '#166534')} title="Baseline deficiencies successfully resolved to Compliant in the latest assessment.">Deficiencies completed to date</th>
@@ -3193,28 +3550,28 @@ export default function Report() {
                       <th rowSpan={2} style={overviewHeaderCellStyle('#f8fafc', '#0f172a')} title="Date of the most recent assessment within the selected range.">Most recent assessment date</th>
                     </tr>
                     <tr>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })} title="Percentage point change between progress and baseline scores: (rounded progress % - rounded baseline %).">Δ Change</th>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')} title="Percentage of baseline deficiencies successfully resolved: (Completed / Baseline Total) * 100.">Closure Rate</th>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })} title="Number of months elapsed since the latest assessment was completed.">Months Since</th>
-                      <th style={overviewHeaderCellStyle('#f0f9ff', '#075985')} title="Current status of the service: Critical (remaining critical deficiencies or score drop <= -15%), Warning (some deficiencies or score drop <= -5%), or On Track.">Status</th>
-                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')} title="Total baseline deficiencies: (NC + PC).">Total</th>
-                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')} title="Baseline criteria scored as Non-Compliant.">NC</th>
-                      <th style={overviewHeaderCellStyle('#fff7ed', '#92400e')} title="Baseline criteria scored as Partially Compliant.">PC</th>
-                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')} title="Total remaining deficiencies: (NC + PC).">Total</th>
-                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')} title="Remaining criteria scored as Non-Compliant in the latest assessment.">NC</th>
-                      <th style={overviewHeaderCellStyle('#fef2f2', '#991b1b')} title="Remaining criteria scored as Partially Compliant in the latest assessment.">PC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Total critical criteria evaluated at baseline.">Total</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria scored as Non-Compliant at baseline.">NC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria scored as Partially Compliant at baseline.">PC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Total critical criteria remaining deficient in the latest assessment.">Total</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria remaining Non-Compliant in the latest assessment.">NC</th>
-                      <th style={overviewHeaderCellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria remaining Partially Compliant in the latest assessment.">PC</th>
+                      <th style={headerRow2CellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })} title="Percentage point change between progress and baseline scores: (rounded progress % - rounded baseline %).">Δ Change</th>
+                      <th style={headerRow2CellStyle('#f0f9ff', '#075985')} title="Percentage of baseline deficiencies successfully resolved: (Completed / Baseline Total) * 100.">Closure Rate</th>
+                      <th style={headerRow2CellStyle('#f0f9ff', '#075985', { whiteSpace: 'nowrap' })} title="Number of months elapsed since the latest assessment was completed.">Months Since</th>
+                      <th style={headerRow2CellStyle('#f0f9ff', '#075985')} title="Current status of the service: Critical (remaining critical deficiencies or score drop <= -15%), Warning (some deficiencies or score drop <= -5%), or On Track.">Status</th>
+                      <th style={headerRow2CellStyle('#fff7ed', '#92400e')} title="Total baseline deficiencies: (NC + PC).">Total</th>
+                      <th style={headerRow2CellStyle('#fff7ed', '#92400e')} title="Baseline criteria scored as Non-Compliant.">NC</th>
+                      <th style={headerRow2CellStyle('#fff7ed', '#92400e')} title="Baseline criteria scored as Partially Compliant.">PC</th>
+                      <th style={headerRow2CellStyle('#fef2f2', '#991b1b')} title="Total remaining deficiencies: (NC + PC).">Total</th>
+                      <th style={headerRow2CellStyle('#fef2f2', '#991b1b')} title="Remaining criteria scored as Non-Compliant in the latest assessment.">NC</th>
+                      <th style={headerRow2CellStyle('#fef2f2', '#991b1b')} title="Remaining criteria scored as Partially Compliant in the latest assessment.">PC</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Total critical criteria evaluated at baseline.">Total</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria scored as Non-Compliant at baseline.">NC</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria scored as Partially Compliant at baseline.">PC</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Total critical criteria remaining deficient in the latest assessment.">Total</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria remaining Non-Compliant in the latest assessment.">NC</th>
+                      <th style={headerRow2CellStyle('#fee2e2', '#7f1d1d')} title="Critical criteria remaining Partially Compliant in the latest assessment.">PC</th>
                     </tr>
                   </thead>
                   <tbody>
                     {facilityOverview.map((row, rowIndex) => (
                       <tr key={`ov-${row.seIndex}`}>
-                        <td style={overviewBodyCellStyle(rowIndex)}>{`SE ${row.seIndex}`}</td>
+                        <td style={overviewBodyCellStyle(rowIndex, { position: 'sticky', left: 0, zIndex: 5 })}>{`SE ${row.seIndex}`}</td>
                         <td style={overviewBodyCellStyle(rowIndex, { minWidth: 220 })}>{renderOverviewService(row)}</td>
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewScore(row.baselinePercent)}</td>
                         <td style={overviewBodyCellStyle(rowIndex)}>{renderOverviewScore(row.latestPercent)}</td>
@@ -3241,7 +3598,7 @@ export default function Report() {
                   </tbody>
                   <tfoot>
                     <tr>
-                      <td style={overviewTotalsCellStyle()}>Totals</td>
+                      <td style={overviewTotalsCellStyle({ position: 'sticky', left: 0, zIndex: 5 })}>Totals</td>
                       <td style={overviewTotalsCellStyle({ textAlign: 'left' })}>{`SE Count: ${facilityOverview.length}`}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewScore(baselineOverall)}</td>
                       <td style={overviewTotalsCellStyle()}>{renderOverviewScore(latestOverall)}</td>

@@ -39,21 +39,13 @@ import mortuaryLinks from '../assets/mortuary/mortuary_links.json';
 import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
 
-import obstericsGynoConfig from '../assets/obsterics-gyno/obsterics_gyno_config.json';
 import obstericsGynoMatrix from '../assets/obsterics-gyno/obsterics_gyno_matrix.json';
-import physiotheraphyConfig from '../assets/physiotheraphy/physiotheraphy_config.json';
 import physiotheraphyMatrix from '../assets/physiotheraphy/physiotheraphy_matrix.json';
-import radiologyConfig from '../assets/radiology/radiology_config.json';
 import radiologyMatrix from '../assets/radiology/radiology_matrix.json';
-import generalPracticeConfig from '../assets/general-practice/general_practice_config.json';
 import generalPracticeMatrix from '../assets/general-practice/general_practice_matrix.json';
-import privateDiabeticConfig from '../assets/private-diabetic/private_diabetic_config.json';
 import privateDiabeticMatrix from '../assets/private-diabetic/private_diabetic_matrix.json';
-import oralConfig from '../assets/oral/oral_config.json';
 import oralMatrix from '../assets/oral/oral_matrix.json';
-import privateOncologyConfig from '../assets/private-oncology/private_oncology_config.json';
 import privateOncologyMatrix from '../assets/private-oncology/private_oncology_matrix.json';
-import paediatricConfig from '../assets/paediatric/paediatric_config.json';
 import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
 
 // Import remaining 8 facility matrices and matrixConfig parser
@@ -76,6 +68,14 @@ const occupationalHealthConfig = buildConfigFromMatrix('occupational_health', oc
 const urologyConfig = buildConfigFromMatrix('urology', urologyMatrix.urology);
 const childhoodIllnessConfig = buildConfigFromMatrix('childhood_illness', childhoodIllnessMatrix.childhood_illness);
 const emergencyManagementConfig = buildConfigFromMatrix('emergency_management', emergencyManagementMatrix.emergency_management);
+const radiologyConfig = buildConfigFromMatrix('radiology', radiologyMatrix.radiology);
+const obstericsGynoConfig = buildConfigFromMatrix('obsterics_gyno', obstericsGynoMatrix.obsterics_gyno);
+const physiotheraphyConfig = buildConfigFromMatrix('physiotheraphy', physiotheraphyMatrix.physiotheraphy);
+const generalPracticeConfig = buildConfigFromMatrix('general_practice', generalPracticeMatrix.general_practice);
+const privateDiabeticConfig = buildConfigFromMatrix('private_diabetic', privateDiabeticMatrix.private_diabetic);
+const oralConfig = buildConfigFromMatrix('oral', oralMatrix.oral);
+const privateOncologyConfig = buildConfigFromMatrix('private_oncology', privateOncologyMatrix.private_oncology);
+const paediatricConfig = buildConfigFromMatrix('paediatric', paediatricMatrix.paediatric);
 
 import { decorateHospitalLinksWithMatrixTags } from '../utils/hospitalMatrixTags';
 import { normalizeCriterionCode } from '../utils/normalization';
@@ -479,9 +479,9 @@ const SETTINGS_TABLE_HEADERS = [
     { label: 'SE Number', minWidth: 55, align: 'center' },
     { label: 'SE Description', minWidth: 220, align: 'center' },
     { label: 'Standard', minWidth: 70, align: 'center' },
+    { label: 'Statement', minWidth: 300, align: 'left' },
     { label: 'Criterion', minWidth: 80, align: 'center' },
     { label: 'Criterion Description/name', minWidth: 280, align: 'left' },
-    { label: 'Statement', minWidth: 300, align: 'left' },
     { label: 'Statement Intent', minWidth: 320, align: 'left' },
     { label: 'Guidelines', minWidth: 320, align: 'left' },
     { label: 'Root', minWidth: 50, align: 'center' },
@@ -489,6 +489,14 @@ const SETTINGS_TABLE_HEADERS = [
     { label: 'Linked Criteria', minWidth: 180, maxWidth: 220 },
     { label: 'Sub-Criteria', minWidth: 180, maxWidth: 220 },
 ];
+
+const getLeftOffset = (label, collapsedCols) => {
+    if (label === 'SE Number') return 0;
+    if (label === 'SE Description') {
+        return collapsedCols?.has?.('SE Number') ? 22 : 55;
+    }
+    return undefined;
+};
 
 const criterionOptionsFor = (serviceElements) => serviceElements.flatMap(se =>
     (se.sections || []).flatMap(section =>
@@ -578,7 +586,20 @@ const rowsForFacility = (serviceElements, configKey, allCriteriaInFacilityType, 
                             ? 'intent_tooltip'
                             : 'intent',
                         criterionId: criterion.id,
-                        criterionDescription: dhis2DescriptionsMap ? (dhis2DescriptionsMap[criterion.id] || '') : (criterion.description || ''),
+                        criterionDescription: (() => {
+                            const dhis2Info = dhis2DescriptionsMap && dhis2DescriptionsMap[criterion.id];
+                            if (dhis2Info && typeof dhis2Info === 'object') {
+                                const dhis2Code = dhis2Info.code || '';
+                                const dhis2Desc = dhis2Info.dhis2Desc || '';
+                                const localDesc = criterion.description || '';
+                                const displayDesc = dhis2Desc || localDesc || '';
+                                return dhis2Code ? `${dhis2Code} - ${displayDesc}` : displayDesc;
+                            }
+                            if (dhis2Info && typeof dhis2Info === 'string') {
+                                return dhis2Info;
+                            }
+                            return criterion.description || '';
+                        })(),
                         guidelines: criterion.guidelines || criterion.guideline || '',
                         isCritical: criterion.is_critical,
                         linkedCriteria: criterion.linked_criteria || linkedCriteriaFromLinks || standardCriteriaIds,
@@ -616,80 +637,78 @@ const EditableTextCell = ({
     onOpen,
     onSave,
 }) => {
-    const [textVal, setTextVal] = useState(value || '');
-    const textareaRef = useRef(null);
+    const editorRef = useRef(null);
 
+    // Populate the contentEditable div when entering edit mode
     useEffect(() => {
-        setTextVal(value || '');
-    }, [value]);
-
-    const handleFormat = (tag) => {
-        const textarea = textareaRef.current;
-        if (!textarea) return;
-
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const selectedText = textVal.substring(start, end);
-        
-        let replacement = '';
-        if (tag === 'ul') {
-            replacement = `<ul>\n  <li>${selectedText || 'item'}</li>\n</ul>`;
-        } else {
-            replacement = `<${tag}>${selectedText}</${tag}>`;
+        if (active && editorRef.current) {
+            editorRef.current.innerHTML = value || '';
+            // Move cursor to end
+            try {
+                const range = document.createRange();
+                const sel = window.getSelection();
+                range.selectNodeContents(editorRef.current);
+                range.collapse(false);
+                sel.removeAllRanges();
+                sel.addRange(range);
+                editorRef.current.focus();
+            } catch (_) { /* ignore */ }
         }
+    }, [active]); // eslint-disable-line react-hooks/exhaustive-deps
 
-        const newValue = textVal.substring(0, start) + replacement + textVal.substring(end);
-        setTextVal(newValue);
-        onSave(newValue);
+    const handleFormat = (command) => {
+        editorRef.current?.focus();
+        // execCommand applies formatting to the current selection
+        document.execCommand(command, false, null);
+        const newHtml = editorRef.current?.innerHTML || '';
+        onSave(newHtml);
+    };
 
-        // Put focus back and set selection range
-        setTimeout(() => {
-            textarea.focus();
-            const newCursorPos = start + replacement.length;
-            textarea.setSelectionRange(newCursorPos, newCursorPos);
-        }, 0);
+    const handleInput = () => {
+        const newHtml = editorRef.current?.innerHTML || '';
+        onSave(newHtml);
     };
 
     if (editable && active) {
         return (
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', width: '100%' }} onClick={(e) => e.stopPropagation()}>
+                {/* Formatting toolbar */}
                 <div style={{ display: 'flex', gap: '4px', background: '#f1f5f9', padding: '4px', borderRadius: '4px', border: '1px solid #cbd5e0', width: 'fit-content' }}>
-                    <button 
+                    <button
                         style={{ padding: '2px 8px', fontSize: '0.85em', fontWeight: 'bold', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
                         title="Bold"
-                        onMouseDown={(e) => { e.preventDefault(); handleFormat('b'); }}
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('bold'); }}
                     >
                         B
                     </button>
-                    <button 
+                    <button
                         style={{ padding: '2px 8px', fontSize: '0.85em', fontStyle: 'italic', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
                         title="Italic"
-                        onMouseDown={(e) => { e.preventDefault(); handleFormat('i'); }}
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('italic'); }}
                     >
                         I
                     </button>
-                    <button 
+                    <button
                         style={{ padding: '2px 8px', fontSize: '0.85em', textDecoration: 'underline', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
                         title="Underline"
-                        onMouseDown={(e) => { e.preventDefault(); handleFormat('u'); }}
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('underline'); }}
                     >
                         U
                     </button>
-                    <button 
+                    <button
                         style={{ padding: '2px 8px', fontSize: '0.85em', cursor: 'pointer', border: '1px solid #cbd5e0', borderRadius: '3px', background: '#fff' }}
                         title="Bullet List"
-                        onMouseDown={(e) => { e.preventDefault(); handleFormat('ul'); }}
+                        onMouseDown={(e) => { e.preventDefault(); handleFormat('insertUnorderedList'); }}
                     >
                         • List
                     </button>
                 </div>
-                <textarea
-                    ref={textareaRef}
-                    value={textVal}
-                    onChange={(e) => {
-                        setTextVal(e.target.value);
-                        onSave(e.target.value);
-                    }}
+                {/* WYSIWYG contentEditable editor — bold/underline render in real time */}
+                <div
+                    ref={editorRef}
+                    contentEditable
+                    suppressContentEditableWarning
+                    onInput={handleInput}
                     onBlur={() => onOpen(null)}
                     onKeyDown={(e) => {
                         if (e.key === 'Escape') onOpen(null);
@@ -700,11 +719,15 @@ const EditableTextCell = ({
                         padding: '6px',
                         fontSize: '0.9rem',
                         fontFamily: 'inherit',
-                        border: '1px solid #cbd5e0',
+                        border: '1px solid #4a90e2',
                         borderRadius: '4px',
-                        resize: 'vertical'
+                        overflowY: 'auto',
+                        outline: 'none',
+                        cursor: 'text',
+                        lineHeight: '1.5',
+                        background: '#fff',
+                        boxShadow: '0 0 0 2px rgba(74,144,226,0.15)',
                     }}
-                    autoFocus
                 />
             </div>
         );
@@ -765,6 +788,7 @@ export function AppSettings() {
     const [isBaselineCreating, setIsBaselineCreating] = useState(false);
     const [createProgress, setCreateProgress] = useState(null);
     const [createDetails, setCreateDetails] = useState([]);
+    const [collapsedSettingsCols, setCollapsedSettingsCols] = useState(new Set()); // Set of collapsed column labels
 	    const [createElapsedSeconds, setCreateElapsedSeconds] = useState(0);
 	    const createDetailsEndRef = useRef(null);
     const [createErrorInfo, setCreateErrorInfo] = useState(null);
@@ -1524,6 +1548,7 @@ export function AppSettings() {
 	    const [showSettings, setShowSettings] = useState(false);
 				    const [expandedFacs, setExpandedFacs] = useState({});
 				    const [loadingFacType, setLoadingFacType] = useState(null);
+				    const [fullScreenFacType, setFullScreenFacType] = useState(null);
                     const [settingsFacilityPages, setSettingsFacilityPages] = useState({});
                     const [dhis2Descriptions, setDhis2Descriptions] = useState({});
                     const [loadingDhis2Descriptions, setLoadingDhis2Descriptions] = useState({});
@@ -4737,7 +4762,7 @@ export function AppSettings() {
                         : [];
 		            const allCriteriaInFacilityType = isExpanded ? criterionOptionsFor(seList) : [];
                     const groupKey = toFacilityGroupKey(type);
-                    const dhis2Map = overviewSource === 'active' ? (dhis2Descriptions[groupKey] || {}) : null;
+                    const dhis2Map = dhis2Descriptions[groupKey] || {};
 		            const rows = isExpanded
                         ? rowsForFacility(visibleSeList, key, allCriteriaInFacilityType, rootMap, currentLinks, dhis2Map)
                         : [];
@@ -4881,7 +4906,11 @@ export function AppSettings() {
                     const normalized = normalizeCriterionCode(de.code);
                     if (normalized) {
                         const desc = de.formName || de.description || de.displayFormName || de.displayName || de.name || '';
-                        descMap[normalized] = cleanDhis2Description(desc);
+                        const cleanDesc = cleanDhis2Description(desc);
+                        descMap[normalized] = {
+                            code: de.code,
+                            dhis2Desc: cleanDesc
+                        };
                     }
                 }
             });
@@ -5008,6 +5037,7 @@ export function AppSettings() {
                                                 if (isClosing) {
                                                     setExpandedFacs({});
                                                     setActiveCellKey(null);
+                                                    setFullScreenFacType(null);
                                                     return;
                                                 }
 											    setLoadingFacType(type);
@@ -5016,9 +5046,8 @@ export function AppSettings() {
                                                     if (overviewSource === 'active' && configSource === 'datastore' && isOnline) {
                                                         await loadRemoteConfig(type);
                                                     }
-                                                    if (overviewSource === 'active') {
-                                                        await loadDhis2Descriptions(type);
-                                                    }
+                                                    // Always load DHIS2 descriptions so the Criterion Description column is always live
+                                                    await loadDhis2Descriptions(type);
                                                     setExpandedFacs({ [type]: true });
                                                     setSettingsFacilityPages(prev => ({ ...prev, [type]: 0 }));
                                                 } finally {
@@ -5047,8 +5076,39 @@ export function AppSettings() {
 																<span style={{ fontSize: '0.8em', color: '#718096', display: 'flex', alignItems: 'center', gap: 6 }}>{loadingFacType === type ? <CircularProgress size={14} /> : (isExpanded ? '  Collapse' : '  Expand')}</span>
 															</div>
 															{isExpanded && (
-																<div style={{ padding: '8px', maxHeight: '55vh', overflowY: 'auto', overflowX: 'auto' }}>
-                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+																<div style={fullScreenFacType === type ? {
+																	position: 'fixed',
+																	top: 0,
+																	left: 0,
+																	width: '100vw',
+																	height: '100vh',
+																	zIndex: 9999,
+																	background: '#fff',
+																	padding: '24px',
+																	boxSizing: 'border-box',
+																	display: 'flex',
+																	flexDirection: 'column',
+																	overflow: 'hidden'
+																} : {
+																	padding: '8px',
+																	maxHeight: '55vh',
+																	overflowY: 'auto',
+																	overflowX: 'auto'
+																}}>
+																	{fullScreenFacType === type && (
+																		<div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12, borderBottom: '2px solid #cbd5e0', paddingBottom: 8, flexShrink: 0 }}>
+																			<h3 style={{ margin: 0, color: '#2d3748', fontFamily: 'sans-serif' }}>{type} Configuration Settings</h3>
+																			<Button
+																				size="small"
+																				variant="contained"
+																				color="error"
+																				onClick={() => setFullScreenFacType(null)}
+																			>
+																				Exit Full Screen
+																			</Button>
+																		</div>
+																	)}
+                                                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 8, flexShrink: 0 }}>
                                                                         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
 																			<TextField
 																				size="small"
@@ -5096,28 +5156,67 @@ export function AppSettings() {
                                                                             >
                                                                                 Next
                                                                             </Button>
+                                                                            <Button
+                                                                                size="small"
+                                                                                variant={fullScreenFacType === type ? "contained" : "outlined"}
+                                                                                color={fullScreenFacType === type ? "error" : "primary"}
+                                                                                onClick={() => setFullScreenFacType(fullScreenFacType === type ? null : type)}
+                                                                            >
+                                                                                {fullScreenFacType === type ? "Exit Full Screen" : "Full Screen"}
+                                                                            </Button>
                                                                         </div>
                                                                     </div>
+																	<div style={fullScreenFacType === type ? { flex: 1, overflow: 'auto', width: '100%', marginTop: 8 } : { display: 'contents' }}>
 																	<table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '0.82em' }}>
 																		<thead style={{ position: 'sticky', top: 0, zIndex: 2 }}>
 																			<tr style={{ background: '#edf2f7', textAlign: 'left' }}>
-																				{SETTINGS_TABLE_HEADERS.map(header => (
-																					<th
-																						key={header.label}
-																						style={{
-																							padding: '8px',
-																							border: '1px solid #cbd5e0',
-																							minWidth: `${header.minWidth}px`,
-																							maxWidth: header.maxWidth ? `${header.maxWidth}px` : undefined,
-																							position: 'sticky',
-																							top: 0,
-																							background: '#edf2f7',
-																							textAlign: header.align || 'center',
-																						}}
-																					>
-																						{header.label}
-																					</th>
-																				))}
+																				{SETTINGS_TABLE_HEADERS.map(header => {
+																					const leftOffset = getLeftOffset(header.label, collapsedSettingsCols);
+																					const isCollapsible = header.label === 'SE Number' || header.label === 'SE Description';
+																					const isCollapsed = collapsedSettingsCols.has(header.label);
+																					return (
+																						<th
+																							key={header.label}
+																							style={{
+																								padding: isCollapsed ? '4px 2px' : '8px',
+																								border: '1px solid #cbd5e0',
+																								minWidth: isCollapsed ? '22px' : `${header.minWidth}px`,
+																								maxWidth: isCollapsed ? '22px' : (header.maxWidth ? `${header.maxWidth}px` : undefined),
+																								width: isCollapsed ? '22px' : undefined,
+																								overflow: 'hidden',
+																								whiteSpace: 'nowrap',
+																								position: 'sticky',
+																								top: 0,
+																								left: leftOffset !== undefined ? leftOffset : undefined,
+																								zIndex: leftOffset !== undefined ? 3 : 2,
+																								background: '#edf2f7',
+																								textAlign: 'center',
+																								transition: 'min-width 0.2s, max-width 0.2s, width 0.2s',
+																							}}
+																						>
+																							{isCollapsible ? (
+																								<div style={{ display: 'flex', alignItems: 'center', gap: '4px', justifyContent: 'center', flexWrap: 'nowrap' }}>
+																									{!isCollapsed && <span style={{ fontSize: '0.75em', fontWeight: 600 }}>{header.label}</span>}
+																									<button
+																										title={isCollapsed ? `Expand ${header.label}` : `Collapse ${header.label}`}
+																										onClick={() => setCollapsedSettingsCols(prev => {
+																											const next = new Set(prev);
+																											if (next.has(header.label)) next.delete(header.label); else next.add(header.label);
+																											return next;
+																										})}
+																										style={{
+																											border: 'none', background: 'transparent', cursor: 'pointer',
+																											padding: '0 2px', fontSize: '10px', lineHeight: 1,
+																											color: '#4a5568', flexShrink: 0,
+																										}}
+																									>
+																										{isCollapsed ? '▶' : '◀'}
+																									</button>
+																								</div>
+																							) : header.label}
+																						</th>
+																					);
+																				})}
 																			</tr>
 																		</thead>
 																		<tbody>
@@ -5127,33 +5226,47 @@ export function AppSettings() {
 																							<td
 																								rowSpan={row.seRowSpan}
 																								style={{
-																									padding: '8px',
+																									padding: collapsedSettingsCols.has('SE Number') ? '4px 2px' : '8px',
 																									border: '1px solid #e2e8f0',
 																									textAlign: 'center',
 																									verticalAlign: 'middle',
 																									fontWeight: 700,
 																									background: '#f8fafc',
+																									position: 'sticky',
+																									left: 0,
+																									zIndex: 1,
+																									width: collapsedSettingsCols.has('SE Number') ? '22px' : undefined,
+																									maxWidth: collapsedSettingsCols.has('SE Number') ? '22px' : undefined,
+																									overflow: 'hidden',
+																									transition: 'width 0.2s, max-width 0.2s, padding 0.2s',
 																								}}
 																							>
-																								{row.seId}
+																								{!collapsedSettingsCols.has('SE Number') && row.seId}
 																							</td>
 																						)}
 																						{row.isFirstSeRow && (
 																							<td
 																								rowSpan={row.seRowSpan}
 																								style={{
-																									padding: '8px',
+																									padding: collapsedSettingsCols.has('SE Description') ? '4px 2px' : '8px',
 																									border: '1px solid #e2e8f0',
 																									textAlign: 'center',
 																									verticalAlign: 'middle',
 																									background: '#f8fafc',
+																									position: 'sticky',
+																									left: collapsedSettingsCols.has('SE Number') ? 22 : 55,
+																									zIndex: 1,
+																									width: collapsedSettingsCols.has('SE Description') ? '22px' : undefined,
+																									maxWidth: collapsedSettingsCols.has('SE Description') ? '22px' : undefined,
+																									overflow: 'hidden',
+																									transition: 'left 0.2s, width 0.2s, max-width 0.2s, padding 0.2s',
 																								}}
 																							>
-																								<div
-																									style={{ maxHeight: '90px', overflowY: 'auto' }}
-																								>
-																									{row.seDescription || '—'}
-																								</div>
+																								{!collapsedSettingsCols.has('SE Description') && (
+																									<div style={{ maxHeight: '90px', overflowY: 'auto' }}>
+																										{row.seDescription || '—'}
+																									</div>
+																								)}
 																							</td>
 																						)}
 																						{row.isFirstStandardRow && (
@@ -5197,13 +5310,6 @@ export function AppSettings() {
 																								)}
 																							</td>
 																						)}
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', fontFamily: 'monospace' }}>{row.criterionId}</td>
-																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'left', verticalAlign: 'middle' }}>
-																							<div
-																								style={{ maxHeight: '90px', overflowY: 'auto' }}
-																								dangerouslySetInnerHTML={{ __html: row.criterionDescription || '—' }}
-																							/>
-																						</td>
 																						{row.isFirstStandardRow && (
 																							<td
 																								rowSpan={row.standardRowSpan}
@@ -5212,6 +5318,7 @@ export function AppSettings() {
 																									border: '1px solid #e2e8f0',
 																									textAlign: 'left',
 																									verticalAlign: 'middle',
+																									background: '#ffffff',
 																								}}
 																							>
 																								{overviewSource !== 'local' && activeCellKey === `${row.criterionId}-statement` ? (
@@ -5232,6 +5339,13 @@ export function AppSettings() {
 																								)}
 																							</td>
 																						)}
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'center', verticalAlign: 'middle', fontFamily: 'monospace' }}>{row.criterionId}</td>
+																						<td style={{ padding: '8px', border: '1px solid #e2e8f0', textAlign: 'left', verticalAlign: 'middle' }}>
+																							<div
+																								style={{ maxHeight: '90px', overflowY: 'auto' }}
+																								dangerouslySetInnerHTML={{ __html: row.criterionDescription || '—' }}
+																							/>
+																						</td>
 																						{row.isFirstStandardRow && (
 																							<td
 																								rowSpan={row.standardRowSpan}
@@ -5452,6 +5566,7 @@ export function AppSettings() {
 																				))}
 																		</tbody>
 																	</table>
+																	</div>
 																</div>
 															)}
 														</div>

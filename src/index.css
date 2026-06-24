@@ -148,3 +148,90 @@ button:hover,
 .MuiInputBase-root {
   border-radius: 10px !important;
 }
+
+/* Security constraints for survey values */
+.secure-no-select {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+.secure-no-select input,
+.secure-no-select textarea,
+.secure-no-select select,
+.secure-no-select span,
+.secure-no-select div,
+.secure-no-select label {
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+}
+
+@media print {
+  body, #root, .form-area, .preview-content, .inspection-preview-overlay {
+    display: none !important;
+  }
+}
+
+/* Premium Save Status Styling for Survey Fields */
+.status-indicator-container {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-top: 0.35rem;
+    padding: 0.15rem 0.45rem;
+    border-radius: 4px;
+    width: fit-content;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.status-unsaved {
+    border-color: #d97706 !important; /* amber border */
+    box-shadow: 0 0 0 3px rgba(217, 119, 6, 0.15) !important;
+}
+.text-unsaved {
+    color: #b45309;
+    background-color: #fef3c7;
+}
+.dot-unsaved {
+    background-color: #d97706;
+    animation: status-pulse-unsaved 1.5s infinite alternate;
+}
+@keyframes status-pulse-unsaved {
+    from { opacity: 0.4; box-shadow: 0 0 2px #d97706; }
+    to { opacity: 1; box-shadow: 0 0 8px #d97706; }
+}
+
+.status-local {
+    border-color: #2563eb !important; /* blue border */
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+}
+.text-local {
+    color: #1d4ed8;
+    background-color: #eff6ff;
+}
+.dot-local {
+    background-color: #2563eb;
+}
+
+.status-synced {
+    border-color: #10b981 !important; /* green border */
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15) !important;
+}
+.text-synced {
+    color: #047857;
+    background-color: #ecfdf5;
+}
+.dot-synced {
+    background-color: #10b981;
+}

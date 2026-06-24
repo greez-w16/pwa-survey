@@ -40,21 +40,13 @@ import mortuaryLinks from '../assets/mortuary/mortuary_links.json';
 import clinicsLinks from '../assets/clinics/clinics_links.json';
 import hospitalLinks from '../assets/hospital/hospital_links.json';
 
-import obstericsGynoConfig from '../assets/obsterics-gyno/obsterics_gyno_config.json';
 import obstericsGynoMatrix from '../assets/obsterics-gyno/obsterics_gyno_matrix.json';
-import physiotheraphyConfig from '../assets/physiotheraphy/physiotheraphy_config.json';
 import physiotheraphyMatrix from '../assets/physiotheraphy/physiotheraphy_matrix.json';
-import radiologyConfig from '../assets/radiology/radiology_config.json';
 import radiologyMatrix from '../assets/radiology/radiology_matrix.json';
-import generalPracticeConfig from '../assets/general-practice/general_practice_config.json';
 import generalPracticeMatrix from '../assets/general-practice/general_practice_matrix.json';
-import privateDiabeticConfig from '../assets/private-diabetic/private_diabetic_config.json';
 import privateDiabeticMatrix from '../assets/private-diabetic/private_diabetic_matrix.json';
-import oralConfig from '../assets/oral/oral_config.json';
 import oralMatrix from '../assets/oral/oral_matrix.json';
-import privateOncologyConfig from '../assets/private-oncology/private_oncology_config.json';
 import privateOncologyMatrix from '../assets/private-oncology/private_oncology_matrix.json';
-import paediatricConfig from '../assets/paediatric/paediatric_config.json';
 import paediatricMatrix from '../assets/paediatric/paediatric_matrix.json';
 
 // Import remaining 8 facility matrices and matrixConfig parser
@@ -77,6 +69,14 @@ const occupationalHealthConfig = buildConfigFromMatrix('occupational_health', oc
 const urologyConfig = buildConfigFromMatrix('urology', urologyMatrix.urology);
 const childhoodIllnessConfig = buildConfigFromMatrix('childhood_illness', childhoodIllnessMatrix.childhood_illness);
 const emergencyManagementConfig = buildConfigFromMatrix('emergency_management', emergencyManagementMatrix.emergency_management);
+const radiologyConfig = buildConfigFromMatrix('radiology', radiologyMatrix.radiology);
+const obstericsGynoConfig = buildConfigFromMatrix('obsterics_gyno', obstericsGynoMatrix.obsterics_gyno);
+const physiotheraphyConfig = buildConfigFromMatrix('physiotheraphy', physiotheraphyMatrix.physiotheraphy);
+const generalPracticeConfig = buildConfigFromMatrix('general_practice', generalPracticeMatrix.general_practice);
+const privateDiabeticConfig = buildConfigFromMatrix('private_diabetic', privateDiabeticMatrix.private_diabetic);
+const oralConfig = buildConfigFromMatrix('oral', oralMatrix.oral);
+const privateOncologyConfig = buildConfigFromMatrix('private_oncology', privateOncologyMatrix.private_oncology);
+const paediatricConfig = buildConfigFromMatrix('paediatric', paediatricMatrix.paediatric);
 
 import { decorateHospitalLinksWithMatrixTags } from '../utils/hospitalMatrixTags';
 import hospitalComputeCriteria from '../assets/hospital/hospital_compute_criteria.json';
@@ -2223,7 +2223,6 @@ export function Dashboard() {
 	                                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
 	                                        <button
 	                                            className="btn btn-secondary btn-xs"
-                                                disabled={!isUserInTeam}
 	                                            onClick={(e) => {
 	                                                e.stopPropagation();
 	                                                const baselineDate = ev._baselineDate || null;
@@ -5613,7 +5612,6 @@ export function Dashboard() {
                                                                                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                                                                                         <button
                                                                                             className="btn btn-secondary btn-xs"
-                                                                                            disabled={!isUserInTeam}
                                                                                             onClick={(e) => {
                                                                                                 e.stopPropagation();
                                                                                                 const baselineDate = ev._baselineDate || null;
@@ -5703,7 +5701,7 @@ export function Dashboard() {
                 )}
             </div>
 
-            {/* Forms List */}
+            {/* Recent Surveys section removed from dashboard as requested
             <div className="forms-section">
                 <div className="section-header">
                     <h3>Recent Surveys</h3>
@@ -5776,6 +5774,7 @@ export function Dashboard() {
                     )}
                 </div>
             </div>
+            */}
 
             {/* Dialogs */}
             <Dialog open={showClearConfirm} onClose={() => setShowClearConfirm(false)}>

@@ -806,22 +806,20 @@ export const api = {
         // SURV-MORTUARY / Mortuary sections). Detect and fetch them in one batch.
         try {
             // Build set of IDs already fully resolved via programStageDataElements
-            const resolvedIds = new Set(
-                (metadata.programStageDataElements || []).map(psde => {
-                    const de = psde.dataElement || psde;
-                    return de?.id;
-                }).filter(Boolean)
-            );
+            const resolvedIds = new Set();
+            (metadata.programStageDataElements || []).forEach(psde => {
+                const de = psde.dataElement || psde;
+                if (de && de.id && (de.name || de.displayName || de.formName)) {
+                    resolvedIds.add(de.id);
+                }
+            });
 
             // Collect IDs referenced in sections but NOT resolved yet
             const missingIds = new Set();
             (metadata.programStageSections || []).forEach(section => {
                 (section.dataElements || []).forEach(rawDe => {
                     const id = rawDe.id || rawDe.dataElement?.id;
-                    // A DE is "missing" if it's not resolved, OR if it was returned
-                    // without an optionSet (bare reference)
-                    const hasOptionSet = rawDe.optionSet || rawDe.dataElement?.optionSet;
-                    if (id && (!resolvedIds.has(id) || !hasOptionSet)) {
+                    if (id && !resolvedIds.has(id)) {
                         missingIds.add(id);
                     }
                 });
@@ -830,35 +828,46 @@ export const api = {
             if (missingIds.size > 0) {
                 console.log(`[API] Fetching ${missingIds.size} missing data elements for section hydration...`);
                 const deFields = 'id,formName,displayFormName,name,displayName,shortName,code,description,valueType,aggregationType,lastUpdated,optionSet[id,displayName,options[id,displayName,code,sortOrder]]';
-                const deResponse = await fetch(
-                    `${BASE_URL}/api/dataElements?paging=false&filter=id:in:[${[...missingIds].join(',')}]&fields=${deFields}&_=${Date.now()}`,
-                    { headers: { ...getHeaders(), 'Cache-Control': 'no-cache', Pragma: 'no-cache' }, cache: 'no-store' }
-                );
+                
+                const missingIdsArray = [...missingIds];
+                const chunkSize = 100;
+                const fetchedDEs = [];
 
-                if (deResponse.ok) {
-                    const deData = await deResponse.json();
-                    const fetchedDEs = deData.dataElements || [];
-                    console.log(`[API] Fetched ${fetchedDEs.length} missing data elements.`);
+                for (let i = 0; i < missingIdsArray.length; i += chunkSize) {
+                    const chunk = missingIdsArray.slice(i, i + chunkSize);
+                    const deResponse = await fetch(
+                        `${BASE_URL}/api/dataElements?paging=false&filter=id:in:[${chunk.join(',')}]&fields=${deFields}&_=${Date.now()}`,
+                        { headers: { ...getHeaders(), 'Cache-Control': 'no-cache', Pragma: 'no-cache' }, cache: 'no-store' }
+                    );
 
-                    // Merge into programStageDataElements so the transformer sees them
-                    if (!metadata.programStageDataElements) metadata.programStageDataElements = [];
-                    fetchedDEs.forEach(de => {
-                        if (!resolvedIds.has(de.id)) {
-                            metadata.programStageDataElements.push({ dataElement: de });
-                        } else {
-                            // Update existing entry with richer data (has optionSet)
-                            const existing = metadata.programStageDataElements.find(
-                                psde => (psde.dataElement?.id || psde.id) === de.id
-                            );
-                            if (existing && !existing.dataElement?.optionSet && de.optionSet) {
-                                if (existing.dataElement) existing.dataElement = de;
-                                else existing.optionSet = de.optionSet;
-                            }
+                    if (deResponse.ok) {
+                        const deData = await deResponse.json();
+                        if (deData.dataElements) {
+                            fetchedDEs.push(...deData.dataElements);
                         }
-                    });
-                } else {
-                    console.warn('[API] Failed to fetch missing data elements:', deResponse.status);
+                    } else {
+                        console.warn(`[API] Failed to fetch chunk of missing data elements (${i} to ${i + chunk.length}):`, deResponse.status);
+                    }
                 }
+
+                console.log(`[API] Fetched ${fetchedDEs.length} missing data elements.`);
+
+                // Merge into programStageDataElements so the transformer sees them
+                if (!metadata.programStageDataElements) metadata.programStageDataElements = [];
+                fetchedDEs.forEach(de => {
+                    if (!resolvedIds.has(de.id)) {
+                        metadata.programStageDataElements.push({ dataElement: de });
+                    } else {
+                        // Update existing entry with richer data (has optionSet)
+                        const existing = metadata.programStageDataElements.find(
+                            psde => (psde.dataElement?.id || psde.id) === de.id
+                        );
+                        if (existing && !existing.dataElement?.optionSet && de.optionSet) {
+                            if (existing.dataElement) existing.dataElement = de;
+                            else existing.optionSet = de.optionSet;
+                        }
+                    }
+                });
             }
         } catch (err) {
             console.warn('[API] Second-pass DE fetch failed (non-fatal):', err);
@@ -1480,37 +1489,40 @@ export const api = {
         }).catch(() => []);
         
         // 2. Supplement with modern tracker events API (handles new 'detached' self-assessments)
-        try {
-            const trackerParams = [
-                'paging=false',
-                `program=${programId}`,
-                `programStage=${stageId}`,
-                `orgUnit=${orgUnitId}`,
-                'ouMode=DESCENDANTS',
-                'order=occurredAt:desc',
-                `fields=${fields.replace('eventDate', 'occurredAt').replace('trackedEntityInstance', 'trackedEntity')}`
-            ].join('&');
-            const trackerResp = await fetch(`${BASE_URL}/api/tracker/events?${trackerParams}`, { headers: getHeaders() });
-            if (trackerResp.ok) {
-                const trackerData = await trackerResp.json();
-                const trackerInstances = (trackerData.instances || trackerData.events || []).map(ev => ({
-                    ...ev,
-                    event: ev.event || ev.instance,
-                    eventDate: ev.occurredAt || ev.eventDate,
-                    trackedEntityInstance: ev.trackedEntity || ev.trackedEntityInstance
-                }));
-                
-                // Merge and deduplicate by event ID
-                const seenIds = new Set(events.map(e => e.event));
-                trackerInstances.forEach(ev => {
-                    if (!seenIds.has(ev.event)) {
-                        events.push(ev);
-                        seenIds.add(ev.event);
-                    }
-                });
+        // Only run if stageId is specified to prevent massive unpaged queries across all stages
+        if (stageId) {
+            try {
+                const trackerParams = [
+                    'paging=false',
+                    `program=${programId}`,
+                    `programStage=${stageId}`,
+                    `orgUnit=${orgUnitId}`,
+                    'ouMode=DESCENDANTS',
+                    'order=occurredAt:desc',
+                    `fields=${fields.replace('eventDate', 'occurredAt').replace('trackedEntityInstance', 'trackedEntity')}`
+                ].join('&');
+                const trackerResp = await fetch(`${BASE_URL}/api/tracker/events?${trackerParams}`, { headers: getHeaders() });
+                if (trackerResp.ok) {
+                    const trackerData = await trackerResp.json();
+                    const trackerInstances = (trackerData.instances || trackerData.events || []).map(ev => ({
+                        ...ev,
+                        event: ev.event || ev.instance,
+                        eventDate: ev.occurredAt || ev.eventDate,
+                        trackedEntityInstance: ev.trackedEntity || ev.trackedEntityInstance
+                    }));
+                    
+                    // Merge and deduplicate by event ID
+                    const seenIds = new Set(events.map(e => e.event));
+                    trackerInstances.forEach(ev => {
+                        if (!seenIds.has(ev.event)) {
+                            events.push(ev);
+                            seenIds.add(ev.event);
+                        }
+                    });
+                }
+            } catch (err) {
+                console.warn('[getSurveyEventsForOrgUnit] Tracker supplement failed', err);
             }
-        } catch (err) {
-            console.warn('[getSurveyEventsForOrgUnit] Tracker supplement failed', err);
         }
 
         return events;

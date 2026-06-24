@@ -1,0 +1,182 @@
+Found 9040 hospital data elements:
+
+ID: dWZwUVrSWJk
+  Code: 8239-HOSPITAL_43.5.1.6
+  Name: SURV_HOSP_8239-Patients assessed as being at nutritional risk receive nutrition therapy.
+  DisplayName: SURV_HOSP_8239-Patients assessed as being at nutritional risk receive nutrition therapy.
+  FormName: None
+--------------------------------------------------
+ID: NyEdAMOEKqW
+  Code: 818-HOSPITAL_8.2.1
+  Name: SURV_HOSP_818-Clinical practice guidelines are used to guide clinical care.
+  DisplayName: SURV_HOSP_818-Clinical practice guidelines are used to guide clinical care.
+  FormName: None
+--------------------------------------------------
+ID: SwpCZ5nqtT8
+  Code: 1943-HOSPITAL_13.1.2-comments
+  Name: SURV_HOSP_1943-The delivery of services is integrated and coordinated amongst care providers.-comments
+  DisplayName: SURV_HOSP_1943-The delivery of services is integrated and coordinated amongst care providers.-comments
+  FormName: None
+--------------------------------------------------
+ID: fTpLxqcz7Dg
+  Code: 5257-HOSPITAL_24.11.6.1-comments
+  Name: SURV_HOSP_5257-There is a documented process to appropriately discharge patients.-comments
+  DisplayName: SURV_HOSP_5257-There is a documented process to appropriately discharge patients.-comments
+  FormName: None
+--------------------------------------------------
+ID: yGDoXIfyYhR
+  Code: 1883-HOSPITAL_12.9.4.4-comments
+  Name: SURV_HOSP_1883-A discharge summary which includes at least items a) to g) in the intent statement is written by the medical practitioner when each patient is discharged.-comments
+  DisplayName: SURV_HOSP_1883-A discharge summary which includes at least items a) to g) in the intent statement is written by the medical practitioner when each patient is discharged.-comments
+  FormName: None
+--------------------------------------------------
+ID: l4lcvd6VnAp
+  Code: 7342-HOSPITAL_44.2.3.4-comments
+  Name: SURV_HOSP_7342-The name of the medical practitioner responsible for the procedure is documented.-comments
+  DisplayName: SURV_HOSP_7342-The name of the medical practitioner responsible for the procedure is documented.-comments
+  FormName: None
+--------------------------------------------------
+ID: bNUUjv1DvoP
+  Code: 1700-HOSPITAL_12.4.3.3-comments
+  Name: SURV_HOSP_1700-Patient needs are prioritised on the basis of assessment results.-comments
+  DisplayName: SURV_HOSP_1700-Patient needs are prioritised on the basis of assessment results.-comments
+  FormName: None
+--------------------------------------------------
+ID: ojeTJOQ14Zc
+  Code: 6012-HOSPITAL_31.6.1
+  Name: SURV_HOSP_6012-The department/service implements infection prevention and control processes.
+  DisplayName: SURV_HOSP_6012-The department/service implements infection prevention and control processes.
+  FormName: None
+--------------------------------------------------
+ID: woQRkxuyBEF
+  Code: 1170-HOSPITAL_41.7.1.2
+  Name: SURV_HOSP_1170-The department participates in the overall programme for quality management and improvement of infection control.
+  DisplayName: SURV_HOSP_1170-The department participates in the overall programme for quality management and improvement of infection control.
+  FormName: None
+--------------------------------------------------
+ID: fSr3A8NDRVC
+  Code: 2386-HOSPITAL_14.5.3.1
+  Name: SURV_HOSP_2386-There is a documented process for obtaining informed consent.
+  DisplayName: SURV_HOSP_2386-There is a documented process for obtaining informed consent.
+  FormName: None
+--------------------------------------------------
+ID: uNc6GpNm31n
+  Code: 7260-HOSPITAL_39.11.1.7-comments
+  Name: SURV_HOSP_7260-All personnel are trained regarding their role in providing a safe and secure patient care facility.-comments
+  DisplayName: SURV_HOSP_7260-All personnel are trained regarding their role in providing a safe and secure patient care facility.-comments
+  FormName: None
+--------------------------------------------------
+ID: kRMuMt07jzS
+  Code: 7606-HOSPITAL_40.9.1.2-comments
+  Name: SURV_HOSP_7606-There are processes to ensure that care is respectful of the patient's personal values and beliefs.-comments
+  DisplayName: SURV_HOSP_7606-There are processes to ensure that care is respectful of the patient's personal values and beliefs.-comments
+  FormName: None
+--------------------------------------------------
+ID: XAooXoclqvM
+  Code: 1194-HOSPITAL_41.8.1.6-comments
+  Name: SURV_HOSP_1194-All personnel are trained regarding their role in providing a safe and secure patient care facility.-comments
+  DisplayName: SURV_HOSP_1194-All personnel are trained regarding their role in providing a safe and secure patient care facility.-comments
+  FormName: None
+--------------------------------------------------
+ID: HkrMN9n7lUj
+  Code: 7974-HOSPITAL_42.9.1.3-comments
+  Name: SURV_HOSP_7974-Measures are taken to protect the patient's privacy, person and possessions.-comments
+  DisplayName: SURV_HOSP_7974-Measures are taken to protect the patient's privacy, person and possessions.-comments
+  FormName: None
+--------------------------------------------------
+ID: YLMCAkfqXvx
+  Code: 8237-HOSPITAL_43.5.1.5
+  Name: SURV_HOSP_8237-When families provide food, they are educated about the patient's dietary limitations.
+  DisplayName: SURV_HOSP_8237-When families provide food, they are educated about the patient's dietary limitations.
+  FormName: None
+--------------------------------------------------
+ID: UnmIchFy0Wd
+  Code: 6660-HOSPITAL_37.3.1.3-comments
+  Name: SURV_HOSP_6660-Policies and procedures are compiled into a comprehensive manual, which is indexed and easily accessible to all staff members.-comments
+  DisplayName: SURV_HOSP_6660-Policies and procedures are compiled into a comprehensive manual, which is indexed and easily accessible to all staff members.-comments
+  FormName: None
+--------------------------------------------------
+ID: BcEjMIvVgnb
+  Code: 2402-HOSPITAL_14.5.4.4
+  Name: SURV_HOSP_2402-The name of the surgeon and the names of other personnel as required by law are documented.
+  DisplayName: SURV_HOSP_2402-The name of the surgeon and the names of other personnel as required by law are documented.
+  FormName: None
+--------------------------------------------------
+ID: cFNO6kf2ihc
+  Code: 2564-HOSPITAL_14.11.1.2
+  Name: SURV_HOSP_2564-Measures are taken to protect the patient's privacy, person and possessions.
+  DisplayName: SURV_HOSP_2564-Measures are taken to protect the patient's privacy, person and possessions.
+  FormName: None
+--------------------------------------------------
+ID: ohLrWkmwJ0o
+  Code: 5465-HOSPITAL_26.5.1-comments
+  Name: SURV_HOSP_5465-Food handlers maintain a hygienic food preparation environment.-comments
+  DisplayName: SURV_HOSP_5465-Food handlers maintain a hygienic food preparation environment.-comments
+  FormName: None
+--------------------------------------------------
+ID: To1jp2tGqEU
+  Code: 623-HOSPITAL_6.2.2.5-comments
+  Name: SURV_HOSP_623-Where technical ICT support is not available at facility level, an arrangement is in place to obtain such support from outside.-comments
+  DisplayName: SURV_HOSP_623-Where technical ICT support is not available at facility level, an arrangement is in place to obtain such support from outside.-comments
+  FormName: None
+--------------------------------------------------
+ID: JqGRN2zmtpR
+  Code: 1212-HOSPITAL_10.9.2.3
+  Name: SURV_HOSP_1212-Follow-up care based on the findings of investigations/consultations performed outside the organisation are noted in the patient record.
+  DisplayName: SURV_HOSP_1212-Follow-up care based on the findings of investigations/consultations performed outside the organisation are noted in the patient record.
+  FormName: None
+--------------------------------------------------
+ID: PkxLVdoFCK3
+  Code: 2347-HOSPITAL_14.4.2.9
+  Name: SURV_HOSP_2347-The initial assessment includes maternal and foetal examination.
+  DisplayName: SURV_HOSP_2347-The initial assessment includes maternal and foetal examination.
+  FormName: None
+--------------------------------------------------
+ID: WcJg4CY3sle
+  Code: 2428-HOSPITAL_14.6.1-comments
+  Name: SURV_HOSP_2428-Medication use in the organisation complies with applicable laws and regulations.-comments
+  DisplayName: SURV_HOSP_2428-Medication use in the organisation complies with applicable laws and regulations.-comments
+  FormName: None
+--------------------------------------------------
+ID: Gu3orGwGDlb
+  Code: 2210-HOSPITAL_13.10.1.4-comments
+  Name: SURV_HOSP_2210-A documentation audit system is in place.-comments
+  DisplayName: SURV_HOSP_2210-A documentation audit system is in place.-comments
+  FormName: None
+--------------------------------------------------
+ID: aCqsmGoZ8VJ
+  Code: 3924-HOSPITAL_19.6.1.1-comments
+  Name: SURV_HOSP_3924-The department conducts on-going monitoring of risks through documented assessments as part of organisational risk management processes.-comments
+  DisplayName: SURV_HOSP_3924-The department conducts on-going monitoring of risks through documented assessments as part of organisational risk management processes.-comments
+  FormName: None
+--------------------------------------------------
+ID: Eotm7Bf3vMA
+  Code: 4968-HOSPITAL_24.2.1.7-comments
+  Name: SURV_HOSP_4968-Quiet and private areas are available for waiting relatives and grieving or otherwise distressed relatives or carers.-comments
+  DisplayName: SURV_HOSP_4968-Quiet and private areas are available for waiting relatives and grieving or otherwise distressed relatives or carers.-comments
+  FormName: None
+--------------------------------------------------
+ID: HBYOtDjdg3v
+  Code: 6971-HOSPITAL_39.3.1.7
+  Name: SURV_HOSP_6971-Electricity and water is available in accordance with the policies and arrangements of the organisation.
+  DisplayName: SURV_HOSP_6971-Electricity and water is available in accordance with the policies and arrangements of the organisation.
+  FormName: None
+--------------------------------------------------
+ID: CkywQKTRUCV
+  Code: 4350-HOSPITAL_22.6.1.4-comments
+  Name: SURV_HOSP_4350-Waiting times from triage categorisation to initial assessment are monitored.-comments
+  DisplayName: SURV_HOSP_4350-Waiting times from triage categorisation to initial assessment are monitored.-comments
+  FormName: None
+--------------------------------------------------
+ID: uJCtl8X3A3c
+  Code: 5671-HOSPITAL_28.1
+  Name: SURV_HOSP_5671-28.1 Management of the Service --
+  DisplayName: SURV_HOSP_5671-28.1 Management of the Service --
+  FormName: None
+--------------------------------------------------
+ID: GrdH3stPx8N
+  Code: 7279-HOSPITAL_44.1.2.5-comments
+  Name: SURV_HOSP_7279-Guidelines are reviewed on a regular basis and updated when necessary.-comments
+  DisplayName: SURV_HOSP_7279-Guidelines are reviewed on a regular basis and updated when necessary.-comments
+  FormName: None
+--------------------------------------------------

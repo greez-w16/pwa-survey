@@ -1,595 +1,591 @@
 ﻿{
-    "occupational_health":  [
-                                {
-                                    "criteria":  "1.2.1.3",
-                                    "description":  "The occupational healthserviceis licensed in terms of relevant legislation for the level and type of services provided.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.2.1.4",
-                                    "description":  "The manager ensures that there is a system in place to monitor the implementation of applicable laws and regulations.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.3",
-                                                            "1.2.1.5",
-                                                            "1.2.1.6",
-                                                            "1.4.2.2",
-                                                            "1.5.2.2",
-                                                            "1.7.2.8",
-                                                            "1.7.3.1",
-                                                            "1.7.5.2",
-                                                            "1.7.5.8",
-                                                            "1.8.1.6",
-                                                            "2.2.1.4",
-                                                            "2.4.1.1",
-                                                            "2.4.1.6",
-                                                            "3.7.1.4",
-                                                            "3.7.1.5",
-                                                            "3.7.1.8",
-                                                            "3.7.1.10",
-                                                            "3.7.3.2",
-                                                            "3.7.3.3",
-                                                            "3.7.3.4",
-                                                            "3.7.3.5",
-                                                            "3.7.3.6",
-                                                            "3.8.1.1",
-                                                            "3.8.4.2"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.2.1.5",
-                                    "description":  "There is evidence of response to any reports from inspecting and regulatory authorities.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4",
-                                                            "1.5.3.2",
-                                                            "1.7.5.2"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.2.1.6",
-                                    "description":  "The manager implements processes to manage and control human, financial and other resources.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4",
-                                                            "1.4.1.1",
-                                                            "1.4.1.3",
-                                                            "1.4.2.1",
-                                                            "1.4.2.4",
-                                                            "1.4.3.1",
-                                                            "1.4.3.4",
-                                                            "1.5.1.1",
-                                                            "1.5.2.4",
-                                                            "1.5.2.1",
-                                                            "1.5.2.4",
-                                                            "1.5.3.1",
-                                                            "1.5.3.6",
-                                                            "1.6.1.1",
-                                                            "1.6.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.2.3.2",
-                                    "description":  "Information on services, hours of operation and processes for obtaining care is provided to services in the community who work in collaboration with the hospice and palliative care service.",
-                                    "linked_criteria":  [
-                                                            "2.1.1.1",
-                                                            "2.1.1.2",
-                                                            "2.1.1.3"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.1.1",
-                                    "description":  "There are documented processes for staffing the practice.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.1.2",
-                                    "description":  "The desired education, qualifications, skills and knowledge are defined for personnel.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.1.3",
-                                    "description":  "The processes include measures to improve personnel retention.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.2.1",
-                                    "description":  "There is implementation of a reliable, documented process for evaluating and verifying the credentials of all health professionals",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.2.2",
-                                    "description":  "Personnel files contain copies of qualifications and licences/registration from the relevant authority for CRITICAL all health professionals.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6",
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.2.3",
-                                    "description":  "There is a system to track the annual registration of all health professionals.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.2.4",
-                                    "description":  "All personnel with direct contact with the public have had a police check, a copy of which is kept in their personnel file.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.3.1",
-                                    "description":  "There are documented processes for orientation of personnel to the practice.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.3.2",
-                                    "description":  "The practice supports continuing education for its clinical personnel and maintains records of this in personnel files.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6",
-                                                            "1.7.5.8",
-                                                            "1.7.6.3",
-                                                            "1.8.3.4",
-                                                            "3.6.2.2"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.3.3",
-                                    "description":  "There is a development strategy for the practice that ensures that the practice manager and administrative personnel receive the training required to fulfil their responsibilities.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.4.3.4",
-                                    "description":  "Personnel members are informed of opportunities to participate in advanced education, training, research, and other experiences.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.1.1",
-                                    "description":  "A designated person is responsible for the implementation and maintenance of a financial strategy",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.1.2",
-                                    "description":  "The designated person is suitably qualified and/or experienced in accounting and financial management.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.1.3",
-                                    "description":  "The responsibilities of designated person include ensuring that policies and procedures for all financial functions are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.2.1",
-                                    "description":  "There is a current budget for the practice.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.2.2",
-                                    "description":  "A report is produced at least annually, setting out the financial position to date.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6",
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.2.3",
-                                    "description":  "There is a mechanism for establishing the Reason for budget variation in either income or expenditure.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.2.4",
-                                    "description":  "Capital investment proposals are subject to unanimous agreement among the partners or are agreed according to a voting system acceptable to all partners in the practice.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.3.1",
-                                    "description":  "The practice has documented ethical and legal policies and procedures for the financial management of the practice that are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.3.2",
-                                    "description":  "Internal and external financial audit systems which meet audit requirements are maintained.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6",
-                                                            "1.2.1.5"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.3.3",
-                                    "description":  "Annual audited financial statements are produced within the required time frame.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.3.4",
-                                    "description":  "There is a capital asset register, which is routinely maintained.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.3.5",
-                                    "description":  "Assets are insured.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.5.3.6",
-                                    "description":  "All health professionals provide evidence of professional indemnity insurance.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.6.1.1",
-                                    "description":  "An individual is designated to control the ordering, storage, distribution and control of equipment and supplies used in the practice.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.6.1.2",
-                                    "description":  "Policies and procedures relating to all aspects Of provisioning/supply chain management are Implemented.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.6.1.3",
-                                    "description":  "Secure storage facilities are available.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.6.1.4",
-                                    "description":  "Prescription pads, letterheads, investigation request forms, administrative records and other official documents are accessible only to authorised persons.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.7.2.8",
-                                    "description":  "The practice reports on notifiable diseases to appropriate external public health agencies.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.7.3.1",
-                                    "description":  "The practice has a waste management policy that is consistent with country-specific laws and regulations and includes the safe handling, storing and disposing of all different types of waste.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.7.5.2",
-                                    "description":  "Documented certification is available from the relevant authority to show that the facility complies with applicable laws and regulations in relation to fire safety (fire clearance Certificate).",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4",
-                                                            "1.2.1.5"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.7.5.8",
-                                    "description":  "Annual personnel training in fire prevention and evacuation procedures is documented.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4",
-                                                            "1.4.3.2",
-                                                            "1.7.5.1"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.7.6.3",
-                                    "description":  "Documented evidence is available to show that the personnel participate in a rehearsal of theemergency plan at least annually.",
-                                    "linked_criteria":  [
-                                                            "1.7.5.1"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.8.1.6",
-                                    "description":  "Documented procedures which outline the processes to provide required information to individuals CRITICAL and agencies outside the practice when required by laws or regulations are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "1.8.3.4",
-                                    "description":  "Personnel are trained in the implementation of quality management processes.",
-                                    "linked_criteria":  [
-                                                            "1.4.3.2"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "2.2.1.4",
-                                    "description":  "The supply of medical equipment is adequate to meet the needs of the practice",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "2.4.1.1",
-                                    "description":  "Policies and procedures for the storage, retrieval, retention, destruction and confidentiality and safety of employee/client records and personal information are implemented",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "2.4.1.6",
-                                    "description":  "The retention process provides the necessary confidentiality and security.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.6.2.2",
-                                    "description":  "All practice personnel are trained in basic resuscitation techniques at least every two years, with records of their attendance at such training.",
-                                    "linked_criteria":  [
-                                                            "1.4.3.2"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.7.1.4",
-                                    "description":  "Dispensed medication is securely and legibly labelled with relevant information as required by practice policy and country specific legislation.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.7.1.5",
-                                    "description":  "A register is maintained of all medication dispensed.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.7.1.8",
-                                    "description":  "Controlled medication is prescribed and dispensed in accordance with legislation and practice policy.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.7.1.10",
-                                    "description":  "Prescriptions conform to all legal requirements.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.7.3.2",
-                                    "description":  "Prescriptions conform to all legal requirements.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.7.3.4",
-                                    "description":  "Controlled drugs are stored in suitable facilities which include but are not limited to: lockable storage facilities, ceiling cages, burglar guards and alarm systems with keypads.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.7.3.5",
-                                    "description":  "Controlled drugs are accurately accounted for in a specific register which is updated contemporaneously and available for inspection.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.7.3.6",
-                                    "description":  "Controlled drugs that have expired are disposed of in accordance with legal requirements.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.8.1.1",
-                                    "description":  "Patient and family rights are identified in a policy and documented in accordance with relevant and current laws, charters and regulations.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                },
-                                {
-                                    "criteria":  "3.8.4.2",
-                                    "description":  "The practice has a documented policy outlining the procedure for obtaining consent in the case of patients who are unable to grant consent for themselves by way of age or mental/physical incapacity, which is in accordance with the relevant laws and regulations.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ]
-                                }
-                            ]
+    "occupational_health": [
+        {
+            "criteria": "1.2.1.3",
+            "description": "The occupational healthserviceis licensed in terms of relevant legislation for the level and type of services provided.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  Documented evidence is required.",
+            "guidelines": "CRITICAL  Documented evidence is required."
+        },
+        {
+            "criteria": "1.2.1.4",
+            "description": "The manager ensures that there is a system in place to monitor the implementation of applicable laws and regulations.",
+            "linked_criteria": [
+                "1.2.1.3",
+                "1.2.1.5",
+                "1.2.1.6",
+                "1.4.2.2",
+                "1.5.2.2",
+                "1.7.2.8",
+                "1.7.3.1",
+                "1.7.5.2",
+                "1.7.5.8",
+                "1.8.1.6",
+                "2.2.1.4",
+                "2.4.1.1",
+                "2.4.1.6",
+                "3.7.1.4",
+                "3.7.1.5",
+                "3.7.1.8",
+                "3.7.1.10",
+                "3.7.3.2",
+                "3.7.3.3",
+                "3.7.3.4",
+                "3.7.3.5",
+                "3.7.3.6",
+                "3.8.1.1",
+                "3.8.4.2"
+            ],
+            "root": [],
+            "guideline": "This criterion will be scored compliant by default, although a PC rating is given whenever there is definite evidence of non-adherence to any legal requirement. In these cases, the transgression needs to be recorded in detail to motivate for the PC rating and it should be based on accurate facts. Common examples of non-conformance with legal requirements include the following deficiencies: The required certificates are not available, for example, fire clearance certificates, electrical installation certificates, commissioning certificates (for example, ethylene oxide sterilisers), pressure test certificates for vessels under pressure Internal/external financial audits are not conducted Nurses transcribe doctors’ prescriptions and/or dispense medication Pharmaceutical items are incorrectly labelled Proof of current registration of professional personnel with the relevant councils is not available In order to demonstrate compliance, occupational health services may wish to compile a template listing the criteria requiring demonstration of compliance with country-specific legislation and regulations against the relevant national acts, regulations, etc. applicable to the criterion.",
+            "guidelines": "This criterion will be scored compliant by default, although a PC rating is given whenever there is definite evidence of non-adherence to any legal requirement. In these cases, the transgression needs to be recorded in detail to motivate for the PC rating and it should be based on accurate facts. Common examples of non-conformance with legal requirements include the following deficiencies: The required certificates are not available, for example, fire clearance certificates, electrical installation certificates, commissioning certificates (for example, ethylene oxide sterilisers), pressure test certificates for vessels under pressure Internal/external financial audits are not conducted Nurses transcribe doctors’ prescriptions and/or dispense medication Pharmaceutical items are incorrectly labelled Proof of current registration of professional personnel with the relevant councils is not available In order to demonstrate compliance, occupational health services may wish to compile a template listing the criteria requiring demonstration of compliance with country-specific legislation and regulations against the relevant national acts, regulations, etc. applicable to the criterion."
+        },
+        {
+            "criteria": "1.2.1.5",
+            "description": "There is evidence of response to any reports from inspecting and regulatory authorities.",
+            "linked_criteria": [
+                "1.2.1.4",
+                "1.5.3.2",
+                "1.7.5.2"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  This requires documented evidence for whatever inspections may have been conducted. Examples may include inspections by the following authorities The local fire authority for fire clearance purposes The national authority responsible for radiation safety aspects The national authority responsible for health and safety compliance The national authority responsible for financial compliance The national authority responsible for maintenance requirements such as boiler inspections and pressure tests, autoclave pressure tests The local authority responsible for testing of water supplies The relevant professional bodies where student training is provided Licensing authorities for facilities such as the pharmacy, etc. Licensing authorities for facilities. Immigration requirements for non-resident",
+            "guidelines": "CRITICAL  This requires documented evidence for whatever inspections may have been conducted. Examples may include inspections by the following authorities The local fire authority for fire clearance purposes The national authority responsible for radiation safety aspects The national authority responsible for health and safety compliance The national authority responsible for financial compliance The national authority responsible for maintenance requirements such as boiler inspections and pressure tests, autoclave pressure tests The local authority responsible for testing of water supplies The relevant professional bodies where student training is provided Licensing authorities for facilities such as the pharmacy, etc. Licensing authorities for facilities. Immigration requirements for non-resident"
+        },
+        {
+            "criteria": "1.2.1.6",
+            "description": "The manager implements processes to manage and control human, financial and other resources.",
+            "linked_criteria": [
+                "1.2.1.4",
+                "1.4.1.1",
+                "1.4.1.3",
+                "1.4.2.1",
+                "1.4.2.4",
+                "1.4.3.1",
+                "1.4.3.4",
+                "1.5.1.1",
+                "1.5.2.4",
+                "1.5.2.1",
+                "1.5.2.4",
+                "1.5.3.1",
+                "1.5.3.6",
+                "1.6.1.1",
+                "1.6.1.4"
+            ],
+            "root": [],
+            "guideline": "The criterion will be scored after the final assessment of Management and Leadership criteria and will be scored according to the findings of financial and human resource management and other criteria dealing with adequate supply and effective management of resources (medication, consumables, equipment etc.).  Linked criteria: 1.4.1.1-  1.4.1.3 1.4.2.1-  1.4.2.4 1.4.3.1-  1.4.3.4 1.5.1.1-  1.5.2.4 1.5.2.1- 1.5.2.4 1.5.3.1- 1.5.3.6 1.6.1.1- 1.6.1.4",
+            "guidelines": "The criterion will be scored after the final assessment of Management and Leadership criteria and will be scored according to the findings of financial and human resource management and other criteria dealing with adequate supply and effective management of resources (medication, consumables, equipment etc.).  Linked criteria: 1.4.1.1-  1.4.1.3 1.4.2.1-  1.4.2.4 1.4.3.1-  1.4.3.4 1.5.1.1-  1.5.2.4 1.5.2.1- 1.5.2.4 1.5.3.1- 1.5.3.6 1.6.1.1- 1.6.1.4"
+        },
+        {
+            "criteria": "1.2.3.2",
+            "description": "Information on services, hours of operation and processes for obtaining care is provided to services in the community who work in collaboration with the hospice and palliative care service.",
+            "linked_criteria": [
+                "2.1.1.1",
+                "2.1.1.2",
+                "2.1.1.3"
+            ],
+            "root": [],
+            "guideline": "This information needs to be provided for example, to community nursing teams, step down care, allied health professionals etc. Compliance can be demonstrated by for example, email correspondence with the various services or by providing information pamphlets about the practice to these services.",
+            "guidelines": "This information needs to be provided for example, to community nursing teams, step down care, allied health professionals etc. Compliance can be demonstrated by for example, email correspondence with the various services or by providing information pamphlets about the practice to these services."
+        },
+        {
+            "criteria": "1.4.1.1",
+            "description": "There are documented processes for staffing the practice.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Compliance with this criterion will require the practitioner to show documented evidence that clinical work load and acuity were studied and considered when planning the staffing for the occupational health service. This must be evident for both the number of personnel required as well as their qualifications.",
+            "guidelines": "Compliance with this criterion will require the practitioner to show documented evidence that clinical work load and acuity were studied and considered when planning the staffing for the occupational health service. This must be evident for both the number of personnel required as well as their qualifications."
+        },
+        {
+            "criteria": "1.4.1.2",
+            "description": "The desired education, qualifications, skills and knowledge are defined for personnel.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "These requirements must be discussed and agreed by all relevant personnel during the recruitment process and form part of the position description.",
+            "guidelines": "These requirements must be discussed and agreed by all relevant personnel during the recruitment process and form part of the position description."
+        },
+        {
+            "criteria": "1.4.1.3",
+            "description": "The processes include measures to improve personnel retention.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Retention of personnel as opposed to the recruitment of new personnel is more cost effective and more likely to result in better clinical care due to improved continuity of care and service provision and the accumulation of experience. It is therefore strategically important for retention to be considered as part of the recruitment process. As an additional benefit, measures taken to improve retention are likely to improve personnel satisfaction, and satisfied personnel provide better services. For an occupational health service to be compliant with this criterion evidence must be provided of at least a personnel satisfaction survey.",
+            "guidelines": "Retention of personnel as opposed to the recruitment of new personnel is more cost effective and more likely to result in better clinical care due to improved continuity of care and service provision and the accumulation of experience. It is therefore strategically important for retention to be considered as part of the recruitment process. As an additional benefit, measures taken to improve retention are likely to improve personnel satisfaction, and satisfied personnel provide better services. For an occupational health service to be compliant with this criterion evidence must be provided of at least a personnel satisfaction survey."
+        },
+        {
+            "criteria": "1.4.2.1",
+            "description": "There is implementation of a reliable, documented process for evaluating and verifying the credentials of all health professionals",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "This can be achieved, for example, by having a standardised checklist of requirements that must be verified. This should include reference checks. The completed document can then be retained in the employee/client's personnel file. Compliance will be verified during an audit of the personnel files of various categories of professional personnel.",
+            "guidelines": "This can be achieved, for example, by having a standardised checklist of requirements that must be verified. This should include reference checks. The completed document can then be retained in the employee/client's personnel file. Compliance will be verified during an audit of the personnel files of various categories of professional personnel."
+        },
+        {
+            "criteria": "1.4.2.2",
+            "description": "Personnel files contain copies of qualifications and licences/registration from the relevant authority for CRITICAL all health professionals.",
+            "linked_criteria": [
+                "1.2.1.6",
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  Copies of all the relevant original degrees/diplomas/certificates must be available, as well as evidence of registration with the relevant registration bodies. Compliance will be verified during an audit of the personnel files.",
+            "guidelines": "CRITICAL  Copies of all the relevant original degrees/diplomas/certificates must be available, as well as evidence of registration with the relevant registration bodies. Compliance will be verified during an audit of the personnel files."
+        },
+        {
+            "criteria": "1.4.2.3",
+            "description": "There is a system to track the annual registration of all health professionals.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "The system must reflect the date that each category of health professional's licence is due for renewal and document that the original, renewed licence has been seen.",
+            "guidelines": "The system must reflect the date that each category of health professional's licence is due for renewal and document that the original, renewed licence has been seen."
+        },
+        {
+            "criteria": "1.4.2.4",
+            "description": "All personnel with direct contact with the public have had a police check, a copy of which is kept in their personnel file.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Police checks are repeated every 3 years or as appropriate. Compliance will be verified during an audit of the personnel file.",
+            "guidelines": "Police checks are repeated every 3 years or as appropriate. Compliance will be verified during an audit of the personnel file."
+        },
+        {
+            "criteria": "1.4.3.1",
+            "description": "There are documented processes for orientation of personnel to the practice.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "This includes general orientation and position-specific orientation as discussed in the standard intent above.",
+            "guidelines": "This includes general orientation and position-specific orientation as discussed in the standard intent above."
+        },
+        {
+            "criteria": "1.4.3.2",
+            "description": "The practice supports continuing education for its clinical personnel and maintains records of this in personnel files.",
+            "linked_criteria": [
+                "1.2.1.6",
+                "1.7.5.8",
+                "1.7.6.3",
+                "1.8.3.4",
+                "3.6.2.2"
+            ],
+            "root": [],
+            "guideline": "This refers specifically to professional personnel and the requirements for continued registration with the relevant professional bodies, where applicable. Management must have a clear strategy for assisting professional personnel to maintain their continued registration.",
+            "guidelines": "This refers specifically to professional personnel and the requirements for continued registration with the relevant professional bodies, where applicable. Management must have a clear strategy for assisting professional personnel to maintain their continued registration."
+        },
+        {
+            "criteria": "1.4.3.3",
+            "description": "There is a development strategy for the practice that ensures that the practice manager and administrative personnel receive the training required to fulfil their responsibilities.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "This training could include billing, medical aid codes and triaging, (which is particularly important when administrative personnel are responsible for the initial assessment of patients in the waiting room.",
+            "guidelines": "This training could include billing, medical aid codes and triaging, (which is particularly important when administrative personnel are responsible for the initial assessment of patients in the waiting room."
+        },
+        {
+            "criteria": "1.4.3.4",
+            "description": "Personnel members are informed of opportunities to participate in advanced education, training, research, and other experiences.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Compliance will be verified during an audit of the personnel files of various categories of personnel or other training records. Personnel members may also be interviewed.",
+            "guidelines": "Compliance will be verified during an audit of the personnel files of various categories of personnel or other training records. Personnel members may also be interviewed."
+        },
+        {
+            "criteria": "1.5.1.1",
+            "description": "A designated person is responsible for the implementation and maintenance of a financial strategy",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "This requires that an individual in the occupational health service has the officially assigned duties of overseeing and taking responsibility for all aspects of financial management. This may be the occupational health service manager, a financial manager or a shared responsibility between occupational health service manager and a financial officer.",
+            "guidelines": "This requires that an individual in the occupational health service has the officially assigned duties of overseeing and taking responsibility for all aspects of financial management. This may be the occupational health service manager, a financial manager or a shared responsibility between occupational health service manager and a financial officer."
+        },
+        {
+            "criteria": "1.5.1.2",
+            "description": "The designated person is suitably qualified and/or experienced in accounting and financial management.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "This criterion will automatically be scored compliant where a solo private practitioner manages the occupational health services' finances. Where a financial manager or financial officer is employed, compliance will be assessed against the requirements set out in the position description.",
+            "guidelines": "This criterion will automatically be scored compliant where a solo private practitioner manages the occupational health services' finances. Where a financial manager or financial officer is employed, compliance will be assessed against the requirements set out in the position description."
+        },
+        {
+            "criteria": "1.5.1.3",
+            "description": "The responsibilities of designated person include ensuring that policies and procedures for all financial functions are implemented.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "This criterion will automatically be scored compliant where a solo private practitioner manages the occupational health services' finances. Where a financial manager or financial officer is employed, policies and procedures must guide their functions.",
+            "guidelines": "This criterion will automatically be scored compliant where a solo private practitioner manages the occupational health services' finances. Where a financial manager or financial officer is employed, policies and procedures must guide their functions."
+        },
+        {
+            "criteria": "1.5.2.1",
+            "description": "There is a current budget for the practice.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "For occupational health services that comprise of more than one practitioner there should be an approved budget available in the management documentation. For occupational health services that comprise of a solo practitioner there should be evidence of an occupational health service budget. The budget must demonstrate allocation of resources. The budget will include, for example, salaries, rent, utility costs (water and electricity), consumable stock etc.",
+            "guidelines": "For occupational health services that comprise of more than one practitioner there should be an approved budget available in the management documentation. For occupational health services that comprise of a solo practitioner there should be evidence of an occupational health service budget. The budget must demonstrate allocation of resources. The budget will include, for example, salaries, rent, utility costs (water and electricity), consumable stock etc."
+        },
+        {
+            "criteria": "1.5.2.2",
+            "description": "A report is produced at least annually, setting out the financial position to date.",
+            "linked_criteria": [
+                "1.2.1.6",
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "This criterion requires that at least the most recent financial report that is prepared annually for submission to the relevant authorities such as Botswana Unified Revenue Service (BURS) must be available during the survey.",
+            "guidelines": "This criterion requires that at least the most recent financial report that is prepared annually for submission to the relevant authorities such as Botswana Unified Revenue Service (BURS) must be available during the survey."
+        },
+        {
+            "criteria": "1.5.2.3",
+            "description": "There is a mechanism for establishing the Reason for budget variation in either income or expenditure.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Evidence should exist in the format in which financial statements are produced. Generally, these statements contain a column/section indicating the variance, i.e. under- or over-expenditure. Evidence showing what is done about this variance (especially over-expenditure), should be available, for example, in the minutes of relevant financial management meetings, personnel meetings or memos.",
+            "guidelines": "Evidence should exist in the format in which financial statements are produced. Generally, these statements contain a column/section indicating the variance, i.e. under- or over-expenditure. Evidence showing what is done about this variance (especially over-expenditure), should be available, for example, in the minutes of relevant financial management meetings, personnel meetings or memos."
+        },
+        {
+            "criteria": "1.5.2.4",
+            "description": "Capital investment proposals are subject to unanimous agreement among the partners or are agreed according to a voting system acceptable to all partners in the practice.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Documented evidence must be provided to demonstrate agreement. This criterion will be scored \"not applicable\" in occupational health services owned by a solo practitioner.",
+            "guidelines": "Documented evidence must be provided to demonstrate agreement. This criterion will be scored \"not applicable\" in occupational health services owned by a solo practitioner."
+        },
+        {
+            "criteria": "1.5.3.1",
+            "description": "The practice has documented ethical and legal policies and procedures for the financial management of the practice that are implemented.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Examples of compliance with this criterion can be found in the policies and procedures for billing or referral to partners within the occupational health service (for example partners in a poly clinic).",
+            "guidelines": "Examples of compliance with this criterion can be found in the policies and procedures for billing or referral to partners within the occupational health service (for example partners in a poly clinic)."
+        },
+        {
+            "criteria": "1.5.3.2",
+            "description": "Internal and external financial audit systems which meet audit requirements are maintained.",
+            "linked_criteria": [
+                "1.2.1.6",
+                "1.2.1.5"
+            ],
+            "root": [],
+            "guideline": "Compliance will be measured in accordance with the national requirements such as Botswana Companies Act.",
+            "guidelines": "Compliance will be measured in accordance with the national requirements such as Botswana Companies Act."
+        },
+        {
+            "criteria": "1.5.3.3",
+            "description": "Annual audited financial statements are produced within the required time frame.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "CRITICAL Compliance will be measured in accordance with the national requirements such as of the Botswana Companies Act.",
+            "guidelines": "CRITICAL Compliance will be measured in accordance with the national requirements such as of the Botswana Companies Act."
+        },
+        {
+            "criteria": "1.5.3.4",
+            "description": "There is a capital asset register, which is routinely maintained.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Documented evidence will be required.",
+            "guidelines": "Documented evidence will be required."
+        },
+        {
+            "criteria": "1.5.3.5",
+            "description": "Assets are insured.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "This includes the occupational health service assets and where applicable the physical structure.",
+            "guidelines": "This includes the occupational health service assets and where applicable the physical structure."
+        },
+        {
+            "criteria": "1.5.3.6",
+            "description": "All health professionals provide evidence of professional indemnity insurance.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Compliance will be measured during the personnel file audit.",
+            "guidelines": "Compliance will be measured during the personnel file audit."
+        },
+        {
+            "criteria": "1.6.1.1",
+            "description": "An individual is designated to control the ordering, storage, distribution and control of equipment and supplies used in the practice.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": []
+        },
+        {
+            "criteria": "1.6.1.2",
+            "description": "Policies and procedures relating to all aspects Of provisioning/supply chain management are Implemented.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "As a minimum, the policies and procedures discussed in a) – d) in the standard intent above should be available, accessible to personnel and implementation should be monitored.",
+            "guidelines": "As a minimum, the policies and procedures discussed in a) – d) in the standard intent above should be available, accessible to personnel and implementation should be monitored."
+        },
+        {
+            "criteria": "1.6.1.3",
+            "description": "Secure storage facilities are available.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "The store must be lockable and exclude any unauthorised entry.",
+            "guidelines": "The store must be lockable and exclude any unauthorised entry."
+        },
+        {
+            "criteria": "1.6.1.4",
+            "description": "Prescription pads, letterheads, investigation request forms, administrative records and other official documents are accessible only to authorised persons.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Compliance will be verified by observation and personnel interviews.",
+            "guidelines": "Compliance will be verified by observation and personnel interviews."
+        },
+        {
+            "criteria": "1.7.2.8",
+            "description": "The practice reports on notifiable diseases to appropriate external public health agencies.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  Documented evidence is required.",
+            "guidelines": "CRITICAL  Documented evidence is required."
+        },
+        {
+            "criteria": "1.7.3.1",
+            "description": "The practice has a waste management policy that is consistent with country-specific laws and regulations and includes the safe handling, storing and disposing of all different types of waste.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "The policy must include all relevant aspects of waste management, for example, identification, colour coding, handling, storage, disposal of etc. with special reference to clinical/healthcare waste, personal protective equipment (PPE), the management of spills and the reporting and investigation of waste related incidents.",
+            "guidelines": "The policy must include all relevant aspects of waste management, for example, identification, colour coding, handling, storage, disposal of etc. with special reference to clinical/healthcare waste, personal protective equipment (PPE), the management of spills and the reporting and investigation of waste related incidents."
+        },
+        {
+            "criteria": "1.7.5.2",
+            "description": "Documented certification is available from the relevant authority to show that the facility complies with applicable laws and regulations in relation to fire safety (fire clearance Certificate).",
+            "linked_criteria": [
+                "1.2.1.4",
+                "1.2.1.5"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  As per the intent statement, compliance with this criterion requires documented evidence of an official inspection to confirm that the building complies with national fire safety requirements. The occupational health service manager must obtain a copy of the documentation from the landlord if the service does not own the building.",
+            "guidelines": "CRITICAL  As per the intent statement, compliance with this criterion requires documented evidence of an official inspection to confirm that the building complies with national fire safety requirements. The occupational health service manager must obtain a copy of the documentation from the landlord if the service does not own the building."
+        },
+        {
+            "criteria": "1.7.5.8",
+            "description": "Annual personnel training in fire prevention and evacuation procedures is documented.",
+            "linked_criteria": [
+                "1.2.1.4",
+                "1.4.3.2",
+                "1.7.5.1"
+            ],
+            "root": [],
+            "guideline": "A fire safety evacuation plan must be developed by the occupational health service. Personnel training must be provided, and evacuation exercises held annually. Documented evidence that the plan is physically rehearsed will be required.",
+            "guidelines": "A fire safety evacuation plan must be developed by the occupational health service. Personnel training must be provided, and evacuation exercises held annually. Documented evidence that the plan is physically rehearsed will be required."
+        },
+        {
+            "criteria": "1.7.6.3",
+            "description": "Documented evidence is available to show that the personnel participate in a rehearsal of theemergency plan at least annually.",
+            "linked_criteria": [
+                "1.7.5.1"
+            ],
+            "root": [],
+            "guideline": "The emphasis of this rehearsal must be on the emergency situations mentioned in the standard intent. Documented evidence must be provided.",
+            "guidelines": "The emphasis of this rehearsal must be on the emergency situations mentioned in the standard intent. Documented evidence must be provided."
+        },
+        {
+            "criteria": "1.8.1.6",
+            "description": "Documented procedures which outline the processes to provide required information to individuals CRITICAL and agencies outside the practice when required by laws or regulations are implemented.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  Documented evidence of reporting is required. This includes notifiable disease reporting, other statistics required according to country-specific legislation and information provided to healthcare funders.",
+            "guidelines": "CRITICAL  Documented evidence of reporting is required. This includes notifiable disease reporting, other statistics required according to country-specific legislation and information provided to healthcare funders."
+        },
+        {
+            "criteria": "1.8.3.4",
+            "description": "Personnel are trained in the implementation of quality management processes.",
+            "linked_criteria": [
+                "1.4.3.2"
+            ],
+            "root": []
+        },
+        {
+            "criteria": "2.2.1.4",
+            "description": "The supply of medical equipment is adequate to meet the needs of the practice",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "guideline": "Compliance will be verified by observation and during personnel and client/worker/employee interviews.",
+            "guidelines": "Compliance will be verified by observation and during personnel and client/worker/employee interviews."
+        },
+        {
+            "criteria": "2.4.1.1",
+            "description": "Policies and procedures for the storage, retrieval, retention, destruction and confidentiality and safety of employee/client records and personal information are implemented",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "Policies and procedures must include at least a) – g) in the standard intent above.",
+            "guidelines": "Policies and procedures must include at least a) – g) in the standard intent above."
+        },
+        {
+            "criteria": "2.4.1.6",
+            "description": "The retention process provides the necessary confidentiality and security.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  Compliance will be measured by observation.",
+            "guidelines": "CRITICAL  Compliance will be measured by observation."
+        },
+        {
+            "criteria": "3.6.2.2",
+            "description": "All practice personnel are trained in basic resuscitation techniques at least every two years, with records of their attendance at such training.",
+            "linked_criteria": [
+                "1.4.3.2"
+            ],
+            "root": [],
+            "guideline": "Documented evidence of nationally accepted training must be provided.",
+            "guidelines": "Documented evidence of nationally accepted training must be provided."
+        },
+        {
+            "criteria": "3.7.1.4",
+            "description": "Dispensed medication is securely and legibly labelled with relevant information as required by practice policy and country specific legislation.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  Country-specific regulations apply, but must include at least the following: Name of employee/client and employee/client record number (if applicable) Proprietary name/approved name or name of each active ingredient Direction with regard to the manner in which medication must be used Strength and number of dose units in the container Date of dispensing Expiry date and batch number Additional labels with warnings and storage instructions in accordance with occupational health service policy",
+            "guidelines": "CRITICAL  Country-specific regulations apply, but must include at least the following: Name of employee/client and employee/client record number (if applicable) Proprietary name/approved name or name of each active ingredient Direction with regard to the manner in which medication must be used Strength and number of dose units in the container Date of dispensing Expiry date and batch number Additional labels with warnings and storage instructions in accordance with occupational health service policy"
+        },
+        {
+            "criteria": "3.7.1.5",
+            "description": "A register is maintained of all medication dispensed.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  Documented evidence is required.",
+            "guidelines": "CRITICAL  Documented evidence is required."
+        },
+        {
+            "criteria": "3.7.1.8",
+            "description": "Controlled medication is prescribed and dispensed in accordance with legislation and practice policy.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  Compliance will be measured by examining the dispensing register, the controlled medication register and during the employee/client record audit.",
+            "guidelines": "CRITICAL  Compliance will be measured by examining the dispensing register, the controlled medication register and during the employee/client record audit."
+        },
+        {
+            "criteria": "3.7.1.10",
+            "description": "Prescriptions conform to all legal requirements.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "Compliance will be verified during the employee/client record audit.",
+            "guidelines": "Compliance will be verified during the employee/client record audit."
+        },
+        {
+            "criteria": "3.7.3.2",
+            "description": "Prescriptions conform to all legal requirements.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "Country-specific regulations apply, but must include at least the following: Proprietary name/approved name or name of each active ingredient Strength and number of dose units in the container Expiry date and batch number",
+            "guidelines": "Country-specific regulations apply, but must include at least the following: Proprietary name/approved name or name of each active ingredient Strength and number of dose units in the container Expiry date and batch number"
+        },
+        {
+            "criteria": "3.7.3.4",
+            "description": "Controlled drugs are stored in suitable facilities which include but are not limited to: lockable storage facilities, ceiling cages, burglar guards and alarm systems with keypads.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "The purpose of this criterion is to ensure the safety of controlled medication during times when the occupational health service is closed. Unlike 24-hour facilities, these unattended occupational health facilities may be targeted and therefore additional security measures are required.",
+            "guidelines": "The purpose of this criterion is to ensure the safety of controlled medication during times when the occupational health service is closed. Unlike 24-hour facilities, these unattended occupational health facilities may be targeted and therefore additional security measures are required."
+        },
+        {
+            "criteria": "3.7.3.5",
+            "description": "Controlled drugs are accurately accounted for in a specific register which is updated contemporaneously and available for inspection.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "CRITICAL  Compliance will be measured against medication control regulations to ensure that the information in the register is accurate and complies with the requirements.",
+            "guidelines": "CRITICAL  Compliance will be measured against medication control regulations to ensure that the information in the register is accurate and complies with the requirements."
+        },
+        {
+            "criteria": "3.7.3.6",
+            "description": "Controlled drugs that have expired are disposed of in accordance with legal requirements.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "Compliance will be measured against medication control regulations to ensure that the information in the register is accurate and complies with the requirements.",
+            "guidelines": "Compliance will be measured against medication control regulations to ensure that the information in the register is accurate and complies with the requirements."
+        },
+        {
+            "criteria": "3.8.1.1",
+            "description": "Patient and family rights are identified in a policy and documented in accordance with relevant and current laws, charters and regulations.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "Employee/client and family rights are internationally accepted and implemented. Country specific laws, regulations and charters must be referenced in the policy. The policy must include at least the right to: A healthy and safe working environment Participation in decision-making Access to health care in the workplace Ethical health care Choice of health services Confidentiality and privacy Culturally sensitive care Informed consent Refusal of treatment A second opinion Complaints about health services",
+            "guidelines": "Employee/client and family rights are internationally accepted and implemented. Country specific laws, regulations and charters must be referenced in the policy. The policy must include at least the right to: A healthy and safe working environment Participation in decision-making Access to health care in the workplace Ethical health care Choice of health services Confidentiality and privacy Culturally sensitive care Informed consent Refusal of treatment A second opinion Complaints about health services"
+        },
+        {
+            "criteria": "3.8.4.2",
+            "description": "The practice has a documented policy outlining the procedure for obtaining consent in the case of patients who are unable to grant consent for themselves by way of age or mental/physical incapacity, which is in accordance with the relevant laws and regulations.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "guideline": "Compliance will be assessed during the employee/client record audit.",
+            "guidelines": "Compliance will be assessed during the employee/client record audit."
+        }
+    ]
 }

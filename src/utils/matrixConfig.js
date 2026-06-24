@@ -55,7 +55,7 @@ export function buildConfigFromMatrix(serviceName, matrixData) {
                 severity: null,
                 description: item.description || "",
                 is_critical: false,
-                guideline: ""
+                guideline: item.guideline || item.guidelines || ""
             });
         }
     });

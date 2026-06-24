@@ -207,13 +207,19 @@ export function calculateSectionScore(standards) {
     return { percent: 0, totalScore: 0, maxScore: 0, criticalFail: false };
   }
   let total = 0, max = 0, criticalFail = false;
+  let percentSum = 0;
+  let validCount = 0;
   for (const s of standards) {
     if (!s) continue;
     total += s.totalScore || 0;
     max   += s.maxScore || 0;
+    if (s.percent !== undefined && s.percent !== null && !isNaN(s.percent)) {
+      percentSum += s.percent;
+      validCount += 1;
+    }
     if (s.criticalFail) criticalFail = true;
   }
-  let percent = max === 0 ? 0 : (total / max) * 100;
+  let percent = validCount === 0 ? 0 : percentSum / validCount;
   if (criticalFail) { percent = 0; total = 0; }
   return { percent: parseFloat(percent.toFixed(2)), totalScore: total, maxScore: max, criticalFail };
 }

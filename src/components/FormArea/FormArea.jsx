@@ -601,16 +601,83 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
         activeEventId,
         scoringResults,
         isScoringPending,
-        onCriterionChange
+        onCriterionChange,
+        syncStatus,
+        setSyncStatus,
+        pendingFields,
+        syncedFields
     }) => {
         const saveField = React.useCallback((key, val) => {
             console.log(`[FormArea Debug] saveField called: key="${key}"`);
             rawSaveField(key, val);
         }, [rawSaveField]);
 
+        const getFieldStatusClass = React.useCallback((fieldId) => {
+            const val = formData?.[fieldId];
+            if (val === undefined || val === null || String(val).trim() === '') {
+                return '';
+            }
+            if (pendingFields && pendingFields.has(fieldId)) {
+                return 'status-unsaved';
+            }
+            if (syncedFields && syncedFields.has(fieldId)) {
+                return 'status-synced';
+            }
+            return 'status-local';
+        }, [formData, pendingFields, syncedFields]);
+
+        const renderFieldStatus = React.useCallback((fieldId) => {
+            const status = getFieldStatusClass(fieldId);
+            if (!status) return null;
+            
+            let text = '';
+            let textClass = '';
+            let dotClass = '';
+            
+            if (status === 'status-unsaved') {
+                text = 'Unsaved changes';
+                textClass = 'text-unsaved';
+                dotClass = 'dot-unsaved';
+            } else if (status === 'status-local') {
+                text = 'Saved locally (offline)';
+                textClass = 'text-local';
+                dotClass = 'dot-local';
+            } else if (status === 'status-synced') {
+                text = 'Synced to server';
+                textClass = 'text-synced';
+                dotClass = 'dot-synced';
+            } else {
+                return null;
+            }
+            
+            return (
+                <div className={`status-indicator-container ${textClass}`}>
+                    <span className={`status-dot ${dotClass}`} />
+                    {text}
+                </div>
+            );
+        }, [getFieldStatusClass]);
+
+        const formAreaRef = React.useRef(null);
+
+        const scrollToTop = React.useCallback(() => {
+            if (formAreaRef.current) {
+                formAreaRef.current.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            } else {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            }
+        }, []);
+
         const [isScoringModalOpen, setIsScoringModalOpen] = useState(false);
         const [viewingRootCalc, setViewingRootCalc] = useState(null); // { code, result }
         const [currentSubsectionIndex, setCurrentSubsectionIndex] = useState(0);
+        const [isWindowActive, setIsWindowActive] = useState(true);
         const [showStandardSummary, setShowStandardSummary] = useState(false); // x.x.x list (collapsed by default)
         const [showPiSummary, setShowPiSummary] = useState(false); // x.x PI row (collapsed by default)
         const [isSeSummaryOpen, setIsSeSummaryOpen] = useState(false); // collapsible SE summary textarea
@@ -738,7 +805,73 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
         // Reset pagination when activeSection changes
         React.useEffect(() => {
             setCurrentSubsectionIndex(0);
-        }, [propsActiveSection?.id]);
+            scrollToTop();
+        }, [propsActiveSection?.id, scrollToTop]);
+
+        // Window active state tracking for screenshot security (blur overlay)
+        React.useEffect(() => {
+            const handleFocus = () => setIsWindowActive(true);
+            const handleBlur = () => setIsWindowActive(false);
+            const handleVisibilityChange = () => {
+                if (document.hidden) {
+                    setIsWindowActive(false);
+                } else {
+                    setIsWindowActive(true);
+                }
+            };
+
+            window.addEventListener('focus', handleFocus);
+            window.addEventListener('blur', handleBlur);
+            document.addEventListener('visibilitychange', handleVisibilityChange);
+
+            // Set initial state
+            setIsWindowActive(document.hasFocus());
+
+            return () => {
+                window.removeEventListener('focus', handleFocus);
+                window.removeEventListener('blur', handleBlur);
+                document.removeEventListener('visibilitychange', handleVisibilityChange);
+            };
+        }, []);
+
+        // Key shortcuts security (Print, Save, Copy/Paste)
+        React.useEffect(() => {
+            const handleKeyDown = (e) => {
+                // Intercept Ctrl+P / Cmd+P (Print)
+                if ((e.ctrlKey || e.metaKey) && e.key === 'p') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    alert("Printing is disabled for security reasons.");
+                }
+                // Intercept Ctrl+S / Cmd+S (Save)
+                if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+                // Intercept Copy/Cut/Paste shortcuts
+                if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'v' || e.key === 'x')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            };
+
+            const handleKeyUp = (e) => {
+                if (e.key === 'PrintScreen') {
+                    try {
+                        navigator.clipboard.writeText('');
+                    } catch (_) {}
+                    alert("Screenshots are disabled for security reasons.");
+                }
+            };
+
+            window.addEventListener('keydown', handleKeyDown, true);
+            window.addEventListener('keyup', handleKeyUp, true);
+
+            return () => {
+                window.removeEventListener('keydown', handleKeyDown, true);
+                window.removeEventListener('keyup', handleKeyUp, true);
+            };
+        }, []);
 
             // Resolve Hospital compute criteria from configuration
             const HOSPITAL_SUBCRITERIA_MAP = React.useMemo(() => {
@@ -1713,10 +1846,14 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                     }
 
                     const sectionScore = scoringResults.sections.find((s) => s.id === activeSection.id);
-                    const standardResults = sectionScore?.standards?.[0];
-                    if (!standardResults) return {};
+                    if (!sectionScore?.standards || sectionScore.standards.length === 0) return {};
 
-                    const criteriaScores = standardResults.criteriaScores || {};
+                    const criteriaScores = {};
+                    sectionScore.standards.forEach(std => {
+                        if (std.criteriaScores) {
+                            Object.assign(criteriaScores, std.criteriaScores);
+                        }
+                    });
                     const result = {};
 
                     subsections.forEach((subFields, subsectionIndex) => {
@@ -2807,7 +2944,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                         )}
                                     </div>
                                 )}
-	                                {(isTypeOfAssessmentField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))))) ? (
+                       	        {(isTypeOfAssessmentField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))))) ? (
 	                                    <div
 	                                        className="form-control"
 	                                        id={`field-${field.id}`}
@@ -2826,89 +2963,92 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
 	                                        {typeOfAssessmentDisplayValue || 'Loading from event...'}
 	                                    </div>
 	                                ) : (
-	                                <select
-                                    className="form-control"
-                                    value={(isRoot && !overrideOn)
-                                        ? (calculatedFieldScore ? (calculatedFieldScore.normalizedValue || calculatedFieldScore.response) : '')
-                                        : (formData[field.id] || '')}
-                                    onChange={(e) => handleInputChange(e, field.id)}
-                                    id={`field-${field.id}`} // Helper for testing
-                                    disabled={isSectionLocked || (isRoot && !overrideOn) || (!isParentAnswered && isCommentField) || isTechnicalField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))))}
-                                >
-                                    <option value="">
-                                        {isRoot
-                                            ? (!overrideOn
-                                                ? ((linkedExpectedCount > 0 || (rootDraftPoints !== null))
-                                                    ? 'Auto-calculated from configured criteria'
-                                                    : 'Not auto-calculated (no effective linked criteria)')
-                                                : 'Select...')
-                                            : 'Select...'}
-                                    </option>
-                                    {(() => {
-                                        const options = (field.options || []).filter((opt) => {
-	                                            const val = typeof opt === 'object' ? opt.value : opt;
-	                                            const label = typeof opt === 'object' ? opt.label : opt;
-	                                            if (field.id === typeOfAssessmentDeId && (isSupportiveType(val) || isSupportiveType(label))) {
-	                                                return false;
-	                                            }
-                                            // If a Baseline already exists for this facility, hide any Baseline-type option
-                                            if (field.id === typeOfAssessmentDeId && hasExistingBaseline) {
-                                                return !(isBaselineType(val) || isBaselineType(label));
-                                            }
-                                            return true;
-                                        });
-                                        const groups = {};
-                                        const ungrouped = [];
+	                                    <>
+	                                        <select
+                                                className={`form-control ${getFieldStatusClass(field.id)}`}
+                                                value={(isRoot && !overrideOn)
+                                                    ? (calculatedFieldScore ? (calculatedFieldScore.normalizedValue || calculatedFieldScore.response) : '')
+                                                    : (formData[field.id] || '')}
+                                                onChange={(e) => handleInputChange(e, field.id)}
+                                                id={`field-${field.id}`} // Helper for testing
+                                                disabled={isSectionLocked || (isRoot && !overrideOn) || (!isParentAnswered && isCommentField) || isTechnicalField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))))}
+                                            >
+                                                <option value="">
+                                                    {isRoot
+                                                        ? (!overrideOn
+                                                            ? ((linkedExpectedCount > 0 || (rootDraftPoints !== null))
+                                                                ? 'Auto-calculated from configured criteria'
+                                                                : 'Not auto-calculated (no effective linked criteria)')
+                                                            : 'Select...')
+                                                        : 'Select...'}
+                                                </option>
+                                                {(() => {
+                                                    const options = (field.options || []).filter((opt) => {
+ 	                                                        const val = typeof opt === 'object' ? opt.value : opt;
+ 	                                                        const label = typeof opt === 'object' ? opt.label : opt;
+ 	                                                        if (field.id === typeOfAssessmentDeId && (isSupportiveType(val) || isSupportiveType(label))) {
+ 	                                                            return false;
+ 	                                                        }
+                                                        // If a Baseline already exists for this facility, hide any Baseline-type option
+                                                        if (field.id === typeOfAssessmentDeId && hasExistingBaseline) {
+                                                            return !(isBaselineType(val) || isBaselineType(label));
+                                                        }
+                                                        return true;
+                                                    });
+                                                    const groups = {};
+                                                    const ungrouped = [];
 
-                                        options.forEach(opt => {
-                                            const val = typeof opt === 'object' ? opt.value : opt;
-                                            const label = typeof opt === 'object' ? opt.label : opt;
+                                                    options.forEach(opt => {
+                                                        const val = typeof opt === 'object' ? opt.value : opt;
+                                                        const label = typeof opt === 'object' ? opt.label : opt;
 
-                                            if (typeof val === 'string' && val.includes('_')) {
-                                                const prefix = val.split('_')[0];
-                                                if (!groups[prefix]) groups[prefix] = [];
-                                                groups[prefix].push({ val, label });
-                                            } else {
-                                                ungrouped.push({ val, label });
-                                            }
-                                        });
+                                                        if (typeof val === 'string' && val.includes('_')) {
+                                                            const prefix = val.split('_')[0];
+                                                            if (!groups[prefix]) groups[prefix] = [];
+                                                            groups[prefix].push({ val, label });
+                                                        } else {
+                                                            ungrouped.push({ val, label });
+                                                        }
+                                                    });
 
-                                        const groupKeys = Object.keys(groups);
-                                        if (groupKeys.length === 0) {
-                                            // No grouped options, render normally
-                                            return options.map((opt, idx) => {
-                                                const val = typeof opt === 'object' ? opt.value : opt;
-                                                const label = typeof opt === 'object' ? opt.label : opt;
-                                                return (
-                                                    <option key={`${val}-${idx}`} value={val}>
-                                                        {label}
-                                                    </option>
-                                                );
-                                            });
-                                        }
+                                                    const groupKeys = Object.keys(groups);
+                                                    if (groupKeys.length === 0) {
+                                                        // No grouped options, render normally
+                                                        return options.map((opt, idx) => {
+                                                            const val = typeof opt === 'object' ? opt.value : opt;
+                                                            const label = typeof opt === 'object' ? opt.label : opt;
+                                                            return (
+                                                                <option key={`${val}-${idx}`} value={val}>
+                                                                    {label}
+                                                                </option>
+                                                            );
+                                                        });
+                                                    }
 
-                                        // Render grouped options
-                                        return (
-                                            <>
-                                                {ungrouped.map((opt, idx) => (
-                                                    <option key={`ungrouped-${opt.val}-${idx}`} value={opt.val}>
-                                                        {opt.label}
-                                                    </option>
-                                                ))}
-                                                {groupKeys.map(group => (
-                                                    <optgroup key={group} label={group}>
-                                                        {groups[group].map((opt, idx) => (
-                                                            <option key={`${group}-${opt.val}-${idx}`} value={opt.val}>
-                                                                {opt.label}
-                                                            </option>
-                                                        ))}
-                                                    </optgroup>
-                                                ))}
-                                            </>
-                                        );
-                                    })()}
-	                                    </select>
-	                                )}
+                                                    // Render grouped options
+                                                    return (
+                                                        <>
+                                                            {ungrouped.map((opt, idx) => (
+                                                                <option key={`ungrouped-${opt.val}-${idx}`} value={opt.val}>
+                                                                    {opt.label}
+                                                                </option>
+                                                            ))}
+                                                            {groupKeys.map(group => (
+                                                                <optgroup key={group} label={group}>
+                                                                    {groups[group].map((opt, idx) => (
+                                                                        <option key={`${group}-${opt.val}-${idx}`} value={opt.val}>
+                                                                            {opt.label}
+                                                                        </option>
+                                                                    ))}
+                                                                </optgroup>
+                                                            ))}
+                                                        </>
+                                                    );
+                                                })()}
+ 	                                        </select>
+                                            {renderFieldStatus(field.id)}
+                                        </>
+ 	                                )}
                                 </>
                                 ) : (
                                     isCommentField ? (
@@ -2922,14 +3062,15 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                             };
                                             const joinCommentValue = (a, b) => `${a || ''}|${b || ''}`;
 
-	                                            // Strip any injected tags from display only, but preserve
-	                                            // user-entered whitespace while typing so the textarea does
-	                                            // not eat space-bar input at the end of a sentence.
-	                                            const stripTags = (txt) => (txt || '').replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '');
+ 	                                            // Strip any injected tags from display only, but preserve
+ 	                                            // user-entered whitespace while typing so the textarea does
+ 	                                            // not eat space-bar input at the end of a sentence.
+ 	                                            const stripTags = (txt) => (txt || '').replace(/\s*\[(INCOMPLETE )?((ROOT )?SCORE|SEVERITY)[^\]]*\]/g, '');
 
                                             const parts = splitCommentValue(formData[field.id] || '');
                                             const disabled = isSectionLocked || (!isParentAnswered && isCommentField) || isTechnicalField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))));
-                                            const baseClass = `form-control ${formData[`is_critical_${field.id}`] && (!questionValue || questionValue === '') ? 'mandatory-warning' : ''}`;
+                                            const fieldStatusClass = getFieldStatusClass(field.id);
+                                            const baseClass = `form-control ${formData[`is_critical_${field.id}`] && (!questionValue || questionValue === '') ? 'mandatory-warning' : ''} ${fieldStatusClass}`;
 
                                             const handlePartChange = (which, newVal) => {
                                                 const current = splitCommentValue(formData[field.id] || '');
@@ -2941,45 +3082,51 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                             };
 
                                             return (
-                                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
-                                                    <div>
-                                                        <label className="standard-summary-label" htmlFor={`field-${field.id}-comments`}>Comments</label>
-                                                        <textarea
-                                                            id={`field-${field.id}-comments`}
-                                                            className={baseClass}
-                                                            rows={3}
-                                                            value={stripTags(parts.comments)}
-                                                            onChange={(e) => handlePartChange('comments', e.target.value)}
-                                                            onBlur={() => handleCommentBlur(field.id)}
-                                                            disabled={disabled}
-                                                        />
+                                                <>
+                                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
+                                                        <div>
+                                                            <label className="standard-summary-label" htmlFor={`field-${field.id}-comments`}>Comments</label>
+                                                            <textarea
+                                                                id={`field-${field.id}-comments`}
+                                                                className={baseClass}
+                                                                rows={3}
+                                                                value={stripTags(parts.comments)}
+                                                                onChange={(e) => handlePartChange('comments', e.target.value)}
+                                                                onBlur={() => handleCommentBlur(field.id)}
+                                                                disabled={disabled}
+                                                            />
+                                                        </div>
+                                                        <div>
+                                                            <label className="standard-summary-label" htmlFor={`field-${field.id}-recs`}>Recommendations</label>
+                                                            <textarea
+                                                                id={`field-${field.id}-recs`}
+                                                                className={baseClass}
+                                                                rows={3}
+                                                                value={stripTags(parts.recommendations)}
+                                                                onChange={(e) => handlePartChange('recommendations', e.target.value)}
+                                                                onBlur={() => handleCommentBlur(field.id)}
+                                                                disabled={disabled}
+                                                            />
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <label className="standard-summary-label" htmlFor={`field-${field.id}-recs`}>Recommendations</label>
-                                                        <textarea
-                                                            id={`field-${field.id}-recs`}
-                                                            className={baseClass}
-                                                            rows={3}
-                                                            value={stripTags(parts.recommendations)}
-                                                            onChange={(e) => handlePartChange('recommendations', e.target.value)}
-                                                            onBlur={() => handleCommentBlur(field.id)}
-                                                            disabled={disabled}
-                                                        />
-                                                    </div>
-                                                </div>
+                                                    {renderFieldStatus(field.id)}
+                                                </>
                                             );
                                         })()
                                     ) : (
-                                        <FieldInput
-                                            type={field.type}
-                                            className={`form-control ${formData[`is_critical_${field.id}`] && (!questionValue || questionValue === '') ? 'mandatory-warning' : ''}`}
-                                            value={formData[field.id] || ''}
-                                            onChange={(e) => handleInputChange(e, field.id)}
-                                            id={`field-${field.id}`}
-                                            disabled={isSectionLocked || isTechnicalField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))))}
-                                        />
-                                    )
-                                ))}
+                                        <>
+                                            <FieldInput
+                                                type={field.type}
+                                                className={`form-control ${formData[`is_critical_${field.id}`] && (!questionValue || questionValue === '') ? 'mandatory-warning' : ''} ${getFieldStatusClass(field.id)}`}
+                                                value={formData[field.id] || ''}
+                                                onChange={(e) => handleInputChange(e, field.id)}
+                                                id={`field-${field.id}`}
+                                                disabled={isSectionLocked || isTechnicalField || (isADSection && (labelLower.includes('type of assessment') || (labelLower.includes('assessment type') && !labelLower.includes('facility assessment'))))}
+                                            />
+                                            {renderFieldStatus(field.id)}
+                                        </>
+                                    )))
+                                }
                     </div>
                 );
 
@@ -3278,6 +3425,9 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
 
                 if (activeEventId) {
                     await indexedDBService.markAsSynced(activeEventId, putEventId || 'synced');
+                    if (typeof setSyncStatus === 'function') {
+                        setSyncStatus('synced');
+                    }
                 }
                 console.log('✅ Background sync on section change successful.');
             } catch (err) {
@@ -3669,6 +3819,9 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
 
                     if (activeEventId) {
                         await indexedDBService.markAsSynced(activeEventId, dhis2EventId || 'synced');
+                        if (typeof setSyncStatus === 'function') {
+                            setSyncStatus('synced');
+                        }
                     }
 
                 if (result && result.chunks) {
@@ -3686,11 +3839,32 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
         };
 
             return (
-                <div className="form-area">
-                        <div className="form-header">
-                            <div className="header-content">
-                                    <h2>
-	                                        {(() => {
+                <div
+                    ref={formAreaRef}
+                    className="form-area secure-no-select"
+                    onCopy={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    onCut={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    onPaste={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                    onContextMenu={(e) => { e.preventDefault(); e.stopPropagation(); }}
+                >
+                    {!isWindowActive && (
+                        <div className="security-blur-overlay" onClick={() => setIsWindowActive(true)}>
+                            <div className="security-blur-card" onClick={(e) => e.stopPropagation()}>
+                                <span className="security-blur-icon">🔒</span>
+                                <h3 className="security-blur-title">Security Shield Active</h3>
+                                <p className="security-blur-text">
+                                    Survey content is hidden for security and confidentiality reasons because this window is inactive.
+                                </p>
+                                <button className="security-blur-btn" onClick={() => setIsWindowActive(true)}>
+                                    Resume Survey
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                    <div className="form-header">
+                        <div className="header-content">
+                                <h2>
+	                                    {(() => {
 	                                            const raw = String(activeSection?.name || '').trim();
 	                                            if (!raw) return '';
 	                                            const upper = raw.toUpperCase();
@@ -3944,7 +4118,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                     className="nav-btn"
                                     onClick={() => {
                                         setCurrentSubsectionIndex((curr) => Math.max(0, curr - 1));
-                                        window.scrollTo(0, 0);
+                                        scrollToTop();
                                     }}
                                     disabled={currentSubsectionIndex === 0}
                                     style={{ opacity: currentSubsectionIndex === 0 ? 0.5 : 1 }}
@@ -3970,7 +4144,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                         setCurrentSubsectionIndex((curr) =>
                                             Math.min(subsections.length - 1, curr + 1),
                                         );
-                                        window.scrollTo(0, 0);
+                                        scrollToTop();
                                     }}
                                     disabled={isLastSubsection}
                                     style={{ opacity: isLastSubsection ? 0.5 : 1 }}
@@ -4129,7 +4303,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                                         const isCurrent = std.subsectionIndex === currentSubsectionIndex;
                                                         const handleJumpToSubsection = () => {
                                                             setCurrentSubsectionIndex(std.subsectionIndex);
-                                                            window.scrollTo(0, 0);
+                                                            scrollToTop();
                                                         };
                                                         return (
                                                             <div
@@ -4222,7 +4396,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                 className="nav-btn"
                                 onClick={() => {
                                     setCurrentSubsectionIndex(curr => Math.max(0, curr - 1));
-                                    window.scrollTo(0, 0);
+                                    scrollToTop();
                                 }}
                                 disabled={currentSubsectionIndex === 0}
                                 style={{ opacity: currentSubsectionIndex === 0 ? 0.5 : 1 }}
@@ -4236,7 +4410,7 @@ import { decorateHospitalLinksWithMatrixTags } from '../../utils/hospitalMatrixT
                                 className="nav-btn"
                                 onClick={() => {
                                     setCurrentSubsectionIndex(curr => Math.min(subsections.length - 1, curr + 1));
-                                    window.scrollTo(0, 0);
+                                    scrollToTop();
                                 }}
                                 disabled={isLastSubsection}
                                 style={{ opacity: isLastSubsection ? 0.5 : 1 }}

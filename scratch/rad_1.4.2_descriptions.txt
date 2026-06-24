@@ -1,0 +1,86 @@
+Found 12 data elements matching '1.4.2':
+
+ID: rAeXvIlhi1Z
+  Code: 500-RAD_3.1.4.2
+  Name: SURV_RAD_500-The practice has a documented policy outlining the procedure for obtaining consent in the case of
+  DisplayName: SURV_RAD_500-The practice has a documented policy outlining the procedure for obtaining consent in the case of
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: B6NkJs5wydc
+  Code: 501-RAD_3.1.4.2-comments
+  Name: SURV_RAD_501-The practice has a documented policy outlining the procedure for obtaining consent in the case of-comments
+  DisplayName: SURV_RAD_501-The practice has a documented policy outlining the procedure for obtaining consent in the case of-comments
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: N5dL0ITtlsV
+  Code: 78-RAD_1.4.2
+  Name: SURV_RAD_78-There is an effective process for gathering, verifying and evaluating the credentials (registration, education, training and experience) of those health care professionals who are permitted to practice independently.
+  DisplayName: SURV_RAD_78-There is an effective process for gathering, verifying and evaluating the credentials (registration, education, training and experience) of those health care professionals who are permitted to practice independently.
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: Jlqld6wsNMx
+  Code: 79-RAD_1.4.2-comments
+  Name: SURV_RAD_79-There is an effective process for gathering, verifying and evaluating the credentials (registration, education, training and experience) of those health care professionals who are permitted to practice independently.-c
+  DisplayName: SURV_RAD_79-There is an effective process for gathering, verifying and evaluating the credentials (registration, education, training and experience) of those health care professionals who are permitted to practice independently.-c
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: n4t3UTL1z8y
+  Code: 80-RAD_1.4.2.1
+  Name: SURV_RAD_80-There is implementation of a reliable, documented process for evaluating and verifying the credentials
+  DisplayName: SURV_RAD_80-There is implementation of a reliable, documented process for evaluating and verifying the credentials
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: cPXyPt8V42f
+  Code: 81-RAD_1.4.2.1-comments
+  Name: SURV_RAD_81-There is implementation of a reliable, documented process for evaluating and verifying the credentials-comments
+  DisplayName: SURV_RAD_81-There is implementation of a reliable, documented process for evaluating and verifying the credentials-comments
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: lvopvAqTtVJ
+  Code: 82-RAD_1.4.2.2
+  Name: SURV_RAD_82-Personnel files contain copies of qualifications and licences/registration from the relevant authority for
+  DisplayName: SURV_RAD_82-Personnel files contain copies of qualifications and licences/registration from the relevant authority for
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: I0ACBqF1UrH
+  Code: 83-RAD_1.4.2.2-comments
+  Name: SURV_RAD_83-Personnel files contain copies of qualifications and licences/registration from the relevant authority for-comments
+  DisplayName: SURV_RAD_83-Personnel files contain copies of qualifications and licences/registration from the relevant authority for-comments
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: oj6QGggeTfi
+  Code: 84-RAD_1.4.2.3
+  Name: SURV_RAD_84-There is a system to track the annual registration of all health professionals.
+  DisplayName: SURV_RAD_84-There is a system to track the annual registration of all health professionals.
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: H1m4IhiZPR1
+  Code: 85-RAD_1.4.2.3-comments
+  Name: SURV_RAD_85-There is a system to track the annual registration of all health professionals.-comments
+  DisplayName: SURV_RAD_85-There is a system to track the annual registration of all health professionals.-comments
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: bOya84lqZNe
+  Code: 86-RAD_1.4.2.4
+  Name: SURV_RAD_86-All personnel members with direct contact with the public have had a police check, a copy of which is
+  DisplayName: SURV_RAD_86-All personnel members with direct contact with the public have had a police check, a copy of which is
+  FormName: None
+  Description: None
+--------------------------------------------------
+ID: k20oZM8SL8Z
+  Code: 87-RAD_1.4.2.4-comments
+  Name: SURV_RAD_87-All personnel members with direct contact with the public have had a police check, a copy of which is-comments
+  DisplayName: SURV_RAD_87-All personnel members with direct contact with the public have had a police check, a copy of which is-comments
+  FormName: None
+  Description: None
+--------------------------------------------------

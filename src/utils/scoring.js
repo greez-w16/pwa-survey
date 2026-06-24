@@ -512,19 +512,25 @@ export const calculateSectionScore = (standards) => {
     let totalScoreSum = 0;
     let maxScoreSum = 0;
     let criticalFail = false;
+    let percentSum = 0;
+    let validStandardsCount = 0;
 
     for (const standard of standards) {
         if (!standard) continue;
 
         totalScoreSum += (standard.totalScore || 0);
         maxScoreSum += (standard.maxScore || 0);
+        if (standard.percent !== undefined && standard.percent !== null && !isNaN(standard.percent)) {
+            percentSum += standard.percent;
+            validStandardsCount += 1;
+        }
 
         if (standard.criticalFail) {
             criticalFail = true;
         }
     }
 
-    let percent = maxScoreSum === 0 ? 0 : (totalScoreSum / maxScoreSum) * 100;
+    let percent = validStandardsCount === 0 ? 0 : percentSum / validStandardsCount;
     if (criticalFail) {
         percent = 0;
         totalScoreSum = 0;

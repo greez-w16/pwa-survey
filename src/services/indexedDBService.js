@@ -165,12 +165,8 @@ class IndexedDBService {
 
 	        const isExistingDraft = Boolean(existingData);
 
-	        // When creating a brand new draft, enforce a per-user limit so we
-	        // don't accumulate unbounded offline data. Existing drafts can always
-	        // be updated.
-	        if (!isExistingDraft) {
-	            await this.enforceDraftLimitForUser(currentUser, 5);
-	        }
+	        // No draft limit — unsynced drafts are always kept until the server
+	        // confirms they have been received. markAsSynced() deletes them immediately.
 
 	        const baseData = existingData || {
 	            eventId: eventId,
@@ -255,10 +251,7 @@ class IndexedDBService {
         }
 
         const isExistingDraft = Boolean(existingData);
-
-        if (!isExistingDraft) {
-            await this.enforceDraftLimitForUser(currentUser, 5);
-        }
+        // No draft limit — see saveFormData for rationale.
 
         const baseData = existingData || {
             eventId: eventId,
@@ -442,22 +435,14 @@ class IndexedDBService {
 	    }
 
 	    /**
-	     * Enforce a maximum number of *draft* records per user.
-	     *
-	     * This does not delete any active drafts; instead, if the user already
-	     * has maxDrafts or more drafts, it throws a typed error so the caller
-	     * can prompt them to sync or clear old data.
+	     * No longer enforces a draft limit.
+	     * Drafts persist until the server confirms receipt via markAsSynced(),
+	     * which immediately deletes the local copy. Kept as a no-op so any
+	     * lingering call-sites don't break.
 	     */
-	    async enforceDraftLimitForUser(user = null, maxDrafts = 5) {
-	        const drafts = await this.getAllDrafts(user);
-	        if (!Array.isArray(drafts)) return;
-	        if (drafts.length < maxDrafts) return;
-
-	        const err = new Error('DRAFT_LIMIT_EXCEEDED');
-	        err.code = 'DRAFT_LIMIT_EXCEEDED';
-	        err.currentDrafts = drafts.length;
-	        err.maxDrafts = maxDrafts;
-	        throw err;
+	    // eslint-disable-next-line no-unused-vars
+	    async enforceDraftLimitForUser(_user = null, _maxDrafts = 5) {
+	        // intentionally empty — draft management is handled by markAsSynced()
 	    }
 
 	    /**
@@ -576,34 +561,45 @@ class IndexedDBService {
     }
 
     /**
-     * Mark a draft as successfully synced to DHIS2
+     * Mark a draft as successfully synced to DHIS2, then immediately delete
+     * it from local storage. The server is now the source of truth — there is
+     * no reason to keep a local copy once sync is confirmed.
+     *
+     * cleanupSyncedRecords() acts as a safety net for any records that slip
+     * through (e.g. app closed before this completes).
      */
     async markAsSynced(eventId, dhis2EventId = null) {
         if (!this.db) await this.init();
-        return new Promise((resolve, reject) => {
-            const tx = this.db.transaction([this.storeName], 'readwrite');
-            const store = tx.objectStore(this.storeName);
-            const getReq = store.get(eventId);
-            getReq.onsuccess = () => {
-                const record = getReq.result;
-                if (!record) { resolve(); return; }
-                const updated = {
-                    ...record,
-                    syncStatus: 'synced',
-                    syncError: null,
-                    syncedAt: new Date().toISOString(),
-                    dhis2EventId: dhis2EventId || record.dhis2EventId,
-                    metadata: { ...record.metadata, isDraft: false }
+        // Delete immediately — server has confirmed receipt.
+        try {
+            await this.deleteDraft(eventId);
+            console.log(`✅ Synced & deleted local draft: ${eventId} (dhis2EventId=${dhis2EventId || 'n/a'})`);
+        } catch (deleteErr) {
+            // Deletion failed — fall back to marking as synced so cleanupSyncedRecords
+            // can remove it on the next app load.
+            console.warn(`⚠️ markAsSynced: could not delete ${eventId}, marking as synced instead.`, deleteErr);
+            return new Promise((resolve, reject) => {
+                const tx = this.db.transaction([this.storeName], 'readwrite');
+                const store = tx.objectStore(this.storeName);
+                const getReq = store.get(eventId);
+                getReq.onsuccess = () => {
+                    const record = getReq.result;
+                    if (!record) { resolve(); return; }
+                    const updated = {
+                        ...record,
+                        syncStatus: 'synced',
+                        syncError: null,
+                        syncedAt: new Date().toISOString(),
+                        dhis2EventId: dhis2EventId || record.dhis2EventId,
+                        metadata: { ...record.metadata, isDraft: false }
+                    };
+                    const putReq = store.put(updated);
+                    putReq.onsuccess = () => resolve(updated);
+                    putReq.onerror = () => reject(putReq.error);
                 };
-                const putReq = store.put(updated);
-                putReq.onsuccess = () => {
-                    console.log(`✅ Marked ${eventId} as synced`);
-                    resolve(updated);
-                };
-                putReq.onerror = () => reject(putReq.error);
-            };
-            getReq.onerror = () => reject(getReq.error);
-        });
+                getReq.onerror = () => reject(getReq.error);
+            });
+        }
     }
 
     /**

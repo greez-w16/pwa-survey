@@ -1,1198 +1,1174 @@
 ﻿{
-    "private_medical_lab":  [
-                                {
-                                    "criteria":  "1.1.1.1",
-                                    "description":  "The leaders of the practice are formally or informally identified.",
-                                    "linked_criteria":  [
-                                                            "1.1.1.9"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.1.1.2",
-                                    "description":  "The practice has a mission statement that reflects its strategic objectives and matches the needs of the community served.",
-                                    "linked_criteria":  [
-                                                            "1.1.1.3",
-                                                            "1.1.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.1.1.3",
-                                    "description":  "The leaders are collectively responsible for ensuring that the mission statement is known to all personnel, patients, carers and the community served.",
-                                    "linked_criteria":  [
-                                                            "1.1.1.2",
-                                                            "1.1.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.1.1.4",
-                                    "description":  "The practice participates in community health activities.",
-                                    "linked_criteria":  [
-
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.1.1.5",
-                                    "description":  "The leaders, in liaison with the whole practice team, coordinate the compilation of an annual strategic plan and budget.",
-                                    "linked_criteria":  [
-                                                            "1.1.1.6",
-                                                            "1.1.1.7",
-                                                            "1.1.1.8",
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.1.1.6",
-                                    "description":  "The leaders are collectively responsible for implementing the practice’s mission and strategic plan.",
-                                    "linked_criteria":  [
-                                                            "1.1.1.2",
-                                                            "1.1.1.3",
-                                                            "1.1.1.5",
-                                                            "1.1.1.7",
-                                                            "1.8.3.5"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.1.1.7",
-                                    "description":  "The strategic plan is reviewed on an annual basis.",
-                                    "linked_criteria":  [
-                                                            "1.1.1.5",
-                                                            "1.1.1.6",
-                                                            "1.1.1.8"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.1.1.8",
-                                    "description":  "Regular monitoring of the implementation of the strategic plan against envisaged timeframes and progress in achieving its objectives is documented at intervals determined by the practice.",
-                                    "linked_criteria":  [
-                                                            "1.1.1.5",
-                                                            "1.1.1.7"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.1.1.9",
-                                    "description":  "Where appropriate, the leadership roles in various positions are documented, agreed to and known by the personnel.",
-                                    "linked_criteria":  [
-                                                            "1.1.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.2.1.3",
-                                    "description":  "The practice is licensed in terms of relevant legislation for the level and type of services provided.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "1.2.1.4",
-                                    "description":  "The manager ensures that there is a system in place to monitor the implementation of applicable laws and regulations.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.3",
-                                                            "1.2.1.5",
-                                                            "1.2.1.6",
-                                                            "1.4.2.1",
-                                                            "1.4.2.2",
-                                                            "1.5.2.2",
-                                                            "1.5.3.2",
-                                                            "1.5.3.3",
-                                                            "1.7.2.8",
-                                                            "1.7.3.1",
-                                                            "1.7.3.3",
-                                                            "1.7.5.2",
-                                                            "1.7.5.4",
-                                                            "1.7.6.4",
-                                                            "2.1.2.1",
-                                                            "3.1.1.1",
-                                                            "3.1.3.2",
-                                                            "3.1.3.3",
-                                                            "3.1.3.4",
-                                                            "3.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.2.1.5",
-                                    "description":  "There is evidence of response to any reports from inspecting and regulatory authorities.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4",
-                                                            "1.2.1.5",
-                                                            "1.2.1.6",
-                                                            "1.5.2.2",
-                                                            "1.5.3.3",
-                                                            "1.7.5.2",
-                                                            "2.1.2.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "1.2.1.6",
-                                    "description":  "The manager implements processes to manage and control human, financial and other resources.",
-                                    "linked_criteria":  [
-                                                            "1.1.1.5",
-                                                            "1.2.1.4",
-                                                            "1.4.1.1",
-                                                            "1.5.2.1",
-                                                            "1.5.2.3",
-                                                            "1.5.2.4",
-                                                            "1.5.3.4",
-                                                            "1.6.1.1",
-                                                            "1.7.2.6",
-                                                            "1.8.3.5",
-                                                            "2.2.2.2",
-                                                            "2.3.2.1",
-                                                            "2.1.2.13",
-                                                            "2.1.3.1",
-                                                            "2.3.1.5",
-                                                            "2.3.3.3"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.2.3.2",
-                                    "description":  "Information on services, hours of operation and processes for obtaining care is provided to services in the community who work in collaboration with the practice.",
-                                    "linked_criteria":  [
-                                                            "2.1.1.3"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.3.1.1",
-                                    "description":  "Policies and procedures that guide and support the different services offered by the practice are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.5.1.3",
-                                                            "1.5.3.1",
-                                                            "1.6.1.2",
-                                                            "1.7.1.2",
-                                                            "1.7.1.4",
-                                                            "1.7.2.2",
-                                                            "1.7.2.10",
-                                                            "1.7.2.11",
-                                                            "1.7.2.14",
-                                                            "1.7.4.6",
-                                                            "1.7.5.1",
-                                                            "1.8.1.1",
-                                                            "1.8.6.4",
-                                                            "2.2.1.1",
-                                                            "2.3.1.1",
-                                                            "2.3.3.1",
-                                                            "2.4.1.1",
-                                                            "2.5.1.4",
-                                                            "3.1.1.2",
-                                                            "3.3.1.1",
-                                                            "3.4.1.1",
-                                                            "2.3.3.5",
-                                                            "3.1.2.4",
-                                                            "3.1.3.2",
-                                                            "3.1.4.1",
-                                                            "3.2.4.1",
-                                                            "3.4.2.1",
-                                                            "3.6.2.1",
-                                                            "1.7.2.13"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.4.1.1",
-                                    "description":  "There are documented processes staffing the practice.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.4.1.2",
-                                    "description":  "The desired education, qualifications, skills and knowledge are defined for personnel.",
-                                    "linked_criteria":  [
-                                                            "1.5.1.2",
-                                                            "1.7.1.3"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.4.1.3",
-                                    "description":  "The processes include measures to improve personnel retention.",
-                                    "linked_criteria":  [
-
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.4.2.1",
-                                    "description":  "There is implementation of a reliable, documented process for evaluating and verifying the credentials of all health professionals.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.4.2.2",
-                                    "description":  "Personnel files contain copies of qualifications and licences/registration from the relevant authority for CRITICAL all health professionals.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.4.3.1",
-                                    "description":  "There are documented processes for orientation of personnel to the practice.",
-                                    "linked_criteria":  [
-                                                            "1.7.4.5",
-                                                            "1.7.5.9",
-                                                            "2.5.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.4.3.2",
-                                    "description":  "The practice supports continuing education for its clinical personnel and maintains records of this in personnel files.",
-                                    "linked_criteria":  [
-                                                            "1.7.1.4",
-                                                            "1.7.2.3"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.1.1",
-                                    "description":  "A designated person is responsible for the implementation and maintenance of a financial strategy.",
-                                    "linked_criteria":  [
-
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.1.2",
-                                    "description":  "The designated person is suitably qualified and/or experienced in accounting and financial management.",
-                                    "linked_criteria":  [
-                                                            "1.4.1.2"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.1.3",
-                                    "description":  "The responsibilities of this person include ensuring that policies and procedures for all financial functions are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.2.1",
-                                    "description":  "There is a current budget for the practice.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.2.2",
-                                    "description":  "A report is produced at least annually, setting out the financial position to date.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.2.3",
-                                    "description":  "There is a mechanism for establishing the reason for budget variation in either income or expenditure.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.2.4",
-                                    "description":  "Capital investment proposals are subject to unanimous agreement among the partners or are agreed according to a voting system acceptable to all partners in the practice.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.3.1",
-                                    "description":  "The practice has documented ethical and legal policies and procedures for the financial management of the practice that are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.3.2",
-                                    "description":  "Internal and external financial audit systems which meet audit requirements are maintained.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.3.3",
-                                    "description":  "Annual audited financial statements are produced within the required time frame.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "1.5.3.4",
-                                    "description":  "There is a capital asset register, which is routinely maintained.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.5.3.5",
-                                    "description":  "Assets are insured.",
-                                    "linked_criteria":  [
-
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.6.1.1",
-                                    "description":  "An individual is designated to control the ordering, storage, distribution and control of equipment and supplies used in the practice.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.6.1.2",
-                                    "description":  "Policies and procedures relating to all aspects of provisioning/supply chain management are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.1.1",
-                                    "description":  "There are documented risk management processes for identifying all risks relating to practice processes and systems, personnel, patients, visitors to the practice and physical facilities.",
-                                    "linked_criteria":  [
-                                                            "1.7.3.5",
-                                                            "1.7.3.6",
-                                                            "1.7.4.1",
-                                                            "1.7.4.6",
-                                                            "1.7.5.1",
-                                                            "1.8.1.5",
-                                                            "1.8.6.1",
-                                                            "2.1.2.5"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.1.2",
-                                    "description":  "The practice manager ensures the development and implementation of written policies and procedures for risk management processes and activities.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.1.3",
-                                    "description":  "A nominated individual with relevant qualifications, skills and/or experience supervises the implementation of the risk management programme.",
-                                    "linked_criteria":  [
-                                                            "1.4.1.2"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.1.4",
-                                    "description":  "Ongoing in-service training of all personnel in risk management policies, procedures and principles is documented.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1",
-                                                            "1.4.3.2"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.2.2",
-                                    "description":  "Written policies and procedures guide personnel in the implementation of the infection control programme.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.2.3",
-                                    "description":  "Regular in-service training is given to all personnel in the field of infection control and is documented.",
-                                    "linked_criteria":  [
-                                                            "1.4.3.2"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.2.6",
-                                    "description":  "Hand washing and disinfecting facilities, including warm water, soap, paper towels or hand sanitisers are available in all relevant areas.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.2.8",
-                                    "description":  "The practice reports on notifiable diseases to appropriate external public health agencies.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "1.7.2.10",
-                                    "description":  "Relevant personnel members are immunised against Hepatitis B according to the policy.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.2.11",
-                                    "description":  "There is a documented policy for the management of exposure to high-risk infections and needle-stick injuries.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.2.14",
-                                    "description":  "There is a documented policy for the triage of patients with potential communicable diseases.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.3.1",
-                                    "description":  "The practice has a waste management policy that is consistent with country-specific laws and regulations and includes the safe handling, storing and disposing of all different types of waste.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.3.2",
-                                    "description":  "The policy makes provision for the appropriate management of confidential waste.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "1.7.3.3",
-                                    "description":  "Waste is segregated in accordance with policies, procedures, country-specific laws and regulations.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.3.5",
-                                    "description":  "Waste is protected from theft, vandalism or scavenging by animals.",
-                                    "linked_criteria":  [
-                                                            "1.7.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.3.6",
-                                    "description":  "Waste is collected at appropriate times so that hazards are not caused.",
-                                    "linked_criteria":  [
-                                                            "1.7.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.4.1",
-                                    "description":  "Security systems, including guards if required, provide for internal and external security.",
-                                    "linked_criteria":  [
-                                                            "1.7.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.4.5",
-                                    "description":  "A mechanism known to the personnel is available for summoning the assistance of security/police/protection services in the case of an emergency.",
-                                    "linked_criteria":  [
-                                                            "1.4.3.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.4.6",
-                                    "description":  "Reasonable measures are taken to ensure the safety of lone workers.",
-                                    "linked_criteria":  [
-                                                            "1.7.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.5.1",
-                                    "description":  "There are structured systems and processes in place to ensure that all occupants of the practice’s facilities are safe from fire or smoke",
-                                    "linked_criteria":  [
-                                                            "1.7.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.5.2",
-                                    "description":  "Documented certification is available from the relevant authority to show that the facility complies with applicable laws and regulations in relation to fire safety (fire clearance certificate).",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "1.7.5.4",
-                                    "description":  "Flammable materials are clearly labelled and safely stored.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "1.7.5.5",
-                                    "description":  "Sufficient electrical socket outlets are provided in all areas to avoid overloading of individual outlets and to minimise fire risks.",
-                                    "linked_criteria":  [
-
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.5.9",
-                                    "description":  "A mechanism known to personnel is available for summoning the fire service.",
-                                    "linked_criteria":  [
-                                                            "1.4.3.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.7.6.4",
-                                    "description":  "First aid kits and materials for healthcare workers are available.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.8.1.1",
-                                    "description":  "There is a documented policy for collection, collation, validation and distribution of data which is implemented.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.8.1.5",
-                                    "description":  "Security and confidentiality of data and information is maintained.",
-                                    "linked_criteria":  [
-                                                            "1.7.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "1.8.1.6",
-                                    "description":  "Documented procedures which outline the processes to provide required information to individuals and agencies outside the practice when required by laws or regulations are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4",
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "1.8.3.5",
-                                    "description":  "The practice manager provides technology, support and resources (including time) for the assessment and improvement of the practice’s management, clinical and support processes and this is reflected in the strategic plan/business plan for the practice.",
-                                    "linked_criteria":  [
-                                                            "1.1.1.6",
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.8.6.1",
-                                    "description":  "A documented procedure for the monitoring of near misses/incidents/adverse (sentinel) events is available, which includes the documentation of interventions, responses and corrective actions taken to recorded incidents.",
-                                    "linked_criteria":  [
-                                                            "1.7.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "1.8.6.4",
-                                    "description":  "All changes to policy and procedure that are identified as a result of these formal incident reviews are documented and included in new policies or incorporated into existing policies.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.1.1.2",
-                                    "description":  "A telephone/emergency number is available and provided to patients on registration and on request.",
-                                    "linked_criteria":  [
-                                                            "3.2.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.1.1.3",
-                                    "description":  "A phone number for the after-hours service of the practice is clearly displayed on the outside of the facility.",
-                                    "linked_criteria":  [
-                                                            "1.2.3.2",
-                                                            "3.2.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.1.2.1",
-                                    "description":  "Laws, regulations and other requirements applicable to the practice’s facilities are implemented and are available to the personnel.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4",
-                                                            "1.2.1.5"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "2.1.2.5",
-                                    "description":  "The waiting area caters for the specific safety needs of children.",
-                                    "linked_criteria":  [
-                                                            "1.7.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.1.2.13",
-                                    "description":  "Required furniture is available according to established lists and functioning properly.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.1.3.1",
-                                    "description":  "Required furniture and equipment is available according to established lists and functioning properly.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.2.1.1",
-                                    "description":  "Implemented policies and procedures guide the management of medical equipment.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.2.2.2",
-                                    "description":  "Specific laboratory reagents, chemicals and kits are used appropriately.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.3.1.1",
-                                    "description":  "Written policies and procedures guide practice personnel in the implementation of all maintenance service requirements.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1",
-                                                            "2.3.1.4",
-                                                            "2.3.2.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.3.1.2",
-                                    "description":  "A designated, competent individual is responsible for supervising the maintenance of buildings, grounds and utilities.",
-                                    "linked_criteria":  [
-
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.3.1.4",
-                                    "description":  "Written agreements ensure technical back-up services are available at all times during the openingor operational hours of the practice.",
-                                    "linked_criteria":  [
-                                                            "2.3.1.1",
-                                                            "2.3.1.2"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  true
-                                },
-                                {
-                                    "criteria":  "2.3.1.5",
-                                    "description":  "Basic maintenance equipment, tools and spare parts are available.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.3.2.1",
-                                    "description":  "The practice plans and budgets for the upgrading or replacing of systems, buildings or components needed for the continued operation of a safe and effective facility.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6",
-                                                            "2.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.3.3.1",
-                                    "description":  "Policies and procedures that guide the management of ICT equipment are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.3.3.3",
-                                    "description":  "There is an inventory of all ICT equipment.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.3.3.4",
-                                    "description":  "All desktop and server computers are provided with surge protection and the server is protected by an uninterruptable power supply.",
-                                    "linked_criteria":  [
-
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.3.3.5",
-                                    "description":  "A documented policy is available clearly describing appropriate back up procedures for electronic records.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.4.1.1",
-                                    "description":  "Written policies and procedures relating to cleaning and laundry duties and the frequency with which these duties are carried out are implemented and monitored.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "2.5.1.4",
-                                    "description":  "The practice ensures that contracted personnel are oriented to the practice and to relevant practice policies and procedures.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1",
-                                                            "1.4.3.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.1.1.1",
-                                    "description":  "Patient and family rights are identified in a policy and documented in accordance with relevant and current laws, charters and regulations.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.1.1.2",
-                                    "description":  "Documented evidence of personnel training in relation to these policies and procedures is available.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.6",
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.1.2.4",
-                                    "description":  "Policies and procedures to prevent the loss or misuse of patient information are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.1.3.2",
-                                    "description":  "The practice has a documented policy outlining the procedure for obtaining consent in the case of patients who are unable to grant consent for themselves by way of age or mental/physical incapacity, which is in accordance with the relevant laws and regulations.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4",
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.1.3.3",
-                                    "description":  "Documented consent is obtained from patients for health information to be provided to a third party.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.1.3.4",
-                                    "description":  "Where practice members use patient information for research, approval has been obtained from the relevant ethics committee and from patients themselves where required.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.1.4.1",
-                                    "description":  "A documented policy outlining the mechanism to receive and act on complaints is implemented.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.2.1.1",
-                                    "description":  "When patients register with the practice, they are informed of the range of services offered by the practice, opening hours, contact details and after hours’ care arrangements, where applicable",
-                                    "linked_criteria":  [
-                                                            "2.1.1.2",
-                                                            "2.1.1.3"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.2.4.1",
-                                    "description":  "The practice implements a policy on telephonic and electronic communication with patients that details at least a) – e) in the standard intent above.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.3.1.1",
-                                    "description":  "Policies and procedures for the storage, retrieval, retention, destruction, confidentiality and safety of patient records are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.2.1.4",
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.4.1.1",
-                                    "description":  "Policies and procedures or standard operating procedures (SOPs) for handling specimens are implemented and include a)-d) in the standard intent as a minimum.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.4.2.1",
-                                    "description":  "Policies and procedures or standard operating procedures regarding reporting and reviewing results are implemented.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                },
-                                {
-                                    "criteria":  "3.6.2.1",
-                                    "description":  "The practice has a policy on resuscitation, which includes the level at which resuscitation is provided, by whom and training and equipment requirements.",
-                                    "linked_criteria":  [
-                                                            "1.3.1.1"
-                                                        ],
-                                    "root":  [
-
-                                             ],
-                                    "is_critical":  false
-                                }
-                            ]
+    "private_medical_lab": [
+        {
+            "criteria": "1.1.1.1",
+            "description": "The leaders of the practice are formally or informally identified.",
+            "linked_criteria": [
+                "1.1.1.9"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Where a practice consists of more than two practitioners the leaders of the practice must be formally identified.",
+            "guidelines": "Where a practice consists of more than two practitioners the leaders of the practice must be formally identified."
+        },
+        {
+            "criteria": "1.1.1.2",
+            "description": "The practice has a mission statement that reflects its strategic objectives and matches the needs of the community served.",
+            "linked_criteria": [
+                "1.1.1.3",
+                "1.1.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "The mission statement is critical to the strategic planning process since it provides clear, guiding principles that define who the healthcare provider is as an organisation and why the practice exists. Mission statements create the foundation for action planning and a basis for accountability with the community.",
+            "guidelines": "The mission statement is critical to the strategic planning process since it provides clear, guiding principles that define who the healthcare provider is as an organisation and why the practice exists. Mission statements create the foundation for action planning and a basis for accountability with the community."
+        },
+        {
+            "criteria": "1.1.1.3",
+            "description": "The leaders are collectively responsible for ensuring that the mission statement is known to all personnel, patients, carers and the community served.",
+            "linked_criteria": [
+                "1.1.1.2",
+                "1.1.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This can be achieved in many ways such as by public display of the mission statement on notice boards, in the waiting area or included in printed information leaflets given to each patient when they first visit the practice. If the practice has a website, the mission statement can also be published on the website. Documented evidence that personnel have read the mission statement must be provided for full compliance with this criterion.",
+            "guidelines": "This can be achieved in many ways such as by public display of the mission statement on notice boards, in the waiting area or included in printed information leaflets given to each patient when they first visit the practice. If the practice has a website, the mission statement can also be published on the website. Documented evidence that personnel have read the mission statement must be provided for full compliance with this criterion."
+        },
+        {
+            "criteria": "1.1.1.4",
+            "description": "The practice participates in community health activities.",
+            "linked_criteria": [],
+            "root": [],
+            "is_critical": false,
+            "guideline": "The mission of a practice should to meet the needs of the community. To be compliant with this criterion evidence must be provided of interaction with the members of the health committees and participation in community health activities.",
+            "guidelines": "The mission of a practice should to meet the needs of the community. To be compliant with this criterion evidence must be provided of interaction with the members of the health committees and participation in community health activities."
+        },
+        {
+            "criteria": "1.1.1.5",
+            "description": "The leaders, in liaison with the whole practice team, coordinate the compilation of an annual strategic plan and budget.",
+            "linked_criteria": [
+                "1.1.1.6",
+                "1.1.1.7",
+                "1.1.1.8",
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This criterion requires all departments within the practice to be involved in the compilation of the annual strategic plan and budget to ensure that the needs of each department are discussed, considered and met if possible within the scope of the practice budget. Compliance will be demonstrated by documented evidence, for example, minutes of meetings.",
+            "guidelines": "This criterion requires all departments within the practice to be involved in the compilation of the annual strategic plan and budget to ensure that the needs of each department are discussed, considered and met if possible within the scope of the practice budget. Compliance will be demonstrated by documented evidence, for example, minutes of meetings."
+        },
+        {
+            "criteria": "1.1.1.6",
+            "description": "The leaders are collectively responsible for implementing the practice’s mission and strategic plan.",
+            "linked_criteria": [
+                "1.1.1.2",
+                "1.1.1.3",
+                "1.1.1.5",
+                "1.1.1.7",
+                "1.8.3.5"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Evidence of an action plan for achieving the practice’s mission and strategic plan will be required.",
+            "guidelines": "Evidence of an action plan for achieving the practice’s mission and strategic plan will be required."
+        },
+        {
+            "criteria": "1.1.1.7",
+            "description": "The strategic plan is reviewed on an annual basis.",
+            "linked_criteria": [
+                "1.1.1.5",
+                "1.1.1.6",
+                "1.1.1.8"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be measured by providing documented evidence that the practice’s strategic plan has been reviewed.",
+            "guidelines": "Compliance will be measured by providing documented evidence that the practice’s strategic plan has been reviewed."
+        },
+        {
+            "criteria": "1.1.1.8",
+            "description": "Regular monitoring of the implementation of the strategic plan against envisaged timeframes and progress in achieving its objectives is documented at intervals determined by the practice.",
+            "linked_criteria": [
+                "1.1.1.5",
+                "1.1.1.7"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This criterion requires that practice leaders adhere to the timeframes that were set at the beginning of each year for achieving the strategic plan. For any plan to be implemented effectively, it is essential to monitor the progress that is being made towards achieving the outcomes that have been planned. This criterion further requires the practice to document the progress that is being made during the year towards achieving the strategic plan.",
+            "guidelines": "This criterion requires that practice leaders adhere to the timeframes that were set at the beginning of each year for achieving the strategic plan. For any plan to be implemented effectively, it is essential to monitor the progress that is being made towards achieving the outcomes that have been planned. This criterion further requires the practice to document the progress that is being made during the year towards achieving the strategic plan."
+        },
+        {
+            "criteria": "1.1.1.9",
+            "description": "Where appropriate, the leadership roles in various positions are documented, agreed to and known by the personnel.",
+            "linked_criteria": [
+                "1.1.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This may, for example include personnel responsible for monitoring infection control practices, resuscitation, stock control, patient files etc.",
+            "guidelines": "This may, for example include personnel responsible for monitoring infection control practices, resuscitation, stock control, patient files etc."
+        },
+        {
+            "criteria": "1.2.1.3",
+            "description": "The practice is licensed in terms of relevant legislation for the level and type of services provided.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": true,
+            "guideline": "CRITICAL Documented evidence is required.",
+            "guidelines": "CRITICAL Documented evidence is required."
+        },
+        {
+            "criteria": "1.2.1.4",
+            "description": "The manager ensures that there is a system in place to monitor the implementation of applicable laws and regulations.",
+            "linked_criteria": [
+                "1.2.1.3",
+                "1.2.1.5",
+                "1.2.1.6",
+                "1.4.2.1",
+                "1.4.2.2",
+                "1.5.2.2",
+                "1.5.3.2",
+                "1.5.3.3",
+                "1.7.2.8",
+                "1.7.3.1",
+                "1.7.3.3",
+                "1.7.5.2",
+                "1.7.5.4",
+                "1.7.6.4",
+                "2.1.2.1",
+                "3.1.1.1",
+                "3.1.3.2",
+                "3.1.3.3",
+                "3.1.3.4",
+                "3.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This criterion will be scored compliant by default, although a PC rating is given whenever there is definite evidence of non-adherence to any legal requirement. In these cases, the transgression needs to be recorded in detail to motivate for the PC rating and it should be based on accurate facts. Common examples of non-conformance with legal requirements include the following deficiencies: The required certificates are not available, for example, fire clearance certificates, electrical installation certificates, commissioning certificates (for example, ethylene oxide sterilisers), pressure test certificates for vessels under pressure Internal/external financial audits are not conducted Nurses transcribe doctors’ tests menu or list Laboratory items are incorrectly labelled Proof of current registration of professional personnel with the relevant councils is not available In order to demonstrate compliance, practices may wish to compile a template listing the criteria requiring demonstration of compliance with country-specific legislation and regulations against the relevant national acts, regulations, etc. applicable to the criterion.",
+            "guidelines": "This criterion will be scored compliant by default, although a PC rating is given whenever there is definite evidence of non-adherence to any legal requirement. In these cases, the transgression needs to be recorded in detail to motivate for the PC rating and it should be based on accurate facts. Common examples of non-conformance with legal requirements include the following deficiencies: The required certificates are not available, for example, fire clearance certificates, electrical installation certificates, commissioning certificates (for example, ethylene oxide sterilisers), pressure test certificates for vessels under pressure Internal/external financial audits are not conducted Nurses transcribe doctors’ tests menu or list Laboratory items are incorrectly labelled Proof of current registration of professional personnel with the relevant councils is not available In order to demonstrate compliance, practices may wish to compile a template listing the criteria requiring demonstration of compliance with country-specific legislation and regulations against the relevant national acts, regulations, etc. applicable to the criterion."
+        },
+        {
+            "criteria": "1.2.1.5",
+            "description": "There is evidence of response to any reports from inspecting and regulatory authorities.",
+            "linked_criteria": [
+                "1.2.1.4",
+                "1.2.1.5",
+                "1.2.1.6",
+                "1.5.2.2",
+                "1.5.3.3",
+                "1.7.5.2",
+                "2.1.2.1"
+            ],
+            "root": [],
+            "is_critical": true,
+            "guideline": "CRITICAL   This requires documented evidence for whatever inspections that may have been conducted.  Examples may include inspections by the following authorities The local fire authority for fire clearance purposes The national authority responsible for radiation safety aspects The national authority responsible for health and safety compliance The national authority responsible for financial compliance The national authority responsible for maintenance requirements such as boiler inspections and pressure tests, autoclave pressure tests The local authority responsible for testing of water supplies The relevant professional bodies where student training is provided Licensing authorities for facilities. Immigration requirements for non-resident",
+            "guidelines": "CRITICAL   This requires documented evidence for whatever inspections that may have been conducted.  Examples may include inspections by the following authorities The local fire authority for fire clearance purposes The national authority responsible for radiation safety aspects The national authority responsible for health and safety compliance The national authority responsible for financial compliance The national authority responsible for maintenance requirements such as boiler inspections and pressure tests, autoclave pressure tests The local authority responsible for testing of water supplies The relevant professional bodies where student training is provided Licensing authorities for facilities. Immigration requirements for non-resident"
+        },
+        {
+            "criteria": "1.2.1.6",
+            "description": "The manager implements processes to manage and control human, financial and other resources.",
+            "linked_criteria": [
+                "1.1.1.5",
+                "1.2.1.4",
+                "1.4.1.1",
+                "1.5.2.1",
+                "1.5.2.3",
+                "1.5.2.4",
+                "1.5.3.4",
+                "1.6.1.1",
+                "1.7.2.6",
+                "1.8.3.5",
+                "2.2.2.2",
+                "2.3.2.1",
+                "2.1.2.13",
+                "2.1.3.1",
+                "2.3.1.5",
+                "2.3.3.3"
+            ],
+            "root": [],
+            "is_critical": false
+        },
+        {
+            "criteria": "1.2.3.2",
+            "description": "Information on services, hours of operation and processes for obtaining care is provided to services in the community who work in collaboration with the practice.",
+            "linked_criteria": [
+                "2.1.1.3"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This information needs to be provided for example, to community nursing teams, step down care, allied health professionals etc. Compliance can be demonstrated by for example, e-mail correspondence with the various services or by providing information pamphlets about the practice to these services.",
+            "guidelines": "This information needs to be provided for example, to community nursing teams, step down care, allied health professionals etc. Compliance can be demonstrated by for example, e-mail correspondence with the various services or by providing information pamphlets about the practice to these services."
+        },
+        {
+            "criteria": "1.3.1.1",
+            "description": "Policies and procedures that guide and support the different services offered by the practice are implemented.",
+            "linked_criteria": [
+                "1.5.1.3",
+                "1.5.3.1",
+                "1.6.1.2",
+                "1.7.1.2",
+                "1.7.1.4",
+                "1.7.2.2",
+                "1.7.2.10",
+                "1.7.2.11",
+                "1.7.2.14",
+                "1.7.4.6",
+                "1.7.5.1",
+                "1.8.1.1",
+                "1.8.6.4",
+                "2.2.1.1",
+                "2.3.1.1",
+                "2.3.3.1",
+                "2.4.1.1",
+                "2.5.1.4",
+                "3.1.1.2",
+                "3.3.1.1",
+                "3.4.1.1",
+                "2.3.3.5",
+                "3.1.2.4",
+                "3.1.3.2",
+                "3.1.4.1",
+                "3.2.4.1",
+                "3.4.2.1",
+                "3.6.2.1",
+                "1.7.2.13"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "ROOT The criterion will be scored at the end of the survey. If this criterion is scored PC or NC Surveyors must document examples of non-compliance. This criterion will automatically be scored NC if there is evidence of non-compliance with policies and procedures that affect patient and personnel safety.",
+            "guidelines": "ROOT The criterion will be scored at the end of the survey. If this criterion is scored PC or NC Surveyors must document examples of non-compliance. This criterion will automatically be scored NC if there is evidence of non-compliance with policies and procedures that affect patient and personnel safety."
+        },
+        {
+            "criteria": "1.4.1.1",
+            "description": "There are documented processes staffing the practice.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance with this criterion will require the practitioner to show documented evidence that patient load and patient acuity were studied and considered when planning the staffing for the practice. This must be evident for both the number of personnel required as well as their qualifications.",
+            "guidelines": "Compliance with this criterion will require the practitioner to show documented evidence that patient load and patient acuity were studied and considered when planning the staffing for the practice. This must be evident for both the number of personnel required as well as their qualifications."
+        },
+        {
+            "criteria": "1.4.1.2",
+            "description": "The desired education, qualifications, skills and knowledge are defined for personnel.",
+            "linked_criteria": [
+                "1.5.1.2",
+                "1.7.1.3"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "These requirements must be discussed and agreed by all relevant personnel during the recruitment process and form part of the position description.",
+            "guidelines": "These requirements must be discussed and agreed by all relevant personnel during the recruitment process and form part of the position description."
+        },
+        {
+            "criteria": "1.4.1.3",
+            "description": "The processes include measures to improve personnel retention.",
+            "linked_criteria": [],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Retention of personnel as opposed to the recruitment of new personnel is more cost effective and more likely to result in better patient care due to improved continuity of care and service provision and the accumulation of experience. It is therefore strategically important for retention to be considered as part of the recruitment process. As an additional benefit, measures taken to improve retention are likely to improve personnel satisfaction, and satisfied personnel provide better services. For a practice to be compliant with this criterion evidence must be provided of at least a personnel satisfaction survey.",
+            "guidelines": "Retention of personnel as opposed to the recruitment of new personnel is more cost effective and more likely to result in better patient care due to improved continuity of care and service provision and the accumulation of experience. It is therefore strategically important for retention to be considered as part of the recruitment process. As an additional benefit, measures taken to improve retention are likely to improve personnel satisfaction, and satisfied personnel provide better services. For a practice to be compliant with this criterion evidence must be provided of at least a personnel satisfaction survey."
+        },
+        {
+            "criteria": "1.4.2.1",
+            "description": "There is implementation of a reliable, documented process for evaluating and verifying the credentials of all health professionals.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This can be achieved for example, by having a standardised checklist of requirements that must be verified. This should include reference checks. The completed document can then be retained in the employee’s personnel file. Compliance will be verified during an audit of the personnel files of various categories of professional personnel.",
+            "guidelines": "This can be achieved for example, by having a standardised checklist of requirements that must be verified. This should include reference checks. The completed document can then be retained in the employee’s personnel file. Compliance will be verified during an audit of the personnel files of various categories of professional personnel."
+        },
+        {
+            "criteria": "1.4.2.2",
+            "description": "Personnel files contain copies of qualifications and licences/registration from the relevant authority for CRITICAL all health professionals.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Copies of all the relevant original degrees/diplomas/certificates must be available, as well as evidence of registration with the relevant registration bodies. Compliance will be verified during an audit of the personnel files.",
+            "guidelines": "Copies of all the relevant original degrees/diplomas/certificates must be available, as well as evidence of registration with the relevant registration bodies. Compliance will be verified during an audit of the personnel files."
+        },
+        {
+            "criteria": "1.4.3.1",
+            "description": "There are documented processes for orientation of personnel to the practice.",
+            "linked_criteria": [
+                "1.7.4.5",
+                "1.7.5.9",
+                "2.5.1.4"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This includes general orientation and position-specific orientation as discussed in the standard intent above.",
+            "guidelines": "This includes general orientation and position-specific orientation as discussed in the standard intent above."
+        },
+        {
+            "criteria": "1.4.3.2",
+            "description": "The practice supports continuing education for its clinical personnel and maintains records of this in personnel files.",
+            "linked_criteria": [
+                "1.7.1.4",
+                "1.7.2.3"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This refers specifically to professional personnel and the requirements for continued registration with the relevant professional bodies, where applicable. Management must have a clear strategy for assisting professional personnel to maintain their continued registration.",
+            "guidelines": "This refers specifically to professional personnel and the requirements for continued registration with the relevant professional bodies, where applicable. Management must have a clear strategy for assisting professional personnel to maintain their continued registration."
+        },
+        {
+            "criteria": "1.5.1.1",
+            "description": "A designated person is responsible for the implementation and maintenance of a financial strategy.",
+            "linked_criteria": [],
+            "root": [],
+            "is_critical": false
+        },
+        {
+            "criteria": "1.5.1.2",
+            "description": "The designated person is suitably qualified and/or experienced in accounting and financial management.",
+            "linked_criteria": [
+                "1.4.1.2"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ finances. Where a financial manager or financial officer is employed, compliance will be assessed against the requirements set out in the position description.",
+            "guidelines": "This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ finances. Where a financial manager or financial officer is employed, compliance will be assessed against the requirements set out in the position description."
+        },
+        {
+            "criteria": "1.5.1.3",
+            "description": "The responsibilities of this person include ensuring that policies and procedures for all financial functions are implemented.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ finances. Where a financial manager or financial officer is employed, policies and procedures must guide their functions.",
+            "guidelines": "This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ finances. Where a financial manager or financial officer is employed, policies and procedures must guide their functions."
+        },
+        {
+            "criteria": "1.5.2.1",
+            "description": "There is a current budget for the practice.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "For practices that comprise of more than one practitioner there should be an approved budget available in the management documentation. For practices that comprise of a solo practitioner there should be evidence of a practice budget. The budget must demonstrate allocation of resources. The budget will include, for example, salaries, rent, utility costs (water and electricity), consumable stock etc.",
+            "guidelines": "For practices that comprise of more than one practitioner there should be an approved budget available in the management documentation. For practices that comprise of a solo practitioner there should be evidence of a practice budget. The budget must demonstrate allocation of resources. The budget will include, for example, salaries, rent, utility costs (water and electricity), consumable stock etc."
+        },
+        {
+            "criteria": "1.5.2.2",
+            "description": "A report is produced at least annually, setting out the financial position to date.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This criterion requires that at least the most recent financial report that is prepared annually for submission to the relevant authorities such as Botswana Unified Revenue Service (BURS) must be available during the survey.",
+            "guidelines": "This criterion requires that at least the most recent financial report that is prepared annually for submission to the relevant authorities such as Botswana Unified Revenue Service (BURS) must be available during the survey."
+        },
+        {
+            "criteria": "1.5.2.3",
+            "description": "There is a mechanism for establishing the reason for budget variation in either income or expenditure.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Evidence should exist in the format in which financial statements are produced. Generally, these statements contain a column/section indicating the variance, i.e. under- or over-expenditure. Evidence showing what is done about this variance (especially over-expenditure), should be available, for example, in the minutes of relevant financial management meetings, personnel meetings or memos.",
+            "guidelines": "Evidence should exist in the format in which financial statements are produced. Generally, these statements contain a column/section indicating the variance, i.e. under- or over-expenditure. Evidence showing what is done about this variance (especially over-expenditure), should be available, for example, in the minutes of relevant financial management meetings, personnel meetings or memos."
+        },
+        {
+            "criteria": "1.5.2.4",
+            "description": "Capital investment proposals are subject to unanimous agreement among the partners or are agreed according to a voting system acceptable to all partners in the practice.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Documented evidence must be provided to demonstrate agreement. This criterion will be scored “not applicable” in practices owned by a solo practitioner.",
+            "guidelines": "Documented evidence must be provided to demonstrate agreement. This criterion will be scored “not applicable” in practices owned by a solo practitioner."
+        },
+        {
+            "criteria": "1.5.3.1",
+            "description": "The practice has documented ethical and legal policies and procedures for the financial management of the practice that are implemented.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Examples of compliance with this criterion can be found in the policies and procedures for billing or referral to partners within the practice (for example partners in a poly clinic).",
+            "guidelines": "Examples of compliance with this criterion can be found in the policies and procedures for billing or referral to partners within the practice (for example partners in a poly clinic)."
+        },
+        {
+            "criteria": "1.5.3.2",
+            "description": "Internal and external financial audit systems which meet audit requirements are maintained.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be measured in accordance with the national requirements such as of the Botswana Companies Act.",
+            "guidelines": "Compliance will be measured in accordance with the national requirements such as of the Botswana Companies Act."
+        },
+        {
+            "criteria": "1.5.3.3",
+            "description": "Annual audited financial statements are produced within the required time frame.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": true,
+            "guideline": "CRITICAL Compliance will be measured in accordance with the national requirements such as of the Botswana Companies Act.",
+            "guidelines": "CRITICAL Compliance will be measured in accordance with the national requirements such as of the Botswana Companies Act."
+        },
+        {
+            "criteria": "1.5.3.4",
+            "description": "There is a capital asset register, which is routinely maintained.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false
+        },
+        {
+            "criteria": "1.5.3.5",
+            "description": "Assets are insured.",
+            "linked_criteria": [],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This includes the practice assets and where applicable the physical structure.",
+            "guidelines": "This includes the practice assets and where applicable the physical structure."
+        },
+        {
+            "criteria": "1.6.1.1",
+            "description": "An individual is designated to control the ordering, storage, distribution and control of equipment and supplies used in the practice.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ equipment and supplies. Where a supply chain manager/stock controller is employed or the function is performed by someone other than the solo practice manager, compliance will be assessed against the requirements set out in the position description.",
+            "guidelines": "This criterion will automatically be scored compliant where a solo private practitioner manages the practices’ equipment and supplies. Where a supply chain manager/stock controller is employed or the function is performed by someone other than the solo practice manager, compliance will be assessed against the requirements set out in the position description."
+        },
+        {
+            "criteria": "1.6.1.2",
+            "description": "Policies and procedures relating to all aspects of provisioning/supply chain management are implemented.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "As a minimum, the policies and procedures discussed in a) – d) in the standard intent above should be available, accessible to personnel and implementation should be monitored.",
+            "guidelines": "As a minimum, the policies and procedures discussed in a) – d) in the standard intent above should be available, accessible to personnel and implementation should be monitored."
+        },
+        {
+            "criteria": "1.7.1.1",
+            "description": "There are documented risk management processes for identifying all risks relating to practice processes and systems, personnel, patients, visitors to the practice and physical facilities.",
+            "linked_criteria": [
+                "1.7.3.5",
+                "1.7.3.6",
+                "1.7.4.1",
+                "1.7.4.6",
+                "1.7.5.1",
+                "1.8.1.5",
+                "1.8.6.1",
+                "2.1.2.5"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance with this criterion requires documented evidence that the practice personnel have collaboratively identified risks within the practice. This document will be used to develop an action plan to eliminate or minimise risk. The risk management process should include all relevant aspects and services of the practice, for example patient, personnel and visitor related risks; financial, corporate and legal risks; physical facility, security and environmental risks; etc. This does not necessarily require a single integrated document, provided all components are dealt with in documented systems for the relevant operational processes/functions/sections. (NOTE: doing only monthly workplace inspections does not qualify for a compliance rating).",
+            "guidelines": "Compliance with this criterion requires documented evidence that the practice personnel have collaboratively identified risks within the practice. This document will be used to develop an action plan to eliminate or minimise risk. The risk management process should include all relevant aspects and services of the practice, for example patient, personnel and visitor related risks; financial, corporate and legal risks; physical facility, security and environmental risks; etc. This does not necessarily require a single integrated document, provided all components are dealt with in documented systems for the relevant operational processes/functions/sections. (NOTE: doing only monthly workplace inspections does not qualify for a compliance rating)."
+        },
+        {
+            "criteria": "1.7.1.2",
+            "description": "The practice manager ensures the development and implementation of written policies and procedures for risk management processes and activities.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "These policies and procedures must define the routine risk management processes, for example, monthly inspections to monitor risks, and the actions to be taken when risks materialise as adverse events.",
+            "guidelines": "These policies and procedures must define the routine risk management processes, for example, monthly inspections to monitor risks, and the actions to be taken when risks materialise as adverse events."
+        },
+        {
+            "criteria": "1.7.1.3",
+            "description": "A nominated individual with relevant qualifications, skills and/or experience supervises the implementation of the risk management programme.",
+            "linked_criteria": [
+                "1.4.1.2"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "In small practices, this will usually be the practice manager. Larger practices may have a designated risk manager.",
+            "guidelines": "In small practices, this will usually be the practice manager. Larger practices may have a designated risk manager."
+        },
+        {
+            "criteria": "1.7.1.4",
+            "description": "Ongoing in-service training of all personnel in risk management policies, procedures and principles is documented.",
+            "linked_criteria": [
+                "1.3.1.1",
+                "1.4.3.2"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "A record must be kept of such training and must include all personnel.",
+            "guidelines": "A record must be kept of such training and must include all personnel."
+        },
+        {
+            "criteria": "1.7.2.2",
+            "description": "Written policies and procedures guide personnel in the implementation of the infection control programme.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "These policies and procedures must be available and accessible in the practice and their implementation monitored.",
+            "guidelines": "These policies and procedures must be available and accessible in the practice and their implementation monitored."
+        },
+        {
+            "criteria": "1.7.2.3",
+            "description": "Regular in-service training is given to all personnel in the field of infection control and is documented.",
+            "linked_criteria": [
+                "1.4.3.2"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "The infection control education programme needs to include policies/guidelines as well as relevant issues as they are identified. All personnel should be included in information sharing and training at regular scheduled meetings or other fora. Documented evidence (for example, minutes of meetings/attendance records) must be provided.",
+            "guidelines": "The infection control education programme needs to include policies/guidelines as well as relevant issues as they are identified. All personnel should be included in information sharing and training at regular scheduled meetings or other fora. Documented evidence (for example, minutes of meetings/attendance records) must be provided."
+        },
+        {
+            "criteria": "1.7.2.6",
+            "description": "Hand washing and disinfecting facilities, including warm water, soap, paper towels or hand sanitisers are available in all relevant areas.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be measured by observation.",
+            "guidelines": "Compliance will be measured by observation."
+        },
+        {
+            "criteria": "1.7.2.8",
+            "description": "The practice reports on notifiable diseases to appropriate external public health agencies.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": true,
+            "guideline": "CRITICAL  Documented evidence is required.",
+            "guidelines": "CRITICAL  Documented evidence is required."
+        },
+        {
+            "criteria": "1.7.2.10",
+            "description": "Relevant personnel members are immunised against Hepatitis B according to the policy.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This requires the practice to formally identify the categories of personnel who are at risk (including cleaning personnel if they handle healthcare related waste) and to ensure that there is a system to track that their Hepatitis B immunisations remain up to date.",
+            "guidelines": "This requires the practice to formally identify the categories of personnel who are at risk (including cleaning personnel if they handle healthcare related waste) and to ensure that there is a system to track that their Hepatitis B immunisations remain up to date."
+        },
+        {
+            "criteria": "1.7.2.11",
+            "description": "There is a documented policy for the management of exposure to high-risk infections and needle-stick injuries.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Documented evidence must be provided to demonstrate that personnel are aware of the policy and have been trained on its content and implementation. Compliance will further be verified by personnel interviews.",
+            "guidelines": "Documented evidence must be provided to demonstrate that personnel are aware of the policy and have been trained on its content and implementation. Compliance will further be verified by personnel interviews."
+        },
+        {
+            "criteria": "1.7.2.14",
+            "description": "There is a documented policy for the triage of patients with potential communicable diseases.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "These patients are identified when requesting an appointment and appropriately triaged. If it is necessary for these patients to attend the practice, they are directed to a separate waiting area to prevent transmission of the infection to non-infected patients. Where there is no separate waiting area, the practitioner must attend to the patient immediately.",
+            "guidelines": "These patients are identified when requesting an appointment and appropriately triaged. If it is necessary for these patients to attend the practice, they are directed to a separate waiting area to prevent transmission of the infection to non-infected patients. Where there is no separate waiting area, the practitioner must attend to the patient immediately."
+        },
+        {
+            "criteria": "1.7.3.1",
+            "description": "The practice has a waste management policy that is consistent with country-specific laws and regulations and includes the safe handling, storing and disposing of all different types of waste.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "The policy must include all relevant aspects of waste management, for example, identification, colour coding, handling, storage, disposal of etc. with special reference to clinical/healthcare waste, personal protective equipment (PPE), the management of spills and the reporting and investigation of waste related incidents.",
+            "guidelines": "The policy must include all relevant aspects of waste management, for example, identification, colour coding, handling, storage, disposal of etc. with special reference to clinical/healthcare waste, personal protective equipment (PPE), the management of spills and the reporting and investigation of waste related incidents."
+        },
+        {
+            "criteria": "1.7.3.2",
+            "description": "The policy makes provision for the appropriate management of confidential waste.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": true,
+            "guideline": "CRITICAL  Confidential waste includes all patient and personnel related documentation and practice-specific documentation for example, financial statements.",
+            "guidelines": "CRITICAL  Confidential waste includes all patient and personnel related documentation and practice-specific documentation for example, financial statements."
+        },
+        {
+            "criteria": "1.7.3.3",
+            "description": "Waste is segregated in accordance with policies, procedures, country-specific laws and regulations.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be measured by observation.",
+            "guidelines": "Compliance will be measured by observation."
+        },
+        {
+            "criteria": "1.7.3.5",
+            "description": "Waste is protected from theft, vandalism or scavenging by animals.",
+            "linked_criteria": [
+                "1.7.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be measured by observation.",
+            "guidelines": "Compliance will be measured by observation."
+        },
+        {
+            "criteria": "1.7.3.6",
+            "description": "Waste is collected at appropriate times so that hazards are not caused.",
+            "linked_criteria": [
+                "1.7.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be measured by observation and by documented evidence that demonstrates when and by whom waste is collected.",
+            "guidelines": "Compliance will be measured by observation and by documented evidence that demonstrates when and by whom waste is collected."
+        },
+        {
+            "criteria": "1.7.4.1",
+            "description": "Security systems, including guards if required, provide for internal and external security.",
+            "linked_criteria": [
+                "1.7.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "If the security system is outsourced (alarms/guards) the service contract must be available during the survey. As a minimum, a practice must be secured with burglar bars and security gates. Compliance will be further measured by observation of the security measures in place and whether they are appropriate for the individual setting.",
+            "guidelines": "If the security system is outsourced (alarms/guards) the service contract must be available during the survey. As a minimum, a practice must be secured with burglar bars and security gates. Compliance will be further measured by observation of the security measures in place and whether they are appropriate for the individual setting."
+        },
+        {
+            "criteria": "1.7.4.5",
+            "description": "A mechanism known to the personnel is available for summoning the assistance of security/police/protection services in the case of an emergency.",
+            "linked_criteria": [
+                "1.4.3.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This can be achieved for example, by including the information in the orientation programme for new personnel and by displaying emergency numbers next to all telephones in the practice.",
+            "guidelines": "This can be achieved for example, by including the information in the orientation programme for new personnel and by displaying emergency numbers next to all telephones in the practice."
+        },
+        {
+            "criteria": "1.7.4.6",
+            "description": "Reasonable measures are taken to ensure the safety of lone workers.",
+            "linked_criteria": [
+                "1.7.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This criterion is only applicable where practitioners consult with patients after hours. Reasonable measures can include for example, the installation of panic buttons or notifying another person or security company that the practitioner is alone in the practice. Sufficient arrangements should be in place to ensure that a personnel member who is alone in the practice is safe. These arrangements must be outlined in a policy which all personnel should be aware of.",
+            "guidelines": "This criterion is only applicable where practitioners consult with patients after hours. Reasonable measures can include for example, the installation of panic buttons or notifying another person or security company that the practitioner is alone in the practice. Sufficient arrangements should be in place to ensure that a personnel member who is alone in the practice is safe. These arrangements must be outlined in a policy which all personnel should be aware of."
+        },
+        {
+            "criteria": "1.7.5.1",
+            "description": "There are structured systems and processes in place to ensure that all occupants of the practice’s facilities are safe from fire or smoke",
+            "linked_criteria": [
+                "1.7.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "There are documented fire safety systems which include all the relevant aspects of fire safety, for example training, rehearsals, servicing and storage of equipment, escape route signage, storage and handling of flammable materials, etc.",
+            "guidelines": "There are documented fire safety systems which include all the relevant aspects of fire safety, for example training, rehearsals, servicing and storage of equipment, escape route signage, storage and handling of flammable materials, etc."
+        },
+        {
+            "criteria": "1.7.5.2",
+            "description": "Documented certification is available from the relevant authority to show that the facility complies with applicable laws and regulations in relation to fire safety (fire clearance certificate).",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": true,
+            "guideline": "CRITICAL  As per the intent statement, compliance with this criterion requires documented evidence of an official inspection to confirm that the building complies with national fire safety requirements. The practice manager must obtain a copy of the documentation from the landlord if the practice does not own the building.",
+            "guidelines": "CRITICAL  As per the intent statement, compliance with this criterion requires documented evidence of an official inspection to confirm that the building complies with national fire safety requirements. The practice manager must obtain a copy of the documentation from the landlord if the practice does not own the building."
+        },
+        {
+            "criteria": "1.7.5.4",
+            "description": "Flammable materials are clearly labelled and safely stored.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": true,
+            "guideline": "CRITICAL Flammable materials are identified by the practice and stored in accordance with the national safety regulations. The storage precautions are applicable to all areas/services/departments where flammable materials are used. The appropriateness of the storage facility will be determined by the quantity and flashpoint of the materials stored. Bulk storage requirements and registration will be determined by country specific regulations.",
+            "guidelines": "CRITICAL Flammable materials are identified by the practice and stored in accordance with the national safety regulations. The storage precautions are applicable to all areas/services/departments where flammable materials are used. The appropriateness of the storage facility will be determined by the quantity and flashpoint of the materials stored. Bulk storage requirements and registration will be determined by country specific regulations."
+        },
+        {
+            "criteria": "1.7.5.5",
+            "description": "Sufficient electrical socket outlets are provided in all areas to avoid overloading of individual outlets and to minimise fire risks.",
+            "linked_criteria": [],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be measured by observation.",
+            "guidelines": "Compliance will be measured by observation."
+        },
+        {
+            "criteria": "1.7.5.9",
+            "description": "A mechanism known to personnel is available for summoning the fire service.",
+            "linked_criteria": [
+                "1.4.3.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This can be achieved for example, by including the information in the orientation programme for new personnel and by displaying emergency numbers next to all telephones in the practice.",
+            "guidelines": "This can be achieved for example, by including the information in the orientation programme for new personnel and by displaying emergency numbers next to all telephones in the practice."
+        },
+        {
+            "criteria": "1.7.6.4",
+            "description": "First aid kits and materials for healthcare workers are available.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Botswana specific occupational health laws and regulations should dictate the contents of the first aid kits.",
+            "guidelines": "Botswana specific occupational health laws and regulations should dictate the contents of the first aid kits."
+        },
+        {
+            "criteria": "1.8.1.1",
+            "description": "There is a documented policy for collection, collation, validation and distribution of data which is implemented.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "The policy must define those permitted access to each category of data and information.",
+            "guidelines": "The policy must define those permitted access to each category of data and information."
+        },
+        {
+            "criteria": "1.8.1.5",
+            "description": "Security and confidentiality of data and information is maintained.",
+            "linked_criteria": [
+                "1.7.1.1"
+            ],
+            "root": [],
+            "is_critical": true,
+            "guideline": "CRITICAL Security relates to access control in terms of passwords, back up processes as well as archiving of paper based records. Up to date anti-virus/anti-malware software is in place. Confidentiality aspects need to be documented as part of the information management processes for the various types of information, whether it be financial data, personal information on personnel, patient information, etc. Where applicable, country-specific legal requirements need to be considered.",
+            "guidelines": "CRITICAL Security relates to access control in terms of passwords, back up processes as well as archiving of paper based records. Up to date anti-virus/anti-malware software is in place. Confidentiality aspects need to be documented as part of the information management processes for the various types of information, whether it be financial data, personal information on personnel, patient information, etc. Where applicable, country-specific legal requirements need to be considered."
+        },
+        {
+            "criteria": "1.8.1.6",
+            "description": "Documented procedures which outline the processes to provide required information to individuals and agencies outside the practice when required by laws or regulations are implemented.",
+            "linked_criteria": [
+                "1.2.1.4",
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": true
+        },
+        {
+            "criteria": "1.8.3.5",
+            "description": "The practice manager provides technology, support and resources (including time) for the assessment and improvement of the practice’s management, clinical and support processes and this is reflected in the strategic plan/business plan for the practice.",
+            "linked_criteria": [
+                "1.1.1.6",
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "The technology, support and resources required will be determined by the design and complexity of the quality management and improvement framework. This may include aspects such as training in quality methodology, aligning work schedules to allow for time to spend on relevant activities, providing assistance with data management (manually or electronically), etc.",
+            "guidelines": "The technology, support and resources required will be determined by the design and complexity of the quality management and improvement framework. This may include aspects such as training in quality methodology, aligning work schedules to allow for time to spend on relevant activities, providing assistance with data management (manually or electronically), etc."
+        },
+        {
+            "criteria": "1.8.6.1",
+            "description": "A documented procedure for the monitoring of near misses/incidents/adverse (sentinel) events is available, which includes the documentation of interventions, responses and corrective actions taken to recorded incidents.",
+            "linked_criteria": [
+                "1.7.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "A policy and procedure should be available to all personnel detailing the steps to follow in the event of such an incident occurring. This includes the reporting, recording and investigation of the event as well as the response to the event and the actions taken to prevent recurrence of the event, or minimise harm should the event recur. Personnel will be interviewed to confirm that they are familiar with the contents of these documents.",
+            "guidelines": "A policy and procedure should be available to all personnel detailing the steps to follow in the event of such an incident occurring. This includes the reporting, recording and investigation of the event as well as the response to the event and the actions taken to prevent recurrence of the event, or minimise harm should the event recur. Personnel will be interviewed to confirm that they are familiar with the contents of these documents."
+        },
+        {
+            "criteria": "1.8.6.4",
+            "description": "All changes to policy and procedure that are identified as a result of these formal incident reviews are documented and included in new policies or incorporated into existing policies.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Documented evidence will be required for compliance.",
+            "guidelines": "Documented evidence will be required for compliance."
+        },
+        {
+            "criteria": "2.1.1.2",
+            "description": "A telephone/emergency number is available and provided to patients on registration and on request.",
+            "linked_criteria": [
+                "3.2.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This can be in the form of a business card or patient information leaflet. Where the practice does not provide emergency services the emergency number must reflect the closest emergency facility to the practice.",
+            "guidelines": "This can be in the form of a business card or patient information leaflet. Where the practice does not provide emergency services the emergency number must reflect the closest emergency facility to the practice."
+        },
+        {
+            "criteria": "2.1.1.3",
+            "description": "A phone number for the after-hours service of the practice is clearly displayed on the outside of the facility.",
+            "linked_criteria": [
+                "1.2.3.2",
+                "3.2.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be verified by observation.",
+            "guidelines": "Compliance will be verified by observation."
+        },
+        {
+            "criteria": "2.1.2.1",
+            "description": "Laws, regulations and other requirements applicable to the practice’s facilities are implemented and are available to the personnel.",
+            "linked_criteria": [
+                "1.2.1.4",
+                "1.2.1.5"
+            ],
+            "root": [],
+            "is_critical": true,
+            "guideline": "CRITICAL  A copy of the occupation certificate issued in terms of the Building Control Act and regulations must be available during the survey. Where the practice is in a rented facility, a copy must be obtained from the landlord.  Copies of the laws, regulations and other requirements applicable to the structure of the facility should be available and accessible to personnel in either hard copy or electronic format and should include at least the Building Control Act and regulations.",
+            "guidelines": "CRITICAL  A copy of the occupation certificate issued in terms of the Building Control Act and regulations must be available during the survey. Where the practice is in a rented facility, a copy must be obtained from the landlord.  Copies of the laws, regulations and other requirements applicable to the structure of the facility should be available and accessible to personnel in either hard copy or electronic format and should include at least the Building Control Act and regulations."
+        },
+        {
+            "criteria": "2.1.2.5",
+            "description": "The waiting area caters for the specific safety needs of children.",
+            "linked_criteria": [
+                "1.7.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This includes for example, no open electrical sockets, measure to prevent children leaving the practice unnoticed, measures to prevent injury from inappropriate toys (ingestion of small objects, sharp protrusions, easily cleanable), measures to secure hazardous substances etc.",
+            "guidelines": "This includes for example, no open electrical sockets, measure to prevent children leaving the practice unnoticed, measures to prevent injury from inappropriate toys (ingestion of small objects, sharp protrusions, easily cleanable), measures to secure hazardous substances etc."
+        },
+        {
+            "criteria": "2.1.2.13",
+            "description": "Required furniture is available according to established lists and functioning properly.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "The practice must compile and maintain an inventory of furniture which must be available at the survey. As a minimum, a practice must have at least the following: Chairs (in the waiting area, for administrative staff, for clinical staff and for patients and families in the treatment areas) Desks/workstations (sufficient for the size of the practice) Minimum testing equipment (sufficient for the size of the practice) File cabinets Lockable fire proof cabinet (for all confidential documentation) Refuse bins for domestic and clinical waste in each functional area where appropriate.",
+            "guidelines": "The practice must compile and maintain an inventory of furniture which must be available at the survey. As a minimum, a practice must have at least the following: Chairs (in the waiting area, for administrative staff, for clinical staff and for patients and families in the treatment areas) Desks/workstations (sufficient for the size of the practice) Minimum testing equipment (sufficient for the size of the practice) File cabinets Lockable fire proof cabinet (for all confidential documentation) Refuse bins for domestic and clinical waste in each functional area where appropriate."
+        },
+        {
+            "criteria": "2.1.3.1",
+            "description": "Required furniture and equipment is available according to established lists and functioning properly.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be measured by observation.",
+            "guidelines": "Compliance will be measured by observation."
+        },
+        {
+            "criteria": "2.2.1.1",
+            "description": "Implemented policies and procedures guide the management of medical equipment.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "ROOT Policies and procedures that detail how equipment is to be used, maintained and repaired and the level of staff training required to use the equipment are implemented.",
+            "guidelines": "ROOT Policies and procedures that detail how equipment is to be used, maintained and repaired and the level of staff training required to use the equipment are implemented."
+        },
+        {
+            "criteria": "2.2.2.2",
+            "description": "Specific laboratory reagents, chemicals and kits are used appropriately.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Pay particular attention to the following: Consumables are not re-used Reagents and kits are not expired Proper specimen collection materials are used e.g. Vacutainer (or similar) system for blood collection should be mandatory Products are from quality assured manufacturers Kits used are part of the national algorithms Reagents and kits are stored according to the manufacturer’s guidelines",
+            "guidelines": "Pay particular attention to the following: Consumables are not re-used Reagents and kits are not expired Proper specimen collection materials are used e.g. Vacutainer (or similar) system for blood collection should be mandatory Products are from quality assured manufacturers Kits used are part of the national algorithms Reagents and kits are stored according to the manufacturer’s guidelines"
+        },
+        {
+            "criteria": "2.3.1.1",
+            "description": "Written policies and procedures guide practice personnel in the implementation of all maintenance service requirements.",
+            "linked_criteria": [
+                "1.3.1.1",
+                "2.3.1.4",
+                "2.3.2.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This criterion is assessed based on the evidence of effective maintenance found throughout the practice during the survey. If this criterion is scored PC or NC, the transgressions need to be recorded in detail to motivate for the PC/NC rating and it should be based on accurate facts.",
+            "guidelines": "This criterion is assessed based on the evidence of effective maintenance found throughout the practice during the survey. If this criterion is scored PC or NC, the transgressions need to be recorded in detail to motivate for the PC/NC rating and it should be based on accurate facts."
+        },
+        {
+            "criteria": "2.3.1.2",
+            "description": "A designated, competent individual is responsible for supervising the maintenance of buildings, grounds and utilities.",
+            "linked_criteria": [],
+            "root": [],
+            "is_critical": false,
+            "guideline": "If this role is fulfilled by the practice manager or solo practitioner, compliance will be measured on evidence of effective maintenance of the buildings, grounds and utilities. Where a designated individual has been identified to fulfil this role, compliance will be measured in accordance with the requirements set out in the employee’s position description.",
+            "guidelines": "If this role is fulfilled by the practice manager or solo practitioner, compliance will be measured on evidence of effective maintenance of the buildings, grounds and utilities. Where a designated individual has been identified to fulfil this role, compliance will be measured in accordance with the requirements set out in the employee’s position description."
+        },
+        {
+            "criteria": "2.3.1.4",
+            "description": "Written agreements ensure technical back-up services are available at all times during the openingor operational hours of the practice.",
+            "linked_criteria": [
+                "2.3.1.1",
+                "2.3.1.2"
+            ],
+            "root": [],
+            "is_critical": true,
+            "guideline": "Documented evidence is required.",
+            "guidelines": "Documented evidence is required."
+        },
+        {
+            "criteria": "2.3.1.5",
+            "description": "Basic maintenance equipment, tools and spare parts are available.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "The type and number of items available will vary in each practice according to the size of the facility and the services offered, but should be suitable and sufficient to prevent unnecessary risk to patients, visitors and personnel or cessation of services due to deficiencies that are easily rectifiable.",
+            "guidelines": "The type and number of items available will vary in each practice according to the size of the facility and the services offered, but should be suitable and sufficient to prevent unnecessary risk to patients, visitors and personnel or cessation of services due to deficiencies that are easily rectifiable."
+        },
+        {
+            "criteria": "2.3.2.1",
+            "description": "The practice plans and budgets for the upgrading or replacing of systems, buildings or components needed for the continued operation of a safe and effective facility.",
+            "linked_criteria": [
+                "1.2.1.6",
+                "2.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Documented evidence must be provided for example in the budget and/or strategic plan.",
+            "guidelines": "Documented evidence must be provided for example in the budget and/or strategic plan."
+        },
+        {
+            "criteria": "2.3.3.1",
+            "description": "Policies and procedures that guide the management of ICT equipment are implemented.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "All key processes that relate to the management of ICT equipment should be identified and the correct manner of performing the tasks documented. The purpose of this requirement is to ensure that important tasks are performed correctly and consistently.",
+            "guidelines": "All key processes that relate to the management of ICT equipment should be identified and the correct manner of performing the tasks documented. The purpose of this requirement is to ensure that important tasks are performed correctly and consistently."
+        },
+        {
+            "criteria": "2.3.3.3",
+            "description": "There is an inventory of all ICT equipment.",
+            "linked_criteria": [
+                "1.2.1.6"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This does not have to be a separate inventory, it can form part of a single inventory document for the practice. All ICT equipment must be included in the inventory (printers, laptop computers, desktop computers etc.)",
+            "guidelines": "This does not have to be a separate inventory, it can form part of a single inventory document for the practice. All ICT equipment must be included in the inventory (printers, laptop computers, desktop computers etc.)"
+        },
+        {
+            "criteria": "2.3.3.4",
+            "description": "All desktop and server computers are provided with surge protection and the server is protected by an uninterruptable power supply.",
+            "linked_criteria": [],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance with this criterion will ensure that data is not lost due to loss of power and that ICT equipment is not damaged, with potential loss of data, due to power surges.",
+            "guidelines": "Compliance with this criterion will ensure that data is not lost due to loss of power and that ICT equipment is not damaged, with potential loss of data, due to power surges."
+        },
+        {
+            "criteria": "2.3.3.5",
+            "description": "A documented policy is available clearly describing appropriate back up procedures for electronic records.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Documented evidence will be required.",
+            "guidelines": "Documented evidence will be required."
+        },
+        {
+            "criteria": "2.4.1.1",
+            "description": "Written policies and procedures relating to cleaning and laundry duties and the frequency with which these duties are carried out are implemented and monitored.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Policies and procedures must detail how the core functions are to be performed. Implementation of these policies and procedures should be monitored to ensure consistent service delivery according to agreed standards of practice. Compliance will be verified by documented evidence of monitoring activities and by observation of implementation of the policies.",
+            "guidelines": "Policies and procedures must detail how the core functions are to be performed. Implementation of these policies and procedures should be monitored to ensure consistent service delivery according to agreed standards of practice. Compliance will be verified by documented evidence of monitoring activities and by observation of implementation of the policies."
+        },
+        {
+            "criteria": "2.5.1.4",
+            "description": "The practice ensures that contracted personnel are oriented to the practice and to relevant practice policies and procedures.",
+            "linked_criteria": [
+                "1.3.1.1",
+                "1.4.3.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Documented evidence of orientation to the facility, the position and relevant policies and procedures is required.",
+            "guidelines": "Documented evidence of orientation to the facility, the position and relevant policies and procedures is required."
+        },
+        {
+            "criteria": "3.1.1.1",
+            "description": "Patient and family rights are identified in a policy and documented in accordance with relevant and current laws, charters and regulations.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": false
+        },
+        {
+            "criteria": "3.1.1.2",
+            "description": "Documented evidence of personnel training in relation to these policies and procedures is available.",
+            "linked_criteria": [
+                "1.2.1.6",
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Evidence of such training can exist in various forms such as formal in-service training sessions, meetings where policies and procedures are discussed, staff acknowledging in writing that they have studied policies and procedures, etc.",
+            "guidelines": "Evidence of such training can exist in various forms such as formal in-service training sessions, meetings where policies and procedures are discussed, staff acknowledging in writing that they have studied policies and procedures, etc."
+        },
+        {
+            "criteria": "3.1.2.4",
+            "description": "Policies and procedures to prevent the loss or misuse of patient information are implemented.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "This criterion measures more than just the information contained in the patient record. The confidentiality agreement that is signed by personnel must include the protection of all patient related information including for example, discussing patient details with anyone not involved in the patient’s care, comments on social media etc. Compliance will be measured by evidence of a signed confidentiality agreement and by examining the incident management system in the practice to establish if any complaints or incidents have been reported involving a breach of patient confidentiality.",
+            "guidelines": "This criterion measures more than just the information contained in the patient record. The confidentiality agreement that is signed by personnel must include the protection of all patient related information including for example, discussing patient details with anyone not involved in the patient’s care, comments on social media etc. Compliance will be measured by evidence of a signed confidentiality agreement and by examining the incident management system in the practice to establish if any complaints or incidents have been reported involving a breach of patient confidentiality."
+        },
+        {
+            "criteria": "3.1.3.2",
+            "description": "The practice has a documented policy outlining the procedure for obtaining consent in the case of patients who are unable to grant consent for themselves by way of age or mental/physical incapacity, which is in accordance with the relevant laws and regulations.",
+            "linked_criteria": [
+                "1.2.1.4",
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be assessed during the patient record audit.",
+            "guidelines": "Compliance will be assessed during the patient record audit."
+        },
+        {
+            "criteria": "3.1.3.3",
+            "description": "Documented consent is obtained from patients for health information to be provided to a third party.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Evidence of compliance with this criterion may be found in different documents. For example, patients may give consent for information to be shared with health funders as part of their membership registration. Consent is required whenever health information is shared with employers, family members or carers, lawyers, insurance companies, etc.",
+            "guidelines": "Evidence of compliance with this criterion may be found in different documents. For example, patients may give consent for information to be shared with health funders as part of their membership registration. Consent is required whenever health information is shared with employers, family members or carers, lawyers, insurance companies, etc."
+        },
+        {
+            "criteria": "3.1.3.4",
+            "description": "Where practice members use patient information for research, approval has been obtained from the relevant ethics committee and from patients themselves where required.",
+            "linked_criteria": [
+                "1.2.1.4"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Documented evidence will be required.",
+            "guidelines": "Documented evidence will be required."
+        },
+        {
+            "criteria": "3.1.4.1",
+            "description": "A documented policy outlining the mechanism to receive and act on complaints is implemented.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Documented evidence of implementation of the complaints procedure, e.g. complaints log and the documentation relating to the investigation and resolution of complaints, must be made available for assessment.",
+            "guidelines": "Documented evidence of implementation of the complaints procedure, e.g. complaints log and the documentation relating to the investigation and resolution of complaints, must be made available for assessment."
+        },
+        {
+            "criteria": "3.2.1.1",
+            "description": "When patients register with the practice, they are informed of the range of services offered by the practice, opening hours, contact details and after hours’ care arrangements, where applicable",
+            "linked_criteria": [
+                "2.1.1.2",
+                "2.1.1.3"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "It is advisable to provide this information in printed form as patients may not remember what they had been told. Patients must acknowledge receipt of the information by signing (on the registration form) that they have been informed.",
+            "guidelines": "It is advisable to provide this information in printed form as patients may not remember what they had been told. Patients must acknowledge receipt of the information by signing (on the registration form) that they have been informed."
+        },
+        {
+            "criteria": "3.2.4.1",
+            "description": "The practice implements a policy on telephonic and electronic communication with patients that details at least a) – e) in the standard intent above.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Compliance will be verified during personnel and patient interviews, patient record audits and by observation.",
+            "guidelines": "Compliance will be verified during personnel and patient interviews, patient record audits and by observation."
+        },
+        {
+            "criteria": "3.3.1.1",
+            "description": "Policies and procedures for the storage, retrieval, retention, destruction, confidentiality and safety of patient records are implemented.",
+            "linked_criteria": [
+                "1.2.1.4",
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Policies and procedures must include at least a) – g) in the standard intent above.",
+            "guidelines": "Policies and procedures must include at least a) – g) in the standard intent above."
+        },
+        {
+            "criteria": "3.4.1.1",
+            "description": "Policies and procedures or standard operating procedures (SOPs) for handling specimens are implemented and include a)-d) in the standard intent as a minimum.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Procedures and guidelines should be available for all specimens that are collected and investigated.  Topics such as proper collection, safe handling and storage must be addressed. Policies for specimen acceptance and/or rejection should be available.  These criteria should be based on information available in the manufacturer’s manual and general guidelines.",
+            "guidelines": "Procedures and guidelines should be available for all specimens that are collected and investigated.  Topics such as proper collection, safe handling and storage must be addressed. Policies for specimen acceptance and/or rejection should be available.  These criteria should be based on information available in the manufacturer’s manual and general guidelines."
+        },
+        {
+            "criteria": "3.4.2.1",
+            "description": "Policies and procedures or standard operating procedures regarding reporting and reviewing results are implemented.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Standard Operating Procedures (SOPs) should clearly define how these actions should be completed.  All personnel involved in the process should be familiar with the content of the SOPs and implementation of the SOPs should be monitored.",
+            "guidelines": "Standard Operating Procedures (SOPs) should clearly define how these actions should be completed.  All personnel involved in the process should be familiar with the content of the SOPs and implementation of the SOPs should be monitored."
+        },
+        {
+            "criteria": "3.6.2.1",
+            "description": "The practice has a policy on resuscitation, which includes the level at which resuscitation is provided, by whom and training and equipment requirements.",
+            "linked_criteria": [
+                "1.3.1.1"
+            ],
+            "root": [],
+            "is_critical": false,
+            "guideline": "Documented policies and procedures that include at least a) – f) must be available and implemented. Evidence of implementation of all of the listed policies is required for a compliance rating, otherwise this criterion will be scored PC.",
+            "guidelines": "Documented policies and procedures that include at least a) – f) must be available and implemented. Evidence of implementation of all of the listed policies is required for a compliance rating, otherwise this criterion will be scored PC."
+        }
+    ]
 }

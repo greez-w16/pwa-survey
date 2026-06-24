@@ -31,6 +31,9 @@ export const useIncrementalSave = (eventId, options = {}) => {
 
     // Form data state
     const [formData, setFormData] = useState({});
+    const [pendingFields, setPendingFields] = useState(new Set());
+    const [syncedFields, setSyncedFields] = useState(new Set());
+    const [syncStatus, setSyncStatus] = useState('pending'); // 'pending' | 'synced' | 'error'
 
     // Store pending saves to batch them
     const pendingSaves = useRef(new Map());
@@ -58,6 +61,9 @@ export const useIncrementalSave = (eventId, options = {}) => {
     useEffect(() => {
         if (enableLogging) console.log(`🔄 useIncrementalSave: eventId changed to ${eventId}, clearing local state.`);
         setFormData({});
+        setPendingFields(new Set());
+        setSyncedFields(new Set());
+        setSyncStatus('pending');
         setLastSaved(null);
         // Clear pending saves to prevent old data from being written to new ID
         pendingSaves.current.clear();
@@ -86,6 +92,14 @@ export const useIncrementalSave = (eventId, options = {}) => {
             // Save all fields at once in a single transaction
             const fieldsMap = Object.fromEntries(updates);
             await indexedDBService.saveFormDataMultiple(eventId, fieldsMap, {}, currentUser);
+            
+            // Clear from pending fields
+            setPendingFields(prev => {
+                const next = new Set(prev);
+                updates.forEach(([k]) => next.delete(k));
+                return next;
+            });
+
             // Clear pending saves
             pendingSaves.current.clear();
 
@@ -121,6 +135,19 @@ export const useIncrementalSave = (eventId, options = {}) => {
             [fieldKey]: fieldValue
         }));
 
+        // Track as pending save and unsynced
+        setPendingFields(prev => {
+            const next = new Set(prev);
+            next.add(fieldKey);
+            return next;
+        });
+        setSyncedFields(prev => {
+            const next = new Set(prev);
+            next.delete(fieldKey);
+            return next;
+        });
+        setSyncStatus('pending');
+
         // Add to pending saves
         pendingSaves.current.set(fieldKey, fieldValue);
         setIsSaving(true); // Indicate pending save
@@ -139,6 +166,7 @@ export const useIncrementalSave = (eventId, options = {}) => {
     const loadFormData = useCallback(async () => {
         if (!eventId) {
             setFormData({});
+            setSyncStatus('pending');
             setLastSaved(null);
             return null;
         }
@@ -147,6 +175,12 @@ export const useIncrementalSave = (eventId, options = {}) => {
             if (data && data.formData) {
                 if (enableLogging) console.log(`📂 useIncrementalSave: Loaded existing draft for ${eventId}`);
                 setFormData(data.formData);
+                setSyncStatus(data.syncStatus || 'pending');
+                if (data.syncStatus === 'synced') {
+                    setSyncedFields(new Set(Object.keys(data.formData)));
+                } else {
+                    setSyncedFields(new Set());
+                }
                 if (data.lastUpdated) {
                     setLastSaved(new Date(data.lastUpdated));
                 }
@@ -154,16 +188,27 @@ export const useIncrementalSave = (eventId, options = {}) => {
             } else {
                 if (enableLogging) console.log(`📂 useIncrementalSave: No draft found for ${eventId}, starting fresh.`);
                 setFormData({});
+                setSyncedFields(new Set());
+                setSyncStatus('pending');
                 setLastSaved(null);
             }
             return null;
         } catch (error) {
             console.error('❌ Failed to load form data:', error);
             setFormData({});
+            setSyncedFields(new Set());
+            setSyncStatus('pending');
             setLastSaved(null);
             return null;
         }
     }, [eventId, enableLogging]);
+
+    // Automatically mark all current form fields as synced when syncStatus is 'synced'
+    useEffect(() => {
+        if (syncStatus === 'synced' && formData) {
+            setSyncedFields(new Set(Object.keys(formData)));
+        }
+    }, [syncStatus, formData]);
 
     return {
         formData,
@@ -171,6 +216,11 @@ export const useIncrementalSave = (eventId, options = {}) => {
         saveField,
         loadFormData,
         isSaving,
-        lastSaved
+        lastSaved,
+        syncStatus,
+        setSyncStatus,
+        pendingFields,
+        syncedFields
     };
 };
+
